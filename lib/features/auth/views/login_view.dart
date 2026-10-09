@@ -169,35 +169,40 @@ class _RoleCard extends GetView<LoginController> {
       child: Material(
         color: context.colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.tile),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.tile),
-          onTap: () => controller.demo(role),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: context.colors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
+        child: Obx(
+          () => InkWell(
+            borderRadius: BorderRadius.circular(AppRadius.tile),
+            onTap: controller.loading.value ? null : () => controller.demo(role),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: context.colors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(icon, color: context.colors.primary),
                   ),
-                  child: Icon(icon, color: context.colors.primary),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title.tr, style: context.text.titleMedium),
-                      Text(body.tr, style: context.text.bodySmall),
-                    ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title.tr, style: context.text.titleMedium),
+                        Text(body.tr, style: context.text.bodySmall),
+                      ],
+                    ),
                   ),
-                ),
-                Icon(PhosphorIconsRegular.caretRight, color: context.colors.onSurfaceVariant),
-              ],
+                  Icon(
+                    PhosphorIconsRegular.caretRight,
+                    color: context.colors.onSurfaceVariant,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

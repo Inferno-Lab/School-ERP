@@ -124,6 +124,7 @@ class MarkAttendanceController extends GetxController with Loadable {
   }
 
   Future<void> submit() async {
+    if (saving.value) return;
     saving.value = true;
     try {
       final payload = {
@@ -150,6 +151,7 @@ class AssignHomeworkController extends GetxController {
   final saving = false.obs;
 
   Future<void> submit(String classId) async {
+    if (saving.value) return;
     if (formKey.currentState?.validate() != true) return;
     final teacherId = Get.find<AuthService>().user.value?.teacherId;
     if (teacherId == null) return;
@@ -210,7 +212,7 @@ class GradingController extends GetxController with Loadable {
     }, isEmpty: () => items.isEmpty);
   }
 
-  Future<void> grade({
+  Future<bool> grade({
     required Homework homework,
     required String studentId,
     required int marks,
@@ -227,8 +229,10 @@ class GradingController extends GetxController with Loadable {
         feedback: feedback,
       );
       ToastHelper.show('teacher.graded', kind: ToastKind.success);
+      return true;
     } on AppException catch (error) {
       ToastHelper.show(error.message, kind: ToastKind.error);
+      return false;
     }
   }
 }
@@ -240,6 +244,7 @@ class MarksEntryController extends GetxController with Loadable {
   List<Student> students = [];
   final subject = 'maths'.obs;
   final values = <String, int>{}.obs;
+  final saving = false.obs;
 
   @override
   bool get watchRevision => false;
@@ -261,8 +266,10 @@ class MarksEntryController extends GetxController with Loadable {
   }
 
   Future<void> save() async {
+    if (saving.value) return;
     final id = classId ?? Get.parameters['classId'];
     if (id == null) return;
+    saving.value = true;
     try {
       await Get.find<ExamRepository>().saveMarks(
         classId: id,
@@ -272,6 +279,8 @@ class MarksEntryController extends GetxController with Loadable {
       ToastHelper.show('teacher.marks_saved', kind: ToastKind.success);
     } on AppException catch (error) {
       ToastHelper.show(error.message, kind: ToastKind.error);
+    } finally {
+      saving.value = false;
     }
   }
 }
@@ -285,6 +294,7 @@ class PostNoticeController extends GetxController {
   final saving = false.obs;
 
   Future<void> submit() async {
+    if (saving.value) return;
     if (formKey.currentState?.validate() != true) return;
     saving.value = true;
     try {

@@ -17,9 +17,9 @@ class ShellController extends GetxController {
       return;
     }
     final leave = await confirmSheet(
-      title: 'common.logout',
-      body: 'settings.logout_body',
-      confirm: 'common.done',
+      title: 'shell.exit_title',
+      body: 'shell.exit_body',
+      confirm: 'shell.exit_confirm',
     );
     if (leave) unawaited(SystemNavigator.pop());
   }

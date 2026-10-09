@@ -237,7 +237,11 @@ class _HomeworkBody extends StatelessWidget {
             const SizedBox(height: 8),
             PrimaryButton(
               label: 'homework.sample',
-              onPressed: () => Get.find<HomeworkController>().submit(item, camera: false),
+              onPressed: () => Get.find<HomeworkController>().submit(
+                item,
+                camera: false,
+                sample: true,
+              ),
             ),
           ],
         ),

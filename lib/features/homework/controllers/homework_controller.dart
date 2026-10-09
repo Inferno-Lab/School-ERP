@@ -56,17 +56,25 @@ class HomeworkController extends GetxController with Loadable {
     }, isEmpty: () => false);
   }
 
-  Future<void> submit(Homework homework, {required bool camera}) async {
+  Future<void> submit(
+    Homework homework, {
+    required bool camera,
+    bool sample = false,
+  }) async {
     final id = studentId;
     if (id == null) return;
     var fileName = 'Homework_scan.jpg';
-    try {
-      final file = await ImagePicker().pickImage(
-        source: camera ? ImageSource.camera : ImageSource.gallery,
-      );
-      if (file != null) fileName = file.name;
-    } on Exception {
-      fileName = 'Homework_scan.jpg';
+    if (!sample) {
+      try {
+        final file = await ImagePicker().pickImage(
+          source: camera ? ImageSource.camera : ImageSource.gallery,
+        );
+        if (file == null) return;
+        fileName = file.name;
+      } on Exception {
+        ToastHelper.show('errors.generic', kind: ToastKind.error);
+        return;
+      }
     }
     try {
       await Get.find<HomeworkRepository>().submit(

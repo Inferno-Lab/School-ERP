@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/services/auth_service.dart';
@@ -142,7 +144,7 @@ class SettingsView extends StatelessWidget {
                 );
                 if (!ok) return;
                 await Get.find<AuthService>().logout();
-                await Get.offAllNamed<void>(AppRoutes.login);
+                unawaited(Get.offAllNamed<void>(AppRoutes.login));
               },
             ),
             GestureDetector(

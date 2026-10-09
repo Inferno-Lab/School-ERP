@@ -41,6 +41,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> _enter(Future<AppUser> Function() action) async {
+    if (loading.value) return;
     loading.value = true;
     try {
       final user = await action();

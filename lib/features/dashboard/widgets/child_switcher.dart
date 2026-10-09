@@ -21,10 +21,16 @@ class ChildSwitcher extends StatelessWidget {
     return Obx(() {
       if (auth.role != UserRole.parent) return const SizedBox.shrink();
       final label = name ?? 'home.switch_child'.tr;
-      return ActionChip(
-        avatar: AppAvatar(name: label, url: avatarUrl, size: 24),
-        label: Text(label),
-        onPressed: () => _open(context),
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: ActionChip(
+          avatar: AppAvatar(name: label, url: avatarUrl, size: 24),
+          label: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width - 120),
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+          onPressed: () => _open(context),
+        ),
       );
     });
   }

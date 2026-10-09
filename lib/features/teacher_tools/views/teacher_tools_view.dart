@@ -8,6 +8,7 @@ import 'package:edunest/core/widgets/app_text_field.dart';
 import 'package:edunest/core/widgets/buttons.dart';
 import 'package:edunest/core/widgets/feature_page.dart';
 import 'package:edunest/core/widgets/states.dart';
+import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/data/models/student.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
@@ -76,7 +77,15 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
                         children: [
                           AppAvatar(name: student.name, url: student.avatarUrl, size: 56),
                           const SizedBox(height: 8),
-                          Text(student.name, textAlign: TextAlign.center),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              student.name,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                           Text(
                             switch (status) {
                               AttendanceStatus.present => 'status.present'.tr,
@@ -240,14 +249,18 @@ class GradingView extends GetView<GradingController> {
             PrimaryButton(
               label: 'common.save',
               onPressed: () async {
-                final value = int.tryParse(marks.text) ?? 0;
-                await controller.grade(
+                final value = int.tryParse(marks.text);
+                if (value == null) {
+                  ToastHelper.show('validation.required', kind: ToastKind.error);
+                  return;
+                }
+                final saved = await controller.grade(
                   homework: homework,
                   studentId: studentId,
                   marks: value.clamp(0, homework.maxMarks),
                   feedback: feedback.text,
                 );
-                Get.back<void>();
+                if (saved) Get.back<void>();
               },
             ),
           ],
@@ -278,24 +291,25 @@ class MarksEntryView extends GetView<MarksEntryController> {
               children: [
                 for (final student in controller.students)
                   ListTile(
-                    title: Text(student.name),
+                    title: Text(
+                      student.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     trailing: SizedBox(
                       width: 72,
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        decoration: InputDecoration(
-                          hintText: '${controller.values[student.id] ?? ''}',
-                        ),
-                        onChanged: (value) {
-                          final parsed = int.tryParse(value);
-                          if (parsed == null) return;
-                          controller.values[student.id] = parsed.clamp(0, 50);
-                        },
+                      child: _MarkField(
+                        key: ValueKey('${controller.subject.value}-${student.id}'),
+                        initial: controller.values[student.id],
+                        onChanged: (parsed) => controller.values[student.id] = parsed,
                       ),
                     ),
                   ),
-                PrimaryButton(label: 'common.save', onPressed: controller.save),
+                PrimaryButton(
+                  label: 'common.save',
+                  loading: controller.saving.value,
+                  onPressed: controller.save,
+                ),
               ],
             ),
           ),
@@ -350,6 +364,44 @@ class PostNoticeView extends GetView<PostNoticeController> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MarkField extends StatefulWidget {
+  const _MarkField({required this.initial, required this.onChanged, super.key});
+
+  final int? initial;
+  final ValueChanged<int> onChanged;
+
+  @override
+  State<_MarkField> createState() => _MarkFieldState();
+}
+
+class _MarkFieldState extends State<_MarkField> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initial?.toString() ?? '',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      keyboardType: TextInputType.number,
+      textAlign: TextAlign.end,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      decoration: const InputDecoration(isDense: true),
+      onChanged: (value) {
+        final parsed = int.tryParse(value);
+        if (parsed == null) return;
+        widget.onChanged(parsed.clamp(0, 50));
+      },
     );
   }
 }

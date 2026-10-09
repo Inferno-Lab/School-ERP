@@ -1,74 +1,95 @@
+import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/widgets/buttons.dart';
+import 'package:edunest/core/widgets/misc.dart';
 import 'package:edunest/features/auth/controllers/splash_controller.dart';
+import 'package:edunest/features/auth/views/onboarding_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
   const OnboardingView({super.key});
 
+  static const _pages = [
+    ('onboard.one_title', 'onboard.one_body'),
+    ('onboard.two_title', 'onboard.two_body'),
+    ('onboard.three_title', 'onboard.three_body'),
+    ('onboard.four_title', 'onboard.four_body'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    const pages = [
-      ('onboard.one_title', 'onboard.one_body', 0),
-      ('onboard.two_title', 'onboard.two_body', 1),
-      ('onboard.three_title', 'onboard.three_body', 2),
-    ];
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: controller.finish,
-                child: Text('common.skip'.tr),
-              ),
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: controller.controller,
-                itemCount: pages.length,
-                onPageChanged: (value) => controller.page.value = value,
-                itemBuilder: (context, index) {
-                  final page = pages[index];
-                  return _Slide(title: page.$1, body: page.$2, variant: page.$3);
-                },
-              ),
-            ),
-            Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var i = 0; i < 3; i++)
-                    AnimatedContainer(
-                      duration: AppDurations.fast,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 8,
-                      width: controller.page.value == i ? 22 : 8,
-                      decoration: BoxDecoration(
-                        color: controller.page.value == i
-                            ? context.colors.primary
-                            : context.colors.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(99),
-                      ),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              context.app.gradientStart.withValues(alpha: 0.14),
+              context.colors.surface,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 8, 0),
+                child: Row(
+                  children: [
+                    NestMark(size: 28, color: context.colors.primary),
+                    const SizedBox(width: 8),
+                    Text(AppConfig.appName, style: context.text.titleMedium),
+                    const Spacer(),
+                    Obx(
+                      () => controller.isLast
+                          ? const SizedBox(width: 72)
+                          : TextButton(
+                              onPressed: controller.finish,
+                              child: Text('common.skip'.tr),
+                            ),
                     ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Obx(
-                () => PrimaryButton(
-                  label: controller.page.value == 2
-                      ? 'common.get_started'
-                      : 'common.next',
-                  onPressed: controller.next,
+                  ],
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: PageView.builder(
+                  controller: controller.controller,
+                  itemCount: OnboardingController.pageCount,
+                  onPageChanged: (value) => controller.page.value = value,
+                  itemBuilder: (context, index) {
+                    final page = _pages[index];
+                    return _Slide(title: page.$1, body: page.$2, index: index);
+                  },
+                ),
+              ),
+              const _Indicator(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                child: Obx(
+                  () => Row(
+                    children: [
+                      if (!controller.isFirst) ...[
+                        TextButton(
+                          onPressed: controller.previous,
+                          child: Text('onboard.previous'.tr),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: PrimaryButton(
+                          label: controller.isLast ? 'common.get_started' : 'common.next',
+                          onPressed: controller.next,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -76,101 +97,108 @@ class OnboardingView extends GetView<OnboardingController> {
 }
 
 class _Slide extends StatelessWidget {
-  const _Slide({required this.title, required this.body, required this.variant});
+  const _Slide({required this.title, required this.body, required this.index});
 
   final String title;
   final String body;
-  final int variant;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final headline = width < 360 ? 26.0 : 30.0;
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          Expanded(child: _Art(variant: variant)),
-          Text(title.tr, style: context.text.headlineLarge, textAlign: TextAlign.center),
-          const SizedBox(height: 10),
-          Text(
-            body.tr,
-            style: context.text.bodyLarge?.copyWith(color: context.colors.onSurfaceVariant),
-            textAlign: TextAlign.center,
+          Expanded(
+            flex: 5,
+            child: _Enter(child: OnboardingArt(index: index)),
           ),
-          const SizedBox(height: 12),
+          Flexible(
+            flex: 4,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  Text(
+                    title.tr,
+                    textAlign: TextAlign.center,
+                    style: context.text.displaySmall?.copyWith(
+                      fontSize: headline,
+                      height: 1.15,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    body.tr,
+                    textAlign: TextAlign.center,
+                    style: context.text.bodyLarge?.copyWith(
+                      fontSize: 16,
+                      color: context.colors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _Art extends StatelessWidget {
-  const _Art({required this.variant});
+class _Enter extends StatelessWidget {
+  const _Enter({required this.child});
 
-  final int variant;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return CustomPaint(
-          painter: _OnboardPainter(
-            variant: variant,
-            primary: context.app.gradientStart,
-            secondary: context.app.gradientEnd,
-            surface: context.colors.surfaceContainerLowest,
+    final still = context.reduceMotion;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: still ? 1 : 0, end: 1),
+      duration: still ? Duration.zero : AppDurations.medium,
+      curve: AppCurves.ease,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * 14),
+            child: child,
           ),
-          size: Size(constraints.maxWidth, constraints.maxHeight),
         );
       },
+      child: child,
     );
   }
 }
 
-class _OnboardPainter extends CustomPainter {
-  _OnboardPainter({
-    required this.variant,
-    required this.primary,
-    required this.secondary,
-    required this.surface,
-  });
-
-  final int variant;
-  final Color primary;
-  final Color secondary;
-  final Color surface;
+class _Indicator extends GetView<OnboardingController> {
+  const _Indicator();
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final paint = Paint()..color = primary.withValues(alpha: 0.15);
-    canvas.drawCircle(center, size.shortestSide * 0.34, paint);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: center, width: size.width * 0.62, height: size.height * 0.42),
-        const Radius.circular(28),
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (var i = 0; i < OnboardingController.pageCount; i++)
+            AnimatedContainer(
+              duration: context.reduceMotion ? Duration.zero : AppDurations.fast,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              height: 8,
+              width: controller.page.value == i ? 22 : 8,
+              decoration: BoxDecoration(
+                color: controller.page.value == i
+                    ? context.colors.primary
+                    : context.colors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+        ],
       ),
-      Paint()..color = surface,
-    );
-    final accent = Paint()..color = variant == 1 ? secondary : primary;
-    canvas.drawCircle(
-      center.translate(0, variant == 2 ? -10 : -30),
-      18,
-      accent,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: center.translate(0, 28),
-          width: size.width * (0.28 + variant * 0.06),
-          height: 14,
-        ),
-        const Radius.circular(8),
-      ),
-      Paint()..color = primary.withValues(alpha: 0.35),
     );
   }
-
-  @override
-  bool shouldRepaint(covariant _OnboardPainter oldDelegate) =>
-      oldDelegate.variant != variant || oldDelegate.primary != primary;
 }

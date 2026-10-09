@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/utils/app_exception.dart';
 import 'package:edunest/core/utils/loadable.dart';
+import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:flutter/material.dart';
@@ -65,11 +67,18 @@ class ChatThreadController extends GetxController with Loadable {
     if (value.isEmpty || id == null || userId == null) return;
     text.clear();
     typing.value = true;
-    await Get.find<ChatRepository>().send(
-      threadId: id,
-      senderId: userId,
-      text: value,
-    );
+    try {
+      await Get.find<ChatRepository>().send(
+        threadId: id,
+        senderId: userId,
+        text: value,
+      );
+    } on AppException catch (error) {
+      text.text = value;
+      typing.value = false;
+      ToastHelper.show(error.message, kind: ToastKind.error);
+      return;
+    }
     Future<void>.delayed(const Duration(milliseconds: 1400), () {
       if (!isClosed) typing.value = false;
     });

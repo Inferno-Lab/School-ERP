@@ -129,6 +129,7 @@ class LeaveApplyController extends GetxController {
   }
 
   Future<void> submit() async {
+    if (saving.value) return;
     if (formKey.currentState?.validate() != true) return;
     final id = Get.find<AuthService>().activeStudentId.value;
     if (id == null) return;

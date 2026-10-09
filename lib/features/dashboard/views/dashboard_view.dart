@@ -66,7 +66,6 @@ class _Hero extends StatelessWidget {
                 AppAvatar(
                   name: user?.name ?? '',
                   url: user?.avatarUrl,
-                  heroTag: 'profile-avatar',
                 ),
                 const Spacer(),
                 IconButton(

@@ -104,10 +104,17 @@ class _Header extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title.tr, style: context.text.headlineLarge),
+                Text(
+                  title.tr,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.text.headlineLarge,
+                ),
                 if (subtitle != null)
                   Text(
                     subtitle!.tr,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: context.text.bodyMedium?.copyWith(
                       color: context.colors.onSurfaceVariant,
                     ),

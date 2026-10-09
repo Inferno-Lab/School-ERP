@@ -74,7 +74,6 @@ class ProfileView extends GetView<ProfileController> {
                         name: user?.name ?? '',
                         url: user?.avatarUrl,
                         size: 72,
-                        heroTag: 'profile-avatar',
                       ),
                       const Positioned(
                         right: 0,
@@ -148,29 +147,67 @@ class _Row extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(label.tr, style: context.text.bodySmall)),
-          Text(value, style: context.text.titleSmall),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: context.text.titleSmall,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class AboutView extends StatelessWidget {
+class AboutView extends StatefulWidget {
   const AboutView({super.key});
+
+  @override
+  State<AboutView> createState() => _AboutViewState();
+}
+
+class _AboutViewState extends State<AboutView> {
+  late Future<SchoolInfo> _school = Get.find<DirectoryRepository>().school();
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Get.find<DirectoryRepository>().school(),
+      future: _school,
       builder: (context, snapshot) {
         final school = snapshot.data;
+        final failed = snapshot.hasError;
         return FeaturePage(
           title: 'about.title',
           subtitle: school?.tagline ?? AppConfig.appName,
+          onRefresh: () async {
+            setState(() {
+              _school = Get.find<DirectoryRepository>().school();
+            });
+            await _school;
+          },
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: school == null
-                ? const CircularProgressIndicator()
+                ? failed
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('errors.generic'.tr, style: context.text.bodyLarge),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _school = Get.find<DirectoryRepository>().school();
+                              });
+                            },
+                            child: Text('common.retry'.tr),
+                          ),
+                        ],
+                      )
+                    : const Center(child: CircularProgressIndicator())
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
