@@ -1,0 +1,36 @@
+abstract final class AppRoutes {
+  static const splash = '/splash';
+  static const onboarding = '/onboarding';
+  static const login = '/login';
+  static const shell = '/shell';
+  static const attendance = '/attendance';
+  static const homework = '/homework';
+  static const homeworkDetail = '/homework/:id';
+  static const timetable = '/timetable';
+  static const results = '/results';
+  static const fees = '/fees';
+  static const receipt = '/fees/receipt';
+  static const notices = '/notices';
+  static const noticeDetail = '/notices/:id';
+  static const events = '/events';
+  static const eventDetail = '/events/:id';
+  static const chat = '/chat';
+  static const chatThread = '/chat/:id';
+  static const library = '/library';
+  static const transport = '/transport';
+  static const gallery = '/gallery';
+  static const galleryViewer = '/gallery/viewer';
+  static const leave = '/leave';
+  static const leaveApply = '/leave/apply';
+  static const notifications = '/notifications';
+  static const profile = '/profile';
+  static const settings = '/settings';
+  static const about = '/about';
+  static const help = '/help';
+  static const designSystem = '/design-system';
+  static const teacherAttendance = '/teacher/attendance/:classId';
+  static const teacherAssign = '/teacher/homework/assign';
+  static const teacherGrade = '/teacher/grading';
+  static const teacherMarks = '/teacher/marks/:classId';
+  static const teacherNotice = '/teacher/notice';
+}

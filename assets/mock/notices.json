@@ -1,0 +1,74 @@
+[
+  {
+    "id": "nt_ptm",
+    "title": "Parent-teacher meeting this Saturday",
+    "body": "Meet your child's class teacher between 9:00 am and 12:30 pm in the classroom. Please carry the Term 1 report card. Slots are first come, first served, with ten minutes per family.",
+    "category": "academic",
+    "audience": "all",
+    "pinned": true,
+    "date": "today-1",
+    "author": "Principal's office",
+    "attachments": [
+      "PTM_slot_note.pdf"
+    ]
+  },
+  {
+    "id": "nt_mid",
+    "title": "Mid term timetable is out",
+    "body": "The mid term begins in two weeks. The seating plan will be on the notice board outside the library on the Friday before the exams. Arrive 15 minutes early with a transparent pouch.",
+    "category": "exams",
+    "audience": "all",
+    "pinned": true,
+    "date": "today-0",
+    "author": "Examination cell",
+    "attachments": [
+      "Midterm_timetable.pdf"
+    ]
+  },
+  {
+    "id": "nt_football",
+    "title": "Inter-house football trials",
+    "body": "Trials for the inter-house tournament are on the main ground after school. Wear house colours and sports shoes. Water will be provided. Parents may watch from the side stands.",
+    "category": "sports",
+    "audience": "students",
+    "pinned": false,
+    "date": "today-2",
+    "author": "Amit Rao, PE",
+    "attachments": []
+  },
+  {
+    "id": "nt_diwali",
+    "title": "Diwali break dates",
+    "body": "The school will remain closed for Diwali from the dates on the attached note. Homework for the break is light and already on the homework tab. The campus reopens on a regular Monday timetable.",
+    "category": "holiday",
+    "audience": "all",
+    "pinned": false,
+    "date": "today-4",
+    "author": "Principal's office",
+    "attachments": [
+      "Diwali_break.pdf"
+    ]
+  },
+  {
+    "id": "nt_fee",
+    "title": "Term 2 fee reminder",
+    "body": "Term 2 tuition is due this month. You can pay inside the app with UPI, card or net banking. Receipts are saved under Fees. Please ignore this note if you have already paid.",
+    "category": "fees",
+    "audience": "parents",
+    "pinned": false,
+    "date": "today-3",
+    "author": "Accounts office",
+    "attachments": []
+  },
+  {
+    "id": "nt_books",
+    "title": "Book fair in the library foyer",
+    "body": "The Pune book fair stall is in the library foyer this week, from 9 am to 2 pm. Students may buy with a note from home, or reserve a title and collect it at the PTM.",
+    "category": "general",
+    "audience": "all",
+    "pinned": false,
+    "date": "today-5",
+    "author": "Library",
+    "attachments": []
+  }
+]

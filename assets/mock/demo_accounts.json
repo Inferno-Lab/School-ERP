@@ -1,0 +1,26 @@
+[
+  {
+    "role": "student",
+    "name": "Aarav Sharma",
+    "email": "aarav.sharma@edunest.app",
+    "password": "demo123",
+    "otp": "123456",
+    "userId": "usr_aarav"
+  },
+  {
+    "role": "parent",
+    "name": "Priya Sharma",
+    "email": "priya.sharma@edunest.app",
+    "password": "demo123",
+    "otp": "123456",
+    "userId": "usr_priya"
+  },
+  {
+    "role": "teacher",
+    "name": "Kavita Iyer",
+    "email": "kavita.iyer@edunest.app",
+    "password": "demo123",
+    "otp": "123456",
+    "userId": "usr_kavita"
+  }
+]

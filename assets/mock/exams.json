@@ -1,0 +1,79 @@
+[
+  {
+    "id": "ex_8_term",
+    "name": "Term 1",
+    "classId": "cls_8a",
+    "startDate": "today-18",
+    "endDate": "today-12",
+    "status": "completed",
+    "subjects": [
+      "maths",
+      "science",
+      "english",
+      "hindi",
+      "social",
+      "computer"
+    ]
+  },
+  {
+    "id": "ex_8_ut",
+    "name": "Unit Test 2",
+    "classId": "cls_8a",
+    "startDate": "today-40",
+    "endDate": "today-36",
+    "status": "completed",
+    "subjects": [
+      "maths",
+      "science",
+      "english",
+      "hindi",
+      "social",
+      "computer"
+    ]
+  },
+  {
+    "id": "ex_8_mid",
+    "name": "Mid Term",
+    "classId": "cls_8a",
+    "startDate": "today+14",
+    "endDate": "today+18",
+    "status": "upcoming",
+    "subjects": [
+      "maths",
+      "science",
+      "english",
+      "hindi",
+      "social",
+      "computer"
+    ]
+  },
+  {
+    "id": "ex_5_term",
+    "name": "Term 1",
+    "classId": "cls_5b",
+    "startDate": "today-18",
+    "endDate": "today-13",
+    "status": "completed",
+    "subjects": [
+      "maths",
+      "english",
+      "hindi",
+      "science",
+      "art"
+    ]
+  },
+  {
+    "id": "ex_5_mid",
+    "name": "Mid Term",
+    "classId": "cls_5b",
+    "startDate": "today+15",
+    "endDate": "today+18",
+    "status": "upcoming",
+    "subjects": [
+      "maths",
+      "english",
+      "hindi",
+      "science"
+    ]
+  }
+]

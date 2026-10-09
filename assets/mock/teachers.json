@@ -1,0 +1,113 @@
+[
+  {
+    "id": "tch_kavita",
+    "userId": "usr_kavita",
+    "name": "Kavita Iyer",
+    "subject": "maths",
+    "email": "kavita.iyer@greenfield.edu.in",
+    "phone": "+91 98220 44110",
+    "avatarUrl": "https://i.pravatar.cc/300?img=49",
+    "classIds": [
+      "cls_8a"
+    ]
+  },
+  {
+    "id": "tch_meera",
+    "userId": null,
+    "name": "Meera Nair",
+    "subject": "english",
+    "email": "meera.nair@greenfield.edu.in",
+    "phone": "+91 98220 44111",
+    "avatarUrl": "https://i.pravatar.cc/300?img=44",
+    "classIds": [
+      "cls_5b"
+    ]
+  },
+  {
+    "id": "tch_rahul",
+    "userId": null,
+    "name": "Rahul Deshmukh",
+    "subject": "science",
+    "email": "rahul.deshmukh@greenfield.edu.in",
+    "phone": "+91 98220 44112",
+    "avatarUrl": "https://i.pravatar.cc/300?img=14",
+    "classIds": [
+      "cls_8a"
+    ]
+  },
+  {
+    "id": "tch_arjun",
+    "userId": null,
+    "name": "Arjun Patil",
+    "subject": "social",
+    "email": "arjun.patil@greenfield.edu.in",
+    "phone": "+91 98220 44113",
+    "avatarUrl": "https://i.pravatar.cc/300?img=13",
+    "classIds": [
+      "cls_8a"
+    ]
+  },
+  {
+    "id": "tch_sneha",
+    "userId": null,
+    "name": "Sneha Kulkarni",
+    "subject": "hindi",
+    "email": "sneha.kulkarni@greenfield.edu.in",
+    "phone": "+91 98220 44114",
+    "avatarUrl": "https://i.pravatar.cc/300?img=36",
+    "classIds": [
+      "cls_8a",
+      "cls_5b"
+    ]
+  },
+  {
+    "id": "tch_dev",
+    "userId": null,
+    "name": "Dev Patel",
+    "subject": "computer",
+    "email": "dev.patel@greenfield.edu.in",
+    "phone": "+91 98220 44115",
+    "avatarUrl": "https://i.pravatar.cc/300?img=59",
+    "classIds": [
+      "cls_8a"
+    ]
+  },
+  {
+    "id": "tch_pooja",
+    "userId": null,
+    "name": "Pooja Joshi",
+    "subject": "art",
+    "email": "pooja.joshi@greenfield.edu.in",
+    "phone": "+91 98220 44116",
+    "avatarUrl": "https://i.pravatar.cc/300?img=41",
+    "classIds": [
+      "cls_8a",
+      "cls_5b"
+    ]
+  },
+  {
+    "id": "tch_amit",
+    "userId": null,
+    "name": "Amit Rao",
+    "subject": "pe",
+    "email": "amit.rao@greenfield.edu.in",
+    "phone": "+91 98220 44117",
+    "avatarUrl": "https://i.pravatar.cc/300?img=18",
+    "classIds": [
+      "cls_8a",
+      "cls_5b"
+    ]
+  },
+  {
+    "id": "tch_leela",
+    "userId": null,
+    "name": "Leela Krishnan",
+    "subject": "music",
+    "email": "leela.krishnan@greenfield.edu.in",
+    "phone": "+91 98220 44118",
+    "avatarUrl": "https://i.pravatar.cc/300?img=26",
+    "classIds": [
+      "cls_5b"
+    ]
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "id": "lv_aarav_past",
+    "studentId": "stu_aarav",
+    "from": "today-20",
+    "to": "today-19",
+    "reason": "Family function in Nashik",
+    "status": "approved",
+    "appliedOn": "today-24",
+    "reviewedBy": "Kavita Iyer",
+    "reviewNote": "Approved. Please collect the class notes from Diya."
+  },
+  {
+    "id": "lv_aarav_open",
+    "studentId": "stu_aarav",
+    "from": "today+7",
+    "to": "today+8",
+    "reason": "Dental appointment and a day of rest after",
+    "status": "pending",
+    "appliedOn": "today-1"
+  },
+  {
+    "id": "lv_ananya_no",
+    "studentId": "stu_ananya",
+    "from": "today-8",
+    "to": "today-8",
+    "reason": "Out of town",
+    "status": "rejected",
+    "appliedOn": "today-9",
+    "reviewedBy": "Meera Nair",
+    "reviewNote": "Please add a note from home with the city you are travelling to, then apply again."
+  }
+]

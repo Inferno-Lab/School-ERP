@@ -1,0 +1,514 @@
+[
+  {
+    "id": "hw_linear",
+    "classId": "cls_8a",
+    "subject": "maths",
+    "title": "Linear equations worksheet",
+    "description": "Solve questions 1 to 12 from the shared worksheet. Show each step, and check your answer by substitution.",
+    "assignedOn": "today-2",
+    "dueOn": "today+1",
+    "teacherId": "tch_kavita",
+    "maxMarks": 20,
+    "attachments": [
+      "Linear_equations_worksheet.pdf"
+    ],
+    "submissions": [
+      {
+        "studentId": "stu_aarav",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_diya",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_kabir",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_myra",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_vivaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_anika",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_ishaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_sara",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_arjun_s",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_kiara",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "id": "hw_photo",
+    "classId": "cls_8a",
+    "subject": "science",
+    "title": "Photosynthesis lab note",
+    "description": "Write the aim, a labelled diagram of a leaf cross-section, and three observations from Friday's experiment.",
+    "assignedOn": "today-1",
+    "dueOn": "today+3",
+    "teacherId": "tch_rahul",
+    "maxMarks": 20,
+    "attachments": [
+      "Lab_note_template.pdf"
+    ],
+    "submissions": [
+      {
+        "studentId": "stu_aarav",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_diya",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_kabir",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_myra",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_vivaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_anika",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_ishaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_sara",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_arjun_s",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_kiara",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "id": "hw_letter",
+    "classId": "cls_8a",
+    "subject": "english",
+    "title": "Letter to the editor",
+    "description": "Write a formal letter about safer crossings outside the school gate. 150 to 180 words.",
+    "assignedOn": "today-6",
+    "dueOn": "today-1",
+    "teacherId": "tch_meera",
+    "maxMarks": 20,
+    "attachments": [
+      "Formal_letter_format.pdf"
+    ],
+    "submissions": [
+      {
+        "studentId": "stu_aarav",
+        "status": "submitted",
+        "submittedAt": "today-1T18:40",
+        "fileName": "submission.pdf"
+      },
+      {
+        "studentId": "stu_diya",
+        "status": "submitted",
+        "submittedAt": "today-1T18:40",
+        "fileName": "submission.pdf"
+      },
+      {
+        "studentId": "stu_kabir",
+        "status": "submitted",
+        "submittedAt": "today-1T18:40",
+        "fileName": "submission.pdf"
+      },
+      {
+        "studentId": "stu_myra",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_vivaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_anika",
+        "status": "submitted",
+        "submittedAt": "today-1T18:40",
+        "fileName": "submission.pdf"
+      },
+      {
+        "studentId": "stu_ishaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_sara",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_arjun_s",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_kiara",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "id": "hw_monsoon",
+    "classId": "cls_8a",
+    "subject": "hindi",
+    "title": "Essay: first rain in Pune",
+    "description": "Write 120 words on the first monsoon evening in your neighbourhood. Use at least five describing words.",
+    "assignedOn": "today-10",
+    "dueOn": "today-4",
+    "teacherId": "tch_sneha",
+    "maxMarks": 20,
+    "attachments": [],
+    "submissions": [
+      {
+        "studentId": "stu_aarav",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 18,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_diya",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 18,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_kabir",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 17,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_myra",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 18,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_vivaan",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 16,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_anika",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 17,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_ishaan",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 16,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_sara",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 18,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_arjun_s",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 15,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_kiara",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 17,
+        "grade": "A",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      }
+    ]
+  },
+  {
+    "id": "hw_rivers",
+    "classId": "cls_8a",
+    "subject": "social",
+    "title": "Rivers of India map work",
+    "description": "Mark the Ganga, Yamuna, Godavari, Krishna and Kaveri on the outline map. Add the direction of flow.",
+    "assignedOn": "today-1",
+    "dueOn": "today+6",
+    "teacherId": "tch_arjun",
+    "maxMarks": 15,
+    "attachments": [
+      "India_outline_map.pdf"
+    ],
+    "submissions": [
+      {
+        "studentId": "stu_aarav",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_diya",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_kabir",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_myra",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_vivaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_anika",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_ishaan",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_sara",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_arjun_s",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_kiara",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "id": "hw_scratch",
+    "classId": "cls_8a",
+    "subject": "computer",
+    "title": "Scratch greeting card",
+    "description": "Build a one-scene greeting card with a sprite, a backdrop and one sound. Export the project file.",
+    "assignedOn": "today-14",
+    "dueOn": "today-8",
+    "teacherId": "tch_dev",
+    "maxMarks": 20,
+    "attachments": [
+      "Scratch_checklist.pdf"
+    ],
+    "submissions": [
+      {
+        "studentId": "stu_aarav",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 19,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_diya",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 19,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_kabir",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 18,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_myra",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 19,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_vivaan",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 17,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_anika",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 18,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_ishaan",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 17,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_sara",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 19,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_arjun_s",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 16,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      },
+      {
+        "studentId": "stu_kiara",
+        "status": "graded",
+        "submittedAt": "today-5T19:10",
+        "fileName": "submission.pdf",
+        "marks": 18,
+        "grade": "A+",
+        "feedback": "Clear working and neat presentation. Keep it up."
+      }
+    ]
+  },
+  {
+    "id": "hw_fractions",
+    "classId": "cls_5b",
+    "subject": "maths",
+    "title": "Fractions practice",
+    "description": "Complete the shaded-figure questions and the four word problems on sharing a dosa and a ribbon.",
+    "assignedOn": "today-1",
+    "dueOn": "today+2",
+    "teacherId": "tch_kavita",
+    "maxMarks": 20,
+    "attachments": [
+      "Fractions_class5.pdf"
+    ],
+    "submissions": [
+      {
+        "studentId": "stu_ananya",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_reyansh",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_aisha",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_advait",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_mishka",
+        "status": "pending"
+      }
+    ]
+  },
+  {
+    "id": "hw_festival",
+    "classId": "cls_5b",
+    "subject": "english",
+    "title": "My favourite festival",
+    "description": "Write eight sentences about how your family celebrates one festival. Draw a small picture if you like.",
+    "assignedOn": "today-7",
+    "dueOn": "today-2",
+    "teacherId": "tch_meera",
+    "maxMarks": 10,
+    "attachments": [],
+    "submissions": [
+      {
+        "studentId": "stu_ananya",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_reyansh",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_aisha",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_advait",
+        "status": "pending"
+      },
+      {
+        "studentId": "stu_mishka",
+        "status": "pending"
+      }
+    ]
+  }
+]

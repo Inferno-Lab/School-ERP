@@ -1,0 +1,171 @@
+[
+  {
+    "id": "res_stu_aarav_ex_8_term",
+    "examId": "ex_8_term",
+    "studentId": "stu_aarav",
+    "overallPercent": 86.0,
+    "grade": "A",
+    "rank": 3,
+    "totalStudents": 32,
+    "subjects": [
+      {
+        "subject": "maths",
+        "marks": 46,
+        "maxMarks": 50,
+        "grade": "A+"
+      },
+      {
+        "subject": "science",
+        "marks": 44,
+        "maxMarks": 50,
+        "grade": "A"
+      },
+      {
+        "subject": "english",
+        "marks": 41,
+        "maxMarks": 50,
+        "grade": "A"
+      },
+      {
+        "subject": "hindi",
+        "marks": 38,
+        "maxMarks": 50,
+        "grade": "B+"
+      },
+      {
+        "subject": "social",
+        "marks": 42,
+        "maxMarks": 50,
+        "grade": "A"
+      },
+      {
+        "subject": "computer",
+        "marks": 47,
+        "maxMarks": 50,
+        "grade": "A+"
+      }
+    ],
+    "trend": [
+      {
+        "label": "UT1",
+        "percent": 78
+      },
+      {
+        "label": "UT2",
+        "percent": 82
+      },
+      {
+        "label": "Term 1",
+        "percent": 86
+      }
+    ]
+  },
+  {
+    "id": "res_stu_aarav_ex_8_ut",
+    "examId": "ex_8_ut",
+    "studentId": "stu_aarav",
+    "overallPercent": 82.1,
+    "grade": "A",
+    "rank": 4,
+    "totalStudents": 32,
+    "subjects": [
+      {
+        "subject": "maths",
+        "marks": 36,
+        "maxMarks": 40,
+        "grade": "A+"
+      },
+      {
+        "subject": "science",
+        "marks": 33,
+        "maxMarks": 40,
+        "grade": "A"
+      },
+      {
+        "subject": "english",
+        "marks": 31,
+        "maxMarks": 40,
+        "grade": "B+"
+      },
+      {
+        "subject": "hindi",
+        "marks": 30,
+        "maxMarks": 40,
+        "grade": "B+"
+      },
+      {
+        "subject": "social",
+        "marks": 32,
+        "maxMarks": 40,
+        "grade": "A"
+      },
+      {
+        "subject": "computer",
+        "marks": 35,
+        "maxMarks": 40,
+        "grade": "A"
+      }
+    ],
+    "trend": [
+      {
+        "label": "UT1",
+        "percent": 78
+      },
+      {
+        "label": "UT2",
+        "percent": 82
+      }
+    ]
+  },
+  {
+    "id": "res_stu_ananya_ex_5_term",
+    "examId": "ex_5_term",
+    "studentId": "stu_ananya",
+    "overallPercent": 88.0,
+    "grade": "A",
+    "rank": 2,
+    "totalStudents": 28,
+    "subjects": [
+      {
+        "subject": "maths",
+        "marks": 44,
+        "maxMarks": 50,
+        "grade": "A"
+      },
+      {
+        "subject": "english",
+        "marks": 46,
+        "maxMarks": 50,
+        "grade": "A+"
+      },
+      {
+        "subject": "hindi",
+        "marks": 42,
+        "maxMarks": 50,
+        "grade": "A"
+      },
+      {
+        "subject": "science",
+        "marks": 40,
+        "maxMarks": 50,
+        "grade": "A"
+      },
+      {
+        "subject": "art",
+        "marks": 48,
+        "maxMarks": 50,
+        "grade": "A+"
+      }
+    ],
+    "trend": [
+      {
+        "label": "UT1",
+        "percent": 84
+      },
+      {
+        "label": "Term 1",
+        "percent": 88
+      }
+    ]
+  }
+]

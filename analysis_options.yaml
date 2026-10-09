@@ -1,0 +1,18 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+  errors:
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    public_member_api_docs: false
+    lines_longer_than_80_chars: false
+    flutter_style_todos: false
+    one_member_abstracts: false
+    avoid_catches_without_on_clauses: false
+    document_ignores: false
+    specify_nonobvious_property_types: false
+    cascade_invocations: false

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "bk_science",
+    "title": "The Story of Science",
+    "author": "Joy Bhattacharya",
+    "category": "Science",
+    "isbn": "9788172348801",
+    "available": false,
+    "coverUrl": "https://picsum.photos/seed/book-science/600/800",
+    "borrowedBy": "stu_aarav",
+    "dueDate": "today+4"
+  },
+  {
+    "id": "bk_rivers",
+    "title": "Rivers of the Deccan",
+    "author": "Leela Patkar",
+    "category": "Social",
+    "isbn": "9788172348802",
+    "available": false,
+    "coverUrl": "https://picsum.photos/seed/book-rivers/600/800",
+    "borrowedBy": "stu_aarav",
+    "dueDate": "today-1"
+  },
+  {
+    "id": "bk_math",
+    "title": "Puzzles for a Rainy Day",
+    "author": "Amit Narang",
+    "category": "Maths",
+    "isbn": "9788172348803",
+    "available": true,
+    "coverUrl": "https://picsum.photos/seed/book-math/600/800"
+  },
+  {
+    "id": "bk_poem",
+    "title": "Monsoon Poems for Children",
+    "author": "Sneha Kulkarni",
+    "category": "English",
+    "isbn": "9788172348804",
+    "available": true,
+    "coverUrl": "https://picsum.photos/seed/book-poems/600/800"
+  },
+  {
+    "id": "bk_space",
+    "title": "A Pocket Guide to the Night Sky",
+    "author": "Dev Krishnan",
+    "category": "Science",
+    "isbn": "9788172348805",
+    "available": true,
+    "coverUrl": "https://picsum.photos/seed/book-sky/600/800"
+  },
+  {
+    "id": "bk_pune",
+    "title": "Walks in Old Pune",
+    "author": "Arjun Patil",
+    "category": "Social",
+    "isbn": "9788172348806",
+    "available": true,
+    "coverUrl": "https://picsum.photos/seed/book-pune/600/800"
+  },
+  {
+    "id": "bk_fest",
+    "title": "Festival Kitchen",
+    "author": "Meera Nair",
+    "category": "General",
+    "isbn": "9788172348807",
+    "available": false,
+    "coverUrl": "https://picsum.photos/seed/book-fest/600/800",
+    "borrowedBy": "stu_ananya",
+    "dueDate": "today+8"
+  },
+  {
+    "id": "bk_draw",
+    "title": "Draw Birds of the Sahyadris",
+    "author": "Pooja Joshi",
+    "category": "Art",
+    "isbn": "9788172348808",
+    "available": true,
+    "coverUrl": "https://picsum.photos/seed/book-birds/600/800"
+  }
+]

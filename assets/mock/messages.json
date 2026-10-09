@@ -1,0 +1,74 @@
+[
+  {
+    "id": "m1",
+    "threadId": "th_kavita_aarav",
+    "senderId": "usr_kavita",
+    "text": "Aarav, bring the geometry box tomorrow. We start constructions in period 1.",
+    "sentAt": "today-1T16:10",
+    "read": true
+  },
+  {
+    "id": "m2",
+    "threadId": "th_kavita_aarav",
+    "senderId": "usr_aarav",
+    "text": "Yes ma'am, I have it. Should I also bring the graph book?",
+    "sentAt": "today-1T16:22",
+    "read": true
+  },
+  {
+    "id": "m3",
+    "threadId": "th_kavita_aarav",
+    "senderId": "usr_kavita",
+    "text": "Graph book on Thursday is enough. The worksheet is due tomorrow evening.",
+    "sentAt": "today-0T08:05",
+    "read": true
+  },
+  {
+    "id": "m4",
+    "threadId": "th_office_aarav",
+    "senderId": "usr_office",
+    "text": "Your ID card reprint is ready at the front desk. Collect it during the long break.",
+    "sentAt": "today-0T09:40",
+    "read": false
+  },
+  {
+    "id": "m5",
+    "threadId": "th_rahul_aarav",
+    "senderId": "usr_rahul",
+    "text": "Nice questions in the lab today. Add the diagram before you submit the note.",
+    "sentAt": "today-2T14:15",
+    "read": true
+  },
+  {
+    "id": "m6",
+    "threadId": "th_kavita_priya",
+    "senderId": "usr_kavita",
+    "text": "Priya, Aarav is steady in class. We can talk through the mid term plan at the PTM on Saturday.",
+    "sentAt": "today-1T18:02",
+    "read": true
+  },
+  {
+    "id": "m7",
+    "threadId": "th_kavita_priya",
+    "senderId": "usr_priya",
+    "text": "Thank you, Kavita. We will be there by 10.",
+    "sentAt": "today-1T18:20",
+    "read": true
+  },
+  {
+    "id": "m8",
+    "threadId": "th_meera_priya",
+    "senderId": "usr_meera",
+    "text": "Ananya read her festival piece aloud today. It was lovely. The written copy is in.",
+    "sentAt": "today-2T15:45",
+    "read": true
+  },
+  {
+    "id": "m9",
+    "threadId": "th_staff",
+    "senderId": "usr_rahul",
+    "text": "Science exhibition boards can go up on Thursday after lunch. I will keep the lawn clear.",
+    "sentAt": "today-0T11:12",
+    "read": false
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "th_kavita_aarav",
+    "title": "Kavita Iyer",
+    "subtitle": "Class teacher · Maths",
+    "participantIds": [
+      "usr_aarav",
+      "usr_kavita"
+    ],
+    "avatarUrl": "https://i.pravatar.cc/300?img=49",
+    "online": true
+  },
+  {
+    "id": "th_office_aarav",
+    "title": "School office",
+    "subtitle": "Front desk",
+    "participantIds": [
+      "usr_aarav",
+      "usr_office"
+    ],
+    "avatarUrl": "https://i.pravatar.cc/300?img=28",
+    "online": true
+  },
+  {
+    "id": "th_rahul_aarav",
+    "title": "Rahul Deshmukh",
+    "subtitle": "Science",
+    "participantIds": [
+      "usr_aarav",
+      "usr_rahul"
+    ],
+    "avatarUrl": "https://i.pravatar.cc/300?img=14",
+    "online": false
+  },
+  {
+    "id": "th_kavita_priya",
+    "title": "Kavita Iyer",
+    "subtitle": "Aarav's class teacher",
+    "participantIds": [
+      "usr_priya",
+      "usr_kavita"
+    ],
+    "avatarUrl": "https://i.pravatar.cc/300?img=49",
+    "online": true
+  },
+  {
+    "id": "th_meera_priya",
+    "title": "Meera Nair",
+    "subtitle": "Ananya's class teacher",
+    "participantIds": [
+      "usr_priya",
+      "usr_meera"
+    ],
+    "avatarUrl": "https://i.pravatar.cc/300?img=44",
+    "online": false
+  },
+  {
+    "id": "th_staff",
+    "title": "Staff room",
+    "subtitle": "Class 8 teachers",
+    "participantIds": [
+      "usr_kavita",
+      "usr_rahul"
+    ],
+    "avatarUrl": "https://i.pravatar.cc/300?img=14",
+    "online": true
+  }
+]

@@ -1,0 +1,67 @@
+[
+  {
+    "id": "ev_ptm",
+    "title": "Parent-teacher meeting",
+    "description": "A short conversation with the class teacher about Term 1, attendance and the term ahead. Report cards will be handed over in the classroom.",
+    "date": "today+4",
+    "time": "09:00",
+    "venue": "Classrooms",
+    "category": "academic",
+    "imageUrl": "https://picsum.photos/seed/edunest-ptm/1200/800",
+    "rsvps": [
+      {
+        "userId": "usr_priya",
+        "status": "going"
+      }
+    ]
+  },
+  {
+    "id": "ev_annual",
+    "title": "Annual Day: Monsoon Orchestra",
+    "description": "An evening of music, dance and a short play by Classes 5 to 10. Gates open at 4:30 pm. Each family has two seats in the auditorium.",
+    "date": "today+18",
+    "time": "17:00",
+    "venue": "School auditorium",
+    "category": "cultural",
+    "imageUrl": "https://picsum.photos/seed/edunest-annual/1200/800",
+    "rsvps": []
+  },
+  {
+    "id": "ev_science",
+    "title": "Science exhibition",
+    "description": "Class 8 presents working models on water, light and the city climate. Parents are welcome during the open hour after lunch.",
+    "date": "today+9",
+    "time": "11:00",
+    "venue": "Science block lawn",
+    "category": "academic",
+    "imageUrl": "https://picsum.photos/seed/edunest-science/1200/800",
+    "rsvps": [
+      {
+        "userId": "usr_aarav",
+        "status": "going"
+      }
+    ]
+  },
+  {
+    "id": "ev_football",
+    "title": "Inter-house football final",
+    "description": "Emerald takes on Ruby in the final. Cheer from the east stand. The match is 30 minutes each way.",
+    "date": "today+11",
+    "time": "15:30",
+    "venue": "Main ground",
+    "category": "sports",
+    "imageUrl": "https://picsum.photos/seed/edunest-football/1200/800",
+    "rsvps": []
+  },
+  {
+    "id": "ev_books",
+    "title": "Library book fair",
+    "description": "Pick a holiday read. Teachers will be around to help younger students choose.",
+    "date": "today+2",
+    "time": "09:30",
+    "venue": "Library foyer",
+    "category": "general",
+    "imageUrl": "https://picsum.photos/seed/edunest-books/1200/800",
+    "rsvps": []
+  }
+]

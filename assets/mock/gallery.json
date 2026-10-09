@@ -1,0 +1,114 @@
+[
+  {
+    "id": "alb_annual",
+    "title": "Annual Day",
+    "date": "today-40",
+    "blurb": "The evening the auditorium turned into a monsoon stage.",
+    "photos": [
+      {
+        "id": "alb_annual_1",
+        "url": "https://picsum.photos/seed/alb_annual-1/900/1200",
+        "caption": "Opening dance"
+      },
+      {
+        "id": "alb_annual_2",
+        "url": "https://picsum.photos/seed/alb_annual-2/900/1200",
+        "caption": "Choir"
+      },
+      {
+        "id": "alb_annual_3",
+        "url": "https://picsum.photos/seed/alb_annual-3/900/1200",
+        "caption": "Class 8 play"
+      },
+      {
+        "id": "alb_annual_4",
+        "url": "https://picsum.photos/seed/alb_annual-4/900/1200",
+        "caption": "Finale"
+      }
+    ]
+  },
+  {
+    "id": "alb_sports",
+    "title": "Sports Day",
+    "date": "today-70",
+    "blurb": "House flags, sack races and a very close relay.",
+    "photos": [
+      {
+        "id": "alb_sports_1",
+        "url": "https://picsum.photos/seed/alb_sports-1/900/1200",
+        "caption": "March past"
+      },
+      {
+        "id": "alb_sports_2",
+        "url": "https://picsum.photos/seed/alb_sports-2/900/1200",
+        "caption": "Relay baton"
+      },
+      {
+        "id": "alb_sports_3",
+        "url": "https://picsum.photos/seed/alb_sports-3/900/1200",
+        "caption": "Long jump"
+      },
+      {
+        "id": "alb_sports_4",
+        "url": "https://picsum.photos/seed/alb_sports-4/900/1200",
+        "caption": "House cup"
+      }
+    ]
+  },
+  {
+    "id": "alb_science",
+    "title": "Science fair",
+    "date": "today-25",
+    "blurb": "Models, questions and a lot of curious parents.",
+    "photos": [
+      {
+        "id": "alb_science_1",
+        "url": "https://picsum.photos/seed/alb_science-1/900/1200",
+        "caption": "Water filter"
+      },
+      {
+        "id": "alb_science_2",
+        "url": "https://picsum.photos/seed/alb_science-2/900/1200",
+        "caption": "Volcano"
+      },
+      {
+        "id": "alb_science_3",
+        "url": "https://picsum.photos/seed/alb_science-3/900/1200",
+        "caption": "Star projector"
+      },
+      {
+        "id": "alb_science_4",
+        "url": "https://picsum.photos/seed/alb_science-4/900/1200",
+        "caption": "Judges"
+      }
+    ]
+  },
+  {
+    "id": "alb_indep",
+    "title": "Independence Day",
+    "date": "today-55",
+    "blurb": "Flag hoisting on a bright August morning.",
+    "photos": [
+      {
+        "id": "alb_indep_1",
+        "url": "https://picsum.photos/seed/alb_indep-1/900/1200",
+        "caption": "Flag"
+      },
+      {
+        "id": "alb_indep_2",
+        "url": "https://picsum.photos/seed/alb_indep-2/900/1200",
+        "caption": "Speech"
+      },
+      {
+        "id": "alb_indep_3",
+        "url": "https://picsum.photos/seed/alb_indep-3/900/1200",
+        "caption": "Song"
+      },
+      {
+        "id": "alb_indep_4",
+        "url": "https://picsum.photos/seed/alb_indep-4/900/1200",
+        "caption": "Sweet distribution"
+      }
+    ]
+  }
+]

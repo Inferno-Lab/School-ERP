@@ -1,0 +1,35 @@
+[
+  {
+    "id": "cls_8a",
+    "name": "Class 8",
+    "section": "A",
+    "classTeacherId": "tch_kavita",
+    "room": "B-204",
+    "studentIds": [
+      "stu_aarav",
+      "stu_diya",
+      "stu_kabir",
+      "stu_myra",
+      "stu_vivaan",
+      "stu_anika",
+      "stu_ishaan",
+      "stu_sara",
+      "stu_arjun_s",
+      "stu_kiara"
+    ]
+  },
+  {
+    "id": "cls_5b",
+    "name": "Class 5",
+    "section": "B",
+    "classTeacherId": "tch_meera",
+    "room": "A-102",
+    "studentIds": [
+      "stu_ananya",
+      "stu_reyansh",
+      "stu_aisha",
+      "stu_advait",
+      "stu_mishka"
+    ]
+  }
+]

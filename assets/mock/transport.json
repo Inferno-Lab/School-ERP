@@ -1,0 +1,70 @@
+[
+  {
+    "studentId": "stu_aarav",
+    "routeName": "Route 4 · Baner",
+    "busNumber": "MH12 AB 4418",
+    "etaMinutes": 12,
+    "progress": 0.62,
+    "driver": {
+      "name": "Ramesh Pawar",
+      "phone": "+919823011223",
+      "avatarUrl": "https://i.pravatar.cc/300?img=51"
+    },
+    "stops": [
+      {
+        "name": "School gate",
+        "time": "07:10",
+        "reached": true
+      },
+      {
+        "name": "Balewadi phata",
+        "time": "07:22",
+        "reached": true
+      },
+      {
+        "name": "Baner road signal",
+        "time": "07:31",
+        "reached": false
+      },
+      {
+        "name": "Ivory Towers",
+        "time": "07:38",
+        "reached": false
+      }
+    ]
+  },
+  {
+    "studentId": "stu_ananya",
+    "routeName": "Route 2 · Aundh",
+    "busNumber": "MH12 CD 2291",
+    "etaMinutes": 8,
+    "progress": 0.74,
+    "driver": {
+      "name": "Suresh Jadhav",
+      "phone": "+919823011440",
+      "avatarUrl": "https://i.pravatar.cc/300?img=53"
+    },
+    "stops": [
+      {
+        "name": "School gate",
+        "time": "07:15",
+        "reached": true
+      },
+      {
+        "name": "University circle",
+        "time": "07:24",
+        "reached": true
+      },
+      {
+        "name": "Aundh gaon",
+        "time": "07:33",
+        "reached": false
+      },
+      {
+        "name": "Ivory Towers",
+        "time": "07:41",
+        "reached": false
+      }
+    ]
+  }
+]

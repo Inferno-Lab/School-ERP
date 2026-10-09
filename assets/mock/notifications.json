@@ -1,0 +1,102 @@
+[
+  {
+    "id": "nf1",
+    "userId": "usr_aarav",
+    "title": "Worksheet due tomorrow",
+    "body": "Linear equations worksheet is due tomorrow evening.",
+    "type": "homework",
+    "date": "today-0T07:30",
+    "read": false,
+    "route": "/homework"
+  },
+  {
+    "id": "nf2",
+    "userId": "usr_aarav",
+    "title": "ID card is ready",
+    "body": "Collect the reprinted ID card from the front desk at long break.",
+    "type": "general",
+    "date": "today-0T09:41",
+    "read": false,
+    "route": "/chat/th_office_aarav"
+  },
+  {
+    "id": "nf3",
+    "userId": "usr_aarav",
+    "title": "Lab fee is overdue",
+    "body": "Lab and activity fee of ₹4,500 was due 3 days ago.",
+    "type": "fees",
+    "date": "today-1T08:00",
+    "read": true,
+    "route": "/fees"
+  },
+  {
+    "id": "nf4",
+    "userId": "usr_aarav",
+    "title": "You are 3rd in Term 1",
+    "body": "Term 1 results are published. Overall 86 percent.",
+    "type": "results",
+    "date": "today-6T17:00",
+    "read": true,
+    "route": "/results"
+  },
+  {
+    "id": "nf5",
+    "userId": "usr_priya",
+    "title": "PTM on Saturday",
+    "body": "Kavita Iyer can meet you from 9 am. You marked Going.",
+    "type": "event",
+    "date": "today-0T08:10",
+    "read": false,
+    "route": "/events"
+  },
+  {
+    "id": "nf6",
+    "userId": "usr_priya",
+    "title": "Aarav was on time today",
+    "body": "Attendance for today has not been submitted yet. Yesterday was present.",
+    "type": "attendance",
+    "date": "today-1T15:30",
+    "read": true,
+    "route": "/attendance"
+  },
+  {
+    "id": "nf7",
+    "userId": "usr_priya",
+    "title": "Ananya's essay is in",
+    "body": "Meera Nair confirmed the festival writing was submitted.",
+    "type": "homework",
+    "date": "today-2T16:00",
+    "read": true,
+    "route": "/homework"
+  },
+  {
+    "id": "nf8",
+    "userId": "usr_kavita",
+    "title": "4 letters still pending",
+    "body": "English letter submissions are in from 4 of 10 students.",
+    "type": "homework",
+    "date": "today-0T10:00",
+    "read": false,
+    "route": "/teacher/grading"
+  },
+  {
+    "id": "nf9",
+    "userId": "usr_kavita",
+    "title": "Attendance not submitted",
+    "body": "Class 8 A attendance for today is still open.",
+    "type": "attendance",
+    "date": "today-0T08:20",
+    "read": false,
+    "route": "/teacher/attendance/cls_8a"
+  },
+  {
+    "id": "nf10",
+    "userId": "usr_kavita",
+    "title": "Exhibition boards Thursday",
+    "body": "Rahul will clear the science lawn after lunch on Thursday.",
+    "type": "general",
+    "date": "today-0T11:13",
+    "read": false,
+    "route": "/chat/th_staff"
+  }
+]

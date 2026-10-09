@@ -1,0 +1,115 @@
+[
+  {
+    "studentId": "stu_aarav",
+    "academicYear": "2026-27",
+    "installments": [
+      {
+        "id": "fee_aarav_t1",
+        "title": "Term 1 tuition",
+        "amount": 28500,
+        "dueDate": "today-60",
+        "paid": true,
+        "paidOn": "today-58",
+        "method": "upi",
+        "reference": "UPI28461937"
+      },
+      {
+        "id": "fee_aarav_bus",
+        "title": "Transport, first term",
+        "amount": 9000,
+        "dueDate": "today-55",
+        "paid": true,
+        "paidOn": "today-54",
+        "method": "netbanking",
+        "reference": "NB11029384"
+      },
+      {
+        "id": "fee_aarav_lab",
+        "title": "Lab and activity",
+        "amount": 4500,
+        "dueDate": "today-3",
+        "paid": false
+      },
+      {
+        "id": "fee_aarav_t2",
+        "title": "Term 2 tuition",
+        "amount": 28500,
+        "dueDate": "today+6",
+        "paid": false
+      }
+    ],
+    "receipts": [
+      {
+        "id": "rcpt_fee_aarav_t1",
+        "installmentId": "fee_aarav_t1",
+        "title": "Term 1 tuition",
+        "amount": 28500,
+        "paidOn": "today-58",
+        "method": "upi",
+        "reference": "UPI28461937"
+      },
+      {
+        "id": "rcpt_fee_aarav_bus",
+        "installmentId": "fee_aarav_bus",
+        "title": "Transport, first term",
+        "amount": 9000,
+        "paidOn": "today-54",
+        "method": "netbanking",
+        "reference": "NB11029384"
+      }
+    ]
+  },
+  {
+    "studentId": "stu_ananya",
+    "academicYear": "2026-27",
+    "installments": [
+      {
+        "id": "fee_ananya_t1",
+        "title": "Term 1 tuition",
+        "amount": 24000,
+        "dueDate": "today-60",
+        "paid": true,
+        "paidOn": "today-59",
+        "method": "upi",
+        "reference": "UPI99881220"
+      },
+      {
+        "id": "fee_ananya_t2",
+        "title": "Term 2 tuition",
+        "amount": 24000,
+        "dueDate": "today-2",
+        "paid": true,
+        "paidOn": "today-1",
+        "method": "card",
+        "reference": "CARD441298"
+      },
+      {
+        "id": "fee_ananya_act",
+        "title": "Annual day costume",
+        "amount": 1800,
+        "dueDate": "today+40",
+        "paid": false
+      }
+    ],
+    "receipts": [
+      {
+        "id": "rcpt_fee_ananya_t1",
+        "installmentId": "fee_ananya_t1",
+        "title": "Term 1 tuition",
+        "amount": 24000,
+        "paidOn": "today-59",
+        "method": "upi",
+        "reference": "UPI99881220"
+      },
+      {
+        "id": "rcpt_fee_ananya_t2",
+        "installmentId": "fee_ananya_t2",
+        "title": "Term 2 tuition",
+        "amount": 24000,
+        "paidOn": "today-1",
+        "method": "card",
+        "reference": "CARD441298"
+      }
+    ]
+  }
+]
