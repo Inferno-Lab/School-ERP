@@ -14,6 +14,7 @@ abstract final class StorageKeys {
   static const notifyHomework = 'notifyHomework';
   static const notifyFees = 'notifyFees';
   static const readNotices = 'readNotices';
+  static const recentSearches = 'recentSearches';
 }
 
 class StorageService extends GetxService {
