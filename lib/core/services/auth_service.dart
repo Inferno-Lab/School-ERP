@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/services/storage_service.dart';
+import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/data/models/user.dart';
 import 'package:get/get.dart';
 
@@ -22,15 +25,12 @@ class AuthService extends GetxService {
     if (decoded is! Map<String, dynamic>) return;
     user.value = AppUser.fromJson(decoded);
     activeStudentId.value =
-        _storage.read<String>(StorageKeys.activeStudent) ??
-        user.value?.studentId ??
-        user.value?.childIds.firstOrNull;
+        _storage.read<String>(StorageKeys.activeStudent) ?? user.value?.studentId ?? user.value?.childIds.firstOrNull;
   }
 
   Future<void> setSession(AppUser next, {String? studentId}) async {
     user.value = next;
-    final resolved =
-        studentId ?? next.studentId ?? next.childIds.firstOrNull;
+    final resolved = studentId ?? next.studentId ?? next.childIds.firstOrNull;
     activeStudentId.value = resolved;
     await _storage.write(StorageKeys.sessionUser, jsonEncode(next.toJson()));
     if (resolved == null) {
@@ -51,10 +51,22 @@ class AuthService extends GetxService {
     await setSession(current.copyWith(avatarUrl: url), studentId: activeStudentId.value);
   }
 
-  Future<void> logout() async {
-    user.value = null;
-    activeStudentId.value = null;
+  /// Signs out: forgets the saved session, shows the sign-in screen and drops
+  /// the session once the old screens have left, so none rebuild with no user.
+  Future<void> signOut() async {
     await _storage.remove(StorageKeys.sessionUser);
     await _storage.remove(StorageKeys.activeStudent);
+    if (Get.testMode) {
+      _clear();
+      return;
+    }
+    unawaited(Get.offAllNamed<void>(AppRoutes.login));
+    await Future<void>.delayed(AppDurations.medium);
+    _clear();
+  }
+
+  void _clear() {
+    user.value = null;
+    activeStudentId.value = null;
   }
 }
