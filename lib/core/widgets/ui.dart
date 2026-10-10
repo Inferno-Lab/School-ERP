@@ -106,7 +106,9 @@ class _SpinePainter extends BoxPainter {
     final rect = offset & size;
     canvas
       ..save()
-      ..clipRRect(RRect.fromRectAndCorners(rect, topLeft: const Radius.circular(6), bottomLeft: const Radius.circular(6)))
+      ..clipRRect(
+        RRect.fromRectAndCorners(rect, topLeft: const Radius.circular(6), bottomLeft: const Radius.circular(6)),
+      )
       ..drawRect(Rect.fromLTWH(rect.left, rect.top, width, rect.height), Paint()..color = const Color(0x33000000))
       ..drawRect(Rect.fromLTWH(rect.right - 1, rect.top, 1, rect.height), Paint()..color = const Color(0x26FFFFFF))
       ..restore();
@@ -153,14 +155,53 @@ class Dot extends StatelessWidget {
   );
 }
 
+/// Live indicator: a dot breathing between full and 35% opacity every 2.2s.
+class PulseDot extends StatefulWidget {
+  const PulseDot(this.color, {super.key});
+
+  final Color color;
+
+  @override
+  State<PulseDot> createState() => _PulseDotState();
+}
+
+class _PulseDotState extends State<PulseDot> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.reduceMotion) {
+      _c.value = 0;
+    } else if (!_c.isAnimating) {
+      _c.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: Tween<double>(begin: 1, end: .35).chain(CurveTween(curve: Curves.easeInOut)).animate(_c),
+    child: Dot(widget.color),
+  );
+}
+
 class Hr extends StatelessWidget {
   const Hr({this.indent = 0, super.key});
 
   final double indent;
 
   @override
-  Widget build(BuildContext context) =>
-      Container(height: 1, margin: EdgeInsets.only(left: indent), color: context.app.line);
+  Widget build(BuildContext context) => Container(
+    height: 1,
+    margin: EdgeInsets.only(left: indent),
+    color: context.app.line,
+  );
 }
 
 /// Solid content card: paper with a hairline ring, never glass.
@@ -285,7 +326,9 @@ class Btn extends StatelessWidget {
           SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2.2, color: fg))
         else ...[
           if (icon != null) ...[Icon(icon, size: 18, color: fg), const SizedBox(width: 8)],
-          Flexible(child: Text(label.tr, style: style, maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Flexible(
+            child: Text(label.tr, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
           if (trailing != null) ...[const SizedBox(width: 8), Icon(trailing, size: 18, color: fg)],
         ],
       ],
@@ -541,7 +584,9 @@ class _FieldState extends State<Field> {
                   children: [
                     Icon(Icons.error_outline_rounded, size: 15, color: c.badText),
                     const SizedBox(width: 6),
-                    Expanded(child: Text(error.tr, style: anek(13, 600, height: 1.3, color: c.badText))),
+                    Expanded(
+                      child: Text(error.tr, style: anek(13, 600, height: 1.3, color: c.badText)),
+                    ),
                   ],
                 ),
               ),

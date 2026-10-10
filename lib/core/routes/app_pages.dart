@@ -21,6 +21,7 @@ import 'package:edunest/features/fees/controllers/fees_controller.dart';
 import 'package:edunest/features/fees/views/fees_view.dart';
 import 'package:edunest/features/gallery/views/gallery_view.dart';
 import 'package:edunest/features/homework/controllers/homework_controller.dart';
+import 'package:edunest/features/homework/views/homework_scan_view.dart';
 import 'package:edunest/features/homework/views/homework_view.dart';
 import 'package:edunest/features/leave/views/leave_view.dart';
 import 'package:edunest/features/library/views/library_view.dart';
@@ -90,6 +91,7 @@ class AppPages {
       transition: Transition.fadeIn,
       transitionDuration: AppDurations.medium,
     ),
+    GetPage(name: AppRoutes.homeworkScan, page: () => const HomeworkScanView(), middlewares: [AuthMiddleware()], transition: Transition.downToUp),
     _page(AppRoutes.timetable, const TimetableView(), TimetableController.new),
     _page(AppRoutes.results, const ResultsView(), ResultsController.new),
     _page(AppRoutes.fees, const FeesView(), FeesController.new),

@@ -9,6 +9,7 @@ import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/haptics.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/toast.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/features/homework/controllers/homework_controller.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +109,9 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
       Get.back<void>();
       return;
     }
-    final controller = Get.isRegistered<HomeworkController>() ? Get.find<HomeworkController>() : Get.put(HomeworkController());
+    final controller = Get.isRegistered<HomeworkController>()
+        ? Get.find<HomeworkController>()
+        : Get.put(HomeworkController());
     await controller.sendScan(hw, _pages.length);
     Get.back<void>();
   }
@@ -146,7 +149,11 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
                         ? const CircularProgressIndicator(color: white)
                         : Padding(
                             padding: const EdgeInsets.all(32),
-                            child: Text(_error!.tr, textAlign: TextAlign.center, style: context.type.b.copyWith(color: white)),
+                            child: Text(
+                              _error!.tr,
+                              textAlign: TextAlign.center,
+                              style: context.type.b.copyWith(color: white),
+                            ),
                           ),
                   ),
           ),
@@ -167,12 +174,11 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
                 const Spacer(),
                 Glass(
                   height: 44,
-                  radius: 22,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const _Pulse(),
+                      const PulseDot(AppColors.mari),
                       const SizedBox(width: 8),
                       Text(
                         (camera == null ? 'scan.starting' : 'scan.hold_still').tr,
@@ -221,7 +227,10 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
                                 height: 22,
                                 alignment: Alignment.center,
                                 decoration: const BoxDecoration(color: AppColors.mari, shape: BoxShape.circle),
-                                child: Text('${_pages.length}', style: anek(12, 760, height: 1, color: AppColors.mariInk)),
+                                child: Text(
+                                  '${_pages.length}',
+                                  style: anek(12, 760, height: 1, color: AppColors.mariInk),
+                                ),
                               ),
                             ),
                           ],
@@ -276,33 +285,6 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
       ),
     );
   }
-}
-
-class _Pulse extends StatefulWidget {
-  const _Pulse();
-
-  @override
-  State<_Pulse> createState() => _PulseState();
-}
-
-class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200))..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => FadeTransition(
-    opacity: Tween(begin: 1.0, end: .35).animate(_c),
-    child: Container(
-      width: 8,
-      height: 8,
-      decoration: const BoxDecoration(color: AppColors.mari, shape: BoxShape.circle),
-    ),
-  );
 }
 
 class _Guide extends StatefulWidget {
