@@ -325,33 +325,30 @@ class GlassIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
+    return GlassPress(
+      onTap: onTap,
       label: label,
-      child: GlassPress(
-        onTap: onTap,
-        child: Glass(
-          width: size,
-          height: size,
-          radius: size / 2,
-          onPigment: onPigment ?? color == AppColors.white,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(icon, size: 22, color: color ?? context.app.ink),
-              if (badge)
-                const Positioned(
-                  top: 8,
-                  right: 9,
-                  child: SizedBox.square(
-                    dimension: 9,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(color: Color(0xFFC23B2A), shape: BoxShape.circle),
-                    ),
+      child: Glass(
+        width: size,
+        height: size,
+        radius: size / 2,
+        onPigment: onPigment ?? color == AppColors.white,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(icon, size: 22, color: color ?? context.app.ink),
+            if (badge)
+              const Positioned(
+                top: 8,
+                right: 9,
+                child: SizedBox.square(
+                  dimension: 9,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: Color(0xFFC23B2A), shape: BoxShape.circle),
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
@@ -359,11 +356,14 @@ class GlassIconButton extends StatelessWidget {
 }
 
 /// Glass squashes 5% on press (scale 1.05 x .95) with the glass spring.
+/// It is its own accessibility node (a button) so it never merges into the header around it;
+/// icon-only controls pass [label], text controls read their own text.
 class GlassPress extends StatefulWidget {
-  const GlassPress({required this.child, this.onTap, super.key});
+  const GlassPress({required this.child, this.onTap, this.label, super.key});
 
   final Widget child;
   final VoidCallback? onTap;
+  final String? label;
 
   @override
   State<GlassPress> createState() => _GlassPressState();
@@ -375,18 +375,26 @@ class _GlassPressState extends State<GlassPress> {
   @override
   Widget build(BuildContext context) {
     final squash = _down && !context.reduceMotion;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: widget.onTap != null,
+      label: widget.label,
+      excludeSemantics: widget.label != null,
       onTap: widget.onTap,
-      onTapDown: widget.onTap == null ? null : (_) => setState(() => _down = true),
-      onTapUp: widget.onTap == null ? null : (_) => setState(() => _down = false),
-      onTapCancel: widget.onTap == null ? null : () => setState(() => _down = false),
-      child: AnimatedContainer(
-        duration: squash ? const Duration(milliseconds: 120) : AppDurations.medium,
-        curve: squash ? Curves.easeOut : kSpring,
-        transformAlignment: Alignment.center,
-        transform: Matrix4.diagonal3Values(squash ? 1.05 : 1, squash ? .95 : 1, 1),
-        child: widget.child,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        onTapDown: widget.onTap == null ? null : (_) => setState(() => _down = true),
+        onTapUp: widget.onTap == null ? null : (_) => setState(() => _down = false),
+        onTapCancel: widget.onTap == null ? null : () => setState(() => _down = false),
+        child: AnimatedContainer(
+          duration: squash ? const Duration(milliseconds: 120) : AppDurations.medium,
+          curve: squash ? Curves.easeOut : kSpring,
+          transformAlignment: Alignment.center,
+          transform: Matrix4.diagonal3Values(squash ? 1.05 : 1, squash ? .95 : 1, 1),
+          child: widget.child,
+        ),
       ),
     );
   }
