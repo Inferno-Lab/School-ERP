@@ -13,6 +13,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Threads are stored from the family's side ("Kavita Iyer, class teacher").
+/// For the person that title names, show the other side instead.
+Future<ChatThread> threadForMe(ChatThread t, AppUser me) async {
+  if (t.title != me.name) return t;
+  final other = t.participantIds.where((id) => id != me.id).firstOrNull;
+  final name = other == null ? null : await Get.find<DirectoryRepository>().userName(other);
+  if (name == null) return t;
+  return ChatThread(
+    id: t.id,
+    title: name,
+    subtitle: 'chat.family'.tr,
+    participantIds: t.participantIds,
+    avatarUrl: t.avatarUrl,
+    online: t.online,
+  );
+}
+
 class ChatListController extends GetxController with Loadable {
   List<ChatThread> threads = [];
   final previews = <String, ChatMessage>{};
@@ -50,7 +67,7 @@ class ChatListController extends GetxController with Loadable {
     final user = Get.find<AuthService>().user.value;
     if (user == null) return;
     final bundle = await Get.find<ChatRepository>().inbox(user.id);
-    threads = bundle.threads;
+    threads = [for (final t in bundle.threads) await threadForMe(t, user)];
     previews.clear();
     unreadBy.clear();
     for (final message in bundle.messages) {
@@ -111,7 +128,9 @@ class ChatThreadController extends GetxController with Loadable {
     final userId = me;
     if (id == null || userId == null) return;
     final repo = Get.find<ChatRepository>();
-    thread = (await repo.threadsFor(userId)).where((t) => t.id == id).firstOrNull;
+    final account = Get.find<AuthService>().user.value!;
+    final found = (await repo.threadsFor(userId)).where((t) => t.id == id).firstOrNull;
+    thread = found == null ? null : await threadForMe(found, account);
     messages = await repo.messages(id);
     officePhone ??= (await Get.find<DirectoryRepository>().school()).phone;
     if (messages.any((m) => !m.read && m.senderId != userId)) {

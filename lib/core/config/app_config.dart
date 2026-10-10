@@ -10,17 +10,26 @@ class AppConfig {
   static const schoolName = 'Greenfield International School';
   static const schoolTagline = 'Curiosity first. Kindness always.';
   static const logoAsset = 'assets/images/logo.svg';
-  static const version = '2.0.0';
-  static const build = 210;
+  static const version = '2.0.2';
+  static const build = 212;
 
   /// Flip to false to route every repository through the remote stub.
   static bool useMockData = true;
 
-  static int mockDelayMinMs = 400;
-  static int mockDelayMaxMs = 900;
+  /// Mock calls answer almost at once, like a good connection.
+  static int mockDelayMinMs = 30;
+  static int mockDelayMaxMs = 90;
 
-  /// Design system "Slow network": off answers mock calls almost at once.
-  static final slowNetwork = true.obs;
+  /// Feature switches. Off until the screen and the backend for it exist, so unfinished work
+  /// never reaches families. A school's build profile can turn them on with --dart-define.
+  static const assistantEnabled = bool.fromEnvironment('ASSISTANT');
+
+  /// Design system "Empty school": a brand-new school with people but no content,
+  /// to check every empty state. `--dart-define=EMPTY_DATA=true` starts that way.
+  static final emptyData = const bool.fromEnvironment('EMPTY_DATA').obs;
+
+  /// Design system "Slow network": 0.4 to 0.9 s per call, to test loading states.
+  static final slowNetwork = false.obs;
 
   /// Toggled from Settings so loading and error states can be demoed.
   static final simulateErrors = false.obs;

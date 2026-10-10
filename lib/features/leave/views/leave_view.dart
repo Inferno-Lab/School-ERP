@@ -1,85 +1,21 @@
 import 'dart:async';
 
 import 'package:edunest/core/routes/app_routes.dart';
-import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
-import 'package:edunest/core/utils/app_exception.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/utils/haptics.dart';
-import 'package:edunest/core/utils/loadable.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/glass_controls.dart';
 import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/states.dart';
-import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/core/widgets/ui.dart';
-import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/data/models/campus.dart';
-import 'package:edunest/data/repositories/academic_repository.dart';
-import 'package:edunest/data/repositories/campus_repository.dart';
-import 'package:edunest/data/repositories/directory_repository.dart';
+import 'package:edunest/features/leave/controllers/leave_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-
-DateTime _day(DateTime d) => DateUtils.dateOnly(d);
-
-/// Days a leave covers, counting both ends.
-int _span(LeaveRequest r) => _day(r.to).difference(_day(r.from)).inDays + 1;
-
-/// shortcut: terms are fixed halves (Jun–Nov, Dec–May); read them from the school calendar once it exists.
-DateTime _termStart(DateTime now) {
-  if (now.month >= 6 && now.month <= 11) return DateTime(now.year, 6);
-  return now.month == 12 ? DateTime(now.year, 12) : DateTime(now.year - 1, 12);
-}
-
-class LeaveController extends GetxController with Loadable {
-  List<LeaveRequest> items = [];
-  String? childName;
-  String? teacherName;
-
-  /// Most recent absence no leave request covers.
-  DateTime? unexplained;
-
-  int get waiting => items.where((i) => i.status == LeaveStatus.pending).length;
-
-  int get takenThisTerm {
-    final start = _termStart(DateTime.now());
-    return items
-        .where((i) => i.status == LeaveStatus.approved && !i.from.isBefore(start))
-        .fold(0, (sum, i) => sum + _span(i));
-  }
-
-  @override
-  Future<void> load() async {
-    final id = Get.find<AuthService>().activeStudentId.value;
-    if (id == null) {
-      await run(() async {}, isEmpty: () => true);
-      return;
-    }
-    await run(() async {
-      final directory = Get.find<DirectoryRepository>();
-      final student = await directory.student(id);
-      final cls = await directory.schoolClass(student.classId);
-      childName = student.name.split(' ').first;
-      teacherName = (await directory.teacherOrNull(cls.classTeacherId))?.name;
-      items = await Get.find<LeaveRepository>().forStudent(id);
-      items.sort((a, b) => b.appliedOn.compareTo(a.appliedOn));
-      final days = await Get.find<AttendanceRepository>().forStudent(id);
-      final absences =
-          days
-              .where((d) => d.status == AttendanceStatus.absent)
-              .map((d) => _day(d.date))
-              .where((d) => !items.any((r) => !d.isBefore(_day(r.from)) && !d.isAfter(_day(r.to))))
-              .toList()
-            ..sort((a, b) => b.compareTo(a));
-      unexplained = absences.firstOrNull;
-    }, isEmpty: () => false);
-  }
-}
 
 class LeaveView extends GetView<LeaveController> {
   const LeaveView({super.key});
@@ -124,8 +60,8 @@ class LeaveView extends GetView<LeaveController> {
                   ? null
                   : [
                       controller.childName!,
-                      'leave.taken'.trParams({'n': '${controller.takenThisTerm}'}),
-                      if (controller.waiting > 0) 'leave.waiting_n'.trParams({'n': '${controller.waiting}'}),
+                      'leave.taken'.trp({'n': '${controller.takenThisTerm}'}),
+                      if (controller.waiting > 0) 'leave.waiting_n'.trp({'n': '${controller.waiting}'}),
                     ].join(' · '),
             ),
           ),
@@ -142,7 +78,12 @@ class LeaveView extends GetView<LeaveController> {
                 ],
                 const Rise(index: 3, child: SectionLabel('leave.requests')),
                 if (items.isEmpty)
-                  const EmptyState(title: 'leave.empty', body: 'leave.empty_body')
+                  EmptyState(
+                    art: EmptyArt.plane,
+                    title: 'leave.empty',
+                    body: 'leave.empty_body',
+                    hint: 'leave.empty_hint',
+                  )
                 else
                   Rise(
                     index: 3,
@@ -217,7 +158,7 @@ class _Unexplained extends StatelessWidget {
               children: [
                 Text('leave.no_reason'.tr, style: context.type.t),
                 Text(
-                  'leave.no_reason_body'.trParams({'day': DateFormat('EEEE').format(date)}),
+                  'leave.no_reason_body'.trp({'day': DateFormat('EEEE').format(date)}),
                   style: context.type.cap,
                 ),
               ],
@@ -239,7 +180,7 @@ class _Request extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.app;
-    final days = _span(item);
+    final days = leaveSpan(item);
     final (stamp, tone) = switch (item.status) {
       LeaveStatus.pending => ('leave.waiting', c.dark ? const Color(0xFFF6BA45) : AppColors.late),
       LeaveStatus.approved => ('leave.approved', AppColors.ok),
@@ -281,8 +222,8 @@ class _Request extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       teacher == null
-                          ? 'leave.sent_on'.trParams({'date': DateFormat('EEE d MMM').format(item.appliedOn)})
-                          : 'leave.sent_to'.trParams({
+                          ? 'leave.sent_on'.trp({'date': DateFormat('EEE d MMM').format(item.appliedOn)})
+                          : 'leave.sent_to'.trp({
                               'date': DateFormat('EEE d MMM').format(item.appliedOn),
                               'name': teacher!,
                             }),
@@ -311,163 +252,6 @@ class _Request extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class LeaveApplyController extends GetxController {
-  static const reasons = ['unwell', 'family', 'travel', 'appointment', 'other'];
-
-  /// 0: upcoming leave, 1: explaining a past absence.
-  final mode = 0.obs;
-  final start = Rxn<DateTime>();
-  final end = Rxn<DateTime>();
-
-  /// Which end of the range the next tap sets: 0 start, 1 end.
-  final picking = 0.obs;
-  final month = DateTime(DateTime.now().year, DateTime.now().month).obs;
-  final reason = RxnString();
-  final attachment = RxnString();
-  final sending = false.obs;
-  final note = TextEditingController();
-
-  final holidays = <DateTime>{}.obs;
-  String? teacherName;
-
-  DateTime get today => _day(DateTime.now());
-
-  @override
-  void onInit() {
-    super.onInit();
-    final args = Get.arguments;
-    if (args is Map && args['past'] is DateTime) {
-      final d = _day(args['past'] as DateTime);
-      mode.value = 1;
-      start.value = d;
-      end.value = d;
-      month.value = DateTime(d.year, d.month);
-    }
-    unawaited(_load());
-  }
-
-  @override
-  void onClose() {
-    note.dispose();
-    super.onClose();
-  }
-
-  Future<void> _load() async {
-    final id = Get.find<AuthService>().activeStudentId.value;
-    if (id == null) return;
-    try {
-      final directory = Get.find<DirectoryRepository>();
-      final student = await directory.student(id);
-      final cls = await directory.schoolClass(student.classId);
-      teacherName = (await directory.teacherOrNull(cls.classTeacherId))?.name;
-      final days = await Get.find<AttendanceRepository>().forStudent(id);
-      holidays.addAll(days.where((d) => d.status == AttendanceStatus.holiday).map((d) => _day(d.date)));
-    } on AppException {
-      // Without the calendar only Sundays are blocked; the class teacher still reviews.
-    }
-  }
-
-  void setMode(int value) {
-    if (mode.value == value) return;
-    mode.value = value;
-    start.value = null;
-    end.value = null;
-    picking.value = 0;
-    month.value = DateTime(today.year, today.month);
-  }
-
-  bool disabled(DateTime d) {
-    if (d.weekday == DateTime.sunday || holidays.contains(d)) return true;
-    return mode.value == 1 ? d.isAfter(today) : d.isBefore(today);
-  }
-
-  /// Months the calendar may show: two back for absences, three ahead for leave.
-  bool canShift(int delta) {
-    final now = DateTime(today.year, today.month);
-    final target = DateTime(month.value.year, month.value.month + delta);
-    final diff = (target.year - now.year) * 12 + target.month - now.month;
-    return mode.value == 1 ? diff <= 0 && diff >= -2 : diff >= 0 && diff <= 3;
-  }
-
-  void shift(int delta) {
-    if (canShift(delta)) month.value = DateTime(month.value.year, month.value.month + delta);
-  }
-
-  void pick(DateTime d) {
-    if (disabled(d)) return;
-    Haptics.selection();
-    final s = start.value;
-    if (picking.value == 0 || s == null || d.isBefore(s)) {
-      // The end can never come before the start: an earlier tap starts over.
-      start.value = d;
-      end.value = d;
-      picking.value = 1;
-    } else {
-      end.value = d;
-      picking.value = 0;
-    }
-  }
-
-  int get schoolDays {
-    final s = start.value;
-    final e = end.value;
-    if (s == null || e == null) return 0;
-    var n = 0;
-    for (var d = s; !d.isAfter(e); d = DateTime(d.year, d.month, d.day + 1)) {
-      if (d.weekday != DateTime.sunday && !holidays.contains(d)) n++;
-    }
-    return n;
-  }
-
-  Future<void> attach() async {
-    try {
-      final file = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 70);
-      if (file != null) attachment.value = file.name;
-    } on Exception {
-      ToastHelper.show('leave.attach_failed', kind: ToastKind.error);
-    }
-  }
-
-  Future<void> send() async {
-    final id = Get.find<AuthService>().activeStudentId.value;
-    final s = start.value;
-    final e = end.value;
-    if (id == null || s == null || e == null) {
-      ToastHelper.show('leave.pick_dates', kind: ToastKind.error);
-      return;
-    }
-    if (reason.value == null) {
-      ToastHelper.show('leave.pick_reason', kind: ToastKind.error);
-      return;
-    }
-    sending.value = true;
-    try {
-      final text = note.text.trim();
-      await Get.find<LeaveRepository>().apply(
-        LeaveRequest(
-          id: 'lv_${DateTime.now().microsecondsSinceEpoch}',
-          studentId: id,
-          from: s,
-          to: e,
-          reason: 'leave.reason_${reason.value}'.tr,
-          note: [if (text.isNotEmpty) text, if (attachment.value != null) 'leave.note_attached'.tr].join(' '),
-          status: LeaveStatus.pending,
-          appliedOn: DateTime.now(),
-        ),
-      );
-      Get.back<void>();
-      ToastHelper.show(
-        teacherName == null ? 'leave.sent' : 'leave.sent_named'.trParams({'name': teacherName!}),
-        kind: ToastKind.success,
-      );
-    } on AppException catch (error) {
-      ToastHelper.show(error.message, kind: ToastKind.error);
-    } finally {
-      sending.value = false;
-    }
   }
 }
 
@@ -572,7 +356,7 @@ class LeaveApplyView extends GetView<LeaveApplyController> {
             controller: controller.note,
             label: controller.teacherName == null
                 ? '${'leave.note'.tr} · ${'common.optional'.tr}'
-                : '${'leave.note_for'.trParams({'name': controller.teacherName!})} · ${'common.optional'.tr}',
+                : '${'leave.note_for'.trp({'name': controller.teacherName!})} · ${'common.optional'.tr}',
             hint: past ? 'leave.note_hint_past' : 'leave.note_hint',
             maxLines: 4,
             minHeight: 76,
@@ -658,7 +442,7 @@ class _RangeCalendar extends StatelessWidget {
             children: [
               Expanded(child: Text(DateFormat('MMMM y').format(month), style: context.type.t)),
               if (n > 0)
-                Text(n == 1 ? 'leave.one_day'.tr : 'leave.n_days'.trParams({'n': '$n'}), style: context.type.cap),
+                Text(n == 1 ? 'leave.one_day'.tr : 'leave.n_days'.trp({'n': '$n'}), style: context.type.cap),
               const SizedBox(width: 4),
               arrow(PhosphorIconsRegular.caretLeft, -1, 'leave.prev_month'),
               arrow(PhosphorIconsRegular.caretRight, 1, 'leave.next_month'),

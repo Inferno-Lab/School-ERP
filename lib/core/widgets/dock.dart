@@ -60,7 +60,6 @@ class _GlassDockState extends State<GlassDock> {
     return Glass(
       height: 64,
       radius: 32,
-      blur: 1.6,
       child: LayoutBuilder(
         builder: (context, box) {
           const pad = 7.0;
@@ -96,11 +95,17 @@ class _GlassDockState extends State<GlassDock> {
                 child: Row(
                   children: [
                     for (var i = 0; i < widget.items.length; i++)
-                      Expanded(child: _DockButton(item: widget.items[i], on: i == widget.index, onTap: () {
-                        if (i == widget.index) return;
-                        Haptics.selection();
-                        widget.onChanged(i);
-                      })),
+                      Expanded(
+                        child: _DockButton(
+                          item: widget.items[i],
+                          on: i == widget.index,
+                          onTap: () {
+                            if (i == widget.index) return;
+                            Haptics.selection();
+                            widget.onChanged(i);
+                          },
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -151,25 +156,12 @@ class _DockButton extends StatelessWidget {
                 ],
               ),
               if (item.badge > 0)
-                Positioned(
-                  top: 9,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Transform.translate(
-                      offset: const Offset(15, 0),
-                      child: Container(
-                        constraints: const BoxConstraints(minWidth: 16),
-                        height: 16,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(color: AppColors.bad, borderRadius: BorderRadius.circular(8)),
-                        child: Text(
-                          '${item.badge}',
-                          style: anek(10, 700, height: 1, color: AppColors.white),
-                        ),
-                      ),
-                    ),
+                // Pinned to the icon's top-right; sized by its digits, never by the tab.
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 9, left: 30),
+                    child: _Badge(count: item.badge),
                   ),
                 ),
             ],
@@ -239,6 +231,36 @@ class GlassRail extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Round count pill: a circle for one digit, a short pill beyond that.
+class _Badge extends StatelessWidget {
+  const _Badge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = count > 99 ? '99+' : '$count';
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.bad,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.app.paper, width: 1.5),
+      ),
+      child: SizedBox(
+        height: 16,
+        width: text.length == 1 ? 16 : null,
+        child: Center(
+          widthFactor: text.length == 1 ? null : 1,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: text.length == 1 ? 0 : 4),
+            child: Text(text, style: anek(10, 700, height: 1, color: AppColors.white, tabular: true)),
+          ),
+        ),
       ),
     );
   }

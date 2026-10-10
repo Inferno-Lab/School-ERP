@@ -20,6 +20,7 @@ import 'package:edunest/data/repositories/academic_repository.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -177,7 +178,12 @@ class _SearchViewState extends State<SearchView> {
             height: 84 + inset.top,
             child: Obx(() => _Ribbon(periods: c.today.toList(), ready: c.ready.value)),
           ),
-          Positioned.fill(
+          // Results start below the ribbon, so nothing scrolls under the glass search bar.
+          Positioned(
+            left: 0,
+            right: 0,
+            top: inset.top + 90,
+            bottom: 0,
             child: Obx(() {
               c.query.value;
               c.scope.value;
@@ -192,7 +198,7 @@ class _SearchViewState extends State<SearchView> {
               final total = c.homework.length + c.notices.length + c.people.length + c.events.length;
               return ListView(
                 keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: EdgeInsets.fromLTRB(gutter + 4, inset.top + 102, gutter + 4, inset.bottom + 32),
+                padding: EdgeInsets.fromLTRB(gutter + 4, 12, gutter + 4, inset.bottom + 32),
                 children: [
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -204,7 +210,7 @@ class _SearchViewState extends State<SearchView> {
                             selected: s == key,
                             child: Chip2(
                               key == 'all' && q.isNotEmpty
-                                  ? 'search.all_n'.trParams({'n': '$total'})
+                                  ? 'search.all_n'.trp({'n': '$total'})
                                   : 'search.scope_$key'.tr,
                               on: s == key,
                               onTap: () => c.scope.value = key,
@@ -227,11 +233,11 @@ class _SearchViewState extends State<SearchView> {
                         ],
                       ),
                     ] else
-                      const EmptyState(title: 'search.start', body: 'search.start_body'),
+                      const EmptyState(art: EmptyArt.search, title: 'search.start', body: 'search.start_body'),
                   ] else if (!c.ready.value)
                     const Padding(padding: EdgeInsets.only(top: 22), child: SkeletonList())
                   else if (hw.isEmpty && nt.isEmpty && pp.isEmpty && ev.isEmpty)
-                    EmptyState(title: 'search.nothing', body: 'search.nothing_body'.trParams({'q': q}))
+                    EmptyState(art: EmptyArt.search, title: 'search.nothing', body: 'search.nothing_body'.trp({'q': q}))
                   else ...[
                     if (hw.isNotEmpty)
                       ..._section('search.scope_homework', [
@@ -370,7 +376,7 @@ class _SearchViewState extends State<SearchView> {
     final sub = c.studentId == null ? null : h.forStudent(c.studentId!);
     final graded = sub?.grade;
     if (graded != null) {
-      return '${subjectName(h.subject)} · ${'search.graded'.trParams({'grade': graded})} · ${DateFormat('d MMM').format(h.dueOn)}';
+      return '${subjectName(h.subject)} · ${'search.graded'.trp({'grade': graded})} · ${DateFormat('d MMM').format(h.dueOn)}';
     }
     final days = Formatters.daysUntil(h.dueOn);
     final when = days == 0
@@ -378,7 +384,7 @@ class _SearchViewState extends State<SearchView> {
         : days == 1
         ? 'common.tomorrow'.tr.toLowerCase()
         : DateFormat('EEE d MMM').format(h.dueOn);
-    return '${subjectName(h.subject)} · ${'search.due'.trParams({'when': when})}';
+    return '${subjectName(h.subject)} · ${'search.due'.trp({'when': when})}';
   }
 
   List<Widget> _section(String key, List<Widget> rows) => [

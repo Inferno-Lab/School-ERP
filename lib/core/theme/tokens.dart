@@ -7,10 +7,10 @@ const kEase = Cubic(.2, .8, .2, 1);
 const kSpring = Cubic(.3, 1.45, .45, 1);
 
 abstract final class AppDurations {
-  static const fast = Duration(milliseconds: 260);
-  static const medium = Duration(milliseconds: 450);
-  static const slow = Duration(milliseconds: 600);
-  static const rise = Duration(milliseconds: 700);
+  static const fast = Duration(milliseconds: 180);
+  static const medium = Duration(milliseconds: 280);
+  static const slow = Duration(milliseconds: 400);
+  static const rise = Duration(milliseconds: 420);
 }
 
 abstract final class AppBreakpoints {

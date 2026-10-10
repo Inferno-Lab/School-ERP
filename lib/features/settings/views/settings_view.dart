@@ -9,7 +9,6 @@ import 'package:edunest/core/theme/app_theme.dart';
 import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/haptics.dart';
-import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/glass_controls.dart';
 import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/sheets.dart';
@@ -46,7 +45,7 @@ Future<void> signOut() async {
     confirm: 'common.logout',
     cancel: 'settings.stay',
   );
-  if (ok) await Get.find<AuthService>().logout();
+  if (ok) await Get.find<AuthService>().signOut();
 }
 
 class SettingsView extends StatelessWidget {
@@ -395,10 +394,6 @@ class _AboutViewState extends State<AboutView> {
                   ],
                 ),
               ),
-              const Positioned(
-                bottom: 48,
-                child: Glass(width: 90, height: 90, radius: 45, kind: GlassKind.lens, tint: Color(0x0DFFFFFF)),
-              ),
             ],
           ),
         ),
@@ -407,7 +402,7 @@ class _AboutViewState extends State<AboutView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Overline('about.for'.trParams({'version': AppConfig.version.split('.').take(2).join('.')})),
+              Overline('about.for'.trp({'version': AppConfig.version.split('.').take(2).join('.')})),
               const SizedBox(height: 8),
               Text(s?.name ?? AppConfig.schoolName, style: context.type.h2),
               const SizedBox(height: 4),
@@ -436,8 +431,8 @@ class _AboutViewState extends State<AboutView> {
                       const Hr(indent: 44),
                       _Fact(
                         icon: PhosphorIconsRegular.clock,
-                        title: 'about.office'.trParams({'hours': s.officeHours}),
-                        sub: 'about.principal'.trParams({'name': s.principal, 'year': '${s.founded}'}),
+                        title: 'about.office'.trp({'hours': s.officeHours}),
+                        sub: 'about.principal'.trp({'name': s.principal, 'year': '${s.founded}'}),
                       ),
                       const Hr(indent: 44),
                       _Fact(
@@ -482,7 +477,7 @@ class _AboutViewState extends State<AboutView> {
                 },
                 child: Center(
                   child: Text(
-                    'about.version'.trParams({'version': AppConfig.version, 'build': '${AppConfig.build}'}),
+                    'about.version'.trp({'version': AppConfig.version, 'build': '${AppConfig.build}'}),
                     textAlign: TextAlign.center,
                     style: context.type.cap,
                   ),

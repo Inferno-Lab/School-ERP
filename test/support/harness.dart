@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/services/session_bus.dart';
@@ -20,6 +22,11 @@ import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> bootMock() async {
   await initializeDateFormatting();
+  // The image cache asks for temp directories; there is no platform plugin in tests.
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    const MethodChannel('plugins.flutter.io/path_provider'),
+    (_) async => Directory.systemTemp.path,
+  );
   Get.reset();
   Get.testMode = true;
   AppConfig.useMockData = true;

@@ -1,44 +1,21 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/utils/loadable.dart';
 import 'package:edunest/core/utils/view_state.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
-import 'package:edunest/data/repositories/campus_repository.dart';
+import 'package:edunest/features/transport/controllers/transport_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-class TransportController extends GetxController with Loadable {
-  TransportInfo? route;
-
-  @override
-  Future<void> load() async {
-    final id = Get.find<AuthService>().activeStudentId.value;
-    if (id == null) {
-      await run(() async {}, isEmpty: () => true);
-      return;
-    }
-    await run(() async {
-      route = await Get.find<TransportRepository>().forStudent(id);
-    }, isEmpty: () => route == null);
-  }
-
-  Future<void> callDriver() async {
-    final phone = route?.driver.phone;
-    if (phone == null) return;
-    await launchUrl(Uri(scheme: 'tel', path: phone));
-  }
-}
 
 /// Bus: painted map with the bus as a glass bubble, then the stops sheet.
 class TransportView extends GetView<TransportController> {
@@ -63,6 +40,9 @@ class TransportView extends GetView<TransportController> {
               errorKey: controller.errorMessage.value,
               emptyTitle: 'transport.empty',
               emptyBody: 'transport.empty_body',
+              emptyArt: EmptyArt.bus,
+              emptyHint: 'transport.empty_hint',
+              emptyActions: [EmptyAction('common.ask_office', icon: PhosphorIconsRegular.lifebuoy, onTap: () => Get.toNamed<void>(AppRoutes.help))],
               child: const SizedBox.shrink(),
             ),
           ],
@@ -105,7 +85,7 @@ class TransportView extends GetView<TransportController> {
                               child: Text(
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                'transport.live'.trParams({'route': route.routeName.split(' · ').first}),
+                                'transport.live'.trp({'route': route.routeName.split(' · ').first}),
                                 style: anek(14, 680, height: 1, color: c.ink),
                               ),
                             ),
@@ -155,7 +135,7 @@ class _RouteMap extends StatelessWidget {
     final progress = route.progress.clamp(0.0, 1.0);
     final bus = metric.getTangentForOffset(metric.length * progress)!.position * scale;
     return Semantics(
-      label: 'transport.map_label'.trParams({'route': route.routeName}),
+      label: 'transport.map_label'.trp({'route': route.routeName}),
       image: true,
       child: ClipRect(
         child: Stack(
@@ -267,8 +247,8 @@ class _MapPainter extends CustomPainter {
             ),
             textDirection: TextDirection.ltr,
           )..layout();
-          // Canvas: first label up-right of its stop, last label below-left.
-          final o = i == 0 ? at + Offset(14, -10 - label.height * .8) : at + Offset(-48, 25 - label.height * .8);
+          // First label sits down-right of its stop (up-right ran under the top pill), last label below-left.
+          final o = i == 0 ? at + const Offset(14, 22) : at + Offset(-48, 25 - label.height * .8);
           label.paint(canvas, o);
         }
       }
@@ -385,7 +365,7 @@ class _StopsSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Overline('transport.to'.trParams({'stop': stops.isEmpty ? '' : stops.last.name})),
+                    Overline('transport.to'.trp({'stop': stops.isEmpty ? '' : stops.last.name})),
                     const SizedBox(height: 8),
                     Text.rich(
                       TextSpan(
@@ -456,7 +436,7 @@ class _StopsSheet extends StatelessWidget {
                 ),
               ),
               Semantics(
-                label: 'transport.call_driver'.trParams({'name': route.driver.name}),
+                label: 'transport.call_driver'.trp({'name': route.driver.name}),
                 excludeSemantics: true,
                 child: Btn(
                   'transport.call',
@@ -496,9 +476,9 @@ class _StopRow extends StatelessWidget {
             ),
           );
     final name = last
-        ? 'transport.your_stop'.trParams({'stop': stop.name})
+        ? 'transport.your_stop'.trp({'stop': stop.name})
         : next
-        ? 'transport.next_stop'.trParams({'stop': stop.name})
+        ? 'transport.next_stop'.trp({'stop': stop.name})
         : stop.name;
     final time = stop.time.startsWith('0') ? stop.time.substring(1) : stop.time;
     return Row(

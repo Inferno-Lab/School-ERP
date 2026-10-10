@@ -22,8 +22,14 @@ class EventsController extends GetxController with Loadable {
     return items.where((e) => !e.date.isBefore(today)).toList()..sort((a, b) => a.date.compareTo(b.date));
   }
 
+  String? _featuredId;
+
   /// The next event that asks families to come and has no answer yet; else the next one.
-  SchoolEvent? get featured {
+  /// Picked on first load and then held, so answering shows the choice on the same card
+  /// instead of swapping to the next event.
+  SchoolEvent? get featured => byId(_featuredId) ?? _pick();
+
+  SchoolEvent? _pick() {
     final list = upcoming;
     return list.where((e) => e.category != 'general' && mine(e) == null).firstOrNull ?? list.firstOrNull;
   }
@@ -39,6 +45,8 @@ class EventsController extends GetxController with Loadable {
   @override
   Future<void> load() => run(() async {
     items = await Get.find<EventRepository>().all();
+    // A reload after an answer must not move the card: pick again only if the held event is gone.
+    if (byId(_featuredId) == null) _featuredId = _pick()?.id;
     final id = Get.find<AuthService>().activeStudentId.value;
     childName = id == null ? null : (await Get.find<DirectoryRepository>().student(id)).name.split(' ').first;
   }, isEmpty: () => items.isEmpty);

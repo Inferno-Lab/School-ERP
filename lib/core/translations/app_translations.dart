@@ -299,6 +299,7 @@ const _en = <String, String>{
   'day.thu': 'Thu',
   'day.fri': 'Fri',
   'day.sat': 'Sat',
+  'day.sun': 'Sun',
   'accent.ocean': 'Ocean blue',
   'accent.emerald': 'Emerald',
   'accent.purple': 'Royal purple',

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/widgets/sheets.dart';
 import 'package:edunest/data/models/user.dart';
@@ -11,7 +12,17 @@ class ShellController extends GetxController {
 
   bool get isTeacher => Get.find<AuthService>().role == UserRole.teacher;
 
+  /// Tab positions shared by both navs (family and teacher).
+  static const chatTab = 3;
+  static const profileTab = 4;
+
   void go(int value) => index.value = value;
+
+  /// Brings the shell to [tab] from any screen, e.g. an empty state's button.
+  static void showTab(int tab) {
+    Get.until((route) => route.settings.name == AppRoutes.shell);
+    Get.find<ShellController>().go(tab);
+  }
 
   Future<void> onBack() async {
     if (index.value != 0) {

@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/utils/loadable.dart';
 import 'package:edunest/core/utils/view_state.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/sheets.dart';
@@ -14,49 +13,11 @@ import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
-import 'package:edunest/data/repositories/campus_repository.dart';
-import 'package:edunest/data/repositories/directory_repository.dart';
+import 'package:edunest/features/gallery/controllers/gallery_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-
-class GalleryController extends GetxController with Loadable {
-  final onlyChild = false.obs;
-  final favourites = <String>{}.obs;
-  List<GalleryAlbum> albums = [];
-  String? childId;
-  String? childName;
-
-  /// Albums newest first; with "Only (child)" on, just the photos they are in.
-  List<GalleryAlbum> get visible {
-    final sorted = [...albums]..sort((a, b) => b.date.compareTo(a.date));
-    if (!onlyChild.value || childId == null) return sorted;
-    return [
-      for (final a in sorted)
-        if (a.photos.any((p) => p.tagged.contains(childId)))
-          GalleryAlbum(
-            id: a.id,
-            title: a.title,
-            date: a.date,
-            blurb: a.blurb,
-            photos: a.photos.where((p) => p.tagged.contains(childId)).toList(),
-          ),
-    ];
-  }
-
-  int withChild(GalleryAlbum album) =>
-      childId == null ? 0 : album.photos.where((p) => p.tagged.contains(childId)).length;
-
-  @override
-  Future<void> load() => run(() async {
-    albums = await Get.find<GalleryRepository>().all();
-    childId = Get.find<AuthService>().activeStudentId.value;
-    childName = childId == null
-        ? null
-        : (await Get.find<DirectoryRepository>().student(childId!)).name.split(' ').first;
-  }, isEmpty: () => albums.isEmpty);
-}
 
 /// Placeholder pigments while a photo loads or when it cannot.
 const _wash = [Color(0xFF2A1638), Color(0xFF1C4D33), Color(0xFF1F3A93), Color(0xFF5E7F23)];
@@ -97,7 +58,7 @@ class GalleryView extends GetView<GalleryController> {
         topPadding: ready ? 0 : null,
         leading: BackGlass(color: ready ? AppColors.white : null),
         actions: [
-          if (controller.childName != null)
+          if (controller.childName != null && controller.albums.isNotEmpty)
             GlassPress(
               onTap: () => controller.onlyChild.toggle(),
               child: Semantics(
@@ -106,6 +67,7 @@ class GalleryView extends GetView<GalleryController> {
                 child: Glass(
                   height: 44,
                   width: 150,
+                  onPigment: ready,
                   tint: controller.onlyChild.value ? const Color(0x59F2A007) : null,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -116,7 +78,7 @@ class GalleryView extends GetView<GalleryController> {
                         child: Text(
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          'gallery.only'.trParams({'name': controller.childName!}),
+                          'gallery.only'.trp({'name': controller.childName!}),
                           style: anek(14, 680, height: 1, color: ready ? AppColors.white : context.app.ink),
                         ),
                       ),
@@ -142,6 +104,8 @@ class GalleryView extends GetView<GalleryController> {
                     errorKey: controller.errorMessage.value,
                     emptyTitle: controller.onlyChild.value ? 'gallery.none_with' : 'gallery.empty',
                     emptyBody: 'gallery.empty_body',
+                    emptyArt: EmptyArt.photos,
+                    emptyHint: controller.onlyChild.value ? null : 'gallery.empty_hint',
                     child: const SizedBox.shrink(),
                   ),
                 ],
@@ -155,7 +119,7 @@ class GalleryView extends GetView<GalleryController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (rest.isNotEmpty) ...[
-                    Rise(child: Overline('gallery.albums'.trParams({'year': _year(hero.date)}))),
+                    Rise(child: Overline('gallery.albums'.trp({'year': _year(hero.date)}))),
                     const SizedBox(height: 12),
                     Rise(index: 1, child: _AlbumGrid(albums: rest)),
                   ],
@@ -194,7 +158,7 @@ class _Hero extends StatelessWidget {
     final count = controller.withChild(album);
     return Semantics(
       button: true,
-      label: '${album.title}, ${'gallery.photos'.trParams({'n': '${album.photos.length}'})}',
+      label: '${album.title}, ${'gallery.photos'.trp({'n': '${album.photos.length}'})}',
       excludeSemantics: true,
       child: GestureDetector(
         onTap: () => _open(album),
@@ -227,16 +191,16 @@ class _Hero extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Overline(
-                        'gallery.latest'.trParams({'date': DateFormat('d MMM').format(album.date)}),
+                        'gallery.latest'.trp({'date': DateFormat('d MMM').format(album.date)}),
                         color: Colors.white.withValues(alpha: .8),
                       ),
                       const SizedBox(height: 6),
                       Text(album.title, style: context.type.h1.copyWith(color: AppColors.white)),
                       Text(
                         [
-                          'gallery.photos'.trParams({'n': '${album.photos.length}'}),
+                          'gallery.photos'.trp({'n': '${album.photos.length}'}),
                           if (count > 0 && controller.childName != null)
-                            'gallery.with'.trParams({'n': '$count', 'name': controller.childName!}),
+                            'gallery.with'.trp({'n': '$count', 'name': controller.childName!}),
                         ].join(' · '),
                         style: context.type.s.copyWith(color: Colors.white.withValues(alpha: .85)),
                       ),
@@ -290,7 +254,7 @@ class _AlbumTile extends StatelessWidget {
     return Semantics(
       button: true,
       label:
-          '${album.title}, ${DateFormat('d MMMM').format(album.date)}, ${'gallery.photos'.trParams({'n': '${album.photos.length}'})}',
+          '${album.title}, ${DateFormat('d MMMM').format(album.date)}, ${'gallery.photos'.trp({'n': '${album.photos.length}'})}',
       excludeSemantics: true,
       child: Pressable(
         onTap: () => _open(album),
@@ -324,7 +288,7 @@ class _AlbumTile extends StatelessWidget {
                       style: context.type.t.copyWith(color: AppColors.white, shadows: shadow),
                     ),
                     Text(
-                      '${DateFormat('d MMM').format(album.date)} · ${'gallery.photos'.trParams({'n': '${album.photos.length}'})}',
+                      '${DateFormat('d MMM').format(album.date)} · ${'gallery.photos'.trp({'n': '${album.photos.length}'})}',
                       style: context.type.cap.copyWith(color: Colors.white.withValues(alpha: .85), shadows: shadow),
                     ),
                   ],
@@ -484,9 +448,10 @@ class _GalleryViewerState extends State<GalleryViewer> with SingleTickerProvider
                   Glass(
                     height: 44,
                     width: 120,
+                    onPigment: true,
                     child: Center(
                       child: Text(
-                        'gallery.n_of'.trParams({'i': '${_index + 1}', 'n': '${photos.length}'}),
+                        'gallery.n_of'.trp({'i': '${_index + 1}', 'n': '${photos.length}'}),
                         style: anek(14, 680, height: 1, color: white, tabular: true),
                       ),
                     ),
@@ -514,7 +479,7 @@ class _GalleryViewerState extends State<GalleryViewer> with SingleTickerProvider
                     [
                       widget.album.title,
                       DateFormat('d MMM').format(widget.album.date),
-                      if (withChild) 'gallery.is_in'.trParams({'name': _gallery.childName ?? ''}),
+                      if (withChild) 'gallery.is_in'.trp({'name': _gallery.childName ?? ''}),
                     ].join(' · '),
                     style: context.type.s.copyWith(color: Colors.white.withValues(alpha: .8)),
                   ),
@@ -570,6 +535,7 @@ class _GalleryViewerState extends State<GalleryViewer> with SingleTickerProvider
                   child: Glass(
                     height: 60,
                     radius: 30,
+                    onPigment: true,
                     child: Obx(() {
                       final fav = _gallery.favourites.contains(photo.id);
                       return Row(

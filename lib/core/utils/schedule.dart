@@ -37,3 +37,10 @@ PeriodSlot? nextClassAfter(List<PeriodSlot> periods, PeriodSlot? current) {
   }
   return null;
 }
+
+/// Weekdays (`DateTime.monday` to `DateTime.sunday`) the school is closed every week.
+/// shortcut: the demo school teaches all seven days so every screen has lectures whatever day it is;
+/// a real school lists its weekly off day here, ideally read from the school calendar.
+const weeklyOffDays = <int>{};
+
+bool isWeeklyOff(DateTime d) => weeklyOffDays.contains(d.weekday);

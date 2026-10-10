@@ -95,7 +95,7 @@ class AcademicsController extends GetxController with Loadable {
       final subjects =
           latestExam?.subjects ??
           week.expand((d) => d.periods).where((p) => p.kind == PeriodKind.klass).map((p) => p.subject).toSet().toList();
-      const order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+      const order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
       shelf = [
         for (final s in subjects)
           () {

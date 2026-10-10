@@ -257,6 +257,7 @@ class _DemoCard extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (final s in ['maths', 'science', 'hindi', 'social', 'computer', 'english', 'pe', 'art'])
                     Expanded(child: ColoredBox(color: AppColors.subject(s).fill)),
@@ -384,7 +385,10 @@ class _OtpScreenState extends State<_OtpScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   for (var i = 0; i < 6; i++)
-                                    _Cell(char: i < code.length ? code[i] : null, active: i == code.length && _focus.hasFocus),
+                                    _Cell(
+                                      char: i < code.length ? code[i] : null,
+                                      active: i == code.length && _focus.hasFocus,
+                                    ),
                                 ],
                               ),
                               Opacity(
@@ -452,12 +456,16 @@ class _OtpScreenState extends State<_OtpScreen> {
                 ),
               ],
             ),
-            Positioned(left: 16, top: inset.top + 8, child: GlassIconButton(
-              icon: PhosphorIconsRegular.caretLeft,
-              label: 'common.back'.tr,
-              color: AppColors.white,
-              onTap: back,
-            )),
+            Positioned(
+              left: 16,
+              top: inset.top + 8,
+              child: GlassIconButton(
+                icon: PhosphorIconsRegular.caretLeft,
+                label: 'common.back'.tr,
+                color: AppColors.white,
+                onTap: back,
+              ),
+            ),
             Positioned(
               left: 24,
               right: 24,

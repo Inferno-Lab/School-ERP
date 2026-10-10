@@ -1,23 +1,24 @@
 # EduNest
 
+> Developers and coding agents: start with [`AGENTS.md`](AGENTS.md).
+
 EduNest is a Flutter demo of a school app for students, parents, and teachers. Every screen reads local JSON. The repositories are abstract, so a real backend is a single switch in `AppConfig` plus an `ApiClient` implementation.
 
-The product name is **EduNest**. Change it in one place: `AppConfig.appName` in `lib/core/config/app_config.dart`. The logo mark is `NestMark` (`lib/core/widgets/misc.dart`); the asset path is `AppConfig.logoAsset`.
+The product name is **EduNest**. Change it in one place: `AppConfig.appName` in `lib/core/config/app_config.dart`. The logo asset path is `AppConfig.logoAsset`.
 
 ## Requirements
 
-- Flutter 3.41 or newer (Dart `^3.11.5`)
+- Flutter 3.47 or newer (Dart 3.13)
 - Xcode for the iOS simulator, or Android Studio for an Android emulator
 
 ## Run
 
 ```bash
 flutter pub get
-dart run build_runner build
 flutter run
 ```
 
-`flutter analyze` should report no issues. `flutter test` covers the mock data source, repositories, theme persistence, login, home, fees, settings, teacher attendance, marks entry, and the remote binding switch.
+`tool/verify.sh` runs the analyzer and every test. The tests cover the mock data source, repositories, theme persistence, login, home, fees, settings, teacher attendance, marks entry, and the remote binding switch.
 
 ## Demo accounts
 
@@ -48,7 +49,7 @@ The three cards on the login screen sign in as those users. Priya can switch bet
 - Student and parent home, academics, attendance, homework, timetable, results, fees
 - Notices, events, chat, transport, library, gallery, leave, notifications, profile
 - Teacher home, classes, attendance, homework, grading, marks, notices
-- Settings: theme, six accents, Material You, text scale, locale, notification toggles, reduce motion
+- Settings: Chalk, Blackboard, AMOLED or Auto theme, text size, language, reduce motion and transparency, reminders
 - Light, dark, and AMOLED themes. Strings go through GetX translations (`en`, with partial `hi` and `mr`)
 
 ## Architecture
@@ -75,8 +76,6 @@ assets/mock/   the demo school
 
 The views and controllers do not change. Push, card payments, and live bus GPS are described as plug-in interfaces in the contract. They are not implemented.
 
-## Theming
+## Design and docs
 
-`AppTheme` builds light, dark, and AMOLED `ThemeData` from an `AccentPalette` (Ocean, Emerald, Royal Purple, Sunset, Rose, Teal). Status and subject colors live on the `AppColors` theme extension (`context.app`). Headings use bundled Poppins. Body text uses bundled Plus Jakarta Sans. `GoogleFonts.config.allowRuntimeFetching` is false, so the first frame does not download fonts.
-
-Text scale is Small (0.9), Default (1.0), or Large (1.15), applied with `MediaQuery.textScaler`. Reduce motion skips staggered entrances.
+The look is **Chalk & Glass**: tokens, glass rules and empty-state rules are in [docs/design-system.md](docs/design-system.md). Layers and data flow: [docs/architecture.md](docs/architecture.md). Adding screens, repositories and AI features: [docs/adding-a-feature.md](docs/adding-a-feature.md). Machine setup and build notes: [docs/dev-environment.md](docs/dev-environment.md).

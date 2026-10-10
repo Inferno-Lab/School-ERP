@@ -1,0 +1,73 @@
+import 'package:edunest/core/config/app_config.dart';
+import 'package:edunest/core/routes/app_routes.dart';
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/utils/extensions.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
+import 'package:edunest/core/widgets/ui.dart';
+import 'package:edunest/features/shell/shell_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+/// What Home shows before the school has put anything in: a welcome and three
+/// first steps, so a new family lands on something useful, not an empty page.
+class HomeWelcome extends StatelessWidget {
+  const HomeWelcome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    final steps = [
+      (PhosphorIconsRegular.chatCircle, 'home.step_chat', 'home.step_chat_sub', () => Get.find<ShellController>().go(3)),
+      (PhosphorIconsRegular.identificationCard, 'home.step_profile', 'home.step_profile_sub', () => Get.find<ShellController>().go(4)),
+      (PhosphorIconsRegular.bellRinging, 'home.step_alerts', 'home.step_alerts_sub', () => Get.toNamed<void>(AppRoutes.settings)),
+    ];
+    return EduCard(
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Center(child: EmptyArtView(EmptyArt.calendar, height: 120)),
+          const SizedBox(height: 14),
+          Text('home.welcome_title'.trp({'school': AppConfig.schoolName.split(' ').first}), style: context.type.h2),
+          const SizedBox(height: 6),
+          Text('home.welcome_body'.tr, style: context.type.b.copyWith(color: c.ink2)),
+          const SizedBox(height: 14),
+          Overline('home.first_steps'.tr),
+          const SizedBox(height: 4),
+          for (final (i, s) in steps.indexed) ...[
+            if (i > 0) const Hr(indent: 52),
+            Pressable(
+              onTap: s.$4,
+              scale: .985,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(color: i == 0 ? AppColors.mari : c.paper2, borderRadius: BorderRadius.circular(12)),
+                      child: Icon(s.$1, size: 20, color: i == 0 ? AppColors.mariInk : c.ink),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(s.$2.tr, style: context.type.t.copyWith(fontSize: 15)),
+                          Text(s.$3.tr, style: context.type.cap),
+                        ],
+                      ),
+                    ),
+                    Icon(PhosphorIconsRegular.caretRight, size: 16, color: c.ink3),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

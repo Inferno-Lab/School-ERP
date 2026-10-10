@@ -510,5 +510,53 @@
         "status": "pending"
       }
     ]
+  },
+  {
+    "id": "hw_ratios",
+    "classId": "cls_6a",
+    "subject": "maths",
+    "title": "Ratios: first look",
+    "description": "Questions 1 to 10. Write each ratio in its simplest form.",
+    "assignedOn": "today-4",
+    "dueOn": "today-1",
+    "teacherId": "tch_kavita",
+    "maxMarks": 20,
+    "attachments": [],
+    "submissions": [
+      {
+        "studentId": "stu_6a_laksh",
+        "status": "submitted",
+        "submittedAt": "today-1T07:12",
+        "fileName": "ratios.pdf"
+      },
+      {
+        "studentId": "stu_6a_esha",
+        "status": "submitted",
+        "submittedAt": "today-1T08:12",
+        "fileName": "ratios.pdf"
+      },
+      {
+        "studentId": "stu_6a_rohan",
+        "status": "submitted",
+        "submittedAt": "today-1T09:12",
+        "fileName": "ratios.pdf"
+      },
+      {
+        "studentId": "stu_6a_tara",
+        "status": "submitted",
+        "submittedAt": "today-0T10:12",
+        "fileName": "ratios.pdf"
+      },
+      {
+        "studentId": "stu_6a_zoya",
+        "status": "submitted",
+        "submittedAt": "today-0T11:12",
+        "fileName": "ratios.pdf"
+      },
+      {
+        "studentId": "stu_6a_arnav",
+        "status": "pending"
+      }
+    ]
   }
 ]

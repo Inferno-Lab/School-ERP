@@ -25,6 +25,7 @@ class PageFrame extends StatelessWidget {
     this.underlay,
     this.topPadding,
     this.padContent = true,
+    this.topFade = true,
     this.controller,
     super.key,
   });
@@ -46,6 +47,9 @@ class PageFrame extends StatelessWidget {
   /// Overrides where content starts (default: below the top controls).
   final double? topPadding;
   final bool padContent;
+
+  /// Fade content out under the top controls; off where art already fills the top edge.
+  final bool topFade;
   final ScrollController? controller;
 
   @override
@@ -88,6 +92,25 @@ class PageFrame extends StatelessWidget {
                 edgeOffset: top + 50,
                 child: list,
               ),
+            ),
+          // Content never slides under glass: it fades out beneath the status bar and the top controls,
+          // so the glass always sits on clean page colour (a card edge showing inside it looked like a bug).
+          if (underlay == null && topFade)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: hasTopRow ? top + 70 : inset.top + 18,
+              child: IgnorePointer(child: EdgeFade(color: background ?? context.app.chalk, solid: hasTopRow ? .78 : .6)),
+            ),
+          // The same under the dock or a bottom bar.
+          if (dockPage || bottomBar != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: (bottomBar != null ? bottomBarHeight + 60 : 96) + (dockPage ? 76 : 0) + inset.bottom,
+              child: IgnorePointer(child: EdgeFade(color: background ?? context.app.chalk, solid: .7, up: true)),
             ),
           if (hasTopRow)
             Positioned(
@@ -200,4 +223,27 @@ class SectionLabel extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// Page colour that holds solid for [solid] of its length, then fades to nothing.
+class EdgeFade extends StatelessWidget {
+  const EdgeFade({required this.color, required this.solid, this.up = false});
+
+  final Color color;
+  final double solid;
+  final bool up;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: up ? Alignment.bottomCenter : Alignment.topCenter,
+          end: up ? Alignment.topCenter : Alignment.bottomCenter,
+          stops: [0, solid, 1],
+          colors: [color, color.withValues(alpha: .94), color.withValues(alpha: 0)],
+        ),
+      ),
+    );
+  }
 }

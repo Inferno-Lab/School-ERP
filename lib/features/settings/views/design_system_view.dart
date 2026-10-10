@@ -10,6 +10,7 @@ import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/glass_controls.dart';
 import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/ui.dart';
+import 'package:edunest/data/datasources/mock_json_datasource.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
@@ -60,7 +61,7 @@ class _DesignSystemViewState extends State<DesignSystemView> {
       children: [
         Row(
           children: [
-            Text('dev.title'.tr, style: context.type.h2),
+            Flexible(child: Text('dev.title'.tr, style: context.type.h2, maxLines: 1, overflow: TextOverflow.ellipsis)),
             const SizedBox(width: 10),
             Stamp('dev.developer'.tr, color: c.mariText),
           ],
@@ -76,6 +77,7 @@ class _DesignSystemViewState extends State<DesignSystemView> {
               children: [
                 Positioned.fill(
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (final id in AppColors.subjects.keys)
                         Expanded(child: ColoredBox(color: AppColors.subject(id).fill)),
@@ -166,6 +168,21 @@ class _DesignSystemViewState extends State<DesignSystemView> {
               const Hr(),
               Obx(
                 () => _Row(
+                  title: 'dev.empty',
+                  hint: 'dev.empty_hint',
+                  trailing: GlassSwitch(
+                    value: AppConfig.emptyData.value,
+                    label: 'dev.empty'.tr,
+                    onChanged: (v) {
+                      AppConfig.emptyData.value = v;
+                      unawaited(Get.find<MockJsonDataSource>().reload());
+                    },
+                  ),
+                ),
+              ),
+              const Hr(),
+              Obx(
+                () => _Row(
                   title: 'dev.slow',
                   hint: 'dev.slow_hint',
                   trailing: GlassSwitch(
@@ -180,7 +197,7 @@ class _DesignSystemViewState extends State<DesignSystemView> {
         ),
         const SizedBox(height: 12),
         Text(
-          'dev.readout'.trParams({
+          'dev.readout'.trp({
             'n': '${LiquidGlass.live}',
             'ms': _frameMs.toStringAsFixed(1),
             'hz': '$hz',

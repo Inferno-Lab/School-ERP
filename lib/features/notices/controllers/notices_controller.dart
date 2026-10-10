@@ -8,6 +8,7 @@ import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edunest/core/utils/schedule.dart';
 
 /// Filter tabs and the categories each one shows.
 const noticeFilters = {
@@ -99,7 +100,7 @@ class NoticeDetailController extends GetxController with Loadable {
     if (e == null || e.subjects.isEmpty) return const [];
     final days = <DateTime>[];
     for (var d = DateUtils.dateOnly(e.startDate); !d.isAfter(e.endDate); d = DateTime(d.year, d.month, d.day + 1)) {
-      if (d.weekday != DateTime.sunday) days.add(d);
+      if (!isWeeklyOff(d)) days.add(d);
     }
     if (days.isEmpty) return const [];
     final n = e.subjects.length;

@@ -6,6 +6,7 @@ import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/calendar.dart';
 import 'package:edunest/core/utils/extensions.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/states.dart';
@@ -88,8 +89,6 @@ class NoticesView extends GetView<NoticesController> {
             ),
         ],
         onRefresh: controller.load,
-        bottomBarHeight: 52,
-        bottomBar: _FilterBar(controller: controller),
         children: [
           const Rise(child: PageTitle('notices.title')),
           ViewStateView(
@@ -98,9 +97,13 @@ class NoticesView extends GetView<NoticesController> {
             errorKey: controller.errorMessage.value,
             emptyTitle: 'notices.empty',
             emptyBody: 'notices.empty_body',
+            emptyArt: EmptyArt.notice,
+            emptyHint: 'notices.empty_hint',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 14),
+                Rise(index: 1, child: _Filters(controller: controller)),
                 if (pinned.isNotEmpty) ...[
                   const SizedBox(height: 22),
                   Rise(
@@ -140,7 +143,7 @@ class NoticesView extends GetView<NoticesController> {
                   ),
                 ],
                 if (pinned.isEmpty && week.isEmpty && earlier.isEmpty)
-                  const EmptyState(title: 'notices.none_here', body: 'notices.none_here_body'),
+                  const EmptyState(art: EmptyArt.notice, title: 'notices.none_here', body: 'notices.none_here_body'),
               ],
             ),
           ),
@@ -313,57 +316,34 @@ class _Row extends StatelessWidget {
   }
 }
 
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({required this.controller});
+/// Filters sit under the title, like every other list screen; a floating bar at the bottom hid behind the dock.
+class _Filters extends StatelessWidget {
+  const _Filters({required this.controller});
 
   final NoticesController controller;
 
   @override
   Widget build(BuildContext context) {
-    final c = context.app;
     return Semantics(
       label: 'notices.filter'.tr,
       container: true,
-      child: Glass(
-        height: 52,
-        radius: 26,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            children: [
-              for (final key in noticeFilters.keys)
-                Semantics(
-                  selected: controller.filter.value == key,
-                  button: true,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => controller.filter.value = key,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 260),
-                      curve: const Cubic(.2, .8, .2, 1),
-                      height: 44,
-                      constraints: const BoxConstraints(minWidth: 60),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      decoration: BoxDecoration(
-                        color: controller.filter.value == key ? c.ink : Colors.transparent,
-                        borderRadius: BorderRadius.circular(22),
-                      ),
-                      child: Text(
-                        'notices.filter_$key'.tr,
-                        style: anek(
-                          14,
-                          controller.filter.value == key ? 700 : 600,
-                          height: 1,
-                          color: controller.filter.value == key ? c.chalk : c.ink3,
-                        ),
-                      ),
-                    ),
-                  ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        child: Row(
+          children: [
+            for (final key in noticeFilters.keys) ...[
+              if (key != noticeFilters.keys.first) const SizedBox(width: 8),
+              Semantics(
+                selected: controller.filter.value == key,
+                child: Chip2(
+                  'notices.filter_$key',
+                  on: controller.filter.value == key,
+                  onTap: () => controller.filter.value = key,
                 ),
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -405,7 +385,7 @@ class NoticeDetailView extends GetView<NoticeDetailController> {
                     Expanded(
                       child: Text(
                         sittings.isNotEmpty
-                            ? 'notices.exam_days'.trParams({'n': '${sittings.length}'})
+                            ? 'notices.exam_days'.trp({'n': '${sittings.length}'})
                             : 'notices.school_closed'.tr,
                         style: anek(13, 600, height: 1.3, color: c.ink3),
                       ),
@@ -431,6 +411,7 @@ class NoticeDetailView extends GetView<NoticeDetailController> {
             state: controller.state.value,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyArt: EmptyArt.search,
             emptyTitle: 'notices.gone',
             emptyBody: 'notices.gone_body',
             child: notice == null
@@ -547,7 +528,7 @@ class _Sitting extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(child: Text(subjects.map(subjectName).join(' · '), style: context.type.t)),
               Text(
-                subjects.length > 1 ? 'notices.sittings'.trParams({'n': '${subjects.length}'}) : '8:30–11:00',
+                subjects.length > 1 ? 'notices.sittings'.trp({'n': '${subjects.length}'}) : '8:30–11:00',
                 style: context.type.mono.copyWith(color: c.ink3),
               ),
             ],
