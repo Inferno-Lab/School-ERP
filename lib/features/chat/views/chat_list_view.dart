@@ -466,6 +466,22 @@ class ChatThreadView extends GetView<ChatThreadController> {
                       },
                     ),
             ),
+            // Messages fade out before they reach the glass header and composer.
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: inset.top + 84,
+              child: IgnorePointer(child: EdgeFade(color: c.chalk, solid: .75)),
+            ),
+            if (thread != null)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: bottom + 56 + 12 + 36 + 28,
+                child: IgnorePointer(child: EdgeFade(color: c.chalk, solid: .72, up: true)),
+              ),
             // Glass header: messages scroll beneath it.
             Positioned(
               left: gutter,

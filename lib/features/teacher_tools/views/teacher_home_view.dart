@@ -46,6 +46,7 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
         dockPage: true,
         padContent: false,
         topPadding: 0,
+        topFade: !hasDay,
         onRefresh: controller.load,
         children: [
           SizedBox(
@@ -79,7 +80,7 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                           child: Glass(
                             height: 44,
                             width: 160,
-                            onPigment: hasDay,
+                            // Frosted, with ink text: over a ribbon the pill can sit on pale hatching as well as colour.
                             padding: const EdgeInsets.only(left: 5, right: 14),
                             child: Row(
                               children: [
@@ -102,8 +103,8 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                                           14,
                                           680,
                                           height: 1.05,
-                                          color: ink,
-                                        ).copyWith(shadows: hasDay ? _shade : null),
+                                          color: context.app.ink,
+                                        ),
                                       ),
                                       Text(
                                         [
@@ -116,8 +117,8 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                                           11.5,
                                           520,
                                           height: 1.05,
-                                          color: hasDay ? Colors.white.withValues(alpha: .9) : context.app.ink3,
-                                        ).copyWith(shadows: hasDay ? _shade : null),
+                                          color: context.app.ink3,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -154,7 +155,6 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
   }
 }
 
-const _shade = [Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1))];
 
 class _Body extends StatelessWidget {
   const _Body({required this.controller, required this.teacher});

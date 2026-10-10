@@ -178,7 +178,12 @@ class _SearchViewState extends State<SearchView> {
             height: 84 + inset.top,
             child: Obx(() => _Ribbon(periods: c.today.toList(), ready: c.ready.value)),
           ),
-          Positioned.fill(
+          // Results start below the ribbon, so nothing scrolls under the glass search bar.
+          Positioned(
+            left: 0,
+            right: 0,
+            top: inset.top + 90,
+            bottom: 0,
             child: Obx(() {
               c.query.value;
               c.scope.value;
@@ -193,7 +198,7 @@ class _SearchViewState extends State<SearchView> {
               final total = c.homework.length + c.notices.length + c.people.length + c.events.length;
               return ListView(
                 keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: EdgeInsets.fromLTRB(gutter + 4, inset.top + 102, gutter + 4, inset.bottom + 32),
+                padding: EdgeInsets.fromLTRB(gutter + 4, 12, gutter + 4, inset.bottom + 32),
                 children: [
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,

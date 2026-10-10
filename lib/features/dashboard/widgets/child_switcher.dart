@@ -40,10 +40,7 @@ String shortClass(SchoolClass c) => '${c.name.replaceAll(RegExp('[^0-9]'), '')} 
 /// Glass capsule with stacked child avatars. Tap to open the switcher,
 /// swipe sideways to switch straight away.
 class ChildCapsule extends StatefulWidget {
-  const ChildCapsule({this.onRibbon = true, super.key});
-
-  /// Over the day ribbon the label is white; on plain chalk it is ink.
-  final bool onRibbon;
+  const ChildCapsule({super.key});
 
   @override
   State<ChildCapsule> createState() => _ChildCapsuleState();
@@ -92,7 +89,6 @@ class _ChildCapsuleState extends State<ChildCapsule> {
             child: Glass(
               key: _anchor,
               height: 44,
-              onPigment: widget.onRibbon,
               padding: const EdgeInsets.only(left: 5, right: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -119,14 +115,10 @@ class _ChildCapsuleState extends State<ChildCapsule> {
                   SizedBox(width: others.isEmpty ? 8 : 0),
                   Text(
                     label,
-                    style: anek(14, 680, height: 1, color: widget.onRibbon ? AppColors.white : context.app.ink).copyWith(
-                      shadows: widget.onRibbon
-                          ? const [Shadow(color: Color(0x4D000000), blurRadius: 8, offset: Offset(0, 1))]
-                          : null,
-                    ),
+                    style: anek(14, 680, height: 1, color: context.app.ink),
                   ),
                   const SizedBox(width: 4),
-                  Icon(PhosphorIconsBold.caretDown, size: 13, color: widget.onRibbon ? AppColors.white : context.app.ink),
+                  Icon(PhosphorIconsBold.caretDown, size: 13, color: context.app.ink),
                 ],
               ),
             ),

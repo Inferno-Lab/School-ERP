@@ -53,7 +53,9 @@ class _DashboardViewState extends State<DashboardView> {
       controller.state.value; // rebuild on state changes
       return Scaffold(
         backgroundColor: context.app.chalk,
-        body: NotificationListener<ScrollUpdateNotification>(
+        body: Stack(
+          children: [
+            Positioned.fill(child: NotificationListener<ScrollUpdateNotification>(
           // Pull down on Home opens search.
           onNotification: (n) {
             if (n.metrics.pixels < -90 && !_pulled) {
@@ -108,7 +110,7 @@ class _DashboardViewState extends State<DashboardView> {
                       Positioned(
                         left: wide ? 130 : 16,
                         top: top + 8,
-                        child: parent ? ChildCapsule(onRibbon: hasDay) : _ProfileCapsule(data: data, onRibbon: hasDay),
+                        child: parent ? const ChildCapsule() : _ProfileCapsule(data: data),
                       ),
                       Positioned(
                         right: wide ? 24 : 16,
@@ -187,6 +189,17 @@ class _DashboardViewState extends State<DashboardView> {
               ],
             ),
           ),
+        )),
+            // Cards fade out before the dock so the glass sits on clean page colour.
+            if (!wide)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: kDockClearance + 44 + MediaQuery.paddingOf(context).bottom,
+                child: IgnorePointer(child: EdgeFade(color: context.app.chalk, solid: .72, up: true)),
+              ),
+          ],
         ),
       );
     });
@@ -219,10 +232,9 @@ class _RibbonPlaceholder extends StatelessWidget {
 }
 
 class _ProfileCapsule extends StatelessWidget {
-  const _ProfileCapsule({required this.data, this.onRibbon = true});
+  const _ProfileCapsule({required this.data});
 
   final HomeSnapshot? data;
-  final bool onRibbon;
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +248,7 @@ class _ProfileCapsule extends StatelessWidget {
         label: 'home.profile_capsule'.trp({'name': name, 'class': cls}),
         child: Glass(
           height: 44,
-          onPigment: onRibbon,
+          // Frosted with ink text: over the ribbon the capsule meets pale hatching as well as colour.
           padding: const EdgeInsets.only(left: 5, right: 14),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -249,13 +261,11 @@ class _ProfileCapsule extends StatelessWidget {
                 children: [
                   Text(
                     name.split(' ').first,
-                    style: anek(14, 680, height: 1.05, color: onRibbon ? AppColors.white : context.app.ink)
-                        .copyWith(shadows: onRibbon ? _shadow : null),
+                    style: anek(14, 680, height: 1.05, color: context.app.ink),
                   ),
                   Text(
                     cls,
-                    style: anek(11.5, 560, height: 1.05, color: onRibbon ? const Color(0xE0FFFFFF) : context.app.ink3)
-                        .copyWith(shadows: onRibbon ? _shadow : null),
+                    style: anek(11.5, 560, height: 1.05, color: context.app.ink3),
                   ),
                 ],
               ),
@@ -267,7 +277,6 @@ class _ProfileCapsule extends StatelessWidget {
   }
 }
 
-const _shadow = [Shadow(color: Color(0x4D000000), blurRadius: 8, offset: Offset(0, 1))];
 
 String greeting(String first) => '${Formatters.greetingKey(DateTime.now()).tr},\n$first';
 
