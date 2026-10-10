@@ -24,6 +24,7 @@ class DueItem {
     this.homework,
     this.event,
     this.childName,
+    this.studentId,
   });
 
   final DueKind kind;
@@ -31,6 +32,7 @@ class DueItem {
   final Installment? installment;
   final Homework? homework;
   final SchoolEvent? event;
+  final String? studentId;
   final String? childName;
 
   bool get overdue => kind == DueKind.fee && moneyStatus(installment!) == MoneyStatus.overdue;
@@ -137,7 +139,7 @@ class DashboardController extends GetxController with Loadable {
         for (final item in fees?.installments ?? const <Installment>[]) {
           final tone = moneyStatus(item);
           if (tone == MoneyStatus.due || tone == MoneyStatus.overdue) {
-            due.add(DueItem(kind: DueKind.fee, when: item.dueDate, installment: item, childName: name));
+            due.add(DueItem(kind: DueKind.fee, when: item.dueDate, installment: item, childName: name, studentId: id));
             dueTotal += item.amount;
           }
         }

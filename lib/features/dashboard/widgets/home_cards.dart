@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:edunest/core/routes/app_routes.dart';
+import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/formatters.dart';
@@ -61,9 +64,9 @@ class _DueRow extends StatelessWidget {
                 }),
           subtitleColor: overdue ? c.badText : null,
           trailing: overdue
-              ? Btn('home.pay', small: true, onPressed: () => Get.toNamed<void>(AppRoutes.fees, arguments: {'pay': fee.id}))
+              ? Btn('home.pay', small: true, onPressed: () => unawaited(_openFees(item, pay: true)))
               : Stamp(daysStamp(fee.dueDate), color: c.dark ? const Color(0xFFF6BA45) : AppColors.late),
-          onTap: () => Get.toNamed<void>(AppRoutes.fees),
+          onTap: () => unawaited(_openFees(item)),
         );
       case DueKind.homework:
         final hw = item.homework!;
@@ -281,4 +284,13 @@ Color noticeTone(BuildContext context, String category) {
     'fees' => c.dark ? const Color(0xFFF6BA45) : AppColors.late,
     _ => c.ink3,
   };
+}
+
+/// Opens Fees for the child the fee belongs to, optionally straight into paying it.
+Future<void> _openFees(DueItem item, {bool pay = false}) async {
+  final auth = Get.find<AuthService>();
+  if (item.studentId != null && item.studentId != auth.activeStudentId.value) {
+    await auth.switchChild(item.studentId!);
+  }
+  await Get.toNamed<void>(AppRoutes.fees, arguments: pay ? {'pay': item.installment!.id} : null);
 }

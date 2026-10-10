@@ -59,13 +59,14 @@ extension MockWrites on MockJsonDataSource {
     bump();
   }
 
-  void payInstallment({
+  /// Marks the installment paid and returns the receipt that was stored.
+  Receipt? payInstallment({
     required String studentId,
     required String installmentId,
     required String method,
   }) {
     final index = fees.indexWhere((account) => account.studentId == studentId);
-    if (index < 0) return;
+    if (index < 0) return null;
     final account = fees[index];
     Installment? paid;
     final next = [
@@ -82,10 +83,11 @@ extension MockWrites on MockJsonDataSource {
     ];
     final receiptSource = paid;
     final receipts = [...account.receipts];
+    Receipt? created;
     if (receiptSource != null) {
       receipts.insert(
         0,
-        Receipt(
+        created = Receipt(
           id: nextId('rcpt'),
           installmentId: receiptSource.id,
           title: receiptSource.title,
@@ -98,6 +100,7 @@ extension MockWrites on MockJsonDataSource {
     }
     fees[index] = account.copyWith(installments: next, receipts: receipts);
     bump();
+    return created;
   }
 
   void sendMessage({

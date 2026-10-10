@@ -6,7 +6,8 @@ import 'package:edunest/data/models/campus.dart';
 abstract class FeeRepository {
   Future<FeeAccount?> forStudent(String studentId);
 
-  Future<void> pay({
+  /// Pays an installment and returns the stored receipt.
+  Future<Receipt?> pay({
     required String studentId,
     required String installmentId,
     required String method,
@@ -27,7 +28,7 @@ class MockFeeRepository implements FeeRepository {
   });
 
   @override
-  Future<void> pay({
+  Future<Receipt?> pay({
     required String studentId,
     required String installmentId,
     required String method,
@@ -52,14 +53,17 @@ class RemoteFeeRepository implements FeeRepository {
   }
 
   @override
-  Future<void> pay({
+  Future<Receipt?> pay({
     required String studentId,
     required String installmentId,
     required String method,
-  }) => _remote.post('/fees/$installmentId/pay', {
-    'studentId': studentId,
-    'method': method,
-  });
+  }) async {
+    final json = await _remote.post('/fees/$installmentId/pay', {
+      'studentId': studentId,
+      'method': method,
+    });
+    return json is Map ? Receipt.fromJson(Map<String, dynamic>.from(json)) : null;
+  }
 }
 
 abstract class NoticeRepository {
