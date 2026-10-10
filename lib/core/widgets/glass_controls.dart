@@ -261,7 +261,7 @@ class GlassSlider extends StatefulWidget {
     required this.value,
     required this.onChanged,
     required this.label,
-    this.valueLabel,
+    this.describe,
     this.divisions,
     this.fill,
     this.onChangeEnd,
@@ -274,7 +274,8 @@ class GlassSlider extends StatefulWidget {
   final ValueChanged<double> onChanged;
   final ValueChanged<double>? onChangeEnd;
   final String label;
-  final String? valueLabel;
+  /// Spoken value for a slider position; defaults to a percentage.
+  final String Function(double value)? describe;
   final int? divisions;
   final Color? fill;
   final Widget? thumbChild;
@@ -306,13 +307,19 @@ class _GlassSliderState extends State<GlassSlider> {
   @override
   Widget build(BuildContext context) {
     final c = context.app;
+    final step = 1 / (widget.divisions ?? 10);
+    final up = _snap((widget.value + step).clamp(0, 1));
+    final down = _snap((widget.value - step).clamp(0, 1));
+    String say(double v) => widget.describe?.call(v) ?? '${(v * 100).round()}%';
     return Semantics(
       slider: true,
       label: widget.label.tr,
-      value: widget.valueLabel,
-      increasedValue: widget.valueLabel,
-      onIncrease: () => widget.onChanged(_snap(widget.value + 1 / (widget.divisions ?? 10))),
-      onDecrease: () => widget.onChanged(_snap(widget.value - 1 / (widget.divisions ?? 10))),
+      // Every action needs its resulting value, or semantics asserts.
+      value: say(widget.value),
+      increasedValue: say(up),
+      decreasedValue: say(down),
+      onIncrease: () => widget.onChanged(up),
+      onDecrease: () => widget.onChanged(down),
       child: LayoutBuilder(
         builder: (context, box) {
           final width = box.maxWidth;
