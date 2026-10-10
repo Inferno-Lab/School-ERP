@@ -1,46 +1,21 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/utils/loadable.dart';
 import 'package:edunest/core/utils/view_state.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
-import 'package:edunest/data/repositories/campus_repository.dart';
-import 'package:edunest/core/widgets/empty_art.dart';
-import 'package:edunest/core/routes/app_routes.dart';
+import 'package:edunest/features/transport/controllers/transport_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-class TransportController extends GetxController with Loadable {
-  TransportInfo? route;
-
-  @override
-  Future<void> load() async {
-    final id = Get.find<AuthService>().activeStudentId.value;
-    if (id == null) {
-      await run(() async {}, isEmpty: () => true);
-      return;
-    }
-    await run(() async {
-      route = await Get.find<TransportRepository>().forStudent(id);
-    }, isEmpty: () => route == null);
-  }
-
-  Future<void> callDriver() async {
-    final phone = route?.driver.phone;
-    if (phone == null) return;
-    await launchUrl(Uri(scheme: 'tel', path: phone));
-  }
-}
 
 /// Bus: painted map with the bus as a glass bubble, then the stops sheet.
 class TransportView extends GetView<TransportController> {
@@ -272,8 +247,8 @@ class _MapPainter extends CustomPainter {
             ),
             textDirection: TextDirection.ltr,
           )..layout();
-          // Canvas: first label up-right of its stop, last label below-left.
-          final o = i == 0 ? at + Offset(14, -10 - label.height * .8) : at + Offset(-48, 25 - label.height * .8);
+          // First label sits down-right of its stop (up-right ran under the top pill), last label below-left.
+          final o = i == 0 ? at + const Offset(14, 6) : at + Offset(-48, 25 - label.height * .8);
           label.paint(canvas, o);
         }
       }
