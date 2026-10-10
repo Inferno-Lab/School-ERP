@@ -44,10 +44,10 @@ void main() {
   }
 
   vec2 local = frag - origin;
-  vec2 half = uSize * 0.5;
-  vec2 p = local - half;
-  float r = min(uRadius, min(half.x, half.y));
-  vec2 q = abs(p) - (half - vec2(r));
+  vec2 hs = uSize * 0.5;
+  vec2 p = local - hs;
+  float r = min(uRadius, min(hs.x, hs.y));
+  vec2 q = abs(p) - (hs - vec2(r));
 
   float sd;
   vec2 n;
