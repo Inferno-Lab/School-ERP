@@ -245,15 +245,15 @@ class _RenderGlass extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => true;
 
-  ui.ImageFilter _filter() {
-    final program = LiquidGlass.program;
-    if (!LiquidGlass.available || program == null) {
-      // Frosted fallback for Skia, web and unsupported devices.
-      final saturate = ui.ColorFilter.matrix(_saturationMatrix(_lens ? _saturation : 1.7));
-      return ui.ImageFilter.compose(outer: saturate, inner: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14));
-    }
-    final shader = _shader ??= program.fragmentShader();
-    final origin = localToGlobal(Offset.zero) * _dpr;
+  /// Frosted fallback for Skia, web and unsupported devices; it does not depend on where the glass is.
+  ui.ImageFilter _fallbackFilter() {
+    final saturate = ui.ColorFilter.matrix(_saturationMatrix(_lens ? _saturation : 1.7));
+    return ui.ImageFilter.compose(outer: saturate, inner: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14));
+  }
+
+  /// The shader filter for a glass whose top-left sits at [origin] (physical px, window space).
+  ui.ImageFilter _shaderFilter(Offset origin) {
+    final shader = _shader ??= LiquidGlass.program!.fragmentShader();
     final screen = ui.PlatformDispatcher.instance.implicitView?.physicalSize ?? size * _dpr;
     final px = size * _dpr;
     final shortest = size.shortestSide;
@@ -281,10 +281,59 @@ class _RenderGlass extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final filterLayer = (layer as BackdropFilterLayer?) ?? BackdropFilterLayer();
-    filterLayer.filter = _filter();
+    final filterLayer = (layer as _GlassLayer?) ?? _GlassLayer();
+    final shaded = LiquidGlass.available && LiquidGlass.program != null;
+    filterLayer
+      ..paintOffset = offset
+      ..shaderFilter = shaded ? _shaderFilter : null;
+    if (!shaded) filterLayer.filter = _fallbackFilter();
     layer = filterLayer;
     context.pushLayer(filterLayer, super.paint, offset);
+  }
+}
+
+/// A backdrop filter that learns where it is on screen when the frame is composed, not when it
+/// was painted. A scroll view moves a cached layer without repainting it, so a position baked in at
+/// paint time left the shader drawing its edge, rim and sampling at the old spot (a ghost that only
+/// showed while scrolling, and during page transitions).
+class _GlassLayer extends BackdropFilterLayer {
+  Offset paintOffset = Offset.zero;
+  ui.ImageFilter Function(Offset origin)? shaderFilter;
+
+  @override
+  bool get alwaysNeedsAddToScene => shaderFilter != null;
+
+  /// Physical-pixel window position of the glass: the paint offset carried through every ancestor
+  /// offset and transform (the root transform is the device pixel ratio).
+  Offset _windowOrigin() {
+    var m = Matrix4.translationValues(paintOffset.dx, paintOffset.dy, 0);
+    for (Layer? p = parent; p != null; p = p.parent) {
+      if (p is TransformLayer) {
+        final o = p.offset;
+        m = Matrix4.translationValues(o.dx, o.dy, 0).multiplied(p.transform ?? Matrix4.identity()).multiplied(m);
+      } else if (p is OffsetLayer) {
+        m = Matrix4.translationValues(p.offset.dx, p.offset.dy, 0).multiplied(m);
+      }
+    }
+    return Offset(m.storage[12], m.storage[13]);
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder) {
+    final build = shaderFilter;
+    if (build == null) {
+      super.addToScene(builder);
+      return;
+    }
+    // Pushed straight to the scene: the `filter` setter marks the layer dirty, which a layer that
+    // always re-adds itself must not do.
+    engineLayer = builder.pushBackdropFilter(
+      build(_windowOrigin()),
+      blendMode: blendMode,
+      oldLayer: engineLayer as ui.BackdropFilterEngineLayer?,
+    );
+    addChildrenToScene(builder);
+    builder.pop();
   }
 }
 
