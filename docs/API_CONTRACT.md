@@ -91,6 +91,7 @@ Remote parsers currently expect the raw array (or a single object). When a backe
 | `NotificationRepository.forUser` | `GET /users/:userId/notifications` → notification[] |
 | `dismiss` | `POST /notifications/:id/dismiss` `{}` |
 | `markAllRead` | `POST /users/:userId/notifications/read` `{}` |
+| `AssistantRepository.ask` | `POST /users/:userId/assistant` `{ "prompt", "history": [{ "role", "text" }] }` → `{ "text", "suggestions"?, "route"? }` |
 
 ## Plug-ins (not built)
 

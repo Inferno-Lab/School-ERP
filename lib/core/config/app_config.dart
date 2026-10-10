@@ -20,6 +20,10 @@ class AppConfig {
   static int mockDelayMinMs = 30;
   static int mockDelayMaxMs = 90;
 
+  /// Feature switches. Off until the screen and the backend for it exist, so unfinished work
+  /// never reaches families. A school's build profile can turn them on with --dart-define.
+  static const assistantEnabled = bool.fromEnvironment('ASSISTANT');
+
   /// Design system "Empty school": a brand-new school with people but no content,
   /// to check every empty state. `--dart-define=EMPTY_DATA=true` starts that way.
   static final emptyData = const bool.fromEnvironment('EMPTY_DATA').obs;

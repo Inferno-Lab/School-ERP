@@ -3,6 +3,7 @@ import 'package:edunest/core/network/api_client.dart';
 import 'package:edunest/data/datasources/mock_json_datasource.dart';
 import 'package:edunest/data/datasources/remote_datasource.dart';
 import 'package:edunest/data/repositories/academic_repository.dart';
+import 'package:edunest/data/repositories/assistant_repository.dart';
 import 'package:edunest/data/repositories/auth_repository.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
@@ -52,7 +53,8 @@ class InitialBinding extends Bindings {
         ..lazyPut<NotificationRepository>(
           () => MockNotificationRepository(source),
           fenix: true,
-        );
+        )
+        ..lazyPut<AssistantRepository>(MockAssistantRepository.new, fenix: true);
       return;
     }
 
@@ -96,6 +98,7 @@ class InitialBinding extends Bindings {
       ..lazyPut<NotificationRepository>(
         () => RemoteNotificationRepository(remote),
         fenix: true,
-      );
+      )
+      ..lazyPut<AssistantRepository>(() => RemoteAssistantRepository(remote), fenix: true);
   }
 }
