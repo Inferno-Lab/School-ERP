@@ -14,6 +14,7 @@ import 'package:edunest/data/repositories/directory_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:edunest/core/utils/schedule.dart';
 
 DateTime dayOnly(DateTime d) => DateUtils.dateOnly(d);
 
@@ -137,7 +138,7 @@ class LeaveApplyController extends GetxController {
   }
 
   bool disabled(DateTime d) {
-    if (d.weekday == DateTime.sunday || holidays.contains(d)) return true;
+    if (isWeeklyOff(d) || holidays.contains(d)) return true;
     return mode.value == 1 ? d.isAfter(today) : d.isBefore(today);
   }
 
@@ -174,7 +175,7 @@ class LeaveApplyController extends GetxController {
     if (s == null || e == null) return 0;
     var n = 0;
     for (var d = s; !d.isAfter(e); d = DateTime(d.year, d.month, d.day + 1)) {
-      if (d.weekday != DateTime.sunday && !holidays.contains(d)) n++;
+      if (!isWeeklyOff(d) && !holidays.contains(d)) n++;
     }
     return n;
   }

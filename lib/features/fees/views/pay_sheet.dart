@@ -176,8 +176,9 @@ class _PaySheetState extends State<PaySheet> {
             amount: Formatters.inr(widget.item.amount),
             onStart: () => setState(() => _drag = true),
             onMove: (x) => setState(() => _x = x),
-            onEnd: (max) {
-              if (_x > max * .85) {
+            onEnd: (max, velocity) {
+              // Past the middle, or a flick, pays: nobody should have to drag the whole track.
+              if (_x > max * .55 || velocity > 600) {
                 unawaited(_pay(max));
               } else {
                 setState(() {
@@ -235,7 +236,7 @@ class _SlideToPay extends StatelessWidget {
   final String amount;
   final VoidCallback onStart;
   final ValueChanged<double> onMove;
-  final ValueChanged<double> onEnd;
+  final void Function(double max, double velocity) onEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -251,8 +252,13 @@ class _SlideToPay extends StatelessWidget {
         return Semantics(
           slider: true,
           label: 'fees.slide'.trp({'amount': amount}),
-          onIncrease: paid || busy ? null : () => onEnd(max),
-          child: AnimatedContainer(
+          onIncrease: paid || busy ? null : () => onEnd(max, 0),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: paid || busy ? null : (_) => onStart(),
+            onHorizontalDragUpdate: paid || busy ? null : (d) => onMove((x + d.delta.dx).clamp(0, max)),
+            onHorizontalDragEnd: paid || busy ? null : (d) => onEnd(max, d.primaryVelocity ?? 0),
+            child: AnimatedContainer(
             duration: const Duration(milliseconds: 400),
             height: 64,
             decoration: BoxDecoration(
@@ -282,11 +288,7 @@ class _SlideToPay extends StatelessWidget {
                   top: 4,
                   width: thumb,
                   height: 56,
-                  child: GestureDetector(
-                    onHorizontalDragStart: paid || busy ? null : (_) => onStart(),
-                    onHorizontalDragUpdate: paid || busy ? null : (d) => onMove((x + d.delta.dx).clamp(0, max)),
-                    onHorizontalDragEnd: paid || busy ? null : (_) => onEnd(max),
-                    child: Glass(
+                  child: Glass(
                       kind: GlassKind.lens,
                       radius: 28,
                       tint: const Color(0x29FFFFFF),
@@ -304,9 +306,9 @@ class _SlideToPay extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
               ],
             ),
+          ),
           ),
         );
       },

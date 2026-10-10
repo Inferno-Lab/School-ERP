@@ -412,8 +412,8 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final record = controller.on(date);
     final future = date.isAfter(today);
-    final sunday = date.weekday == DateTime.sunday;
-    final status = record?.status ?? (sunday ? AttendanceStatus.holiday : null);
+    final off = isWeeklyOff(date);
+    final status = record?.status ?? (off ? AttendanceStatus.holiday : null);
     final label =
         '${DateFormat('d MMMM').format(date)}, ${switch (status) {
           AttendanceStatus.present => 'attendance.present'.tr,
@@ -431,9 +431,9 @@ class _DayCell extends StatelessWidget {
           if (record != null && record.status != AttendanceStatus.holiday) unawaited(_openDay(record));
         },
         child: Opacity(
-          opacity: future && sunday ? .6 : 1,
+          opacity: future && off ? .6 : 1,
           child: _Tile(
-            status: future && !sunday ? null : status,
+            status: future && !off ? null : status,
             day: date.day,
             future: future,
             today: date.isSameDay(today),
