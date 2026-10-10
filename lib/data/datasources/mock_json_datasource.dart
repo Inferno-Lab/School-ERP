@@ -61,14 +61,41 @@ class MockJsonDataSource {
     notifications = await _list('notifications.json', AppNotification.fromJson);
     final info = await _object('school_info.json');
     school = SchoolInfo.fromJson(info);
+    if (AppConfig.emptyData.value) _clearContent();
     _ready = true;
+  }
+
+  /// Loads the data again, e.g. after the design system flips "Empty school".
+  Future<void> reload() async {
+    _ready = false;
+    await ensureLoaded();
+    bump();
+  }
+
+  /// A new school: people and classes exist, nothing has happened yet.
+  void _clearContent() {
+    attendance = [];
+    timetable = [];
+    homework = [];
+    exams = [];
+    results = [];
+    fees = [];
+    notices = [];
+    events = [];
+    threads = [];
+    messages = [];
+    books = [];
+    transport = [];
+    leaves = [];
+    albums = [];
+    notifications = [];
   }
 
   Future<T> guard<T>(T Function() body) async {
     await ensureLoaded();
     final slow = AppConfig.slowNetwork.value;
-    final min = slow ? AppConfig.mockDelayMinMs : 0;
-    final max = slow ? AppConfig.mockDelayMaxMs : 120;
+    final min = slow ? 400 : AppConfig.mockDelayMinMs;
+    final max = slow ? 900 : AppConfig.mockDelayMaxMs;
     final span = max - min;
     final extra = span <= 0 ? 0 : _random.nextInt(span + 1);
     final wait = min + extra;

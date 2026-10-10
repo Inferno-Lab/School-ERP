@@ -910,5 +910,1373 @@
         "kind": "class"
       }
     ]
+  },
+  {
+    "classId": "cls_7b",
+    "day": "mon",
+    "periods": [
+      {
+        "id": "cls_7b-mon-0",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-mon-1",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-mon-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_7b-mon-2",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-mon-3",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-mon-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_7b-mon-4",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-mon-5",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-118",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_7b",
+    "day": "tue",
+    "periods": [
+      {
+        "id": "cls_7b-tue-0",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-tue-1",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-tue-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_7b-tue-2",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-tue-3",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-tue-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_7b-tue-4",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-tue-5",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-118",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_7b",
+    "day": "wed",
+    "periods": [
+      {
+        "id": "cls_7b-wed-0",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-wed-1",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-wed-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_7b-wed-2",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-wed-3",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-wed-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_7b-wed-4",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-wed-5",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-118",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_7b",
+    "day": "thu",
+    "periods": [
+      {
+        "id": "cls_7b-thu-0",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-thu-1",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-thu-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_7b-thu-2",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-thu-3",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-thu-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_7b-thu-4",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-thu-5",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-118",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_7b",
+    "day": "fri",
+    "periods": [
+      {
+        "id": "cls_7b-fri-0",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-fri-1",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-fri-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_7b-fri-2",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-fri-3",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-fri-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_7b-fri-4",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-fri-5",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-118",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_7b",
+    "day": "sat",
+    "periods": [
+      {
+        "id": "cls_7b-sat-0",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-sat-1",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-sat-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_7b-sat-2",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-sat-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-sat-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_7b-sat-4",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-118",
+        "kind": "class"
+      },
+      {
+        "id": "cls_7b-sat-5",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-118",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_6a",
+    "day": "mon",
+    "periods": [
+      {
+        "id": "cls_6a-mon-0",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-mon-1",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-mon-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_6a-mon-2",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-mon-3",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-mon-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_6a-mon-4",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-mon-5",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-210",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_6a",
+    "day": "tue",
+    "periods": [
+      {
+        "id": "cls_6a-tue-0",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-tue-1",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-tue-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_6a-tue-2",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-tue-3",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-tue-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_6a-tue-4",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-tue-5",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-210",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_6a",
+    "day": "wed",
+    "periods": [
+      {
+        "id": "cls_6a-wed-0",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-wed-1",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-wed-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_6a-wed-2",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-wed-3",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-wed-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_6a-wed-4",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-wed-5",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-210",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_6a",
+    "day": "thu",
+    "periods": [
+      {
+        "id": "cls_6a-thu-0",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-thu-1",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-thu-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_6a-thu-2",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-thu-3",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-thu-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_6a-thu-4",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-thu-5",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-210",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_6a",
+    "day": "fri",
+    "periods": [
+      {
+        "id": "cls_6a-fri-0",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-fri-1",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-fri-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_6a-fri-2",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-fri-3",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-fri-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_6a-fri-4",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-fri-5",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-210",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_6a",
+    "day": "sat",
+    "periods": [
+      {
+        "id": "cls_6a-sat-0",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-sat-1",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-sat-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_6a-sat-2",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-sat-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-sat-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_6a-sat-4",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "A-210",
+        "kind": "class"
+      },
+      {
+        "id": "cls_6a-sat-5",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "A-210",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_9c",
+    "day": "mon",
+    "periods": [
+      {
+        "id": "cls_9c-mon-0",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-mon-1",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-mon-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_9c-mon-2",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-mon-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-mon-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_9c-mon-4",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-mon-5",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "C-101",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_9c",
+    "day": "tue",
+    "periods": [
+      {
+        "id": "cls_9c-tue-0",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-tue-1",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-tue-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_9c-tue-2",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-tue-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-tue-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_9c-tue-4",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-tue-5",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "C-101",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_9c",
+    "day": "wed",
+    "periods": [
+      {
+        "id": "cls_9c-wed-0",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-wed-1",
+        "subject": "hindi",
+        "teacherId": "tch_sneha",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-wed-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_9c-wed-2",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-wed-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-wed-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_9c-wed-4",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-wed-5",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "C-101",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_9c",
+    "day": "thu",
+    "periods": [
+      {
+        "id": "cls_9c-thu-0",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-thu-1",
+        "subject": "social",
+        "teacherId": "tch_arjun",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-thu-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_9c-thu-2",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-thu-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-thu-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_9c-thu-4",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-thu-5",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "C-101",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_9c",
+    "day": "fri",
+    "periods": [
+      {
+        "id": "cls_9c-fri-0",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-fri-1",
+        "subject": "computer",
+        "teacherId": "tch_dev",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-fri-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_9c-fri-2",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-fri-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-fri-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_9c-fri-4",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-fri-5",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "C-101",
+        "kind": "class"
+      }
+    ]
+  },
+  {
+    "classId": "cls_9c",
+    "day": "sat",
+    "periods": [
+      {
+        "id": "cls_9c-sat-0",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "08:00",
+        "end": "08:40",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-sat-1",
+        "subject": "art",
+        "teacherId": "tch_pooja",
+        "start": "08:45",
+        "end": "09:25",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-sat-break",
+        "subject": "break",
+        "start": "09:25",
+        "end": "09:40",
+        "room": "",
+        "kind": "break"
+      },
+      {
+        "id": "cls_9c-sat-2",
+        "subject": "pe",
+        "teacherId": "tch_amit",
+        "start": "09:40",
+        "end": "10:20",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-sat-3",
+        "subject": "maths",
+        "teacherId": "tch_kavita",
+        "start": "10:25",
+        "end": "11:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-sat-recess",
+        "subject": "recess",
+        "start": "11:05",
+        "end": "11:25",
+        "room": "",
+        "kind": "recess"
+      },
+      {
+        "id": "cls_9c-sat-4",
+        "subject": "science",
+        "teacherId": "tch_rahul",
+        "start": "11:25",
+        "end": "12:05",
+        "room": "C-101",
+        "kind": "class"
+      },
+      {
+        "id": "cls_9c-sat-5",
+        "subject": "english",
+        "teacherId": "tch_meera",
+        "start": "12:10",
+        "end": "12:50",
+        "room": "C-101",
+        "kind": "class"
+      }
+    ]
   }
 ]

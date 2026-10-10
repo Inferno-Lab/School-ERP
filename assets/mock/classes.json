@@ -31,5 +31,50 @@
       "stu_advait",
       "stu_mishka"
     ]
+  },
+  {
+    "id": "cls_7b",
+    "name": "Class 7",
+    "section": "B",
+    "classTeacherId": "tch_rahul",
+    "room": "A-118",
+    "studentIds": [
+      "stu_7b_ishita",
+      "stu_7b_neel",
+      "stu_7b_pari",
+      "stu_7b_yash",
+      "stu_7b_hiba",
+      "stu_7b_om"
+    ]
+  },
+  {
+    "id": "cls_6a",
+    "name": "Class 6",
+    "section": "A",
+    "classTeacherId": "tch_rahul",
+    "room": "A-210",
+    "studentIds": [
+      "stu_6a_laksh",
+      "stu_6a_esha",
+      "stu_6a_rohan",
+      "stu_6a_tara",
+      "stu_6a_zoya",
+      "stu_6a_arnav"
+    ]
+  },
+  {
+    "id": "cls_9c",
+    "name": "Class 9",
+    "section": "C",
+    "classTeacherId": "tch_arjun",
+    "room": "C-101",
+    "studentIds": [
+      "stu_9c_kiara",
+      "stu_9c_dhruv",
+      "stu_9c_sara",
+      "stu_9c_aditya",
+      "stu_9c_meher",
+      "stu_9c_veer"
+    ]
   }
 ]
