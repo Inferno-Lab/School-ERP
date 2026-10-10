@@ -980,6 +980,7 @@ class _GradeSheetViewState extends State<GradeSheetView> {
                 Glass(
                   height: 44,
                   width: 130,
+                  onPigment: true,
                   child: Center(
                     child: Text(
                       'teacher.n_of'.trp({'i': '${_i + 1}', 'n': '${_queue.length}'}),

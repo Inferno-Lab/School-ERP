@@ -115,7 +115,7 @@ class LibraryView extends GetView<LibraryController> {
         ],
         onRefresh: controller.load,
         bottomBarHeight: 56,
-        bottomBar: _SearchBar(controller: controller, count: controller.books.length),
+        bottomBar: controller.books.isEmpty ? null : _SearchBar(controller: controller, count: controller.books.length),
         children: [
           const Rise(child: PageTitle('library.title')),
           ViewStateView(

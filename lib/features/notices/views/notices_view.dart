@@ -434,6 +434,7 @@ class NoticeDetailView extends GetView<NoticeDetailController> {
             state: controller.state.value,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyArt: EmptyArt.search,
             emptyTitle: 'notices.gone',
             emptyBody: 'notices.gone_body',
             child: notice == null

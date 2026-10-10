@@ -174,6 +174,7 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
                 const Spacer(),
                 Glass(
                   height: 44,
+                  onPigment: true,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -258,6 +259,7 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
                     width: 96,
                     height: 48,
                     radius: 24,
+                    onPigment: true,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

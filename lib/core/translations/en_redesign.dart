@@ -227,7 +227,6 @@ const enRedesign = <String, String>{
 
   // fees
   'fees.receipts': 'Receipts',
-  'fees.empty_body': 'The school has not set up fees for this child yet.',
   'fees.of_paid': 'of @total paid',
   'fees.due_now': 'Due now · @title',
   'fees.days_late': '@n days late',
@@ -583,7 +582,7 @@ const enRedesign = <String, String>{
   'dev.note': 'Long-press the version number in About to open. Hidden in release builds for families.',
   'dev.sample_button': 'Sample glass button',
   'dev.sheet_glass': 'Sheet glass',
-  'dev.lens_glass': '← lens glass',
+  'dev.lens_glass': 'lens glass',
   'dev.quality': 'Glass quality',
   'dev.quality_hint': 'Auto picks Off on low-end phones',
   'dev.q_auto': 'Auto',
@@ -777,4 +776,10 @@ const enRedesign = <String, String>{
   'leave.empty_hint': 'The class teacher replies within a day',
   'notifications.empty_hint': 'Fee, homework and school updates land here',
   'teacher.no_classes_hint': 'The office assigns classes before term starts',
+  'fees.empty': 'No fees to pay yet',
+  'fees.empty_body': 'When the school sets the fee plan, each installment appears here. Pay by UPI and keep every receipt.',
+  'homework.summary_new': 'Nothing has been set yet',
+  'chat.no_chats': 'No conversations yet',
+  'chat.no_chats_body': 'Pick a teacher below to start your first chat.',
+  'chat.family': 'Family',
 };

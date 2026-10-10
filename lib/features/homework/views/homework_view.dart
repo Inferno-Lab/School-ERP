@@ -56,7 +56,7 @@ class HomeworkView extends GetView<HomeworkController> {
           onChanged: (i) => controller.tab.value = i,
         ),
         children: [
-          PageTitle('homework.title', subtitle: _summary(tab, counts, controller.visible)),
+          PageTitle('homework.title', subtitle: _summary(controller, tab, counts)),
           ViewStateView(
             state: controller.state.value,
             onRetry: controller.load,
@@ -111,9 +111,11 @@ class HomeworkView extends GetView<HomeworkController> {
     };
   }
 
-  String _summary(int tab, List<int> counts, List<Homework> items) {
+  String _summary(HomeworkController controller, int tab, List<int> counts) {
+    final items = controller.visible;
     switch (tab) {
       case 0:
+        if (controller.items.isEmpty) return 'homework.summary_new'.tr;
         if (items.isEmpty) return 'homework.summary_none'.tr;
         final soonest = [...items]..sort((a, b) => a.dueOn.compareTo(b.dueOn));
         return 'homework.summary_due'.trp({
@@ -270,7 +272,8 @@ class HomeworkDetailView extends GetView<HomeworkDetailController> {
                 state: state,
                 onRetry: controller.load,
                 errorKey: controller.errorMessage.value,
-                emptyTitle: 'homework.not_found',
+                emptyArt: EmptyArt.search,
+            emptyTitle: 'homework.not_found',
                 child: const SizedBox.shrink(),
               ),
             )

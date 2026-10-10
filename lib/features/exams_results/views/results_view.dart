@@ -40,6 +40,7 @@ class ResultsView extends GetView<ResultsController> {
                 height: 44,
                 width: 150,
                 radius: 22,
+                onPigment: true,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

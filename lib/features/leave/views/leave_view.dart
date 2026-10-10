@@ -148,14 +148,6 @@ class LeaveView extends GetView<LeaveController> {
                     title: 'leave.empty',
                     body: 'leave.empty_body',
                     hint: 'leave.empty_hint',
-                    actions: [
-                      EmptyAction(
-                        'leave.new',
-                        icon: PhosphorIconsRegular.plus,
-                        primary: true,
-                        onTap: () => Get.toNamed<void>(AppRoutes.leaveApply),
-                      ),
-                    ],
                   )
                 else
                   Rise(

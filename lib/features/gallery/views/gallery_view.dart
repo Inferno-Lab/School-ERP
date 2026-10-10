@@ -98,7 +98,7 @@ class GalleryView extends GetView<GalleryController> {
         topPadding: ready ? 0 : null,
         leading: BackGlass(color: ready ? AppColors.white : null),
         actions: [
-          if (controller.childName != null)
+          if (controller.childName != null && controller.albums.isNotEmpty)
             GlassPress(
               onTap: () => controller.onlyChild.toggle(),
               child: Semantics(
@@ -107,6 +107,7 @@ class GalleryView extends GetView<GalleryController> {
                 child: Glass(
                   height: 44,
                   width: 150,
+                  onPigment: ready,
                   tint: controller.onlyChild.value ? const Color(0x59F2A007) : null,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -487,6 +488,7 @@ class _GalleryViewerState extends State<GalleryViewer> with SingleTickerProvider
                   Glass(
                     height: 44,
                     width: 120,
+                    onPigment: true,
                     child: Center(
                       child: Text(
                         'gallery.n_of'.trp({'i': '${_index + 1}', 'n': '${photos.length}'}),
@@ -573,6 +575,7 @@ class _GalleryViewerState extends State<GalleryViewer> with SingleTickerProvider
                   child: Glass(
                     height: 60,
                     radius: 30,
+                    onPigment: true,
                     child: Obx(() {
                       final fav = _gallery.favourites.contains(photo.id);
                       return Row(

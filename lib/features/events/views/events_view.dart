@@ -399,7 +399,7 @@ class EventDetailView extends GetView<EventsController> {
               state: controller.state.value,
               onRetry: controller.load,
               errorKey: controller.errorMessage.value,
-              child: const EmptyState(title: 'events.gone', body: 'events.gone_body'),
+              child: const EmptyState(art: EmptyArt.search, title: 'events.gone', body: 'events.gone_body'),
             ),
           ],
         );
