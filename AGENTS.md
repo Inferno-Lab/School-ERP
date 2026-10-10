@@ -52,7 +52,11 @@ Details: `docs/architecture.md`. How to add a screen, a repository, or an AI fea
 6. **Dummy data lives in `assets/mock/*.json`.** Dates use relative tokens (`today-1`, `today+2T09:00`) resolved by `date_seed.dart`; keep them valid (`today-0T010:12` crashed headless runs). Mock calls answer in 30–90 ms by default; do not add artificial delays. `AppConfig.slowNetwork` (Developer switch) is how you test loading states.
 7. **Do not add dependencies for a few lines of code.** `phosphor_flutter` is vendored under `packages/` on purpose.
 8. **Sign-out** goes through `AuthService.signOut()` (clears the session, navigates to login first, then clears state). Do not clear state before navigating.
-9. **Performance**: tabs are lazy (`LazyIndexedStack`); keep per-screen glass to the few floating controls; avoid animating layout; `Rise` stagger is capped. Release builds are what you judge speed on, not debug.
+9. **Glass hygiene** (each of these was a shipped bug): never nest one `Glass` inside another or inside an `Opacity`/fade (use a plain pill for droplets and highlights); glass text sits on a frosted tint with ink colour, not white on a clear lens, unless the backdrop is known to be dark; content must fade out before it reaches glass (`PageFrame` and `EdgeFade` do this, so build new screens on `PageFrame` or add an `EdgeFade`); the glass's window position is resolved at composition time in `_GlassLayer` (a position baked in at paint time goes stale when a list scrolls). Test glass on a device or emulator over colourful art, in a scrolled state, not just at rest.
+10. **Overlays need a Material.** Anything mounted above the Navigator (toasts) must sit in a `Material(type: MaterialType.transparency)` or its text gets the debug double underline.
+11. **Screens that reorder after an action** must hold their position until the next load (the featured event card swapped to another event on the first RSVP, hiding the answer). Pin the choice in the controller.
+12. **Any day of the week must have content.** The demo school teaches seven days (`weeklyOffDays` in `core/utils/schedule.dart`); add demo data for every weekday, never assume "today" has lectures. Filters go under the page title, not in a bottom bar.
+13. **Performance**: tabs are lazy (`LazyIndexedStack`); keep per-screen glass to the few floating controls; avoid animating layout; `Rise` stagger is capped. Release builds are what you judge speed on, not debug.
 
 ## Conventions
 
