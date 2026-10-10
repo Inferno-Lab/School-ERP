@@ -14,6 +14,12 @@ enum GlassKind { sheet, lens }
 abstract final class LiquidGlass {
   static ui.FragmentProgram? program;
 
+  /// Design system: paint each glass's displacement field instead of the backdrop.
+  static final showMaps = ValueNotifier(false);
+
+  /// Glass surfaces currently attached (design system readout).
+  static int live = 0;
+
   static bool get available => program != null && ui.ImageFilter.isShaderFilterSupported;
 
   static Future<void> warmUp() async {
@@ -270,11 +276,15 @@ class _RenderGlass extends RenderProxyBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _refraction?.addListener(markNeedsPaint);
+    LiquidGlass.showMaps.addListener(markNeedsPaint);
+    LiquidGlass.live++;
   }
 
   @override
   void detach() {
     _refraction?.removeListener(markNeedsPaint);
+    LiquidGlass.showMaps.removeListener(markNeedsPaint);
+    LiquidGlass.live--;
     super.detach();
   }
 
@@ -312,7 +322,8 @@ class _RenderGlass extends RenderProxyBox {
       ..setFloat(8, thickness * _dpr)
       ..setFloat(9, t)
       ..setFloat(10, _specular)
-      ..setFloat(11, _saturation);
+      ..setFloat(11, _saturation)
+      ..setFloat(12, LiquidGlass.showMaps.value ? 1 : 0);
     final glass = ui.ImageFilter.shader(shader);
     if (_blur <= 0) return glass;
     return ui.ImageFilter.compose(

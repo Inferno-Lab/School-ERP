@@ -1,89 +1,222 @@
+import 'dart:async';
+import 'dart:ui';
+
+import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/services/theme_service.dart';
-import 'package:edunest/core/theme/accent_palettes.dart';
-import 'package:edunest/core/theme/app_theme.dart';
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/widgets/app_avatar.dart';
-import 'package:edunest/core/widgets/app_card.dart';
-import 'package:edunest/core/widgets/buttons.dart';
-import 'package:edunest/core/widgets/chips.dart';
-import 'package:edunest/core/widgets/feature_page.dart';
-import 'package:edunest/core/widgets/glass_card.dart';
-import 'package:edunest/core/widgets/misc.dart';
-import 'package:edunest/core/widgets/progress.dart';
-import 'package:edunest/core/widgets/states.dart';
+import 'package:edunest/core/widgets/glass.dart';
+import 'package:edunest/core/widgets/glass_controls.dart';
+import 'package:edunest/core/widgets/page.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-class DesignSystemView extends StatelessWidget {
+/// Developer page: live glass samples and switches for testing states.
+class DesignSystemView extends StatefulWidget {
   const DesignSystemView({super.key});
 
   @override
+  State<DesignSystemView> createState() => _DesignSystemViewState();
+}
+
+class _DesignSystemViewState extends State<DesignSystemView> {
+  var _frameMs = 0.0;
+  Timer? _tick;
+
+  void _onTimings(List<FrameTiming> timings) {
+    if (timings.isEmpty) return;
+    final total = timings.fold<int>(0, (sum, t) => sum + t.totalSpan.inMicroseconds);
+    _frameMs = total / timings.length / 1000;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addTimingsCallback(_onTimings);
+    // The readout refreshes once a second; glass count is a plain counter.
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    SchedulerBinding.instance.removeTimingsCallback(_onTimings);
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final c = context.app;
     final theme = Get.find<ThemeService>();
-    return FeaturePage(
-      title: 'menu.design',
-      subtitle: 'settings.subtitle',
-      child: ListView(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20),
-        children: [
-          Wrap(
-            spacing: 8,
+    final hz = View.of(context).display.refreshRate.round();
+    return PageFrame(
+      leading: const BackGlass(),
+      children: [
+        Row(
+          children: [
+            Text('dev.title'.tr, style: context.type.h2),
+            const SizedBox(width: 10),
+            Stamp('dev.developer'.tr, color: c.mariText),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text('dev.note'.tr, style: context.type.cap),
+        const SizedBox(height: 16),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: SizedBox(
+            height: 150,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Row(
+                    children: [
+                      for (final id in AppColors.subjects.keys)
+                        Expanded(child: ColoredBox(color: AppColors.subject(id).fill)),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: 20,
+                  top: 20,
+                  child: GlassIconButton(
+                    icon: PhosphorIconsRegular.magnifyingGlass,
+                    label: 'dev.sample_button'.tr,
+                    color: AppColors.white,
+                    onTap: () {},
+                  ),
+                ),
+                Positioned(
+                  left: 76,
+                  top: 20,
+                  child: Glass(
+                    width: 160,
+                    height: 44,
+                    child: Center(
+                      child: Text('dev.sheet_glass'.tr, style: anek(15, 680, height: 1, color: AppColors.white)),
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  left: 20,
+                  top: 80,
+                  child: Glass(width: 120, height: 52, radius: 26, kind: GlassKind.lens, tint: Color(0x0AFFFFFF)),
+                ),
+                Positioned(
+                  left: 150,
+                  top: 96,
+                  child: Text(
+                    'dev.lens_glass'.tr,
+                    style: anek(13, 650, height: 1.2, color: AppColors.white).copyWith(
+                      shadows: const [Shadow(color: Color(0x66000000), blurRadius: 6, offset: Offset(0, 1))],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        EduCard(
+          child: Column(
             children: [
-              for (final mode in AppThemeMode.values)
-                ActionChip(
-                  label: Text(mode.name),
-                  onPressed: () => theme.setMode(mode),
+              Obx(
+                () => _Row(
+                  title: 'dev.quality',
+                  hint: 'dev.quality_hint',
+                  trailing: Chip2(
+                    theme.reduceTransparency.value ? 'dev.q_off'.tr : 'dev.q_auto'.tr,
+                    on: true,
+                    height: 32,
+                    onTap: () => theme.setReduceTransparency(value: !theme.reduceTransparency.value),
+                  ),
                 ),
-              for (final accent in AccentPalette.all)
-                ActionChip(
-                  label: Text(accent.nameKey.tr),
-                  onPressed: () => theme.setAccent(accent),
+              ),
+              const Hr(),
+              ValueListenableBuilder<bool>(
+                valueListenable: LiquidGlass.showMaps,
+                builder: (context, on, _) => _Row(
+                  title: 'dev.maps',
+                  hint: 'dev.maps_hint',
+                  trailing: GlassSwitch(
+                    value: on,
+                    label: 'dev.maps'.tr,
+                    onChanged: (v) => LiquidGlass.showMaps.value = v,
+                  ),
                 ),
+              ),
+              const Hr(),
+              Obx(
+                () => _Row(
+                  title: 'dev.errors',
+                  hint: 'dev.errors_hint',
+                  trailing: GlassSwitch(
+                    value: AppConfig.simulateErrors.value,
+                    label: 'dev.errors'.tr,
+                    onChanged: (v) => theme.setSimulateErrors(value: v),
+                  ),
+                ),
+              ),
+              const Hr(),
+              Obx(
+                () => _Row(
+                  title: 'dev.slow',
+                  hint: 'dev.slow_hint',
+                  trailing: GlassSwitch(
+                    value: AppConfig.slowNetwork.value,
+                    label: 'dev.slow'.tr,
+                    onChanged: (v) => AppConfig.slowNetwork.value = v,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
-          const PrimaryButton(label: 'common.submit', onPressed: _noop),
-          const SizedBox(height: 8),
-          const SecondaryButton(label: 'common.cancel', onPressed: _noop),
-          const SizedBox(height: 12),
-          const AppCard(child: Text('App card')),
-          const SizedBox(height: 12),
-          const GlassCard(child: Text('Glass card')),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            children: [
-              const SoftChip(label: 'subject.maths'),
-              const SubjectChip(subject: 'science'),
-              attendanceBadge(context, 'present'),
-              attendanceBadge(context, 'overdue'),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const AppAvatar(name: 'Aarav Sharma', size: 56),
-          const SizedBox(height: 12),
-          const StatTile(label: 'home.attendance', value: '92%', icon: PhosphorIconsRegular.calendar),
-          const SizedBox(height: 12),
-          const AnimatedProgressRing(percent: 86, child: Text('86')),
-          const SizedBox(height: 12),
-          const AnimatedBar(value: 0.7),
-          const SizedBox(height: 12),
-          const TimelineTile(title: 'status.pending', subtitle: 'Today', done: true),
-          const TimelineTile(title: 'status.approved', subtitle: 'Next', done: false, last: true),
-          const SizedBox(height: 12),
-          Text('Display', style: context.text.displaySmall),
-          Text('Headline', style: context.text.headlineLarge),
-          Text('Body copy for the school day.', style: context.text.bodyMedium),
-          Text('CAPTION', style: context.text.labelSmall),
-          const SizedBox(height: 12),
-          const EmptyState(title: 'empty.title', body: 'empty.body'),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'dev.readout'.trParams({
+            'n': '${LiquidGlass.live}',
+            'ms': _frameMs.toStringAsFixed(1),
+            'hz': '$hz',
+            'engine': LiquidGlass.available ? 'shader' : 'blur',
+          }),
+          style: context.type.mono.copyWith(color: c.ink3),
+        ),
+      ],
     );
   }
 }
 
-void _noop() {}
+class _Row extends StatelessWidget {
+  const _Row({required this.title, required this.hint, required this.trailing});
+
+  final String title;
+  final String hint;
+  final Widget trailing;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+    child: Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title.tr, style: context.type.t.copyWith(fontSize: 15)),
+              Text(hint.tr, style: context.type.cap),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        trailing,
+      ],
+    ),
+  );
+}

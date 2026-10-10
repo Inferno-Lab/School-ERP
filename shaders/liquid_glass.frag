@@ -15,6 +15,7 @@ uniform float uThickness;   // glass thickness, px
 uniform float uRefraction;  // 0..1.5, animated for "materialise"
 uniform float uSpecular;    // rim light strength
 uniform float uSaturation;  // 1 = unchanged
+uniform float uDebug;       // 1 = draw the displacement field (design system)
 
 uniform sampler2D uTexture;
 
@@ -66,6 +67,7 @@ void main() {
   float depth = -sd;
   vec4 color;
   float rim = 0.0;
+  vec2 shift = vec2(0.0);
 
   if (depth > 0.0 && depth < uBezel) {
     float t = max(depth / uBezel, 0.002);
@@ -77,7 +79,8 @@ void main() {
     float h = uThickness * surface(t);
     float m = h * tan(theta - thetaR);
     // Convex glass pulls light from further inside the shape.
-    color = sampleAt(frag - n * m * uRefraction);
+    shift = -n * m * uRefraction;
+    color = sampleAt(frag + shift);
 
     vec2 light = vec2(-0.6, -0.8);
     float d = dot(n, light);
@@ -90,4 +93,9 @@ void main() {
   color.rgb = mix(vec3(lum), color.rgb, uSaturation);
   color.rgb = mix(color.rgb, vec3(color.a), clamp(rim, 0.0, 1.0));
   fragColor = color;
+  if (uDebug > 0.5) {
+    // Same encoding as the canvas maps: grey is still, red/green push x/y.
+    vec2 enc = clamp(0.5 + shift / max(uThickness, 1.0), 0.0, 1.0);
+    fragColor = vec4(enc, 0.5, 1.0);
+  }
 }

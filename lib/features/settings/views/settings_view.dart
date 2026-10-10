@@ -395,16 +395,9 @@ class _AboutViewState extends State<AboutView> {
                   ],
                 ),
               ),
-              // The design-system easter egg: a glass lens over the shelf.
-              Positioned(
+              const Positioned(
                 bottom: 48,
-                child: GestureDetector(
-                  onLongPress: () {
-                    Haptics.medium();
-                    unawaited(Get.toNamed<void>(AppRoutes.designSystem));
-                  },
-                  child: const Glass(width: 90, height: 90, radius: 45, kind: GlassKind.lens, tint: Color(0x0DFFFFFF)),
-                ),
+                child: Glass(width: 90, height: 90, radius: 45, kind: GlassKind.lens, tint: Color(0x0DFFFFFF)),
               ),
             ],
           ),
@@ -414,7 +407,7 @@ class _AboutViewState extends State<AboutView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Overline('about.for'.trParams({'version': AppConfig.version})),
+              Overline('about.for'.trParams({'version': AppConfig.version.split('.').take(2).join('.')})),
               const SizedBox(height: 8),
               Text(s?.name ?? AppConfig.schoolName, style: context.type.h2),
               const SizedBox(height: 4),
@@ -481,11 +474,18 @@ class _AboutViewState extends State<AboutView> {
                     ),
                 ],
               ),
-              Center(
-                child: Text(
-                  'about.version'.trParams({'version': AppConfig.version}),
-                  textAlign: TextAlign.center,
-                  style: context.type.cap,
+              // Long-press the version to open the design system (developer tool).
+              GestureDetector(
+                onLongPress: () {
+                  Haptics.medium();
+                  unawaited(Get.toNamed<void>(AppRoutes.designSystem));
+                },
+                child: Center(
+                  child: Text(
+                    'about.version'.trParams({'version': AppConfig.version, 'build': '${AppConfig.build}'}),
+                    textAlign: TextAlign.center,
+                    style: context.type.cap,
+                  ),
                 ),
               ),
             ],
