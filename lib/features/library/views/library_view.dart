@@ -1,41 +1,87 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:async';
+
 import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/app_exception.dart';
+import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/formatters.dart';
 import 'package:edunest/core/utils/loadable.dart';
-import 'package:edunest/core/widgets/feature_page.dart';
+import 'package:edunest/core/widgets/glass.dart';
+import 'package:edunest/core/widgets/page.dart';
+import 'package:edunest/core/widgets/sheets.dart';
 import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/toast.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class LibraryController extends GetxController with Loadable {
+  /// Books a student may hold at once.
+  static const limit = 3;
+
   final query = ''.obs;
   List<LibraryBook> books = [];
+  SchoolEvent? fair;
 
-  List<LibraryBook> get visible {
+  String? get _me => Get.find<AuthService>().activeStudentId.value;
+
+  List<LibraryBook> get mine =>
+      books.where((b) => b.borrowedBy != null && b.borrowedBy == _me).toList()
+        ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
+
+  /// The shelf: books on it first, then ones others have borrowed, filtered by the search.
+  List<LibraryBook> get shelf {
     final needle = query.value.trim().toLowerCase();
-    if (needle.isEmpty) return books;
-    return books.where((book) {
-      return book.title.toLowerCase().contains(needle) ||
-          book.author.toLowerCase().contains(needle) ||
-          book.category.toLowerCase().contains(needle);
-    }).toList();
+    return books
+        .where((b) => b.borrowedBy == null || b.borrowedBy != _me)
+        .where(
+          (b) =>
+              needle.isEmpty ||
+              b.title.toLowerCase().contains(needle) ||
+              b.author.toLowerCase().contains(needle) ||
+              b.category.toLowerCase().contains(needle) ||
+              b.isbn.contains(needle),
+        )
+        .toList()
+      ..sort((a, b) => (a.available ? 0 : 1).compareTo(b.available ? 0 : 1));
   }
 
   @override
   Future<void> load() => run(() async {
     books = await Get.find<LibraryRepository>().all();
+    final today = DateUtils.dateOnly(DateTime.now());
+    final events = await Get.find<EventRepository>().all();
+    // A library event coming up gets a chip in the header.
+    fair =
+        (events.where((e) => e.venue.toLowerCase().contains('library') && !e.date.isBefore(today)).toList()
+              ..sort((a, b) => a.date.compareTo(b.date)))
+            .firstOrNull;
   }, isEmpty: () => books.isEmpty);
 
   Future<void> reserve(LibraryBook book) async {
-    final id = Get.find<AuthService>().activeStudentId.value;
+    final id = _me;
     if (id == null) return;
+    if (mine.length >= limit) {
+      ToastHelper.show('library.limit', kind: ToastKind.error);
+      return;
+    }
     try {
       await Get.find<LibraryRepository>().reserve(bookId: book.id, studentId: id);
       ToastHelper.show('library.reserved', kind: ToastKind.success);
+    } on AppException catch (error) {
+      ToastHelper.show(error.message, kind: ToastKind.error);
+    }
+  }
+
+  Future<void> renew(LibraryBook book) async {
+    try {
+      await Get.find<LibraryRepository>().renew(book.id);
+      ToastHelper.show('library.renewed', kind: ToastKind.success);
     } on AppException catch (error) {
       ToastHelper.show(error.message, kind: ToastKind.error);
     }
@@ -47,60 +93,369 @@ class LibraryView extends GetView<LibraryController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => FeaturePage(
-        title: 'library.title',
-        subtitle: 'library.subtitle',
+    return Obx(() {
+      controller.query.value;
+      final fair = controller.fair;
+      final mine = controller.mine;
+      final shelf = controller.shelf;
+      return PageFrame(
+        leading: const BackGlass(),
+        actions: [
+          if (fair != null)
+            Chip2(
+              'library.fair'.trParams({
+                'title': fair.title.replaceFirst(RegExp('^library ', caseSensitive: false), '').capitalizeFirst!,
+                'date': DateFormat('EEE d MMM').format(fair.date),
+              }),
+              background: context.app.mariSoft,
+              foreground: context.app.mariText,
+              onTap: () => Get.toNamed<void>('/events/${fair.id}'),
+            ),
+        ],
         onRefresh: controller.load,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-          child: Column(
-            children: [
-              TextField(
-                decoration: InputDecoration(hintText: 'common.search'.tr),
-                onChanged: (value) => controller.query.value = value,
-              ),
-              const SizedBox(height: 12),
-              ViewStateView(
-                state: controller.state.value,
-                onRetry: controller.load,
-                errorKey: controller.errorMessage.value,
-                child: Column(
-                  children: [
-                    for (final book in controller.visible)
-                      Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: CachedNetworkImage(
-                              imageUrl: book.coverUrl,
-                              width: 42,
-                              height: 56,
-                              fit: BoxFit.cover,
-                              errorWidget: (_, _, _) => const SizedBox(width: 42, height: 56),
-                            ),
-                          ),
-                          title: Text(book.title),
-                          subtitle: Text(
-                            book.borrowedBy == null
-                                ? '${book.author} · ${'library.available'.tr}'
-                                : '${book.author} · ${book.dueDate == null ? 'library.borrowed'.tr : Formatters.fullDate(book.dueDate!)}',
-                          ),
-                          trailing: book.available
-                              ? TextButton(
-                                  onPressed: () => controller.reserve(book),
-                                  child: Text('library.reserve'.tr),
-                                )
-                              : null,
-                        ),
+        bottomBarHeight: 56,
+        bottomBar: _SearchBar(controller: controller, count: controller.books.length),
+        children: [
+          const Rise(child: PageTitle('library.title')),
+          ViewStateView(
+            state: controller.state.value,
+            onRetry: controller.load,
+            errorKey: controller.errorMessage.value,
+            emptyTitle: 'library.empty',
+            emptyBody: 'library.empty_body',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (mine.isNotEmpty) ...[
+                  Rise(
+                    index: 1,
+                    child: SectionLabel(
+                      'library.on_shelf'.trParams({'n': '${mine.length}', 'max': '${LibraryController.limit}'}),
+                      top: 18,
+                    ),
+                  ),
+                  Rise(
+                    index: 1,
+                    child: EduCard(
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < mine.length; i++) ...[
+                            if (i > 0) const Hr(indent: 64),
+                            _MineRow(book: mine[i], controller: controller),
+                          ],
+                        ],
                       ),
-                  ],
+                    ),
+                  ),
+                ],
+                Rise(
+                  index: 2,
+                  child: SectionLabel('library.available_now', top: mine.isEmpty ? 18 : 22),
                 ),
+                if (shelf.isEmpty)
+                  const EmptyState(title: 'library.no_match', body: 'library.no_match_body')
+                else
+                  Rise(
+                    index: 3,
+                    child: LayoutBuilder(
+                      builder: (context, box) {
+                        final columns = box.maxWidth >= 600 ? 5 : 3;
+                        final w = (box.maxWidth - 12 * (columns - 1)) / columns;
+                        return Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: [
+                            for (var i = 0; i < shelf.length; i++)
+                              SizedBox(
+                                width: w,
+                                child: _Book(book: shelf[i], style: i % _styles.length, controller: controller),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _MineRow extends StatelessWidget {
+  const _MineRow({required this.book, required this.controller});
+
+  final LibraryBook book;
+  final LibraryController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    final due = book.dueDate;
+    final days = due == null ? null : Formatters.daysUntil(due);
+    final Widget trailing;
+    if (days != null && days < 0) {
+      trailing = Stamp('library.overdue'.tr, color: c.badText);
+    } else if (days != null && days <= 5) {
+      trailing = Stamp(
+        days == 0 ? 'library.today'.tr : 'library.days'.trParams({'n': '$days'}),
+        color: c.dark ? const Color(0xFFF6BA45) : AppColors.late,
+      );
+    } else {
+      trailing = Btn(
+        'library.renew',
+        kind: BtnKind.quiet,
+        small: true,
+        height: 34,
+        onPressed: () => unawaited(controller.renew(book)),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+          Cover(subject: book.category.toLowerCase(), label: '', width: 38, height: 50),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(book.title, style: context.type.t, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  due == null
+                      ? book.author
+                      : 'library.return_by'.trParams({
+                          'author': book.author,
+                          'date': DateFormat('EEE d MMM').format(due),
+                        }),
+                  style: context.type.cap,
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          trailing,
+        ],
+      ),
+    );
+  }
+}
+
+/// Cover styles in shelf order, each with its own printed shape.
+const _styles = ['computer', 'art', 'night', 'english', 'pe', 'hindi'];
+
+class _Book extends StatelessWidget {
+  const _Book({required this.book, required this.style, required this.controller});
+
+  final LibraryBook book;
+  final int style;
+  final LibraryController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final id = _styles[style];
+    final night = id == 'night';
+    final pigment = night ? const SubjectColor(Color(0xFF10201B), Color(0xFFE8EFEA)) : AppColors.subject(id);
+    final away = !book.available;
+    final shapes = switch (id) {
+      'computer' => [_shape(right: -24, top: 40, w: 80, h: 80, color: const Color(0x24FFFFFF))],
+      'art' => [_shape(left: -10, top: 70, w: 120, h: 40, color: const Color(0x66FFFFFF), radius: 40)],
+      'night' => [
+        _shape(left: 30, top: 76, w: 6, h: 6, color: AppColors.mari),
+        _shape(left: 70, top: 96, w: 4, h: 4, color: AppColors.white),
+        _shape(left: 52, top: 58, w: 5, h: 5, color: AppColors.white),
+      ],
+      'english' => [_shape(left: -30, bottom: -30, w: 90, h: 90, color: const Color(0x1FFFFFFF))],
+      'pe' => [
+        Positioned(
+          right: 10,
+          top: 62,
+          child: Container(
+            width: 50,
+            height: 20,
+            decoration: const BoxDecoration(
+              color: Color(0x4010201B),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.elliptical(25, 10),
+                topRight: Radius.elliptical(25, 10),
+                bottomRight: Radius.elliptical(5, 2),
+                bottomLeft: Radius.elliptical(25, 10),
               ),
-            ],
+            ),
           ),
         ),
+      ],
+      _ => const <Widget>[],
+    };
+    const radius = BorderRadius.only(
+      topLeft: Radius.circular(5),
+      bottomLeft: Radius.circular(5),
+      topRight: Radius.circular(12),
+      bottomRight: Radius.circular(12),
+    );
+    final cover = Container(
+      height: 150,
+      decoration: BoxDecoration(
+        color: pigment.fill,
+        borderRadius: radius,
+        boxShadow: const [
+          BoxShadow(color: Color(0x8010201B), blurRadius: 18, spreadRadius: -12, offset: Offset(0, 10)),
+        ],
+      ),
+      foregroundDecoration: spineDecoration,
+      child: ClipRRect(
+        borderRadius: radius,
+        child: Stack(
+          children: [
+            ...shapes,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    book.title,
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                    style: anek(14, 740, width: 108, height: 1.05, color: pigment.on),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      away && book.dueDate != null
+                          ? 'library.back_on'.trParams({'date': DateFormat('d MMM').format(book.dueDate!)})
+                          : book.author,
+                      maxLines: 2,
+                      style: anek(10.5, 600, height: 1.2, color: pigment.on.withValues(alpha: .85)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    return Semantics(
+      button: !away,
+      label: away
+          ? '${book.title}, ${book.author}, ${'library.borrowed_by_someone'.tr}'
+          : '${book.title}, ${book.author}, ${'library.tap_reserve'.tr}',
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: away ? null : () => unawaited(_confirm(context)),
+        child: Opacity(opacity: away ? .45 : 1, child: cover),
+      ),
+    );
+  }
+
+  Future<void> _confirm(BuildContext context) async {
+    final ok = await confirmSheet(
+      title: 'library.reserve_title'.trParams({'title': book.title}),
+      body: 'library.reserve_body'.trParams({'author': book.author}),
+      confirm: 'library.reserve',
+      danger: false,
+      icon: PhosphorIconsRegular.bookmarkSimple,
+    );
+    if (ok) await controller.reserve(book);
+  }
+
+  static Widget _shape({
+    required double w,
+    required double h,
+    required Color color,
+    double? left,
+    double? right,
+    double? top,
+    double? bottom,
+    double? radius,
+  }) => Positioned(
+    left: left,
+    right: right,
+    top: top,
+    bottom: bottom,
+    child: Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: radius == null ? null : BorderRadius.circular(radius),
+        shape: radius == null ? BoxShape.circle : BoxShape.rectangle,
+      ),
+    ),
+  );
+}
+
+class _SearchBar extends StatefulWidget {
+  const _SearchBar({required this.controller, required this.count});
+
+  final LibraryController controller;
+  final int count;
+
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  late final _text = TextEditingController(text: widget.controller.query.value);
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    return Glass(
+      height: 56,
+      radius: 28,
+      tint: c.dark ? null : const Color(0x4DFBFCF9),
+      padding: const EdgeInsets.only(left: 18, right: 6),
+      child: Row(
+        children: [
+          Icon(PhosphorIconsRegular.magnifyingGlass, color: c.ink, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              controller: _text,
+              onChanged: (v) => setState(() => widget.controller.query.value = v),
+              textInputAction: TextInputAction.search,
+              style: anek(15.5, 520, color: c.ink),
+              cursorColor: c.ink,
+              decoration: InputDecoration(
+                isCollapsed: true,
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                hintText: 'library.search'.trParams({'n': NumberFormat.decimalPattern('en_IN').format(widget.count)}),
+                hintStyle: anek(15.5, 520, color: c.ink3),
+              ),
+            ),
+          ),
+          if (_text.text.isNotEmpty)
+            IconButton(
+              tooltip: 'common.clear'.tr,
+              onPressed: () {
+                _text.clear();
+                widget.controller.query.value = '';
+                setState(() {});
+              },
+              icon: Icon(PhosphorIconsRegular.x, color: c.ink, size: 20),
+            )
+          else
+            IconButton(
+              tooltip: 'library.scan_isbn'.tr,
+              onPressed: () => ToastHelper.show('library.scan_hint'),
+              icon: Icon(PhosphorIconsRegular.barcode, color: c.ink, size: 22),
+            ),
+        ],
       ),
     );
   }

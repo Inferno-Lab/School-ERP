@@ -49,6 +49,7 @@ class PageFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inset = MediaQuery.paddingOf(context);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     final top = inset.top + 8;
     final bottomSpace = dockPage
         ? kDockClearance + inset.bottom
@@ -107,7 +108,8 @@ class PageFrame extends StatelessWidget {
             Positioned(
               left: 16,
               right: 16,
-              bottom: 28 + inset.bottom,
+              // Rides above the keyboard when the bar holds a text field.
+              bottom: keyboard > 0 ? keyboard + 12 : 28 + inset.bottom,
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 520),

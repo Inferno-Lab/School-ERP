@@ -190,6 +190,15 @@ extension MockWrites on MockJsonDataSource {
     bump();
   }
 
+  /// Extends a borrowed book by two weeks from its current due date.
+  void renewBook(String bookId) {
+    final index = books.indexWhere((book) => book.id == bookId);
+    final due = index < 0 ? null : books[index].dueDate;
+    if (due == null) return;
+    books[index] = books[index].copyWith(dueDate: due.add(const Duration(days: 14)));
+    bump();
+  }
+
   void dismissNotification(String id) {
     notifications.removeWhere((item) => item.id == id);
     bump();

@@ -266,6 +266,8 @@ abstract class LibraryRepository {
   Future<List<LibraryBook>> all();
 
   Future<void> reserve({required String bookId, required String studentId});
+
+  Future<void> renew(String bookId);
 }
 
 class MockLibraryRepository implements LibraryRepository {
@@ -279,6 +281,9 @@ class MockLibraryRepository implements LibraryRepository {
   @override
   Future<void> reserve({required String bookId, required String studentId}) =>
       _ds.guard(() => _ds.reserveBook(bookId: bookId, studentId: studentId));
+
+  @override
+  Future<void> renew(String bookId) => _ds.guard(() => _ds.renewBook(bookId));
 }
 
 class RemoteLibraryRepository implements LibraryRepository {
@@ -298,6 +303,9 @@ class RemoteLibraryRepository implements LibraryRepository {
   @override
   Future<void> reserve({required String bookId, required String studentId}) =>
       _remote.post('/library/books/$bookId/reserve', {'studentId': studentId});
+
+  @override
+  Future<void> renew(String bookId) => _remote.post('/library/books/$bookId/renew', const {});
 }
 
 abstract class TransportRepository {
