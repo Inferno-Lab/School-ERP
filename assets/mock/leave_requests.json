@@ -15,9 +15,10 @@
     "studentId": "stu_aarav",
     "from": "today+7",
     "to": "today+8",
-    "reason": "Dental appointment and a day of rest after",
+    "reason": "Dental appointment",
     "status": "pending",
-    "appliedOn": "today-1"
+    "appliedOn": "today-1",
+    "note": "And a day of rest after."
   },
   {
     "id": "lv_ananya_no",

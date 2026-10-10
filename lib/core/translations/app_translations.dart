@@ -1,11 +1,12 @@
+import 'package:edunest/core/translations/en_redesign.dart';
 import 'package:get/get.dart';
 
 class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
-    'en': _en,
-    'hi': {..._en, ..._hi},
-    'mr': {..._en, ..._mr},
+    'en': {..._en, ...enRedesign},
+    'hi': {..._en, ...enRedesign, ..._hi},
+    'mr': {..._en, ...enRedesign, ..._mr},
   };
 }
 

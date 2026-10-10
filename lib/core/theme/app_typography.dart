@@ -1,56 +1,79 @@
+import 'package:edunest/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
+/// Anek Latin + Anek Devanagari (one family, three languages). The width axis
+/// carries the hierarchy: wide and heavy for numbers and headings.
+const kSans = 'AnekLatin';
+const kDeva = 'AnekDevanagari';
+const kMono = 'IBMPlexMono';
+
+TextStyle anek(
+  double size,
+  double weight, {
+  double width = 100,
+  double height = 1.45,
+  double em = 0,
+  Color? color,
+  bool tabular = false,
+}) {
+  return TextStyle(
+    fontFamily: kSans,
+    fontFamilyFallback: const [kDeva],
+    fontSize: size,
+    fontWeight: FontWeight.values[((weight / 100).round() - 1).clamp(0, 8)],
+    fontVariations: [FontVariation('wght', weight), FontVariation('wdth', width)],
+    height: height,
+    letterSpacing: em * size,
+    color: color,
+    fontFeatures: tabular ? const [FontFeature.tabularFigures()] : null,
+  );
+}
+
+/// The type scale from the canvas, resolved against the current tokens.
+class AppType {
+  const AppType(this.c);
+
+  final AppColors c;
+
+  TextStyle get dx => anek(68, 780, width: 125, height: .86, em: -.025, color: c.ink, tabular: true);
+  TextStyle get dl => anek(48, 760, width: 122, height: .9, em: -.02, color: c.ink, tabular: true);
+  TextStyle get h1 => anek(34, 730, width: 118, height: 1, em: -.018, color: c.ink);
+  TextStyle get h2 => anek(24, 690, width: 112, height: 1.08, em: -.01, color: c.ink);
+  TextStyle get h3 => anek(19, 650, width: 108, height: 1.15, color: c.ink);
+  TextStyle get t => anek(16.5, 600, width: 103, height: 1.25, color: c.ink);
+  TextStyle get b => anek(15.5, 420, color: c.ink);
+  TextStyle get s => anek(14, 450, height: 1.38, color: c.ink2);
+  TextStyle get cap => anek(13, 520, height: 1.3, color: c.ink3);
+  TextStyle get o => anek(11.5, 700, width: 118, height: 1, em: .1, color: c.ink3);
+  TextStyle get mono => TextStyle(
+    fontFamily: kMono,
+    fontSize: 12.5,
+    fontWeight: FontWeight.w500,
+    height: 1.3,
+    color: c.ink3,
+  );
+  TextStyle get label => anek(16, 650, width: 108, height: 1, color: c.ink);
+}
+
 abstract final class AppTypography {
-  static TextTheme textTheme(Color color, Color muted) {
-    TextStyle display(double size, FontWeight weight, {double tracking = -0.6}) {
-      return TextStyle(
-        fontFamily: 'Poppins',
-        fontWeight: weight,
-        fontSize: size,
-        height: 1.2,
-        letterSpacing: tracking,
-        color: color,
-      );
-    }
-
-    TextStyle body(double size, FontWeight weight, {double height = 1.45}) {
-      return TextStyle(
-        fontFamily: 'PlusJakartaSans',
-        fontWeight: weight,
-        fontVariations: [FontVariation.weight(weight.value.toDouble())],
-        fontSize: size,
-        height: height,
-        color: color,
-      );
-    }
-
+  static TextTheme textTheme(AppColors c) {
+    final t = AppType(c);
     return TextTheme(
-      displaySmall: display(32, FontWeight.w700),
-      headlineLarge: display(26, FontWeight.w700, tracking: -0.4),
-      headlineMedium: display(22, FontWeight.w700, tracking: -0.3),
-      headlineSmall: display(18, FontWeight.w600, tracking: -0.2),
-      titleMedium: body(16, FontWeight.w600, height: 1.3),
-      titleSmall: body(14, FontWeight.w600, height: 1.3),
-      bodyLarge: body(16, FontWeight.w500),
-      bodyMedium: body(14, FontWeight.w400),
-      bodySmall: body(12, FontWeight.w500).copyWith(color: muted),
-      labelLarge: body(14, FontWeight.w600),
-      labelSmall: body(11, FontWeight.w600, height: 1.2).copyWith(
-        color: muted,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-
-  static TextStyle numeric(BuildContext context, {double size = 28}) {
-    return TextStyle(
-      fontFamily: 'PlusJakartaSans',
-      fontWeight: FontWeight.w700,
-      fontVariations: const [FontVariation.weight(700)],
-      fontFeatures: const [FontFeature.tabularFigures()],
-      fontSize: size,
-      height: 1.1,
-      color: Theme.of(context).colorScheme.onSurface,
+      displayLarge: t.dx,
+      displayMedium: t.dl,
+      displaySmall: t.h1,
+      headlineLarge: t.h1,
+      headlineMedium: t.h2,
+      headlineSmall: t.h3,
+      titleLarge: t.h3,
+      titleMedium: t.t,
+      titleSmall: t.t.copyWith(fontSize: 15),
+      bodyLarge: t.b,
+      bodyMedium: t.b,
+      bodySmall: t.cap,
+      labelLarge: t.label,
+      labelMedium: t.cap,
+      labelSmall: t.o,
     );
   }
 }

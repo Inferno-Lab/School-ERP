@@ -12,6 +12,7 @@ import 'package:edunest/features/auth/views/onboarding_view.dart';
 import 'package:edunest/features/auth/views/splash_view.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
 import 'package:edunest/features/chat/views/chat_list_view.dart';
+import 'package:edunest/features/dashboard/controllers/academics_controller.dart';
 import 'package:edunest/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:edunest/features/events/controllers/events_controller.dart';
 import 'package:edunest/features/events/views/events_view.dart';
@@ -21,6 +22,7 @@ import 'package:edunest/features/fees/controllers/fees_controller.dart';
 import 'package:edunest/features/fees/views/fees_view.dart';
 import 'package:edunest/features/gallery/views/gallery_view.dart';
 import 'package:edunest/features/homework/controllers/homework_controller.dart';
+import 'package:edunest/features/homework/views/homework_scan_view.dart';
 import 'package:edunest/features/homework/views/homework_view.dart';
 import 'package:edunest/features/leave/views/leave_view.dart';
 import 'package:edunest/features/library/views/library_view.dart';
@@ -28,6 +30,7 @@ import 'package:edunest/features/notices/controllers/notices_controller.dart';
 import 'package:edunest/features/notices/views/notices_view.dart';
 import 'package:edunest/features/notifications/views/notifications_view.dart';
 import 'package:edunest/features/profile/views/profile_view.dart';
+import 'package:edunest/features/search/search_view.dart';
 import 'package:edunest/features/settings/views/design_system_view.dart';
 import 'package:edunest/features/settings/views/settings_view.dart';
 import 'package:edunest/features/shell/shell_controller.dart';
@@ -51,11 +54,11 @@ class ShellBinding extends Bindings {
       ..lazyPut(NoticesController.new);
     if (teacher) {
       Get
-        ..lazyPut(TeacherHomeController.new)
-        ..lazyPut(TeacherClassesController.new);
+        ..lazyPut(TeacherHomeController.new);
     } else {
       Get
         ..lazyPut(DashboardController.new)
+        ..lazyPut(AcademicsController.new)
         ..lazyPut(FeesController.new);
     }
   }
@@ -90,6 +93,7 @@ class AppPages {
       transition: Transition.fadeIn,
       transitionDuration: AppDurations.medium,
     ),
+    GetPage(name: AppRoutes.homeworkScan, page: () => const HomeworkScanView(), middlewares: [AuthMiddleware()], transition: Transition.downToUp),
     _page(AppRoutes.timetable, const TimetableView(), TimetableController.new),
     _page(AppRoutes.results, const ResultsView(), ResultsController.new),
     _page(AppRoutes.fees, const FeesView(), FeesController.new),
@@ -104,6 +108,14 @@ class AppPages {
     _page(AppRoutes.gallery, const GalleryView(), GalleryController.new),
     _page(AppRoutes.leave, const LeaveView(), LeaveController.new),
     _page(AppRoutes.leaveApply, const LeaveApplyView(), LeaveApplyController.new),
+    GetPage(
+      name: AppRoutes.search,
+      page: () => const SearchView(),
+      binding: BindingsBuilder<void>(() => Get.lazyPut(AppSearchController.new)),
+      middlewares: [AuthMiddleware()],
+      transition: Transition.fadeIn,
+      transitionDuration: AppDurations.fast,
+    ),
     _page(AppRoutes.notifications, const NotificationsView(), NotificationsController.new),
     GetPage(name: AppRoutes.settings, page: () => const SettingsView(), middlewares: [AuthMiddleware()], transition: Transition.cupertino, transitionDuration: AppDurations.medium),
     GetPage(name: AppRoutes.about, page: () => const AboutView(), middlewares: [AuthMiddleware()], transition: Transition.cupertino),

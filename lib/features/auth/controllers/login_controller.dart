@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/utils/app_exception.dart';
@@ -11,11 +12,13 @@ import 'package:get/get.dart';
 
 class LoginController extends GetxController {
   final email = TextEditingController(text: 'aarav.sharma@edunest.app');
-  final password = TextEditingController();
+  final password = TextEditingController(text: AppConfig.demoPassword);
   final otp = TextEditingController();
   final formKey = GlobalKey<FormState>();
   final loading = false.obs;
   final useOtp = false.obs;
+  /// Demo role picked on the login shelf; none until the user taps one.
+  final demoRole = Rxn<UserRole>();
 
   Future<void> demo(UserRole role) => _enter(
     () => Get.find<AuthRepository>().loginAs(role),

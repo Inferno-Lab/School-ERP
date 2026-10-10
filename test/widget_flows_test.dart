@@ -79,7 +79,7 @@ void main() {
     await tester.pumpWidget(testApp(home: const Scaffold(body: DashboardView())));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('Aarav Sharma'), findsWidgets);
+    expect(find.textContaining('Aarav'), findsWidgets);
   });
 
   testWidgets('fees screen lists an installment', (tester) async {
@@ -96,7 +96,7 @@ void main() {
   testWidgets('settings theme chip switches to dark', (tester) async {
     await tester.pumpWidget(testApp(home: const SettingsView()));
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.text('Dark'));
+    await tester.tap(find.text('Blackboard'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(Get.find<ThemeService>().mode.value, AppThemeMode.dark);

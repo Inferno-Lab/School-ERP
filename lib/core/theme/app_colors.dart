@@ -1,224 +1,189 @@
 import 'package:flutter/material.dart';
 
+/// Subject pigment ("notebook cover") and the colour that reads on top of it.
 class SubjectColor {
-  const SubjectColor({required this.tint, required this.tone});
+  const SubjectColor(this.fill, this.on);
 
-  final Color tint;
-  final Color tone;
+  final Color fill;
+  final Color on;
 }
 
+/// Chalk & Glass tokens. Light is chalk, dark is blackboard, AMOLED is true black.
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({
-    required this.success,
-    required this.onSuccess,
-    required this.successContainer,
-    required this.warning,
-    required this.onWarning,
-    required this.warningContainer,
-    required this.danger,
-    required this.onDanger,
-    required this.dangerContainer,
-    required this.info,
-    required this.onInfo,
-    required this.infoContainer,
-    required this.glassFill,
-    required this.glassBorder,
-    required this.gradientStart,
-    required this.gradientEnd,
-    required this.shadow,
-    required this.cardBorder,
-    required this.subjects,
+    required this.chalk,
+    required this.paper,
+    required this.paper2,
+    required this.ink,
+    required this.ink2,
+    required this.ink3,
+    required this.line,
+    required this.line2,
+    required this.scrim,
+    required this.mariText,
+    required this.mariSoft,
+    required this.okSoft,
+    required this.badSoft,
+    required this.lateSoft,
+    required this.glassTint,
+    required this.glassTintStrong,
+    required this.glassShadow,
+    required this.glassRim,
+    required this.dark,
   });
 
-  final Color success;
-  final Color onSuccess;
-  final Color successContainer;
-  final Color warning;
-  final Color onWarning;
-  final Color warningContainer;
-  final Color danger;
-  final Color onDanger;
-  final Color dangerContainer;
-  final Color info;
-  final Color onInfo;
-  final Color infoContainer;
-  final Color glassFill;
-  final Color glassBorder;
-  final Color gradientStart;
-  final Color gradientEnd;
-  final Color shadow;
-  final Color cardBorder;
-  final Map<String, SubjectColor> subjects;
+  final Color chalk;
+  final Color paper;
+  final Color paper2;
+  final Color ink;
+  final Color ink2;
+  final Color ink3;
+  final Color line;
+  final Color line2;
+  final Color scrim;
+  final Color mariText;
+  final Color mariSoft;
+  final Color okSoft;
+  final Color badSoft;
+  final Color lateSoft;
+  final Color glassTint;
+  final Color glassTintStrong;
+  final Color glassShadow;
+  final Color glassRim;
+  final bool dark;
 
-  SubjectColor subject(String id) =>
-      subjects[id] ??
-      const SubjectColor(tint: Color(0xFFEEF2F7), tone: Color(0xFF64748B));
+  static const mari = Color(0xFFF2A007);
+  static const mariInk = Color(0xFF2B1C00);
+  static const ok = Color(0xFF23784A);
+  static const bad = Color(0xFFC23B2A);
+  static const late = Color(0xFFB06F00);
+  static const off = Color(0xFF6F7A76);
+  static const white = Color(0xFFFFFFFF);
 
-  // ignore: sort_constructors_first
-  factory AppColors.light({
-    required Color gradientStart,
-    required Color gradientEnd,
-  }) {
-    return AppColors(
-      success: const Color(0xFF047857),
-      onSuccess: Colors.white,
-      successContainer: const Color(0xFFD1FAE5),
-      warning: const Color(0xFFB45309),
-      onWarning: Colors.white,
-      warningContainer: const Color(0xFFFEF3C7),
-      danger: const Color(0xFFBE123C),
-      onDanger: Colors.white,
-      dangerContainer: const Color(0xFFFFE4E6),
-      info: const Color(0xFF1D4ED8),
-      onInfo: Colors.white,
-      infoContainer: const Color(0xFFDBEAFE),
-      glassFill: const Color(0xB8FFFFFF),
-      glassBorder: const Color(0x66FFFFFF),
-      gradientStart: gradientStart,
-      gradientEnd: gradientEnd,
-      shadow: const Color(0x141C2434),
-      cardBorder: const Color(0x00000000),
-      subjects: _subjects(dark: false),
-    );
-  }
+  /// Bright red used for text on dark grounds, where #C23B2A fails contrast.
+  Color get badText => dark ? const Color(0xFFFF8A78) : bad;
 
-  // ignore: sort_constructors_first
-  factory AppColors.dark({
-    required Color gradientStart,
-    required Color gradientEnd,
-    bool amoled = false,
-  }) {
-    return AppColors(
-      success: const Color(0xFF34D399),
-      onSuccess: const Color(0xFF052E1F),
-      successContainer: const Color(0xFF064E3B),
-      warning: const Color(0xFFFBBF24),
-      onWarning: const Color(0xFF3B2A05),
-      warningContainer: const Color(0xFF78350F),
-      danger: const Color(0xFFFB7185),
-      onDanger: const Color(0xFF3F0714),
-      dangerContainer: const Color(0xFF881337),
-      info: const Color(0xFF93C5FD),
-      onInfo: const Color(0xFF0B1B3A),
-      infoContainer: const Color(0xFF1E3A8A),
-      glassFill: const Color(0x14FFFFFF),
-      glassBorder: const Color(0x22FFFFFF),
-      gradientStart: gradientStart,
-      gradientEnd: gradientEnd,
-      shadow: const Color(0x66000000),
-      cardBorder: amoled ? const Color(0xFF2A2A2A) : const Color(0x00000000),
-      subjects: _subjects(dark: true),
-    );
-  }
+  static const subjects = <String, SubjectColor>{
+    'maths': SubjectColor(Color(0xFF2F5BD3), white),
+    'science': SubjectColor(Color(0xFF23784A), white),
+    'english': SubjectColor(Color(0xFFC23B2A), white),
+    'hindi': SubjectColor(Color(0xFFB8306F), white),
+    'social': SubjectColor(Color(0xFF1C6F80), white),
+    'computer': SubjectColor(Color(0xFF5E3A9C), white),
+    'art': SubjectColor(Color(0xFF7CC4E8), Color(0xFF0C2633)),
+    'pe': SubjectColor(Color(0xFF9BC53D), Color(0xFF1B2A05)),
+    'music': SubjectColor(Color(0xFFB8306F), white),
+  };
 
-  static Map<String, SubjectColor> _subjects({required bool dark}) {
-    const tones = {
-      'maths': Color(0xFF2563EB),
-      'science': Color(0xFF059669),
-      'english': Color(0xFF7C3AED),
-      'hindi': Color(0xFFDB2777),
-      'social': Color(0xFFEA580C),
-      'computer': Color(0xFF0891B2),
-      'art': Color(0xFFF97316),
-      'pe': Color(0xFF16A34A),
-      'music': Color(0xFFC026D3),
-      'break': Color(0xFF64748B),
-      'recess': Color(0xFF64748B),
-    };
-    const tints = {
-      'maths': Color(0xFFE7F0FF),
-      'science': Color(0xFFE5F8EF),
-      'english': Color(0xFFF3E8FF),
-      'hindi': Color(0xFFFFE8F1),
-      'social': Color(0xFFFFF4E5),
-      'computer': Color(0xFFE6F7FB),
-      'art': Color(0xFFFFF0E8),
-      'pe': Color(0xFFE9FBEA),
-      'music': Color(0xFFFDE8F3),
-      'break': Color(0xFFF1F5F9),
-      'recess': Color(0xFFF1F5F9),
-    };
-    return {
-      for (final entry in tones.entries)
-        entry.key: SubjectColor(
-          tone: entry.value,
-          tint: dark
-              ? entry.value.withValues(alpha: 0.18)
-              : tints[entry.key]!,
-        ),
-    };
-  }
+  static SubjectColor subject(String id) =>
+      subjects[id] ?? const SubjectColor(Color(0xFF56635E), white);
+
+  /// House colours used for student avatars.
+  static const houses = [
+    Color(0xFF23784A),
+    Color(0xFF2F5BD3),
+    Color(0xFFB8306F),
+    Color(0xFFE0A81E),
+  ];
+
+  static const light = AppColors(
+    chalk: Color(0xFFEEF0EC),
+    paper: Color(0xFFFBFCF9),
+    paper2: Color(0xFFF3F5F1),
+    ink: Color(0xFF10201B),
+    ink2: Color(0xFF36443F),
+    ink3: Color(0xFF56635E),
+    line: Color(0x1710201B),
+    line2: Color(0x2B10201B),
+    scrim: Color(0x570A1411),
+    mariText: Color(0xFF8A5600),
+    mariSoft: Color(0xFFFCEBC4),
+    okSoft: Color(0xFFDCEFE3),
+    badSoft: Color(0xFFF8DED9),
+    lateSoft: Color(0xFFFBEBCB),
+    glassTint: Color(0x14FBFCF9),
+    glassTintStrong: Color(0x6BFBFCF9),
+    glassShadow: Color(0x5210201B),
+    glassRim: Color(0x99FFFFFF),
+    dark: false,
+  );
+
+  static const blackboard = AppColors(
+    chalk: Color(0xFF0D1814),
+    paper: Color(0xFF14231E),
+    paper2: Color(0xFF1A2C26),
+    ink: Color(0xFFE8EFEA),
+    ink2: Color(0xFFBCC8C2),
+    ink3: Color(0xFF93A29B),
+    line: Color(0x17E8EFEA),
+    line2: Color(0x2BE8EFEA),
+    scrim: Color(0x80000000),
+    mariText: Color(0xFFF6BA45),
+    mariSoft: Color(0xFF3A2B0C),
+    okSoft: Color(0xFF173A28),
+    badSoft: Color(0xFF41201B),
+    lateSoft: Color(0xFF3B2C0F),
+    glassTint: Color(0x2414241F),
+    glassTintStrong: Color(0x8014241F),
+    glassShadow: Color(0x99000000),
+    glassRim: Color(0x38FFFFFF),
+    dark: true,
+  );
+
+  static final amoled = blackboard.copyWith(
+    chalk: const Color(0xFF000000),
+    paper: const Color(0xFF0B110F),
+    paper2: const Color(0xFF111916),
+  );
 
   @override
-  AppColors copyWith({
-    Color? success,
-    Color? onSuccess,
-    Color? successContainer,
-    Color? warning,
-    Color? onWarning,
-    Color? warningContainer,
-    Color? danger,
-    Color? onDanger,
-    Color? dangerContainer,
-    Color? info,
-    Color? onInfo,
-    Color? infoContainer,
-    Color? glassFill,
-    Color? glassBorder,
-    Color? gradientStart,
-    Color? gradientEnd,
-    Color? shadow,
-    Color? cardBorder,
-    Map<String, SubjectColor>? subjects,
-  }) {
-    return AppColors(
-      success: success ?? this.success,
-      onSuccess: onSuccess ?? this.onSuccess,
-      successContainer: successContainer ?? this.successContainer,
-      warning: warning ?? this.warning,
-      onWarning: onWarning ?? this.onWarning,
-      warningContainer: warningContainer ?? this.warningContainer,
-      danger: danger ?? this.danger,
-      onDanger: onDanger ?? this.onDanger,
-      dangerContainer: dangerContainer ?? this.dangerContainer,
-      info: info ?? this.info,
-      onInfo: onInfo ?? this.onInfo,
-      infoContainer: infoContainer ?? this.infoContainer,
-      glassFill: glassFill ?? this.glassFill,
-      glassBorder: glassBorder ?? this.glassBorder,
-      gradientStart: gradientStart ?? this.gradientStart,
-      gradientEnd: gradientEnd ?? this.gradientEnd,
-      shadow: shadow ?? this.shadow,
-      cardBorder: cardBorder ?? this.cardBorder,
-      subjects: subjects ?? this.subjects,
-    );
-  }
+  AppColors copyWith({Color? chalk, Color? paper, Color? paper2}) => AppColors(
+    chalk: chalk ?? this.chalk,
+    paper: paper ?? this.paper,
+    paper2: paper2 ?? this.paper2,
+    ink: ink,
+    ink2: ink2,
+    ink3: ink3,
+    line: line,
+    line2: line2,
+    scrim: scrim,
+    mariText: mariText,
+    mariSoft: mariSoft,
+    okSoft: okSoft,
+    badSoft: badSoft,
+    lateSoft: lateSoft,
+    glassTint: glassTint,
+    glassTintStrong: glassTintStrong,
+    glassShadow: glassShadow,
+    glassRim: glassRim,
+    dark: dark,
+  );
 
   @override
   AppColors lerp(ThemeExtension<AppColors>? other, double t) {
     if (other is! AppColors) return this;
-    Color mix(Color a, Color b) => Color.lerp(a, b, t)!;
+    Color m(Color a, Color b) => Color.lerp(a, b, t)!;
     return AppColors(
-      success: mix(success, other.success),
-      onSuccess: mix(onSuccess, other.onSuccess),
-      successContainer: mix(successContainer, other.successContainer),
-      warning: mix(warning, other.warning),
-      onWarning: mix(onWarning, other.onWarning),
-      warningContainer: mix(warningContainer, other.warningContainer),
-      danger: mix(danger, other.danger),
-      onDanger: mix(onDanger, other.onDanger),
-      dangerContainer: mix(dangerContainer, other.dangerContainer),
-      info: mix(info, other.info),
-      onInfo: mix(onInfo, other.onInfo),
-      infoContainer: mix(infoContainer, other.infoContainer),
-      glassFill: mix(glassFill, other.glassFill),
-      glassBorder: mix(glassBorder, other.glassBorder),
-      gradientStart: mix(gradientStart, other.gradientStart),
-      gradientEnd: mix(gradientEnd, other.gradientEnd),
-      shadow: mix(shadow, other.shadow),
-      cardBorder: mix(cardBorder, other.cardBorder),
-      subjects: t < 0.5 ? subjects : other.subjects,
+      chalk: m(chalk, other.chalk),
+      paper: m(paper, other.paper),
+      paper2: m(paper2, other.paper2),
+      ink: m(ink, other.ink),
+      ink2: m(ink2, other.ink2),
+      ink3: m(ink3, other.ink3),
+      line: m(line, other.line),
+      line2: m(line2, other.line2),
+      scrim: m(scrim, other.scrim),
+      mariText: m(mariText, other.mariText),
+      mariSoft: m(mariSoft, other.mariSoft),
+      okSoft: m(okSoft, other.okSoft),
+      badSoft: m(badSoft, other.badSoft),
+      lateSoft: m(lateSoft, other.lateSoft),
+      glassTint: m(glassTint, other.glassTint),
+      glassTintStrong: m(glassTintStrong, other.glassTintStrong),
+      glassShadow: m(glassShadow, other.glassShadow),
+      glassRim: m(glassRim, other.glassRim),
+      dark: t < 0.5 ? dark : other.dark,
     );
   }
 }

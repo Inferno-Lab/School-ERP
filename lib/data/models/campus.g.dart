@@ -264,6 +264,7 @@ LeaveRequest _$LeaveRequestFromJson(Map<String, dynamic> json) => LeaveRequest(
   appliedOn: DateTime.parse(json['appliedOn'] as String),
   reviewedBy: json['reviewedBy'] as String?,
   reviewNote: json['reviewNote'] as String?,
+  note: json['note'] as String?,
 );
 
 Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
@@ -277,6 +278,7 @@ Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
       'appliedOn': instance.appliedOn.toIso8601String(),
       'reviewedBy': ?instance.reviewedBy,
       'reviewNote': ?instance.reviewNote,
+      'note': ?instance.note,
     };
 
 const _$LeaveStatusEnumMap = {
@@ -289,6 +291,9 @@ GalleryPhoto _$GalleryPhotoFromJson(Map<String, dynamic> json) => GalleryPhoto(
   id: json['id'] as String,
   url: json['url'] as String,
   caption: json['caption'] as String,
+  tagged:
+      (json['tagged'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      [],
 );
 
 Map<String, dynamic> _$GalleryPhotoToJson(GalleryPhoto instance) =>
@@ -296,6 +301,7 @@ Map<String, dynamic> _$GalleryPhotoToJson(GalleryPhoto instance) =>
       'id': instance.id,
       'url': instance.url,
       'caption': instance.caption,
+      'tagged': instance.tagged,
     };
 
 GalleryAlbum _$GalleryAlbumFromJson(Map<String, dynamic> json) => GalleryAlbum(

@@ -1,14 +1,22 @@
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/utils/formatters.dart';
-import 'package:edunest/core/widgets/feature_page.dart';
-import 'package:edunest/core/widgets/progress.dart';
+import 'package:edunest/core/widgets/glass.dart';
+import 'package:edunest/core/widgets/page.dart';
+import 'package:edunest/core/widgets/sheets.dart';
 import 'package:edunest/core/widgets/states.dart';
+import 'package:edunest/core/widgets/toast.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
+import 'package:edunest/features/dashboard/views/dashboard_view.dart';
 import 'package:edunest/features/exams_results/controllers/results_controller.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ResultsView extends GetView<ResultsController> {
   const ResultsView({super.key});
@@ -16,194 +24,399 @@ class ResultsView extends GetView<ResultsController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      controller.examIndex.value;
       final result = controller.result;
-      final exam = controller.exam;
-      return FeaturePage(
-        title: 'results.title',
-        subtitle: 'results.subtitle',
-        onRefresh: controller.load,
-        child: ViewStateView(
-          state: controller.state.value,
-          onRetry: controller.load,
-          errorKey: controller.errorMessage.value,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 40,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: controller.exams.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) => ChoiceChip(
-                      label: Text(controller.exams[index].name),
-                      selected: controller.examIndex.value == index,
-                      onSelected: (_) => controller.examIndex.value = index,
+      final inset = MediaQuery.paddingOf(context);
+      final heroH = 203.0 + inset.top;
+      final onHero = result == null ? null : AppColors.white;
+      return PageFrame(
+        leading: BackGlass(color: onHero),
+        actions: [
+          if (controller.exams.isNotEmpty)
+            GlassPress(
+              onTap: () => unawaited(_pickExam(context)),
+              child: Glass(
+                height: 44,
+                width: 150,
+                radius: 22,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        controller.exam?.name ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: anek(15, 700, height: 1, color: onHero ?? context.app.ink).copyWith(shadows: _shadow),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 6),
+                    Icon(PhosphorIconsBold.caretDown, size: 13, color: onHero ?? context.app.ink),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                if (result == null)
-                  EmptyState(
-                    title: 'results.empty',
-                    body: exam == null
-                        ? 'home.no_exam'
-                        : 'time.days_left'.trParams({
-                            'count': '${Formatters.daysUntil(exam.startDate)}',
-                          }),
-                  )
-                else
-                  _ResultBody(result: result),
+              ),
+            ),
+          GlassIconButton(
+            icon: PhosphorIconsRegular.downloadSimple,
+            label: 'results.download'.tr,
+            color: onHero,
+            onTap: () => ToastHelper.show('results.downloaded', kind: ToastKind.success),
+          ),
+        ],
+        topPadding: 0,
+        padContent: false,
+        onRefresh: controller.load,
+        children: [
+          if (result == null)
+            Padding(
+              padding: EdgeInsets.fromLTRB(20, inset.top + 70, 20, 0),
+              child: ViewStateView(
+                state: controller.state.value,
+                onRetry: controller.load,
+                errorKey: controller.errorMessage.value,
+                emptyTitle: 'results.none_title',
+                emptyBody: 'results.none',
+                child: const SizedBox.shrink(),
+              ),
+            )
+          else ...[
+            _Columns(result: result, height: heroH),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'results.out_of'.trParams({'n': '${result.subjects.firstOrNull?.maxMarks ?? 0}'}),
+                  style: context.type.cap.copyWith(fontSize: 11.5),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              child: _Summary(controller: controller, result: result),
+            ),
+          ],
+        ],
+      );
+    });
+  }
+
+  Future<void> _pickExam(BuildContext context) => showSheet<void>(
+    SheetBody(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 18),
+          Text('results.pick_exam'.tr, style: context.type.h2),
+          const SizedBox(height: 12),
+          for (var i = 0; i < controller.exams.length; i++)
+            Pressable(
+              onTap: () {
+                controller.examIndex.value = i;
+                Get.back<void>();
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(controller.exams[i].name, style: context.type.t)),
+                    Text(
+                      '${controller.resultFor(controller.exams[i])?.overallPercent.round() ?? 0}%',
+                      style: context.type.cap,
+                    ),
+                    const SizedBox(width: 12),
+                    if (i == controller.examIndex.value)
+                      Icon(PhosphorIconsBold.check, size: 18, color: context.app.ink),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ),
+  );
+}
+
+const _shadow = [Shadow(color: Color(0x4D000000), blurRadius: 6, offset: Offset(0, 1))];
+
+class _Columns extends StatelessWidget {
+  const _Columns({required this.result, required this.height});
+
+  final ExamResult result;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final marks = [...result.subjects]..sort((a, b) => (b.marks / b.maxMarks).compareTo(a.marks / a.maxMarks));
+    return SizedBox(
+      height: height,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final n = marks.length;
+          final w = (box.maxWidth - 4 - (n - 1) * 3) / n;
+          return Stack(
+            children: [
+              for (var i = 0; i < n; i++)
+                _Column(
+                  mark: marks[i],
+                  left: 2 + i * (w + 3),
+                  width: w,
+                  maxHeight: height - 6,
+                  delay: i,
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _Column extends StatelessWidget {
+  const _Column({
+    required this.mark,
+    required this.left,
+    required this.width,
+    required this.maxHeight,
+    required this.delay,
+  });
+
+  final SubjectMark mark;
+  final double left;
+  final double width;
+  final double maxHeight;
+  final int delay;
+
+  @override
+  Widget build(BuildContext context) {
+    final pigment = AppColors.subject(mark.subject);
+    final pct = mark.marks / mark.maxMarks * 100;
+    // Scale from 60% so differences between strong subjects stay visible.
+    final h = math.max(64, ((pct - 60) / 40).clamp(0, 1) * (maxHeight - 64) + 64).toDouble();
+    return Positioned(
+      left: left,
+      top: 0,
+      width: width,
+      height: h,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: context.reduceMotion ? 1 : .2, end: 1),
+        duration: Duration(milliseconds: 900 + delay * 60),
+        curve: kSpring,
+        builder: (context, t, child) => Transform(
+          alignment: Alignment.topCenter,
+          transform: Matrix4.diagonal3Values(1, t, 1),
+          child: child,
+        ),
+        child: Semantics(
+          label: '${subjectName(mark.subject)} ${mark.marks} / ${mark.maxMarks}',
+          child: Container(
+            decoration: BoxDecoration(
+              color: pigment.fill,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            ),
+            padding: const EdgeInsets.only(bottom: 12),
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${mark.marks}', style: anek(20, 760, width: 118, height: 1, color: pigment.on)),
+                const SizedBox(height: 2),
+                Text(
+                  subjectAbbr[mark.subject] ?? '',
+                  style: anek(11, 700, height: 1, em: .06, color: pigment.on.withValues(alpha: .9)),
+                ),
               ],
             ),
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
-class _ResultBody extends StatelessWidget {
-  const _ResultBody({required this.result});
+class _Summary extends StatelessWidget {
+  const _Summary({required this.controller, required this.result});
 
+  final ResultsController controller;
   final ExamResult result;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.app;
+    final prev = controller.previous;
+    final trend = result.trend;
+    final changes = controller.changes.take(3).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [context.app.gradientStart, context.app.gradientEnd],
-            ),
-            borderRadius: BorderRadius.circular(AppRadius.card),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        Rise(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('results.overall'.tr, style: context.text.bodyMedium?.copyWith(color: Colors.white)),
-              AnimatedCounter(
-                value: result.overallPercent,
-                decimals: 1,
-                suffix: '%',
-                size: 36,
-                color: Colors.white,
+              BigNumber(value: '${result.overallPercent.round()}', unit: '%', size: 68),
+              const SizedBox(width: 14),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stamp('results.grade'.trParams({'g': result.grade}), color: AppColors.ok),
+                      const SizedBox(height: 6),
+                      Text(
+                        'results.rank'.trParams({'r': '${result.rank}', 't': '${result.totalStudents}'}),
+                        style: anek(13, 620, height: 1.2, color: c.ink3),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              Text(
-                '${result.grade} · ${'results.rank'.trParams({'rank': '${result.rank}', 'total': '${result.totalStudents}'})}',
-                style: context.text.titleMedium?.copyWith(color: Colors.white),
-              ),
+              const Spacer(),
+              if (trend.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: SizedBox(
+                    width: 90,
+                    height: 46,
+                    child: Semantics(
+                      label: 'results.trend'.trParams({'v': trend.map((t) => '${t.percent.round()}').join(', ')}),
+                      child: CustomPaint(painter: _Spark(trend.map((t) => t.percent).toList(), c.ink, c.chalk)),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Text('results.subjects'.tr, style: context.text.headlineSmall),
-        for (final subject in result.subjects) ...[
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(child: Text('subject.${subject.subject}'.tr, style: context.text.titleSmall)),
-              Text('${subject.marks}/${subject.maxMarks}', style: context.text.titleSmall),
-            ],
+        const SizedBox(height: 8),
+        if (trend.length > 1)
+          Rise(
+            index: 1,
+            child: Text(
+              _trendLine(trend),
+              style: context.type.s,
+            ),
           ),
-          const SizedBox(height: 4),
-          AnimatedBar(
-            value: subject.marks / subject.maxMarks,
-            color: context.app.subject(subject.subject).tone,
+        if (changes.isNotEmpty && prev != null) ...[
+          Rise(
+            index: 2,
+            child: SectionLabel('results.changed_since'.trParams({'exam': controller.previousExam?.name ?? ''})),
+          ),
+          Rise(
+            index: 3,
+            child: EduCard(
+              child: Column(
+                children: [
+                  for (var i = 0; i < changes.length; i++) ...[
+                    if (i > 0) const Hr(indent: 68),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      child: Row(
+                        children: [
+                          Cover(subject: changes[i].$1.subject),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  subjectName(changes[i].$1.subject) +
+                                      (i == 0 && changes[i].$2 > 0
+                                          ? ' · ${'results.biggest_gain'.tr}'
+                                          : changes[i].$2 < 0 && changes.where((x) => x.$2 < 0).length == 1
+                                          ? ' · ${'results.only_dip'.tr}'
+                                          : ''),
+                                  style: context.type.t,
+                                ),
+                                Text(
+                                  '${changes[i].$1.marks} / ${changes[i].$1.maxMarks} · ${changes[i].$1.grade}',
+                                  style: context.type.cap,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            changes[i].$2 > 0
+                                ? '+${changes[i].$2}'
+                                : changes[i].$2 == 0
+                                ? '0'
+                                : '−${changes[i].$2.abs()}',
+                            style: anek(
+                              16,
+                              700,
+                              height: 1,
+                              tabular: true,
+                              color: changes[i].$2 >= 0 ? AppColors.ok : c.badText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ],
-        const SizedBox(height: 20),
-        Text('results.trend'.tr, style: context.text.headlineSmall),
-        const SizedBox(height: 8),
-        SizedBox(height: 180, child: _Trend(result: result)),
-        const SizedBox(height: 12),
-        SizedBox(height: 220, child: _Radar(result: result)),
       ],
     );
   }
-}
 
-class _Trend extends StatelessWidget {
-  const _Trend({required this.result});
-
-  final ExamResult result;
-
-  @override
-  Widget build(BuildContext context) {
-    return LineChart(
-      LineChartData(
-        minY: 0,
-        maxY: 100,
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        titlesData: FlTitlesData(
-          topTitles: const AxisTitles(),
-          rightTitles: const AxisTitles(),
-          leftTitles: const AxisTitles(),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= result.trend.length) return const SizedBox.shrink();
-                return Text(result.trend[index].label, style: context.text.bodySmall);
-              },
-            ),
-          ),
-        ),
-        lineBarsData: [
-          LineChartBarData(
-            isCurved: true,
-            color: context.colors.primary,
-            barWidth: 3,
-            spots: [
-              for (var i = 0; i < result.trend.length; i++)
-                FlSpot(i.toDouble(), result.trend[i].percent),
-            ],
-          ),
-        ],
-      ),
-    );
+  String _trendLine(List<TrendPoint> trend) {
+    final last = trend.last;
+    final earlier = trend.reversed.skip(1).toList();
+    final parts = earlier
+        .map((t) => 'results.trend_part'.trParams({'p': '${t.percent.round()}', 'label': t.label}))
+        .join(' ${'common.and'.tr} ');
+    final up = last.percent >= trend[trend.length - 2].percent;
+    return (up ? 'results.up_from' : 'results.down_from').trParams({'parts': parts});
   }
 }
 
-class _Radar extends StatelessWidget {
-  const _Radar({required this.result});
+class _Spark extends CustomPainter {
+  _Spark(this.values, this.ink, this.chalk);
 
-  final ExamResult result;
+  final List<double> values;
+  final Color ink;
+  final Color chalk;
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.colors.primary;
-    return RadarChart(
-      RadarChartData(
-        dataSets: [
-          RadarDataSet(
-            dataEntries: [
-              for (final subject in result.subjects)
-                RadarEntry(value: subject.marks / subject.maxMarks * 100),
-            ],
-            fillColor: color.withValues(alpha: 0.18),
-            borderColor: color,
-            entryRadius: 3,
-          ),
-        ],
-        radarShape: RadarShape.polygon,
-        tickCount: 3,
-        ticksTextStyle: const TextStyle(fontSize: 0, color: Colors.transparent),
-        gridBorderData: BorderSide(color: context.colors.outline),
-        radarBorderData: BorderSide(color: context.colors.outline),
-        titleTextStyle: context.text.bodySmall,
-        getTitle: (index, angle) => RadarChartTitle(
-          text: 'subject.${result.subjects[index].subject}'.tr,
-        ),
-      ),
+  void paint(Canvas canvas, Size size) {
+    final lo = values.reduce(math.min) - 2;
+    final hi = values.reduce(math.max) + 2;
+    Offset at(int i) => Offset(
+      4 + (size.width - 8) * i / (values.length - 1),
+      size.height - 8 - (size.height - 16) * (values[i] - lo) / (hi - lo),
     );
+    final path = Path()..moveTo(at(0).dx, at(0).dy);
+    for (var i = 1; i < values.length; i++) {
+      path.lineTo(at(i).dx, at(i).dy);
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = ink
+        ..strokeWidth = 2.5
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+    for (var i = 0; i < values.length - 1; i++) {
+      canvas.drawCircle(at(i), 3, Paint()..color = ink);
+    }
+    final last = at(values.length - 1);
+    canvas
+      ..drawCircle(last, 4, Paint()..color = AppColors.mari)
+      ..drawCircle(
+        last,
+        4,
+        Paint()
+          ..color = ink
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
   }
+
+  @override
+  bool shouldRepaint(_Spark old) => old.values != values || old.ink != ink;
 }

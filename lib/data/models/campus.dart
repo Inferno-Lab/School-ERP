@@ -375,6 +375,7 @@ class LeaveRequest {
     required this.appliedOn,
     this.reviewedBy,
     this.reviewNote,
+    this.note,
   });
 
   factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
@@ -390,6 +391,9 @@ class LeaveRequest {
   final String? reviewedBy;
   final String? reviewNote;
 
+  /// The family's note to the class teacher.
+  final String? note;
+
   Map<String, dynamic> toJson() => _$LeaveRequestToJson(this);
 }
 
@@ -399,6 +403,7 @@ class GalleryPhoto {
     required this.id,
     required this.url,
     required this.caption,
+    this.tagged = const [],
   });
 
   factory GalleryPhoto.fromJson(Map<String, dynamic> json) =>
@@ -407,6 +412,10 @@ class GalleryPhoto {
   final String id;
   final String url;
   final String caption;
+
+  /// Students who appear in the photo.
+  @JsonKey(defaultValue: <String>[])
+  final List<String> tagged;
 
   Map<String, dynamic> toJson() => _$GalleryPhotoToJson(this);
 }

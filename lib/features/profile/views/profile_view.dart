@@ -1,46 +1,67 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/loadable.dart';
-import 'package:edunest/core/widgets/app_avatar.dart';
-import 'package:edunest/core/widgets/app_card.dart';
-import 'package:edunest/core/widgets/feature_page.dart';
+import 'package:edunest/core/widgets/glass.dart';
+import 'package:edunest/core/widgets/page.dart';
+import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/toast.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/student.dart';
 import 'package:edunest/data/models/user.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+const _houseColors = {
+  'Emerald': Color(0xFF23784A),
+  'Sapphire': Color(0xFF2F5BD3),
+  'Ruby': Color(0xFFB8306F),
+  'Amber': Color(0xFFE0A81E),
+};
 
 class ProfileController extends GetxController with Loadable {
   Student? student;
   SchoolClass? schoolClass;
+  Teacher? teacher;
+  List<SchoolClass> teaching = [];
 
   @override
   Future<void> load() async {
-    final id = Get.find<AuthService>().activeStudentId.value;
-    if (id == null) {
-      await run(() async {}, isEmpty: () => false);
-      return;
-    }
+    final auth = Get.find<AuthService>();
+    final id = auth.activeStudentId.value;
+    final teacherId = auth.user.value?.teacherId;
     await run(() async {
       final directory = Get.find<DirectoryRepository>();
-      student = await directory.student(id);
-      schoolClass = await directory.schoolClass(student!.classId);
+      student = null;
+      teacher = null;
+      if (id != null) {
+        student = await directory.student(id);
+        schoolClass = await directory.schoolClass(student!.classId);
+      } else if (teacherId != null) {
+        teacher = await directory.teacher(teacherId);
+        teaching = await directory.classesForTeacher(teacherId);
+      }
     }, isEmpty: () => false);
   }
 
   Future<void> editPhoto() async {
     try {
-      final file = await ImagePicker().pickImage(source: ImageSource.gallery);
+      final file = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
       if (file == null) return;
       await Get.find<AuthService>().updateAvatar(file.path);
       ToastHelper.show('profile.photo', kind: ToastKind.success);
     } on Exception {
-      ToastHelper.show('profile.photo');
+      ToastHelper.show('profile.photo_failed', kind: ToastKind.error);
     }
   }
 }
@@ -52,110 +73,279 @@ class ProfileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     final auth = Get.find<AuthService>();
     return Obx(() {
+      controller.state.value;
       final user = auth.user.value;
-      return FeaturePage(
-        title: 'profile.title',
-        subtitle: user?.email ?? '',
+      final role = user?.role;
+      final student = controller.student;
+      final teacher = controller.teacher;
+      return PageFrame(
+        dockPage: true,
+        topPadding: MediaQuery.paddingOf(context).top + 14,
         onRefresh: controller.load,
-        child: ListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-          children: [
-            GradientHeader(
-              height: 180,
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: GestureDetector(
-                  onTap: controller.editPhoto,
-                  child: Stack(
-                    children: [
-                      AppAvatar(
-                        name: user?.name ?? '',
-                        url: user?.avatarUrl,
-                        size: 72,
-                      ),
-                      const Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Icon(PhosphorIconsFill.camera, color: Colors.white, size: 18),
-                      ),
-                    ],
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text('profile.title'.tr, style: context.type.h1)),
+              GlassIconButton(
+                icon: PhosphorIconsRegular.slidersHorizontal,
+                label: 'menu.settings'.tr,
+                onTap: () => Get.toNamed<void>(AppRoutes.settings),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          ViewStateView(
+            state: controller.state.value,
+            onRetry: controller.load,
+            errorKey: controller.errorMessage.value,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (student != null)
+                  Rise(
+                    child: _IdCard(
+                      color: _houseColors[student.house] ?? Avatar.houseFor(student.name),
+                      name: student.name,
+                      photo: role == UserRole.student ? user?.avatarUrl : null,
+                      facts: [
+                        (
+                          'profile.class'.tr,
+                          '${controller.schoolClass?.name.replaceAll(RegExp('[^0-9]'), '') ?? ''} ${controller.schoolClass?.section ?? ''} · ${'fees.roll'.trParams({'n': student.rollNo})}',
+                        ),
+                        ('profile.house'.tr, student.house),
+                        ('profile.born'.tr, _dob(student.dob)),
+                        ('profile.blood'.tr, student.bloodGroup),
+                      ],
+                      code:
+                          'GIS-${controller.schoolClass?.name.replaceAll(RegExp('[^0-9]'), '') ?? ''}${controller.schoolClass?.section ?? ''}-${student.rollNo}',
+                      onPhoto: role == UserRole.student ? () => unawaited(controller.editPhoto()) : null,
+                    ),
+                  )
+                else if (teacher != null)
+                  Rise(
+                    child: _IdCard(
+                      color: AppColors.subject(teacher.subject).fill,
+                      name: teacher.name,
+                      photo: user?.avatarUrl,
+                      facts: [
+                        ('profile.subject'.tr, subjectName(teacher.subject)),
+                        (
+                          'profile.classes'.tr,
+                          controller.teaching
+                              .map((c) => '${c.name.replaceAll(RegExp('[^0-9]'), '')} ${c.section}')
+                              .join(', '),
+                        ),
+                        ('profile.phone'.tr, teacher.phone),
+                        ('profile.role'.tr, 'profile.teacher'.tr),
+                      ],
+                      code: teacher.id.toUpperCase().replaceAll('_', '-'),
+                      onPhoto: () => unawaited(controller.editPhoto()),
+                    ),
                   ),
-                ),
-              ),
+                Rise(index: 1, child: SectionLabel('profile.around'.tr, top: 20)),
+                Rise(index: 2, child: _Tiles(teacher: role == UserRole.teacher)),
+                if (student != null) ...[
+                  const SizedBox(height: 12),
+                  Rise(
+                    index: 3,
+                    child: EduCard(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                        child: Row(
+                          children: [
+                            Avatar(
+                              student.guardianName,
+                              size: 32,
+                              background: context.app.paper2,
+                              foreground: context.app.ink,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    role == UserRole.parent && user?.name == student.guardianName
+                                        ? '${student.guardianName} · ${'profile.you'.tr}'
+                                        : '${student.guardianName} · ${'profile.guardian'.tr}',
+                                    style: context.type.t.copyWith(fontSize: 15),
+                                  ),
+                                  Text(student.guardianPhone, style: context.type.cap),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(user?.name ?? '', style: context.text.headlineMedium),
-            if (controller.student != null)
-              AppCard(
-                child: Column(
-                  children: [
-                    _Row('profile.class', controller.schoolClass?.label ?? ''),
-                    _Row('profile.roll', controller.student!.rollNo),
-                    _Row('profile.house', controller.student!.house),
-                    _Row('profile.blood', controller.student!.bloodGroup),
-                    _Row('profile.guardian', controller.student!.guardianName),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 16),
-            Text('profile.more'.tr, style: context.text.headlineSmall),
-            for (final item in _links(user?.role))
-              ListTile(
-                leading: Icon(item.$1),
-                title: Text(item.$2.tr),
-                trailing: const Icon(PhosphorIconsRegular.caretRight),
-                onTap: () => Get.toNamed<void>(item.$3),
-              ),
-          ],
-        ),
+          ),
+        ],
       );
     });
   }
 
-  List<(IconData, String, String)> _links(UserRole? role) {
-    final common = <(IconData, String, String)>[
-      (PhosphorIconsRegular.megaphone, 'menu.notices', AppRoutes.notices),
-      (PhosphorIconsRegular.calendar, 'menu.events', AppRoutes.events),
-      (PhosphorIconsRegular.bell, 'menu.notifications', AppRoutes.notifications),
-      (PhosphorIconsRegular.gear, 'menu.settings', AppRoutes.settings),
-      (PhosphorIconsRegular.building, 'menu.about', AppRoutes.about),
-      (PhosphorIconsRegular.question, 'menu.help', AppRoutes.help),
-    ];
-    if (role == UserRole.teacher) return common;
-    return [
-      (PhosphorIconsRegular.bus, 'menu.transport', AppRoutes.transport),
-      (PhosphorIconsRegular.bookOpen, 'menu.library', AppRoutes.library),
-      (PhosphorIconsRegular.image, 'menu.gallery', AppRoutes.gallery),
-      (PhosphorIconsRegular.calendarCheck, 'menu.leave', AppRoutes.leave),
-      ...common,
-    ];
+  static String _dob(String iso) {
+    final d = DateTime.tryParse(iso);
+    return d == null ? iso : DateFormat('d MMM y').format(d);
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value);
+class _IdCard extends StatelessWidget {
+  const _IdCard({
+    required this.color,
+    required this.name,
+    required this.facts,
+    required this.code,
+    this.photo,
+    this.onPhoto,
+  });
 
-  final String label;
-  final String value;
+  final Color color;
+  final String name;
+  final String? photo;
+  final List<(String, String)> facts;
+  final String code;
+  final VoidCallback? onPhoto;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
+    final on = color == const Color(0xFFE0A81E) ? AppColors.mariInk : AppColors.white;
+    final now = DateTime.now();
+    final start = now.month >= 6 ? now.year : now.year - 1;
+    TextStyle k() => anek(10.5, 700, height: 1.2, em: .09, color: on.withValues(alpha: .75));
+    final local = photo != null && photo!.isNotEmpty && !photo!.startsWith('http');
+    final initials = Text(Avatar.initialsOf(name), style: anek(28, 780, width: 120, height: 1, color: color));
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: const [
+          BoxShadow(color: Color(0xB310201B), blurRadius: 40, spreadRadius: -24, offset: Offset(0, 20)),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Expanded(child: Text(label.tr, style: context.text.bodySmall)),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.titleSmall,
+          Positioned(
+            right: -68,
+            top: -68,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: const BoxDecoration(color: Color(0x14FFFFFF), shape: BoxShape.circle),
             ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AppConfig.schoolName.toUpperCase(),
+                      style: k(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text('$start–${(start + 1) % 100}', style: k()),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 78,
+                    height: 96,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: const Color(0xFFFBFCF9), borderRadius: BorderRadius.circular(14)),
+                    clipBehavior: Clip.antiAlias,
+                    child: local
+                        ? Image.file(
+                            File(photo!),
+                            fit: BoxFit.cover,
+                            width: 78,
+                            height: 96,
+                            errorBuilder: (_, _, _) => initials,
+                          )
+                        : initials,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name, style: context.type.h2.copyWith(color: on)),
+                        const SizedBox(height: 10),
+                        LayoutBuilder(
+                          builder: (context, box) => Wrap(
+                            spacing: 10,
+                            runSpacing: 8,
+                            children: [
+                              for (final f in facts)
+                                SizedBox(
+                                  width: (box.maxWidth - 10) / 2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(f.$1.toUpperCase(), style: k()),
+                                      const SizedBox(height: 2),
+                                      Text(f.$2, style: anek(15, 650, height: 1.25, color: on), maxLines: 2),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(code, style: context.type.mono.copyWith(color: on.withValues(alpha: .85))),
+                  ),
+                  if (onPhoto != null)
+                    GlassPress(
+                      onTap: onPhoto,
+                      child: Semantics(
+                        button: true,
+                        child: Glass(
+                          height: 36,
+                          width: 120,
+                          radius: 18,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(PhosphorIconsRegular.camera, size: 15, color: on),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'profile.new_photo'.tr,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: anek(13, 650, height: 1, color: on),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -163,66 +353,72 @@ class _Row extends StatelessWidget {
   }
 }
 
-class AboutView extends StatefulWidget {
-  const AboutView({super.key});
+class _Tiles extends StatelessWidget {
+  const _Tiles({required this.teacher});
 
-  @override
-  State<AboutView> createState() => _AboutViewState();
-}
-
-class _AboutViewState extends State<AboutView> {
-  late Future<SchoolInfo> _school = Get.find<DirectoryRepository>().school();
+  final bool teacher;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _school,
-      builder: (context, snapshot) {
-        final school = snapshot.data;
-        final failed = snapshot.hasError;
-        return FeaturePage(
-          title: 'about.title',
-          subtitle: school?.tagline ?? AppConfig.appName,
-          onRefresh: () async {
-            setState(() {
-              _school = Get.find<DirectoryRepository>().school();
-            });
-            await _school;
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: school == null
-                ? failed
-                    ? Column(
+    final c = context.app;
+    SubjectColor s(String id) => AppColors.subject(id);
+    final tiles = <(IconData, String, String, Color, Color)>[
+      if (!teacher) (PhosphorIconsRegular.megaphone, 'menu.notices', AppRoutes.notices, c.mariSoft, c.mariText),
+      (PhosphorIconsRegular.calendarBlank, 'menu.events', AppRoutes.events, s('science').fill, s('science').on),
+      if (!teacher) (PhosphorIconsRegular.bus, 'menu.transport', AppRoutes.transport, s('social').fill, s('social').on),
+      if (!teacher)
+        (PhosphorIconsRegular.bookOpen, 'menu.library', AppRoutes.library, s('computer').fill, s('computer').on),
+      (PhosphorIconsRegular.image, 'menu.gallery', AppRoutes.gallery, s('hindi').fill, s('hindi').on),
+      if (!teacher)
+        (PhosphorIconsRegular.calendarCheck, 'menu.leave', AppRoutes.leave, s('english').fill, s('english').on),
+      if (teacher) (PhosphorIconsRegular.bell, 'menu.notifications', AppRoutes.notifications, c.mariSoft, c.mariText),
+    ];
+    return LayoutBuilder(
+      builder: (context, box) {
+        final w = (box.maxWidth - 16) / 3;
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final t in tiles)
+              SizedBox(
+                width: w,
+                child: Semantics(
+                  button: true,
+                  label: t.$2.tr,
+                  excludeSemantics: true,
+                  child: Pressable(
+                    onTap: () => Get.toNamed<void>(t.$3),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: c.paper,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: c.line),
+                      ),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('errors.generic'.tr, style: context.text.bodyLarge),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _school = Get.find<DirectoryRepository>().school();
-                              });
-                            },
-                            child: Text('common.retry'.tr),
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(color: t.$4, borderRadius: BorderRadius.circular(11)),
+                            child: Icon(t.$1, size: 18, color: t.$5),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            t.$2.tr,
+                            style: context.type.t.copyWith(fontSize: 14),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
-                      )
-                    : const Center(child: CircularProgressIndicator())
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(school.name, style: context.text.headlineMedium),
-                      const SizedBox(height: 8),
-                      Text(school.about, style: context.text.bodyLarge),
-                      const SizedBox(height: 12),
-                      Text(school.address, style: context.text.bodyMedium),
-                      Text(school.officeHours, style: context.text.bodySmall),
-                      Text('${school.principal} · ${school.founded}', style: context.text.bodySmall),
-                      Text(school.email, style: context.text.bodyMedium),
-                      Text(school.phone, style: context.text.bodyMedium),
-                    ],
+                      ),
+                    ),
                   ),
-          ),
+                ),
+              ),
+          ],
         );
       },
     );

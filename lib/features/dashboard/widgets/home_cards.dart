@@ -1,300 +1,308 @@
+import 'dart:async';
+
 import 'package:edunest/core/routes/app_routes.dart';
-import 'package:edunest/core/theme/tokens.dart';
+import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/formatters.dart';
-import 'package:edunest/core/widgets/app_card.dart';
-import 'package:edunest/core/widgets/chips.dart';
-import 'package:edunest/core/widgets/progress.dart';
+import 'package:edunest/core/utils/status.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/data/models/campus.dart';
-import 'package:edunest/features/shell/shell_controller.dart';
+import 'package:edunest/features/dashboard/controllers/dashboard_controller.dart';
+import 'package:edunest/features/dashboard/views/dashboard_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-class AttendanceRingCard extends StatelessWidget {
-  const AttendanceRingCard({required this.percent, super.key});
+/// Merged Due stack: fees, homework and replies in one card.
+class DueList extends StatelessWidget {
+  const DueList({required this.items, this.showChild = false, super.key});
 
-  final double percent;
+  final List<DueItem> items;
+  final bool showChild;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      onTap: () => Get.toNamed<void>(AppRoutes.attendance),
-      child: Row(
+    return EduCard(
+      child: Column(
         children: [
-          AnimatedProgressRing(
-            percent: percent,
-            size: 92,
-            child: AnimatedCounter(
-              value: percent,
-              suffix: '%',
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('home.attendance'.tr, style: context.text.headlineSmall),
-                Text('home.this_month'.tr, style: context.text.bodySmall),
-              ],
-            ),
-          ),
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) const Hr(indent: 68),
+            _DueRow(item: items[i], showChild: showChild),
+          ],
         ],
       ),
     );
   }
 }
 
-class TimetableStrip extends StatelessWidget {
-  const TimetableStrip({required this.day, super.key});
+class _DueRow extends StatelessWidget {
+  const _DueRow({required this.item, required this.showChild});
 
-  final TimetableDay? day;
+  final DueItem item;
+  final bool showChild;
 
   @override
   Widget build(BuildContext context) {
-    final periods = day?.periods ?? const <PeriodSlot>[];
-    return SizedBox(
-      height: 108,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: periods.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final period = periods[index];
-          final now = _isNow(period);
-          final colors = context.app.subject(period.subject);
-          return InkWell(
-            onTap: () => Get.toNamed<void>(AppRoutes.timetable),
-            borderRadius: BorderRadius.circular(AppRadius.tile),
-            child: Container(
-              width: 148,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colors.tint,
-                borderRadius: BorderRadius.circular(AppRadius.tile),
-                border: now ? Border.all(color: colors.tone, width: 1.6) : null,
-              ),
+    final c = context.app;
+    final child = showChild && item.childName != null ? ' · ${item.childName}' : '';
+    switch (item.kind) {
+      case DueKind.fee:
+        final fee = item.installment!;
+        final overdue = moneyStatus(fee) == MoneyStatus.overdue;
+        final late = -Formatters.daysUntil(fee.dueDate);
+        return _Row(
+          leading: _MoneyCover(overdue: overdue),
+          title: '${fee.title}$child',
+          subtitle: overdue
+              ? 'home.fee_late'.trParams({'amount': Formatters.inr(fee.amount), 'n': '$late'})
+              : 'home.fee_due_on'.trParams({
+                  'amount': Formatters.inr(fee.amount),
+                  'date': DateFormat('EEE d MMM').format(fee.dueDate),
+                }),
+          subtitleColor: overdue ? c.badText : null,
+          trailing: overdue
+              ? Btn('home.pay', small: true, onPressed: () => unawaited(_openFees(item, pay: true)))
+              : Stamp(daysStamp(fee.dueDate), color: c.dark ? const Color(0xFFF6BA45) : AppColors.late),
+          onTap: () => unawaited(_openFees(item)),
+        );
+      case DueKind.homework:
+        final hw = item.homework!;
+        return _Row(
+          leading: Cover(subject: hw.subject),
+          title: '${hw.title}$child',
+          subtitle:
+              '${subjectName(hw.subject)} · ${Formatters.countdown(hw.dueOn).trParams({'count': '${Formatters.daysUntil(hw.dueOn)}'}).toLowerCase()}',
+          trailing: Stamp(daysStamp(hw.dueOn), color: c.dark ? const Color(0xFFF6BA45) : AppColors.late),
+          onTap: () => Get.toNamed<void>(AppRoutes.homeworkDetail.replaceFirst(':id', hw.id)),
+        );
+      case DueKind.event:
+        final event = item.event!;
+        return _Row(
+          leading: Cover(subject: _eventPigment(event)),
+          title: 'home.reply_to'.trParams({'title': event.title}),
+          subtitle: 'home.are_you_going'.trParams({'date': DateFormat('EEE d MMM').format(event.date)}),
+          trailing: Icon(PhosphorIconsRegular.caretRight, size: 18, color: c.ink3),
+          onTap: () => Get.toNamed<void>(AppRoutes.eventDetail.replaceFirst(':id', event.id)),
+        );
+    }
+  }
+}
+
+String _eventPigment(SchoolEvent event) => switch (event.category) {
+  'sports' => 'pe',
+  'academic' => 'maths',
+  'cultural' => 'hindi',
+  _ => 'science',
+};
+
+class _MoneyCover extends StatelessWidget {
+  const _MoneyCover({required this.overdue});
+
+  final bool overdue;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    return Container(
+      width: 42,
+      height: 52,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: overdue ? c.badSoft : c.lateSoft,
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Text('₹', style: context.type.h2.copyWith(fontSize: 20, color: overdue ? c.badText : AppColors.late)),
+    );
+  }
+}
+
+class _Row extends StatelessWidget {
+  const _Row({
+    required this.leading,
+    required this.title,
+    required this.subtitle,
+    this.subtitleColor,
+    this.trailing,
+    this.onTap,
+  });
+
+  final Widget leading;
+  final String title;
+  final String subtitle;
+  final Color? subtitleColor;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Pressable(
+      onTap: onTap,
+      scale: .985,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            leading,
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.type.t),
+                  const SizedBox(height: 2),
                   Text(
-                    '${period.start}–${period.end}',
-                    style: context.text.bodySmall?.copyWith(color: colors.tone),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'subject.${period.subject}'.tr,
-                    style: context.text.titleMedium?.copyWith(color: colors.tone),
-                    maxLines: 2,
-                  ),
-                  if (now)
-                    Text(
-                      'timetable.now'.tr,
-                      style: context.text.bodySmall?.copyWith(color: colors.tone),
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.type.cap.copyWith(
+                      color: subtitleColor,
+                      fontWeight: subtitleColor == null ? null : FontWeight.w600,
                     ),
+                  ),
                 ],
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  bool _isNow(PeriodSlot period) {
-    final now = DateTime.now();
-    final start = _clock(period.start);
-    final end = _clock(period.end);
-    final current = now.hour * 60 + now.minute;
-    return current >= start && current < end;
-  }
-
-  int _clock(String value) {
-    final parts = value.split(':');
-    return int.parse(parts[0]) * 60 + int.parse(parts[1]);
-  }
-}
-
-class HomeworkDueCard extends StatelessWidget {
-  const HomeworkDueCard({required this.items, super.key});
-
-  final List<Homework> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final nearest = items.isEmpty
-        ? null
-        : (items.toList()..sort((a, b) => a.dueOn.compareTo(b.dueOn))).first;
-    final label = nearest == null
-        ? 'home.nothing_due'.tr
-        : _due(nearest.dueOn);
-    return AppCard(
-      onTap: () => Get.toNamed<void>(AppRoutes.homework),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('${items.length}', style: context.text.headlineMedium),
-          Text('home.homework'.tr, style: context.text.titleSmall),
-          const Spacer(),
-          Text(label, style: context.text.bodySmall),
-        ],
-      ),
-    );
-  }
-
-  String _due(DateTime date) {
-    final key = Formatters.countdown(date);
-    if (key == 'time.due_in_days') {
-      return key.trParams({'count': '${Formatters.daysUntil(date)}'});
-    }
-    return key.tr;
-  }
-}
-
-class ExamCard extends StatelessWidget {
-  const ExamCard({required this.exam, super.key});
-
-  final Exam? exam;
-
-  @override
-  Widget build(BuildContext context) {
-    final days = exam == null ? 0 : Formatters.daysUntil(exam!.startDate);
-    return AppCard(
-      onTap: () => Get.toNamed<void>(AppRoutes.results),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SoftChip(label: exam == null ? 'home.no_exam' : 'time.days_left'.trParams({'count': '$days'})),
-          const Spacer(),
-          Text(exam?.name ?? 'home.exam'.tr, style: context.text.titleMedium),
-          Text('home.exam'.tr, style: context.text.bodySmall),
-        ],
-      ),
-    );
-  }
-}
-
-class FeeBanner extends StatelessWidget {
-  const FeeBanner({required this.item, super.key});
-
-  final Installment item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [context.app.gradientStart, context.app.gradientEnd],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'home.fee_due'.tr,
-                  style: context.text.bodySmall?.copyWith(color: Colors.white),
-                ),
-                Text(
-                  Formatters.inr(item.amount),
-                  style: context.text.headlineSmall?.copyWith(color: Colors.white),
-                ),
-                Text(
-                  item.title,
-                  style: context.text.bodyMedium?.copyWith(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.white),
-            onPressed: () {
-              if (Get.isRegistered<ShellController>()) {
-                Get.find<ShellController>().index.value = 2;
-              }
-            },
-            child: Text(
-              'common.pay_now'.tr,
-              style: TextStyle(color: context.colors.primary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class NoticeCarousel extends StatefulWidget {
-  const NoticeCarousel({required this.notices, super.key});
-
-  final List<Notice> notices;
-
-  @override
-  State<NoticeCarousel> createState() => _NoticeCarouselState();
-}
-
-class _NoticeCarouselState extends State<NoticeCarousel> {
-  final _page = PageController();
-  var _index = 0;
-
-  @override
-  void dispose() {
-    _page.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.notices.isEmpty) return const SizedBox.shrink();
-    return Column(
-      children: [
-        SizedBox(
-          height: 120,
-          child: PageView.builder(
-            controller: _page,
-            itemCount: widget.notices.length,
-            onPageChanged: (value) => setState(() => _index = value),
-            itemBuilder: (context, index) {
-              final notice = widget.notices[index];
-              return AppCard(
-                onTap: () => Get.toNamed<void>('/notices/${notice.id}'),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(notice.title, style: context.text.titleMedium, maxLines: 2),
-                    const Spacer(),
-                    Text(Formatters.dayMonth(notice.date), style: context.text.bodySmall),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            for (var i = 0; i < widget.notices.length; i++)
-              Container(
-                width: i == _index ? 14 : 6,
-                height: 6,
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                decoration: BoxDecoration(
-                  color: i == _index
-                      ? context.colors.primary
-                      : context.colors.outline,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
+            if (trailing != null) ...[const SizedBox(width: 10), trailing!],
           ],
         ),
-      ],
+      ),
     );
   }
+}
+
+/// Parent strip: each child's attendance and current class today.
+class ChildrenStrip extends StatelessWidget {
+  const ChildrenStrip({required this.children, super.key});
+
+  final List<ChildToday> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    return EduCard(
+      child: Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const Hr(indent: 66),
+            Builder(
+              builder: (context) {
+                final child = children[i];
+                final status = child.status;
+                final (label, tone) = switch (status) {
+                  AttendanceStatus.present => ('attendance.present', AppColors.ok),
+                  AttendanceStatus.absent => ('attendance.absent', c.badText),
+                  AttendanceStatus.lateArrival => ('attendance.late', AppColors.late),
+                  AttendanceStatus.holiday => ('attendance.holiday', AppColors.off),
+                  null => ('attendance.not_marked', AppColors.off),
+                };
+                final period = child.period;
+                final now = period == null
+                    ? 'home.no_class_now'.tr
+                    : period.kind == PeriodKind.klass
+                    ? 'home.subject_now'.trParams({'subject': subjectName(period.subject)})
+                    : subjectName(period.subject);
+                return Pressable(
+                  onTap: () => Get.toNamed<void>(AppRoutes.attendance),
+                  scale: .985,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                    child: Row(
+                      children: [
+                        Avatar(
+                          child.student.name,
+                          initials: Avatar.siblingInitials(child.student.name, [
+                            for (final k in children) k.student.name,
+                          ]),
+                          background: i.isEven ? AppColors.subject('maths').fill : AppColors.subject('hindi').fill,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text.rich(
+                                TextSpan(
+                                  text: child.student.name.split(' ').first,
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          ' · ${child.schoolClass.name.replaceAll(RegExp('[^0-9]'), '')} ${child.schoolClass.section}',
+                                      style: context.type.cap,
+                                    ),
+                                  ],
+                                ),
+                                style: context.type.t,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${label.tr} · $now',
+                                style: context.type.cap,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Stamp(label.tr, color: tone),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class NoticeLine extends StatelessWidget {
+  const NoticeLine({required this.notice, super.key});
+
+  final Notice notice;
+
+  @override
+  Widget build(BuildContext context) {
+    return Pressable(
+      onTap: () => Get.toNamed<void>(AppRoutes.noticeDetail.replaceFirst(':id', notice.id)),
+      scale: .985,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Stamp('notice_cat.${notice.category}'.tr, color: noticeTone(context, notice.category), size: 10),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(notice.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.type.t),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Color noticeTone(BuildContext context, String category) {
+  final c = context.app;
+  return switch (category) {
+    'exams' => c.badText,
+    'academic' => c.mariText,
+    'sports' => AppColors.ok,
+    'holiday' => AppColors.subject('social').fill,
+    'fees' => c.dark ? const Color(0xFFF6BA45) : AppColors.late,
+    _ => c.ink3,
+  };
+}
+
+/// Opens Fees for the child the fee belongs to, optionally straight into paying it.
+Future<void> _openFees(DueItem item, {bool pay = false}) async {
+  final auth = Get.find<AuthService>();
+  if (item.studentId != null && item.studentId != auth.activeStudentId.value) {
+    await auth.switchChild(item.studentId!);
+  }
+  await Get.toNamed<void>(AppRoutes.fees, arguments: pay ? {'pay': item.installment!.id} : null);
 }

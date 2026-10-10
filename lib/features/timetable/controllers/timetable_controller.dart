@@ -1,7 +1,10 @@
 import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/utils/formatters.dart';
 import 'package:edunest/core/utils/loadable.dart';
+import 'package:edunest/core/utils/schedule.dart';
 import 'package:edunest/core/utils/status.dart';
 import 'package:edunest/data/models/academics.dart';
+import 'package:edunest/data/models/student.dart';
 import 'package:edunest/data/repositories/academic_repository.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
 import 'package:get/get.dart';
@@ -9,7 +12,11 @@ import 'package:get/get.dart';
 class TimetableController extends GetxController with Loadable {
   final dayIndex = (DateTime.now().weekday - 1).clamp(0, 5).obs;
   List<TimetableDay> days = [];
+  SchoolClass? schoolClass;
   final teachers = <String, String>{}.obs;
+
+  /// Subjects with homework due by the next school day.
+  Set<String> homeworkDue = {};
 
   static const keys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -21,6 +28,15 @@ class TimetableController extends GetxController with Loadable {
     return null;
   }
 
+  bool get isToday => weekdayKey(DateTime.now()) == keys[dayIndex.value];
+
+  /// The date of the selected weekday in the current week.
+  DateTime dateOf(int index) {
+    final now = DateTime.now();
+    final monday = DateTime(now.year, now.month, now.day - (now.weekday - 1));
+    return monday.add(Duration(days: index));
+  }
+
   @override
   Future<void> load() async {
     final id = Get.find<AuthService>().activeStudentId.value;
@@ -29,24 +45,32 @@ class TimetableController extends GetxController with Loadable {
       return;
     }
     await run(() async {
-      final student = await Get.find<DirectoryRepository>().student(id);
-      days = await Get.find<TimetableRepository>().forClass(student.classId);
-      final people = await Get.find<DirectoryRepository>().teachers();
+      final directory = Get.find<DirectoryRepository>();
+      final student = await directory.student(id);
+      final results = await Future.wait<Object?>([
+        Get.find<TimetableRepository>().forClass(student.classId),
+        directory.teachers(),
+        directory.schoolClass(student.classId),
+        Get.find<HomeworkRepository>().forClass(student.classId),
+      ]);
+      days = results[0]! as List<TimetableDay>;
       teachers
         ..clear()
-        ..addAll({for (final teacher in people) teacher.id: teacher.name});
+        ..addAll({for (final teacher in results[1]! as List<Teacher>) teacher.id: teacher.name});
+      schoolClass = results[2] as SchoolClass?;
+      homeworkDue = {
+        for (final hw in results[3]! as List<Homework>)
+          if ((hw.forStudent(id)?.status ?? HomeworkStatus.pending) == HomeworkStatus.pending &&
+              Formatters.daysUntil(hw.dueOn) >= 0 &&
+              Formatters.daysUntil(hw.dueOn) <= 1)
+            hw.subject,
+      };
     }, isEmpty: () => days.isEmpty);
   }
 
   bool isNow(PeriodSlot period) {
-    if (weekdayKey(DateTime.now()) != keys[dayIndex.value]) return false;
-    final now = DateTime.now();
-    final current = now.hour * 60 + now.minute;
-    int clock(String value) {
-      final parts = value.split(':');
-      return int.parse(parts[0]) * 60 + int.parse(parts[1]);
-    }
-
-    return current >= clock(period.start) && current < clock(period.end);
+    if (!isToday) return false;
+    final current = nowMinutes();
+    return current >= minutesOf(period.start) && current < minutesOf(period.end);
   }
 }

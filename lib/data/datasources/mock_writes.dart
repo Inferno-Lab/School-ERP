@@ -2,6 +2,7 @@ import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/data/datasources/mock_json_datasource.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/data/models/campus.dart';
+import 'package:edunest/data/models/student.dart';
 
 extension MockWrites on MockJsonDataSource {
   void submitHomework({
@@ -59,13 +60,14 @@ extension MockWrites on MockJsonDataSource {
     bump();
   }
 
-  void payInstallment({
+  /// Marks the installment paid and returns the receipt that was stored.
+  Receipt? payInstallment({
     required String studentId,
     required String installmentId,
     required String method,
   }) {
     final index = fees.indexWhere((account) => account.studentId == studentId);
-    if (index < 0) return;
+    if (index < 0) return null;
     final account = fees[index];
     Installment? paid;
     final next = [
@@ -82,10 +84,11 @@ extension MockWrites on MockJsonDataSource {
     ];
     final receiptSource = paid;
     final receipts = [...account.receipts];
+    Receipt? created;
     if (receiptSource != null) {
       receipts.insert(
         0,
-        Receipt(
+        created = Receipt(
           id: nextId('rcpt'),
           installmentId: receiptSource.id,
           title: receiptSource.title,
@@ -98,6 +101,7 @@ extension MockWrites on MockJsonDataSource {
     }
     fees[index] = account.copyWith(installments: next, receipts: receipts);
     bump();
+    return created;
   }
 
   void sendMessage({
@@ -154,6 +158,30 @@ extension MockWrites on MockJsonDataSource {
     bump();
   }
 
+  void reviewLeave({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  }) {
+    final i = leaves.indexWhere((l) => l.id == id);
+    if (i < 0) return;
+    final l = leaves[i];
+    leaves[i] = LeaveRequest(
+      id: l.id,
+      studentId: l.studentId,
+      from: l.from,
+      to: l.to,
+      reason: l.reason,
+      status: status,
+      appliedOn: l.appliedOn,
+      reviewedBy: reviewer,
+      reviewNote: note,
+      note: l.note,
+    );
+    bump();
+  }
+
   void rsvp({
     required String eventId,
     required String userId,
@@ -185,6 +213,58 @@ extension MockWrites on MockJsonDataSource {
       dueDate: DateTime.now().add(const Duration(days: 14)),
     );
     bump();
+  }
+
+  /// Extends a borrowed book by two weeks from its current due date.
+  void renewBook(String bookId) {
+    final index = books.indexWhere((book) => book.id == bookId);
+    final due = index < 0 ? null : books[index].dueDate;
+    if (due == null) return;
+    books[index] = books[index].copyWith(
+      dueDate: due.add(const Duration(days: 14)),
+    );
+    bump();
+  }
+
+  void markThreadRead({required String threadId, required String userId}) {
+    var changed = false;
+    for (var i = 0; i < messages.length; i++) {
+      final m = messages[i];
+      if (m.threadId != threadId || m.senderId == userId || m.read) continue;
+      messages[i] = ChatMessage(
+        id: m.id,
+        threadId: m.threadId,
+        senderId: m.senderId,
+        text: m.text,
+        sentAt: m.sentAt,
+        read: true,
+      );
+      changed = true;
+    }
+    if (changed) bump();
+  }
+
+  String startThread({required String userId, required Teacher teacher}) {
+    final other = teacher.userId ?? 'usr_${teacher.id}';
+    final existing = threads
+        .where(
+          (t) =>
+              t.participantIds.contains(userId) &&
+              t.participantIds.contains(other),
+        )
+        .firstOrNull;
+    if (existing != null) return existing.id;
+    final thread = ChatThread(
+      id: nextId('th'),
+      title: teacher.name,
+      subtitle: teacher.subject,
+      participantIds: [userId, other],
+      avatarUrl: teacher.avatarUrl,
+      online: false,
+    );
+    threads.add(thread);
+    bump();
+    return thread.id;
   }
 
   void dismissNotification(String id) {

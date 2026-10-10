@@ -6,6 +6,7 @@ abstract final class AppRoutes {
   static const attendance = '/attendance';
   static const homework = '/homework';
   static const homeworkDetail = '/homework/:id';
+  static const homeworkScan = '/scan/homework';
   static const timetable = '/timetable';
   static const results = '/results';
   static const fees = '/fees';
@@ -23,6 +24,7 @@ abstract final class AppRoutes {
   static const leave = '/leave';
   static const leaveApply = '/leave/apply';
   static const notifications = '/notifications';
+  static const search = '/search';
   static const profile = '/profile';
   static const settings = '/settings';
   static const about = '/about';

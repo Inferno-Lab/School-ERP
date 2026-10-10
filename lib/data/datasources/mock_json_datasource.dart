@@ -66,9 +66,12 @@ class MockJsonDataSource {
 
   Future<T> guard<T>(T Function() body) async {
     await ensureLoaded();
-    final span = AppConfig.mockDelayMaxMs - AppConfig.mockDelayMinMs;
+    final slow = AppConfig.slowNetwork.value;
+    final min = slow ? AppConfig.mockDelayMinMs : 0;
+    final max = slow ? AppConfig.mockDelayMaxMs : 120;
+    final span = max - min;
     final extra = span <= 0 ? 0 : _random.nextInt(span + 1);
-    final wait = AppConfig.mockDelayMinMs + extra;
+    final wait = min + extra;
     if (wait > 0) {
       await Future<void>.delayed(Duration(milliseconds: wait));
     }

@@ -19,7 +19,7 @@
     "available": false,
     "coverUrl": "https://picsum.photos/seed/book-rivers/600/800",
     "borrowedBy": "stu_aarav",
-    "dueDate": "today-1"
+    "dueDate": "today+9"
   },
   {
     "id": "bk_math",

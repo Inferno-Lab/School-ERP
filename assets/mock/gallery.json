@@ -18,12 +18,19 @@
       {
         "id": "alb_annual_3",
         "url": "https://picsum.photos/seed/alb_annual-3/900/1200",
-        "caption": "Class 8 play"
+        "caption": "Class 8 play",
+        "tagged": [
+          "stu_aarav"
+        ]
       },
       {
         "id": "alb_annual_4",
         "url": "https://picsum.photos/seed/alb_annual-4/900/1200",
-        "caption": "Finale"
+        "caption": "Finale",
+        "tagged": [
+          "stu_aarav",
+          "stu_ananya"
+        ]
       }
     ]
   },
@@ -41,12 +48,18 @@
       {
         "id": "alb_sports_2",
         "url": "https://picsum.photos/seed/alb_sports-2/900/1200",
-        "caption": "Relay baton"
+        "caption": "Relay baton",
+        "tagged": [
+          "stu_ananya"
+        ]
       },
       {
         "id": "alb_sports_3",
         "url": "https://picsum.photos/seed/alb_sports-3/900/1200",
-        "caption": "Long jump"
+        "caption": "Long jump",
+        "tagged": [
+          "stu_aarav"
+        ]
       },
       {
         "id": "alb_sports_4",
@@ -64,7 +77,10 @@
       {
         "id": "alb_science_1",
         "url": "https://picsum.photos/seed/alb_science-1/900/1200",
-        "caption": "Water filter"
+        "caption": "Water filter",
+        "tagged": [
+          "stu_aarav"
+        ]
       },
       {
         "id": "alb_science_2",

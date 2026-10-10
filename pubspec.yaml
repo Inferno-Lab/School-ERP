@@ -1,33 +1,26 @@
 name: edunest
 description: EduNest — a school app for students, parents, and teachers.
 publish_to: 'none'
-version: 1.0.0+1
+version: 2.0.0+210
 
 environment:
   sdk: ^3.11.5
 
 dependencies:
   cached_network_image: ^3.4.1
+  camera: ^0.12.1
   connectivity_plus: ^7.0.0
   cupertino_icons: ^1.0.8
-  # 1.9.0's Android build script does not compile with this project's Android Gradle plugin.
-  dynamic_color: 1.8.1
-  fl_chart: ^1.1.1
   flutter:
     sdk: flutter
-  flutter_animate: ^4.5.2
-  flutter_staggered_grid_view: ^0.7.0
-  flutter_svg: ^2.2.1
   get: ^4.7.2
   get_storage: ^2.1.1
-  google_fonts: ^6.3.2
   image_picker: ^1.2.0
   intl: ^0.20.2
   json_annotation: ^4.9.0
-  lottie: ^3.3.2
-  phosphor_flutter: ^2.1.0
-  shimmer: ^3.0.0
-  table_calendar: ^3.2.0
+  # Vendored: 2.1.0 on pub extends IconData, which is final on this Flutter.
+  phosphor_flutter:
+    path: packages/phosphor_flutter
   url_launcher: ^6.3.2
 
 dev_dependencies:
@@ -42,19 +35,21 @@ flutter:
   uses-material-design: true
   assets:
     - assets/mock/
-    - assets/lottie/
     - assets/images/
     - assets/icons/
+  shaders:
+    - shaders/liquid_glass.frag
   fonts:
-    - family: Poppins
+    - family: AnekLatin
       fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Medium.ttf
+        - asset: assets/fonts/AnekLatin.ttf
+    - family: AnekDevanagari
+      fonts:
+        - asset: assets/fonts/AnekDevanagari.ttf
+    - family: IBMPlexMono
+      fonts:
+        - asset: assets/fonts/IBMPlexMono-Regular.ttf
+        - asset: assets/fonts/IBMPlexMono-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Poppins-SemiBold.ttf
+        - asset: assets/fonts/IBMPlexMono-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Poppins-Bold.ttf
-          weight: 700
-    - family: PlusJakartaSans
-      fonts:
-        - asset: assets/fonts/PlusJakartaSans.ttf

@@ -2,11 +2,13 @@ import 'package:edunest/data/datasources/mock_json_datasource.dart';
 import 'package:edunest/data/datasources/mock_writes.dart';
 import 'package:edunest/data/datasources/remote_datasource.dart';
 import 'package:edunest/data/models/campus.dart';
+import 'package:edunest/data/models/student.dart';
 
 abstract class FeeRepository {
   Future<FeeAccount?> forStudent(String studentId);
 
-  Future<void> pay({
+  /// Pays an installment and returns the stored receipt.
+  Future<Receipt?> pay({
     required String studentId,
     required String installmentId,
     required String method,
@@ -27,7 +29,7 @@ class MockFeeRepository implements FeeRepository {
   });
 
   @override
-  Future<void> pay({
+  Future<Receipt?> pay({
     required String studentId,
     required String installmentId,
     required String method,
@@ -52,14 +54,19 @@ class RemoteFeeRepository implements FeeRepository {
   }
 
   @override
-  Future<void> pay({
+  Future<Receipt?> pay({
     required String studentId,
     required String installmentId,
     required String method,
-  }) => _remote.post('/fees/$installmentId/pay', {
-    'studentId': studentId,
-    'method': method,
-  });
+  }) async {
+    final json = await _remote.post('/fees/$installmentId/pay', {
+      'studentId': studentId,
+      'method': method,
+    });
+    return json is Map
+        ? Receipt.fromJson(Map<String, dynamic>.from(json))
+        : null;
+  }
 }
 
 abstract class NoticeRepository {
@@ -166,6 +173,11 @@ abstract class ChatRepository {
     required String senderId,
     required String text,
   });
+
+  Future<void> markRead({required String threadId, required String userId});
+
+  /// Opens (or finds) a one-to-one thread with [teacher]; returns its id.
+  Future<String> start({required String userId, required Teacher teacher});
 }
 
 class MockChatRepository implements ChatRepository {
@@ -182,8 +194,9 @@ class MockChatRepository implements ChatRepository {
 
   @override
   Future<List<ChatMessage>> messages(String threadId) => _ds.guard(() {
-    final items = _ds.messages.where((item) => item.threadId == threadId).toList()
-      ..sort((a, b) => a.sentAt.compareTo(b.sentAt));
+    final items =
+        _ds.messages.where((item) => item.threadId == threadId).toList()
+          ..sort((a, b) => a.sentAt.compareTo(b.sentAt));
     return items;
   });
 
@@ -195,7 +208,9 @@ class MockChatRepository implements ChatRepository {
         .where((thread) => thread.participantIds.contains(userId))
         .toList();
     final ids = threads.map((thread) => thread.id).toSet();
-    final messages = _ds.messages.where((item) => ids.contains(item.threadId)).toList();
+    final messages = _ds.messages
+        .where((item) => ids.contains(item.threadId))
+        .toList();
     return (threads: threads, messages: messages);
   });
 
@@ -207,6 +222,14 @@ class MockChatRepository implements ChatRepository {
   }) => _ds.guard(
     () => _ds.sendMessage(threadId: threadId, senderId: senderId, text: text),
   );
+
+  @override
+  Future<void> markRead({required String threadId, required String userId}) =>
+      _ds.guard(() => _ds.markThreadRead(threadId: threadId, userId: userId));
+
+  @override
+  Future<String> start({required String userId, required Teacher teacher}) =>
+      _ds.guard(() => _ds.startThread(userId: userId, teacher: teacher));
 }
 
 class RemoteChatRepository implements ChatRepository {
@@ -256,12 +279,30 @@ class RemoteChatRepository implements ChatRepository {
       ],
     );
   }
+
+  @override
+  Future<void> markRead({required String threadId, required String userId}) =>
+      _remote.post('/threads/$threadId/read', {'userId': userId});
+
+  @override
+  Future<String> start({
+    required String userId,
+    required Teacher teacher,
+  }) async {
+    final json = await _remote.post('/threads', {
+      'userId': userId,
+      'teacherId': teacher.id,
+    });
+    return (json as Map)['id'] as String;
+  }
 }
 
 abstract class LibraryRepository {
   Future<List<LibraryBook>> all();
 
   Future<void> reserve({required String bookId, required String studentId});
+
+  Future<void> renew(String bookId);
 }
 
 class MockLibraryRepository implements LibraryRepository {
@@ -275,6 +316,9 @@ class MockLibraryRepository implements LibraryRepository {
   @override
   Future<void> reserve({required String bookId, required String studentId}) =>
       _ds.guard(() => _ds.reserveBook(bookId: bookId, studentId: studentId));
+
+  @override
+  Future<void> renew(String bookId) => _ds.guard(() => _ds.renewBook(bookId));
 }
 
 class RemoteLibraryRepository implements LibraryRepository {
@@ -294,6 +338,10 @@ class RemoteLibraryRepository implements LibraryRepository {
   @override
   Future<void> reserve({required String bookId, required String studentId}) =>
       _remote.post('/library/books/$bookId/reserve', {'studentId': studentId});
+
+  @override
+  Future<void> renew(String bookId) =>
+      _remote.post('/library/books/$bookId/renew', const {});
 }
 
 abstract class TransportRepository {
@@ -330,6 +378,14 @@ abstract class LeaveRepository {
   Future<List<LeaveRequest>> forStudent(String studentId);
 
   Future<void> apply(LeaveRequest request);
+
+  /// A class teacher approves or declines a request.
+  Future<void> review({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  });
 }
 
 class MockLeaveRepository implements LeaveRepository {
@@ -345,6 +401,16 @@ class MockLeaveRepository implements LeaveRepository {
   @override
   Future<void> apply(LeaveRequest request) =>
       _ds.guard(() => _ds.applyLeave(request));
+
+  @override
+  Future<void> review({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  }) => _ds.guard(
+    () => _ds.reviewLeave(id: id, status: status, reviewer: reviewer, note: note),
+  );
 }
 
 class RemoteLeaveRepository implements LeaveRepository {
@@ -364,6 +430,18 @@ class RemoteLeaveRepository implements LeaveRepository {
   @override
   Future<void> apply(LeaveRequest request) =>
       _remote.post('/leave', request.toJson());
+
+  @override
+  Future<void> review({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  }) => _remote.post('/leave/$id/review', {
+    'status': status.name,
+    'reviewer': reviewer,
+    'note': ?note,
+  });
 }
 
 abstract class GalleryRepository {
@@ -409,13 +487,15 @@ class MockNotificationRepository implements NotificationRepository {
 
   @override
   Future<List<AppNotification>> forUser(String userId) => _ds.guard(() {
-    final items = _ds.notifications.where((item) => item.userId == userId).toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final items =
+        _ds.notifications.where((item) => item.userId == userId).toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
     return items;
   });
 
   @override
-  Future<void> dismiss(String id) => _ds.guard(() => _ds.dismissNotification(id));
+  Future<void> dismiss(String id) =>
+      _ds.guard(() => _ds.dismissNotification(id));
 
   @override
   Future<void> markAllRead(String userId) =>
@@ -437,7 +517,8 @@ class RemoteNotificationRepository implements NotificationRepository {
   }
 
   @override
-  Future<void> dismiss(String id) => _remote.post('/notifications/$id/dismiss', {});
+  Future<void> dismiss(String id) =>
+      _remote.post('/notifications/$id/dismiss', {});
 
   @override
   Future<void> markAllRead(String userId) =>

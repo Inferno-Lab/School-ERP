@@ -62,3 +62,16 @@ String weekdayKey(DateTime date) {
   const keys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
   return keys[date.weekday - 1];
 }
+
+/// School days in a row (present or late) counting back from the latest mark.
+/// Holidays don't break a streak.
+int attendanceStreak(List<AttendanceDay> days) {
+  final sorted = [...days]..sort((a, b) => b.date.compareTo(a.date));
+  var streak = 0;
+  for (final day in sorted) {
+    if (day.status == AttendanceStatus.holiday) continue;
+    if (day.status == AttendanceStatus.absent) break;
+    streak++;
+  }
+  return streak;
+}
