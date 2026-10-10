@@ -55,7 +55,11 @@ class OnboardingView extends GetView<OnboardingController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Rise(child: Overline(_pages[i].$1.tr)),
+                            Rise(
+                              child: Overline(
+                                '${_pages[i].$1.tr} · ${'onboarding.page_of'.trParams({'n': '${i + 1}'})}',
+                              ),
+                            ),
                             const SizedBox(height: 12),
                             Rise(index: 1, child: Text(_pages[i].$2.tr, style: context.type.h1)),
                             const SizedBox(height: 12),
@@ -89,7 +93,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         14.5,
                         650,
                         height: 1,
-                        color: controller.page.value == 0 ? AppColors.white : context.app.ink,
+                        color: context.app.ink,
                       ),
                     ),
                   ),
@@ -329,6 +333,7 @@ class _ParentArtState extends State<_ParentArt> with SingleTickerProviderStateMi
                     ),
                     Avatar(
                       'Ananya Sharma',
+                      initials: 'AN',
                       background: const Color(0xFFFBFCF9),
                       foreground: AppColors.subject('hindi').fill,
                     ),

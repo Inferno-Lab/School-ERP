@@ -74,14 +74,16 @@ class AcademicsController extends GetxController with Loadable {
       due = work.where((hw) {
         final mine = hw.forStudent(id);
         return (mine == null || mine.status == HomeworkStatus.pending) && Formatters.daysUntil(hw.dueOn) >= 0;
-      }).toList()
-        ..sort((a, b) => a.dueOn.compareTo(b.dueOn));
+      }).toList()..sort((a, b) => a.dueOn.compareTo(b.dueOn));
 
       final today = DateTime.now();
       final key = weekdayKey(today);
       final todayPeriods = week.where((d) => d.day == key).expand((d) => d.periods).toList();
       final minute = nowMinutes(today);
-      now = todayPeriods.isEmpty || minute < minutesOf(todayPeriods.first.start) || minute > minutesOf(todayPeriods.last.end)
+      now =
+          todayPeriods.isEmpty ||
+              minute < minutesOf(todayPeriods.first.start) ||
+              minute > minutesOf(todayPeriods.last.end)
           ? null
           : periodAt(todayPeriods, minute);
       next = nextClassAfter(todayPeriods, now);
@@ -90,7 +92,9 @@ class AcademicsController extends GetxController with Loadable {
       summary = AttendanceSummary.from(month);
       streak = attendanceStreak(days);
 
-      final subjects = latestExam?.subjects ?? week.expand((d) => d.periods).where((p) => p.kind == PeriodKind.klass).map((p) => p.subject).toSet().toList();
+      final subjects =
+          latestExam?.subjects ??
+          week.expand((d) => d.periods).where((p) => p.kind == PeriodKind.klass).map((p) => p.subject).toSet().toList();
       const order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
       shelf = [
         for (final s in subjects)

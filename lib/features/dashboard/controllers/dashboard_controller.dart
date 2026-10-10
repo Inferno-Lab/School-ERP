@@ -113,9 +113,7 @@ class DashboardController extends GetxController with Loadable {
       final events = results[5]! as List<SchoolEvent>;
       final exams = results[6]! as List<Exam>;
 
-      final monthDays = attendance
-          .where((d) => d.date.year == now.year && d.date.month == now.month)
-          .toList()
+      final monthDays = attendance.where((d) => d.date.year == now.year && d.date.month == now.month).toList()
         ..sort((a, b) => a.date.compareTo(b.date));
 
       TimetableDay? today;

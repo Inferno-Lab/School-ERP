@@ -49,7 +49,10 @@ class AcademicsView extends GetView<AcademicsController> {
                     children: [
                       _Shelf(controller: controller, selected: selected),
                       const SizedBox(height: 22),
-                      Rise(index: 1, child: _SubjectCard(item: controller.shelf[selected], examName: controller.latestExam?.name)),
+                      Rise(
+                        index: 1,
+                        child: _SubjectCard(item: controller.shelf[selected], examName: controller.latestExam?.name),
+                      ),
                       Rise(index: 2, child: SectionLabel('academics.records'.tr)),
                       Rise(index: 3, child: _Records(controller: controller)),
                     ],
@@ -133,7 +136,9 @@ class _Book extends StatelessWidget {
           decoration: BoxDecoration(
             color: pigment.fill,
             borderRadius: const BorderRadius.horizontal(left: Radius.circular(6), right: Radius.circular(16)),
-            boxShadow: const [BoxShadow(color: Color(0x8010201B), blurRadius: 18, spreadRadius: -12, offset: Offset(0, 10))],
+            boxShadow: const [
+              BoxShadow(color: Color(0x8010201B), blurRadius: 18, spreadRadius: -12, offset: Offset(0, 10)),
+            ],
           ),
           foregroundDecoration: spineDecoration,
           child: Column(
@@ -196,7 +201,10 @@ class _SubjectCard extends StatelessWidget {
                 ),
               ),
               if (item.mark != null && examName != null)
-                Stamp('academics.grade_in'.trParams({'grade': item.mark!.grade, 'exam': examName!}), color: AppColors.ok),
+                Stamp(
+                  'academics.grade_in'.trParams({'grade': item.mark!.grade, 'exam': examName!}),
+                  color: AppColors.ok,
+                ),
             ],
           ),
           const SizedBox(height: 10),
@@ -248,7 +256,9 @@ class _Records extends StatelessWidget {
             ? 'home.nothing_due'.tr
             : 'academics.next_hw'.trParams({
                 'title': controller.due.first.title,
-                'when': Formatters.countdown(controller.due.first.dueOn).trParams({'count': '${Formatters.daysUntil(controller.due.first.dueOn)}'}).toLowerCase(),
+                'when': Formatters.countdown(
+                  controller.due.first.dueOn,
+                ).trParams({'count': '${Formatters.daysUntil(controller.due.first.dueOn)}'}).toLowerCase(),
               }),
         AppRoutes.homework,
       ),
@@ -266,13 +276,13 @@ class _Records extends StatelessWidget {
         latest == null
             ? 'results.none'.tr
             : 'academics.results_line'.trParams({
-                'exam': controller.latestExam?.name ?? '',
-                'rank': '${latest.rank}',
-                'total': '${latest.totalStudents}',
-              }) +
-              (delta == null || delta == 0
-                  ? ''
-                  : ' · ${(delta > 0 ? 'academics.up' : 'academics.down').trParams({'n': '${delta.abs()}'})}'),
+                    'exam': controller.latestExam?.name ?? '',
+                    'rank': '${latest.rank}',
+                    'total': '${latest.totalStudents}',
+                  }) +
+                  (delta == null || delta == 0
+                      ? ''
+                      : ' · ${(delta > 0 ? 'academics.up' : 'academics.down').trParams({'n': '${delta.abs()}'})}'),
         AppRoutes.results,
       ),
     ];
@@ -293,7 +303,13 @@ class _Records extends StatelessWidget {
                       child: Text(
                         rows[i].$1,
                         maxLines: 1,
-                        style: anek(rows[i].$1.length > 4 ? 20 : 26, 760, width: 122, height: 1, color: context.app.ink),
+                        style: anek(
+                          rows[i].$1.length > 4 ? 20 : 26,
+                          760,
+                          width: 122,
+                          height: 1,
+                          color: context.app.ink,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 14),

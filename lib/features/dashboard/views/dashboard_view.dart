@@ -98,7 +98,11 @@ class _DashboardViewState extends State<DashboardView> {
                           left: 0,
                           right: 0,
                           top: ribbonH + 6,
-                          child: RibbonScale(periods: data.periods, pxPerMinute: wide ? 3.6 : 2.4, leftInset: wide ? 110 : 0),
+                          child: RibbonScale(
+                            periods: data.periods,
+                            pxPerMinute: wide ? 3.6 : 2.4,
+                            leftInset: wide ? 110 : 0,
+                          ),
                         ),
                       Positioned(
                         left: wide ? 130 : 16,
@@ -144,7 +148,10 @@ class _DashboardViewState extends State<DashboardView> {
                                 children: [
                                   Icon(PhosphorIconsRegular.clock, size: 15, color: context.app.ink),
                                   const SizedBox(width: 6),
-                                  Text('home.back_to_now'.tr, style: anek(13.5, 650, height: 1, color: context.app.ink)),
+                                  Text(
+                                    'home.back_to_now'.tr,
+                                    style: anek(13.5, 650, height: 1, color: context.app.ink),
+                                  ),
                                 ],
                               ),
                             ),
@@ -238,8 +245,14 @@ class _ProfileCapsule extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name.split(' ').first, style: anek(14, 680, height: 1.05, color: AppColors.white).copyWith(shadows: _shadow)),
-                  Text(cls, style: anek(11.5, 560, height: 1.05, color: const Color(0xE0FFFFFF)).copyWith(shadows: _shadow)),
+                  Text(
+                    name.split(' ').first,
+                    style: anek(14, 680, height: 1.05, color: AppColors.white).copyWith(shadows: _shadow),
+                  ),
+                  Text(
+                    cls,
+                    style: anek(11.5, 560, height: 1.05, color: const Color(0xE0FFFFFF)).copyWith(shadows: _shadow),
+                  ),
                 ],
               ),
             ],
@@ -271,7 +284,10 @@ class _StudentBody extends StatelessWidget {
         const SizedBox(height: 8),
         Rise(index: 1, child: Text(greeting(data.student.name.split(' ').first), style: context.type.h1)),
         const SizedBox(height: 18),
-        Rise(index: 2, child: NowCard(data: data, scrub: scrub)),
+        Rise(
+          index: 2,
+          child: NowCard(data: data, scrub: scrub),
+        ),
         Rise(index: 3, child: DueSection(items: data.due)),
         const SizedBox(height: 12),
         Rise(index: 5, child: StatsRow(data: data)),
@@ -289,7 +305,9 @@ class _ParentBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = Get.find<AuthService>().user.value;
     final c = context.app;
-    final quiet = data.children.where((child) => data.due.every((d) => d.childName != child.student.name.split(' ').first));
+    final quiet = data.children.where(
+      (child) => data.due.every((d) => d.childName != child.student.name.split(' ').first),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -347,7 +365,10 @@ class _WideBody extends StatelessWidget {
             children: [
               Overline(todayLine()),
               const SizedBox(height: 8),
-              Text(greeting(data.student.name.split(' ').first).replaceAll('\n', ' '), style: context.type.h1.copyWith(fontSize: 40)),
+              Text(
+                greeting(data.student.name.split(' ').first).replaceAll('\n', ' '),
+                style: context.type.h1.copyWith(fontSize: 40),
+              ),
               const SizedBox(height: 18),
               NowCard(data: data, scrub: scrub, large: true),
               DueSection(items: data.due),
@@ -431,7 +452,8 @@ class NowCard extends StatelessWidget {
       if (klass) {
         title = '${subjectName(p.subject)} · $who';
         final left = (b - minute).clamp(0, 999);
-        meta = 'home.room_line'.trParams({'room': p.room, 'start': clockOf(a), 'end': clockOf(b)}) +
+        meta =
+            'home.room_line'.trParams({'room': p.room, 'start': clockOf(a), 'end': clockOf(b)}) +
             (isNow ? ' · ${'home.min_left'.trParams({'n': '$left'})}' : '');
       } else {
         final next = nextClassAfter(periods, p);
@@ -461,7 +483,12 @@ class NowCard extends StatelessWidget {
               children: [
                 Overline(when, color: c.mariText),
                 const SizedBox(height: 5),
-                Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: large ? context.type.h3 : context.type.t),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: large ? context.type.h3 : context.type.t,
+                ),
                 const SizedBox(height: 2),
                 Text(meta, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.type.cap),
                 const SizedBox(height: 9),

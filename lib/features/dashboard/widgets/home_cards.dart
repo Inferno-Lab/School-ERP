@@ -73,7 +73,8 @@ class _DueRow extends StatelessWidget {
         return _Row(
           leading: Cover(subject: hw.subject),
           title: '${hw.title}$child',
-          subtitle: '${subjectName(hw.subject)} · ${Formatters.countdown(hw.dueOn).trParams({'count': '${Formatters.daysUntil(hw.dueOn)}'}).toLowerCase()}',
+          subtitle:
+              '${subjectName(hw.subject)} · ${Formatters.countdown(hw.dueOn).trParams({'count': '${Formatters.daysUntil(hw.dueOn)}'}).toLowerCase()}',
           trailing: Stamp(daysStamp(hw.dueOn), color: c.dark ? const Color(0xFFF6BA45) : AppColors.late),
           onTap: () => Get.toNamed<void>(AppRoutes.homeworkDetail.replaceFirst(':id', hw.id)),
         );
@@ -212,6 +213,9 @@ class ChildrenStrip extends StatelessWidget {
                       children: [
                         Avatar(
                           child.student.name,
+                          initials: Avatar.siblingInitials(child.student.name, [
+                            for (final k in children) k.student.name,
+                          ]),
                           background: i.isEven ? AppColors.subject('maths').fill : AppColors.subject('hindi').fill,
                         ),
                         const SizedBox(width: 12),
@@ -224,7 +228,8 @@ class ChildrenStrip extends StatelessWidget {
                                   text: child.student.name.split(' ').first,
                                   children: [
                                     TextSpan(
-                                      text: ' · ${child.schoolClass.name.replaceAll(RegExp('[^0-9]'), '')} ${child.schoolClass.section}',
+                                      text:
+                                          ' · ${child.schoolClass.name.replaceAll(RegExp('[^0-9]'), '')} ${child.schoolClass.section}',
                                       style: context.type.cap,
                                     ),
                                   ],
@@ -232,7 +237,12 @@ class ChildrenStrip extends StatelessWidget {
                                 style: context.type.t,
                               ),
                               const SizedBox(height: 2),
-                              Text('${label.tr} · $now', style: context.type.cap, maxLines: 1, overflow: TextOverflow.ellipsis),
+                              Text(
+                                '${label.tr} · $now',
+                                style: context.type.cap,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ],
                           ),
                         ),
@@ -266,7 +276,9 @@ class NoticeLine extends StatelessWidget {
           children: [
             Stamp('notice_cat.${notice.category}'.tr, color: noticeTone(context, notice.category), size: 10),
             const SizedBox(width: 12),
-            Expanded(child: Text(notice.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.type.t)),
+            Expanded(
+              child: Text(notice.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.type.t),
+            ),
           ],
         ),
       ),

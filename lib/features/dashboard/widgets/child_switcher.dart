@@ -54,9 +54,11 @@ class _ChildCapsuleState extends State<ChildCapsule> {
   void initState() {
     super.initState();
     final ids = Get.find<AuthService>().user.value?.childIds ?? const [];
-    unawaited(ChildrenCache.load(ids).then((kids) {
-      if (mounted) setState(() => _kids = kids);
-    }));
+    unawaited(
+      ChildrenCache.load(ids).then((kids) {
+        if (mounted) setState(() => _kids = kids);
+      }),
+    );
   }
 
   Future<void> _switchBy(int step) async {
@@ -75,6 +77,7 @@ class _ChildCapsuleState extends State<ChildCapsule> {
       final active = auth.activeStudentId.value;
       final current = _kids.where((k) => k.$1.id == active).firstOrNull ?? _kids.firstOrNull;
       final others = _kids.where((k) => k.$1.id != current?.$1.id).toList();
+      final family = [for (final k in _kids) k.$1.name];
       final label = current == null ? '' : '${current.$1.name.split(' ').first} · ${shortClass(current.$2)}';
       return Semantics(
         button: true,
@@ -92,11 +95,23 @@ class _ChildCapsuleState extends State<ChildCapsule> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (current != null)
-                    Avatar(current.$1.name, size: 30, background: const Color(0xFFFBFCF9), foreground: const Color(0xFF10201B)),
+                    Avatar(
+                      current.$1.name,
+                      initials: Avatar.siblingInitials(current.$1.name, family),
+                      size: 30,
+                      background: const Color(0xFFFBFCF9),
+                      foreground: const Color(0xFF10201B),
+                    ),
                   for (final k in others.take(1))
                     Transform.translate(
                       offset: const Offset(-10, 0),
-                      child: Avatar(k.$1.name, size: 30, background: const Color(0xFFF6D3E3), foreground: AppColors.subject('hindi').fill),
+                      child: Avatar(
+                        k.$1.name,
+                        initials: Avatar.siblingInitials(k.$1.name, family),
+                        size: 30,
+                        background: const Color(0xFFF6D3E3),
+                        foreground: AppColors.subject('hindi').fill,
+                      ),
                     ),
                   SizedBox(width: others.isEmpty ? 8 : 0),
                   Text(
@@ -130,7 +145,11 @@ class _ChildCapsuleState extends State<ChildCapsule> {
         final t = CurvedAnimation(parent: animation, curve: kSpring, reverseCurve: kEase);
         return FadeTransition(
           opacity: animation,
-          child: ScaleTransition(alignment: Alignment.topLeft, scale: Tween(begin: .6, end: 1.0).animate(t), child: child),
+          child: ScaleTransition(
+            alignment: Alignment.topLeft,
+            scale: Tween(begin: .6, end: 1.0).animate(t),
+            child: child,
+          ),
         );
       },
     );
@@ -172,7 +191,11 @@ class _SwitcherPopover extends StatelessWidget {
                       for (var i = 0; i < kids.length; i++)
                         _Option(
                           selected: kids[i].$1.id == active,
-                          avatar: Avatar(kids[i].$1.name, background: colors[i % 2]),
+                          avatar: Avatar(
+                            kids[i].$1.name,
+                            initials: Avatar.siblingInitials(kids[i].$1.name, [for (final k in kids) k.$1.name]),
+                            background: colors[i % 2],
+                          ),
                           title: kids[i].$1.name,
                           subtitle: 'home.child_line'.trParams({
                             'class': '${kids[i].$2.name} ${kids[i].$2.section}',
@@ -183,7 +206,11 @@ class _SwitcherPopover extends StatelessWidget {
                             await auth.switchChild(kids[i].$1.id);
                           },
                         ),
-                      Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), color: c.line),
+                      Container(
+                        height: 1,
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        color: c.line,
+                      ),
                       _Option(
                         selected: false,
                         avatar: Container(
@@ -217,7 +244,13 @@ class _SwitcherPopover extends StatelessWidget {
 }
 
 class _Option extends StatelessWidget {
-  const _Option({required this.selected, required this.avatar, required this.title, required this.subtitle, required this.onTap});
+  const _Option({
+    required this.selected,
+    required this.avatar,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
   final bool selected;
   final Widget avatar;
