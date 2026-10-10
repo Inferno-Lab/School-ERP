@@ -3,6 +3,7 @@ import 'package:edunest/data/datasources/mock_json_datasource.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/models/student.dart';
+import 'package:get/get.dart';
 
 extension MockWrites on MockJsonDataSource {
   void submitHomework({
@@ -257,7 +258,7 @@ extension MockWrites on MockJsonDataSource {
     final thread = ChatThread(
       id: nextId('th'),
       title: teacher.name,
-      subtitle: teacher.subject,
+      subtitle: 'subject.${teacher.subject}'.tr,
       participantIds: [userId, other],
       avatarUrl: teacher.avatarUrl,
       online: false,

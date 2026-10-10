@@ -248,7 +248,7 @@ class _MapPainter extends CustomPainter {
             textDirection: TextDirection.ltr,
           )..layout();
           // First label sits down-right of its stop (up-right ran under the top pill), last label below-left.
-          final o = i == 0 ? at + const Offset(14, 6) : at + Offset(-48, 25 - label.height * .8);
+          final o = i == 0 ? at + const Offset(14, 22) : at + Offset(-48, 25 - label.height * .8);
           label.paint(canvas, o);
         }
       }

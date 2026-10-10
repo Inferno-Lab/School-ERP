@@ -187,7 +187,7 @@ class _SwitcherPopover extends StatelessWidget {
               children: [
                 Glass(
                   radius: 30,
-                  tint: c.dark ? const Color(0xA614231E) : const Color(0x9EFBFCF9),
+                  tint: c.dark ? const Color(0xE014231E) : const Color(0xE6FBFCF9),
                   padding: const EdgeInsets.all(8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
