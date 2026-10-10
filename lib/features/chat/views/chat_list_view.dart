@@ -1,102 +1,641 @@
 import 'dart:async';
 
 import 'package:edunest/core/services/auth_service.dart';
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/utils/formatters.dart';
-import 'package:edunest/core/widgets/app_avatar.dart';
-import 'package:edunest/core/widgets/feature_page.dart';
+import 'package:edunest/core/utils/view_state.dart';
+import 'package:edunest/core/widgets/glass.dart';
+import 'package:edunest/core/widgets/page.dart';
+import 'package:edunest/core/widgets/sheets.dart';
 import 'package:edunest/core/widgets/states.dart';
+import 'package:edunest/core/widgets/toast.dart';
+import 'package:edunest/core/widgets/ui.dart';
+import 'package:edunest/data/models/campus.dart';
+import 'package:edunest/data/models/student.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+
+/// Avatar pigment for a thread: the teacher's subject, ink for the office.
+({Color fill, Color on}) _threadColor(BuildContext context, ChatThread t) {
+  final sub = t.subtitle.toLowerCase();
+  for (final id in AppColors.subjects.keys) {
+    if (sub.contains(id) || sub.contains(subjectName(id).toLowerCase())) {
+      final p = AppColors.subject(id);
+      return (fill: p.fill, on: p.on);
+    }
+  }
+  return (fill: context.app.ink, on: context.app.chalk);
+}
+
+String _stamp(DateTime t) {
+  final today = DateUtils.dateOnly(DateTime.now());
+  final day = DateUtils.dateOnly(t);
+  final ago = today.difference(day).inDays;
+  if (ago == 0) return DateFormat('H:mm').format(t);
+  if (ago == 1) return 'common.yesterday'.tr;
+  if (ago < 7) return DateFormat('EEE').format(t);
+  return DateFormat('d MMM').format(t);
+}
 
 class ChatListView extends GetView<ChatListController> {
   const ChatListView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final tab = ModalRoute.of(context)?.settings.name != '/chat';
     return Obx(() {
-      final _ = '${controller.state.value}${controller.selectedId.value}${controller.threads.length}';
-      final list = ViewStateView(
-          state: controller.state.value,
-          onRetry: controller.load,
-          errorKey: controller.errorMessage.value,
-          child: ListView.separated(
-            shrinkWrap: !context.isWide,
-            physics: context.isWide
-                ? const AlwaysScrollableScrollPhysics()
-                : const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 120),
-            itemCount: controller.threads.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final thread = controller.threads[index];
-              final preview = controller.previews[thread.id];
-              return ListTile(
-                selected: context.isWide && controller.activeId == thread.id,
-                onTap: () {
-                  if (context.isWide) {
-                    controller.pick = thread.id;
-                  } else {
-                    unawaited(Get.toNamed<void>('/chat/${thread.id}'));
-                  }
-                },
-                leading: Stack(
+      controller.query.value;
+      controller.state.value;
+      final threads = controller.visible;
+      final suggested = controller.suggested;
+      final ready = controller.state.value == ViewState.success || controller.state.value == ViewState.empty;
+      return PageFrame(
+        dockPage: tab,
+        leading: tab ? null : const BackGlass(),
+        topPadding: tab ? MediaQuery.paddingOf(context).top + 14 : null,
+        onRefresh: controller.load,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text('chat.title'.tr, style: context.type.h1)),
+              if (suggested.isNotEmpty || controller.threads.isNotEmpty)
+                GlassIconButton(
+                  icon: PhosphorIconsRegular.pencilSimple,
+                  label: 'chat.new'.tr,
+                  onTap: () => unawaited(showSheet<void>(_NewChatSheet(controller: controller))),
+                ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          if (ready && controller.threads.isNotEmpty) Rise(child: _Search(controller: controller)),
+          ViewStateView(
+            state: controller.state.value,
+            onRetry: controller.load,
+            errorKey: controller.errorMessage.value,
+            emptyTitle: 'chat.empty',
+            emptyBody: 'chat.empty_body',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (threads.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Rise(
+                    index: 1,
+                    child: EduCard(
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < threads.length; i++) ...[
+                            if (i > 0) const Hr(indent: 66),
+                            _ThreadRow(thread: threads[i], controller: controller),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ] else if (controller.query.value.isNotEmpty)
+                  EmptyState(
+                    title: 'chat.no_match',
+                    body: 'chat.no_match_body'.trParams({'q': controller.query.value}),
+                  ),
+                if (suggested.isNotEmpty && controller.query.value.isEmpty) ...[
+                  Rise(index: 2, child: SectionLabel('chat.start_with'.tr)),
+                  Rise(
+                    index: 3,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      clipBehavior: Clip.none,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var i = 0; i < suggested.length; i++) ...[
+                            if (i > 0) const SizedBox(width: 14),
+                            _Suggested(teacher: suggested[i], controller: controller),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _Search extends StatefulWidget {
+  const _Search({required this.controller});
+
+  final ChatListController controller;
+
+  @override
+  State<_Search> createState() => _SearchState();
+}
+
+class _SearchState extends State<_Search> {
+  late final _text = TextEditingController(text: widget.controller.query.value);
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Field(
+    controller: _text,
+    hint: 'chat.search',
+    icon: PhosphorIconsRegular.magnifyingGlass,
+    minHeight: 48,
+    fill: context.app.paper2,
+    borderless: true,
+    textInputAction: TextInputAction.search,
+    onChanged: (v) => setState(() => widget.controller.query.value = v),
+    trailing: _text.text.isEmpty
+        ? null
+        : IconButton(
+            tooltip: 'common.clear'.tr,
+            onPressed: () {
+              _text.clear();
+              setState(() => widget.controller.query.value = '');
+            },
+            icon: Icon(PhosphorIconsRegular.x, size: 18, color: context.app.ink3),
+          ),
+  );
+}
+
+class _ThreadRow extends StatelessWidget {
+  const _ThreadRow({required this.thread, required this.controller});
+
+  final ChatThread thread;
+  final ChatListController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    final last = controller.previews[thread.id];
+    final unread = controller.unreadBy[thread.id] ?? 0;
+    final color = _threadColor(context, thread);
+    final mine = last != null && last.senderId == controller.me;
+    final preview = last == null
+        ? 'chat.no_messages'.tr
+        : (mine ? 'chat.you'.trParams({'text': last.text}) : last.text);
+    return Semantics(
+      button: true,
+      label: [
+        thread.title,
+        if (unread > 0) 'chat.n_unread'.trParams({'n': '$unread'}),
+        preview,
+      ].join(', '),
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: () => Get.toNamed<void>('/chat/${thread.id}'),
+        scale: .985,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          child: Row(
+            children: [
+              Avatar(
+                thread.title,
+                background: color.fill,
+                foreground: color.on,
+                ring: thread.online ? color.fill : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppAvatar(name: thread.title, url: thread.avatarUrl),
-                    if (thread.online)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: context.app.success,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: context.colors.surface, width: 1.5),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            thread.title,
+                            style: context.type.t,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (last != null) Text(_stamp(last.sentAt), style: context.type.cap),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            preview,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.type.s.copyWith(
+                              color: unread > 0 ? c.ink : null,
+                              fontVariations: unread > 0 ? const [FontVariation('wght', 560)] : null,
+                            ),
+                          ),
+                        ),
+                        if (unread > 0) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            constraints: const BoxConstraints(minWidth: 22),
+                            height: 22,
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(color: AppColors.mari, borderRadius: BorderRadius.circular(11)),
+                            child: Text('$unread', style: anek(12, 760, height: 1, color: AppColors.mariInk)),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(thread.subtitle, style: context.type.cap.copyWith(fontSize: 11.5)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Suggested extends StatelessWidget {
+  const _Suggested({required this.teacher, required this.controller});
+
+  final Teacher teacher;
+  final ChatListController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppColors.subject(teacher.subject);
+    return Semantics(
+      button: true,
+      label: 'chat.start_named'.trParams({'name': teacher.name}),
+      excludeSemantics: true,
+      child: Pressable(
+        onTap: () => unawaited(controller.startWith(teacher)),
+        child: SizedBox(
+          width: 64,
+          child: Column(
+            children: [
+              Avatar(teacher.name, size: 56, background: p.fill, foreground: p.on),
+              const SizedBox(height: 6),
+              Text(
+                '${teacher.name.split(' ').first} · ${subjectName(teacher.subject)}',
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                style: context.type.cap.copyWith(fontSize: 11.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NewChatSheet extends StatelessWidget {
+  const _NewChatSheet({required this.controller});
+
+  final ChatListController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final threads = controller.threads;
+    return SheetBody(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 18),
+          Text('chat.new'.tr, style: context.type.h2),
+          const SizedBox(height: 8),
+          for (final t in threads)
+            _SheetRow(
+              title: t.title,
+              sub: t.subtitle,
+              color: _threadColor(context, t),
+              onTap: () {
+                Get.back<void>();
+                unawaited(Get.toNamed<void>('/chat/${t.id}'));
+              },
+            ),
+          for (final t in controller.suggested)
+            _SheetRow(
+              title: t.name,
+              sub: subjectName(t.subject),
+              color: (fill: AppColors.subject(t.subject).fill, on: AppColors.subject(t.subject).on),
+              onTap: () {
+                Get.back<void>();
+                unawaited(controller.startWith(t));
+              },
+            ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}
+
+class _SheetRow extends StatelessWidget {
+  const _SheetRow({required this.title, required this.sub, required this.color, required this.onTap});
+
+  final String title;
+  final String sub;
+  final ({Color fill, Color on}) color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Pressable(
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Avatar(title, background: color.fill, foreground: color.on),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: context.type.t),
+                Text(sub, style: context.type.cap),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// One conversation: glass header, bubbles, quick replies and a glass composer.
+class ChatThreadView extends GetView<ChatThreadController> {
+  const ChatThreadView({super.key});
+
+  static const _quick = ['chat.q_thanks', 'chat.q_late', 'chat.q_absent', 'chat.q_will_do'];
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    final inset = MediaQuery.paddingOf(context);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final bottom = keyboard > 0 ? keyboard + 12 : 28 + inset.bottom;
+    final side = (MediaQuery.sizeOf(context).width - 720) / 2;
+    final gutter = side > 16 ? side : 16.0;
+    return Obx(() {
+      controller.state.value;
+      final thread = controller.thread;
+      final messages = controller.messages;
+      final color = thread == null ? (fill: c.ink, on: c.chalk) : _threadColor(context, thread);
+      final empty = controller.draft.value.trim().isEmpty;
+      final myName = Get.find<AuthService>().user.value?.name.split(' ').first ?? '';
+      return Scaffold(
+        backgroundColor: c.chalk,
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: thread == null || messages.isEmpty
+                  ? Padding(
+                      padding: EdgeInsets.fromLTRB(20, inset.top + 90, 20, 0),
+                      child: ViewStateView(
+                        state: controller.state.value,
+                        onRetry: controller.load,
+                        errorKey: controller.errorMessage.value,
+                        emptyTitle: 'chat.gone',
+                        emptyBody: 'chat.gone_body',
+                        child: EmptyState(
+                          title: 'chat.say_hello',
+                          body: 'chat.say_hello_body'.trParams({'name': thread?.title ?? ''}),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      reverse: true,
+                      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                      padding: EdgeInsets.fromLTRB(gutter, inset.top + 120, gutter, bottom + 56 + 60),
+                      itemCount: messages.length + (controller.typing.value ? 1 : 0),
+                      itemBuilder: (context, row) {
+                        final typing = controller.typing.value;
+                        if (typing && row == 0) {
+                          return const Align(alignment: Alignment.centerLeft, child: _Typing());
+                        }
+                        final index = messages.length - 1 - (typing ? row - 1 : row);
+                        final m = messages[index];
+                        final mine = m.senderId == controller.me;
+                        final next = index + 1 < messages.length ? messages[index + 1] : null;
+                        // A time line closes each run of messages from one side.
+                        final endsRun =
+                            next == null ||
+                            next.senderId != m.senderId ||
+                            next.sentAt.difference(m.sentAt).inMinutes > 10;
+                        final firstRunOfSender = !messages.take(index).any((x) => x.senderId == m.senderId);
+                        final who = mine ? myName : thread.title;
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Column(
+                            crossAxisAlignment: mine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                            children: [
+                              _Bubble(text: m.text, mine: mine),
+                              if (endsRun)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
+                                  child: Text(
+                                    firstRunOfSender
+                                        ? '$who · ${DateFormat('H:mm').format(m.sentAt)}'
+                                        : _stamp(m.sentAt),
+                                    style: anek(11, 520, height: 1.2, color: c.ink3),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            // Glass header: messages scroll beneath it.
+            Positioned(
+              left: gutter,
+              right: gutter,
+              top: inset.top + 8,
+              child: Glass(
+                height: 56,
+                radius: 28,
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Row(
+                  children: [
+                    Semantics(
+                      button: true,
+                      label: 'common.back'.tr,
+                      child: GestureDetector(
+                        onTap: () => Get.back<void>(),
+                        behavior: HitTestBehavior.opaque,
+                        child: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Icon(PhosphorIconsRegular.caretLeft, color: c.ink),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    if (thread != null) Avatar(thread.title, size: 32, background: color.fill, foreground: color.on),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            thread?.title ?? '',
+                            style: context.type.t.copyWith(fontSize: 15.5),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (thread != null)
+                            Text(
+                              thread.online ? 'chat.online'.trParams({'sub': thread.subtitle}) : thread.subtitle,
+                              style: context.type.cap.copyWith(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      ),
+                    ),
+                    Semantics(
+                      button: true,
+                      label: 'chat.call_office'.tr,
+                      child: GestureDetector(
+                        onTap: () => unawaited(controller.callOffice()),
+                        behavior: HitTestBehavior.opaque,
+                        child: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: Icon(PhosphorIconsRegular.phone, size: 20, color: c.ink),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (thread != null) ...[
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: bottom + 56 + 12,
+                height: 36,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: gutter),
+                  itemCount: _quick.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, i) => Pressable(
+                    onTap: () {
+                      controller.text
+                        ..text = _quick[i].tr
+                        ..selection = TextSelection.collapsed(offset: _quick[i].tr.length);
+                    },
+                    child: Container(
+                      height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: c.paper,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: c.line2),
+                      ),
+                      child: Text(_quick[i].tr, style: anek(14, 600, height: 1, color: c.ink)),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: gutter,
+                right: gutter,
+                bottom: bottom,
+                child: Glass(
+                  height: 56,
+                  radius: 28,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Row(
+                    children: [
+                      Semantics(
+                        button: true,
+                        label: 'chat.attach'.tr,
+                        child: GestureDetector(
+                          onTap: () => ToastHelper.show('chat.attach_soon'),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(color: c.ink.withValues(alpha: .06), shape: BoxShape.circle),
+                            child: Icon(PhosphorIconsRegular.plus, color: c.ink),
                           ),
                         ),
                       ),
-                  ],
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: TextField(
+                          controller: controller.text,
+                          minLines: 1,
+                          maxLines: 3,
+                          textCapitalization: TextCapitalization.sentences,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => unawaited(controller.send()),
+                          style: anek(16, 450, height: 1.3, color: c.ink),
+                          cursorColor: c.ink,
+                          decoration: InputDecoration(
+                            isCollapsed: true,
+                            filled: false,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                            hintText: 'chat.message_to'.trParams({'name': thread.title}),
+                            hintStyle: anek(16, 450, height: 1.3, color: c.ink3),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Semantics(
+                        button: true,
+                        enabled: !empty,
+                        label: 'chat.send'.tr,
+                        child: GlassPress(
+                          onTap: empty ? null : () => unawaited(controller.send()),
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: empty ? .45 : 1,
+                            child: Container(
+                              width: 46,
+                              height: 46,
+                              decoration: BoxDecoration(
+                                color: const Color(0xD9F2A007),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppColors.white, width: .6),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x99B06F00),
+                                    blurRadius: 10,
+                                    spreadRadius: -2,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(PhosphorIconsBold.arrowUp, color: AppColors.mariInk, size: 22),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                title: Text(thread.title, style: context.text.titleMedium),
-                subtitle: Text(
-                  preview?.text ?? thread.subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: preview == null
-                    ? null
-                    : Text(Formatters.timeOf(preview.sentAt), style: context.text.bodySmall),
-              );
-            },
-          ),
-        );
-      if (!context.isWide) {
-        return FeaturePage(
-          title: 'chat.title',
-          subtitle: 'chat.subtitle',
-          onRefresh: controller.load,
-          child: list,
-        );
-      }
-      final id = controller.activeId;
-      return FeaturePage(
-        title: 'chat.title',
-        subtitle: 'chat.subtitle',
-        onRefresh: controller.load,
-        expand: true,
-        child: Row(
-          children: [
-            SizedBox(width: 360, child: list),
-            VerticalDivider(width: 1, color: context.colors.outlineVariant),
-            Expanded(
-              child: id == null
-                  ? const EmptyState(title: 'empty.title', body: 'chat.subtitle')
-                  : _PaneThread(id: id),
-            ),
+              ),
+            ],
           ],
         ),
       );
@@ -104,160 +643,90 @@ class ChatListView extends GetView<ChatListController> {
   }
 }
 
-class _PaneThread extends StatefulWidget {
-  const _PaneThread({required this.id});
+class _Bubble extends StatelessWidget {
+  const _Bubble({required this.text, required this.mine});
 
-  final String id;
+  final String text;
+  final bool mine;
 
   @override
-  State<_PaneThread> createState() => _PaneThreadState();
+  Widget build(BuildContext context) {
+    final c = context.app;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.sizeOf(context).width * .72 > 270 ? 270 : MediaQuery.sizeOf(context).width * .72,
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: mine ? c.ink : c.paper,
+          border: mine ? null : Border.all(color: c.line),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
+            bottomLeft: Radius.circular(mine ? 20 : 6),
+            bottomRight: Radius.circular(mine ? 6 : 20),
+          ),
+        ),
+        child: Text(text, style: anek(15, 450, height: 1.4, color: mine ? c.chalk : c.ink)),
+      ),
+    );
+  }
 }
 
-class _PaneThreadState extends State<_PaneThread> {
-  late final ChatThreadController thread;
+class _Typing extends StatefulWidget {
+  const _Typing();
 
   @override
-  void initState() {
-    super.initState();
-    thread = Get.put(ChatThreadController(), tag: 'pane');
-    thread.focus(widget.id);
-  }
+  State<_Typing> createState() => _TypingState();
+}
 
-  @override
-  void didUpdateWidget(covariant _PaneThread oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.id != widget.id) thread.focus(widget.id);
-  }
+class _TypingState extends State<_Typing> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
 
   @override
   void dispose() {
-    unawaited(Get.delete<ChatThreadController>(tag: 'pane'));
+    _c.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChatConversation(controller: thread, showAppBar: false);
-  }
-}
-
-class ChatThreadView extends GetView<ChatThreadController> {
-  const ChatThreadView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChatConversation(controller: controller);
-  }
-}
-
-class ChatConversation extends StatelessWidget {
-  const ChatConversation({required this.controller, this.showAppBar = true, super.key});
-
-  final ChatThreadController controller;
-  final bool showAppBar;
-
-  @override
-  Widget build(BuildContext context) {
-    final me = Get.find<AuthService>().user.value?.id;
-    return Scaffold(
-      appBar: showAppBar
-          ? AppBar(title: Obx(() => Text(controller.thread?.title ?? 'chat.title'.tr)))
-          : null,
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(() {
-              final messages = controller.messages;
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: messages.length + (controller.typing.value ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index >= messages.length) {
-                    return Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('chat.typing'.tr, style: context.text.bodySmall),
+    final c = context.app;
+    return Semantics(
+      label: 'chat.typing'.tr,
+      child: Container(
+        width: 70,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: c.paper,
+          border: Border.all(color: c.line),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+            bottomLeft: Radius.circular(6),
+          ),
+        ),
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (context, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Builder(
+                  builder: (context) {
+                    final t = ((_c.value - i * .15) % 1 + 1) % 1;
+                    final bob = Curves.easeInOut.transform(t < .5 ? t * 2 : (1 - t) * 2);
+                    return Transform.translate(
+                      offset: Offset(0, -4 * bob),
+                      child: Opacity(opacity: .5 + .5 * bob, child: Dot(c.ink3, size: 7)),
                     );
-                  }
-                  final message = messages[index];
-                  final mine = message.senderId == me;
-                  return Align(
-                    alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.74),
-                      decoration: BoxDecoration(
-                        color: mine
-                            ? context.colors.primary
-                            : context.colors.surfaceContainer,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(18),
-                          topRight: const Radius.circular(18),
-                          bottomLeft: Radius.circular(mine ? 18 : 4),
-                          bottomRight: Radius.circular(mine ? 4 : 18),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            message.text,
-                            style: context.text.bodyMedium?.copyWith(
-                              color: mine ? context.colors.onPrimary : context.colors.onSurface,
-                            ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                Formatters.timeOf(message.sentAt),
-                                style: context.text.bodySmall?.copyWith(
-                                  color: mine
-                                      ? context.colors.onPrimary.withValues(alpha: 0.8)
-                                      : context.colors.onSurfaceVariant,
-                                ),
-                              ),
-                              if (mine) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  message.read
-                                      ? PhosphorIconsFill.checks
-                                      : PhosphorIconsRegular.check,
-                                  size: 14,
-                                  color: context.colors.onPrimary,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            }),
+                  },
+                ),
+            ],
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: controller.text,
-                      decoration: InputDecoration(hintText: 'chat.hint'.tr),
-                      onSubmitted: (_) => controller.send(),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: controller.send,
-                    icon: Icon(PhosphorIconsFill.paperPlaneRight, color: context.colors.primary),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

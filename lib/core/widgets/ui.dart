@@ -462,7 +462,8 @@ class Avatar extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: ring == null
             ? null
-            : [BoxShadow(color: context.app.chalk, spreadRadius: 2.5), BoxShadow(color: ring!, spreadRadius: 4.5)],
+            : // Later shadows paint on top, so the outer ring goes first.
+              [BoxShadow(color: ring!, spreadRadius: 4.5), BoxShadow(color: context.app.chalk, spreadRadius: 2.5)],
       ),
       child: Text(
         initialsOf(name),
@@ -491,6 +492,7 @@ class Field extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.fill,
+    this.borderless = false,
     super.key,
   });
 
@@ -510,6 +512,9 @@ class Field extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final List<dynamic>? inputFormatters;
   final Color? fill;
+
+  /// No resting outline (search wells); focus and errors still draw one.
+  final bool borderless;
 
   @override
   State<Field> createState() => _FieldState();
@@ -538,7 +543,9 @@ class _FieldState extends State<Field> {
       validator: widget.validator == null ? null : (_) => widget.validator!(widget.controller?.text),
       builder: (state) {
         final error = state.errorText;
-        final ringColor = error != null ? AppColors.bad : (_focus.hasFocus ? c.ink : c.line2);
+        final ringColor = error != null
+            ? AppColors.bad
+            : (_focus.hasFocus ? c.ink : (widget.borderless ? Colors.transparent : c.line2));
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

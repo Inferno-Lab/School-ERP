@@ -2,6 +2,7 @@ import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/data/datasources/mock_json_datasource.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/data/models/campus.dart';
+import 'package:edunest/data/models/student.dart';
 
 extension MockWrites on MockJsonDataSource {
   void submitHomework({
@@ -195,8 +196,51 @@ extension MockWrites on MockJsonDataSource {
     final index = books.indexWhere((book) => book.id == bookId);
     final due = index < 0 ? null : books[index].dueDate;
     if (due == null) return;
-    books[index] = books[index].copyWith(dueDate: due.add(const Duration(days: 14)));
+    books[index] = books[index].copyWith(
+      dueDate: due.add(const Duration(days: 14)),
+    );
     bump();
+  }
+
+  void markThreadRead({required String threadId, required String userId}) {
+    var changed = false;
+    for (var i = 0; i < messages.length; i++) {
+      final m = messages[i];
+      if (m.threadId != threadId || m.senderId == userId || m.read) continue;
+      messages[i] = ChatMessage(
+        id: m.id,
+        threadId: m.threadId,
+        senderId: m.senderId,
+        text: m.text,
+        sentAt: m.sentAt,
+        read: true,
+      );
+      changed = true;
+    }
+    if (changed) bump();
+  }
+
+  String startThread({required String userId, required Teacher teacher}) {
+    final other = teacher.userId ?? 'usr_${teacher.id}';
+    final existing = threads
+        .where(
+          (t) =>
+              t.participantIds.contains(userId) &&
+              t.participantIds.contains(other),
+        )
+        .firstOrNull;
+    if (existing != null) return existing.id;
+    final thread = ChatThread(
+      id: nextId('th'),
+      title: teacher.name,
+      subtitle: teacher.subject,
+      participantIds: [userId, other],
+      avatarUrl: teacher.avatarUrl,
+      online: false,
+    );
+    threads.add(thread);
+    bump();
+    return thread.id;
   }
 
   void dismissNotification(String id) {
