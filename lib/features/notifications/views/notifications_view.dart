@@ -166,7 +166,14 @@ class NotificationsView extends GetView<NotificationsController> {
                     children: [
                       Icon(PhosphorIconsBold.check, size: 15, color: context.app.ink),
                       const SizedBox(width: 6),
-                      Text('notifications.read_all'.tr, style: anek(14, 650, height: 1, color: context.app.ink)),
+                      Flexible(
+                        child: Text(
+                          'notifications.read_all'.tr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: anek(14, 650, height: 1, color: context.app.ink),
+                        ),
+                      ),
                     ],
                   ),
                 ),

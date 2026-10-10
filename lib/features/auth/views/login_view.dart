@@ -270,7 +270,7 @@ class _DemoCard extends StatelessWidget {
               child: Obx(
                 () => GlassSegmented(
                   labels: const ['nav.student', 'nav.parent', 'nav.teacher'],
-                  index: roles.indexOf(controller.demoRole.value),
+                  index: controller.demoRole.value == null ? -1 : roles.indexOf(controller.demoRole.value!),
                   height: 48,
                   onPigment: true,
                   semanticLabel: 'auth.or_demo'.tr,
@@ -287,7 +287,7 @@ class _DemoCard extends StatelessWidget {
               top: 74,
               child: Obx(
                 () => Text(
-                  'auth.demo_line_${controller.demoRole.value.name}'.tr,
+                  'auth.demo_line_${controller.demoRole.value?.name ?? 'pick'}'.tr,
                   maxLines: 2,
                   style: anek(13, 560, height: 1.3, color: AppColors.white).copyWith(
                     shadows: const [Shadow(color: Color(0x73000000), blurRadius: 6, offset: Offset(0, 1))],

@@ -126,7 +126,7 @@ class SettingsView extends StatelessWidget {
                         child: GlassSlider(
                           value: _tOf(theme.textScale.value),
                           label: 'settings.text_size'.tr,
-                          valueLabel: '${(theme.textScale.value * 100).round()}%',
+                          describe: (t) => '${(_scaleOf(t) * 100).round()}%',
                           divisions: 8,
                           onChanged: (t) => theme.setTextScale(double.parse(_scaleOf(t).toStringAsFixed(2))),
                         ),

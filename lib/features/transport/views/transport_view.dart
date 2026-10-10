@@ -101,9 +101,13 @@ class TransportView extends GetView<TransportController> {
                           children: [
                             const PulseDot(AppColors.ok),
                             const SizedBox(width: 8),
-                            Text(
-                              'transport.live'.trParams({'route': route.routeName.split(' · ').first}),
-                              style: anek(14, 680, height: 1, color: c.ink),
+                            Flexible(
+                              child: Text(
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                'transport.live'.trParams({'route': route.routeName.split(' · ').first}),
+                                style: anek(14, 680, height: 1, color: c.ink),
+                              ),
                             ),
                           ],
                         ),

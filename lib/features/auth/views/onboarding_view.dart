@@ -34,7 +34,8 @@ class OnboardingView extends GetView<OnboardingController> {
             onPageChanged: (value) => controller.page.value = value,
             itemBuilder: (context, i) => LayoutBuilder(
               builder: (context, box) {
-                final artH = (box.maxHeight * .557).clamp(360.0, 520.0);
+                final artH = (box.maxHeight * .557).clamp(280.0, 520.0);
+                final compact = box.maxHeight < 720;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -47,20 +48,23 @@ class OnboardingView extends GetView<OnboardingController> {
                         _ => const _TeacherArt(),
                       },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 34, 24, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Rise(child: Overline(_pages[i].$1.tr)),
-                          const SizedBox(height: 12),
-                          Rise(index: 1, child: Text(_pages[i].$2.tr, style: context.type.h1)),
-                          const SizedBox(height: 12),
-                          Rise(
-                            index: 2,
-                            child: Text(_pages[i].$3.tr, style: context.type.b.copyWith(color: context.app.ink2)),
-                          ),
-                        ],
+                    // Small phones scroll the copy; it never runs under the buttons.
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(24, compact ? 22 : 34, 24, 112 + inset.bottom),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Rise(child: Overline(_pages[i].$1.tr)),
+                            const SizedBox(height: 12),
+                            Rise(index: 1, child: Text(_pages[i].$2.tr, style: context.type.h1)),
+                            const SizedBox(height: 12),
+                            Rise(
+                              index: 2,
+                              child: Text(_pages[i].$3.tr, style: context.type.b.copyWith(color: context.app.ink2)),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -81,7 +85,12 @@ class OnboardingView extends GetView<OnboardingController> {
                   child: Center(
                     child: Text(
                       'common.skip'.tr,
-                      style: anek(14.5, 650, height: 1, color: controller.page.value == 0 ? AppColors.white : context.app.ink),
+                      style: anek(
+                        14.5,
+                        650,
+                        height: 1,
+                        color: controller.page.value == 0 ? AppColors.white : context.app.ink,
+                      ),
                     ),
                   ),
                 ),
@@ -160,7 +169,14 @@ class _DayArtState extends State<_DayArt> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    const cols = [('hindi', 'HI', 250.0), ('social', 'SST', 330.0), ('', '', 170.0), ('computer', 'CS', 410.0), ('art', 'ART', 300.0), ('maths', 'MA', 360.0)];
+    const cols = [
+      ('hindi', 'HI', 250.0),
+      ('social', 'SST', 330.0),
+      ('', '', 170.0),
+      ('computer', 'CS', 410.0),
+      ('art', 'ART', 300.0),
+      ('maths', 'MA', 360.0),
+    ];
     return LayoutBuilder(
       builder: (context, box) {
         final scale = box.maxHeight / 470;
@@ -241,7 +257,9 @@ class _ParentArtState extends State<_ParentArt> with SingleTickerProviderStateMi
         decoration: BoxDecoration(
           color: AppColors.subject(subject).fill,
           borderRadius: BorderRadius.circular(26),
-          boxShadow: const [BoxShadow(color: Color(0x9910201B), blurRadius: 40, spreadRadius: -22, offset: Offset(0, 22))],
+          boxShadow: const [
+            BoxShadow(color: Color(0x9910201B), blurRadius: 40, spreadRadius: -22, offset: Offset(0, 22)),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,13 +283,25 @@ class _ParentArtState extends State<_ParentArt> with SingleTickerProviderStateMi
               left: 34,
               right: 34,
               top: 96 * s,
-              child: kid('maths', 'onboarding.kid_a_over'.tr, 'onboarding.kid_a_big'.tr, 'onboarding.kid_a_line'.tr, -.07),
+              child: kid(
+                'maths',
+                'onboarding.kid_a_over'.tr,
+                'onboarding.kid_a_big'.tr,
+                'onboarding.kid_a_line'.tr,
+                -.07,
+              ),
             ),
             Positioned(
               left: 34,
               right: 34,
               top: 250 * s,
-              child: kid('hindi', 'onboarding.kid_b_over'.tr, 'onboarding.kid_b_big'.tr, 'onboarding.kid_b_line'.tr, .052),
+              child: kid(
+                'hindi',
+                'onboarding.kid_b_over'.tr,
+                'onboarding.kid_b_big'.tr,
+                'onboarding.kid_b_line'.tr,
+                .052,
+              ),
             ),
             AnimatedBuilder(
               animation: _c,
@@ -297,7 +327,11 @@ class _ParentArtState extends State<_ParentArt> with SingleTickerProviderStateMi
                         ),
                       ),
                     ),
-                    Avatar('Ananya Sharma', background: const Color(0xFFFBFCF9), foreground: AppColors.subject('hindi').fill),
+                    Avatar(
+                      'Ananya Sharma',
+                      background: const Color(0xFFFBFCF9),
+                      foreground: AppColors.subject('hindi').fill,
+                    ),
                   ],
                 ),
               ),
@@ -315,7 +349,28 @@ class _TeacherArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const names = ['AS', 'DM', 'KS', 'MK', 'VJ', 'AR', 'IG', 'SK', 'AN', 'KP', 'RM', 'TS', 'NB', 'PD', 'YC', 'HV', 'OB', 'ZA', 'LF', 'EG'];
+    const names = [
+      'AS',
+      'DM',
+      'KS',
+      'MK',
+      'VJ',
+      'AR',
+      'IG',
+      'SK',
+      'AN',
+      'KP',
+      'RM',
+      'TS',
+      'NB',
+      'PD',
+      'YC',
+      'HV',
+      'OB',
+      'ZA',
+      'LF',
+      'EG',
+    ];
     const absent = {6, 18};
     const late = {12};
     return LayoutBuilder(
@@ -333,7 +388,12 @@ class _TeacherArt extends StatelessWidget {
                 runSpacing: 12,
                 children: [
                   for (var i = 0; i < names.length; i++)
-                    _RegisterDot(initials: names[i], colorIndex: i % 4, absent: absent.contains(i), late: late.contains(i)),
+                    _RegisterDot(
+                      initials: names[i],
+                      colorIndex: i % 4,
+                      absent: absent.contains(i),
+                      late: late.contains(i),
+                    ),
                 ],
               ),
             ),
@@ -353,8 +413,14 @@ class _TeacherArt extends StatelessWidget {
                         TextSpan(
                           text: '${'onboarding.tally_present'.tr} · ',
                           children: [
-                            TextSpan(text: '${'onboarding.tally_absent'.tr} · ', style: TextStyle(color: context.app.badText)),
-                            TextSpan(text: 'onboarding.tally_late'.tr, style: const TextStyle(color: AppColors.late)),
+                            TextSpan(
+                              text: '${'onboarding.tally_absent'.tr} · ',
+                              style: TextStyle(color: context.app.badText),
+                            ),
+                            TextSpan(
+                              text: 'onboarding.tally_late'.tr,
+                              style: const TextStyle(color: AppColors.late),
+                            ),
                           ],
                         ),
                         maxLines: 1,

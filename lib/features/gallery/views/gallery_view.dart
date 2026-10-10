@@ -112,9 +112,13 @@ class GalleryView extends GetView<GalleryController> {
                     children: [
                       Icon(PhosphorIconsRegular.user, size: 15, color: ready ? AppColors.white : context.app.ink),
                       const SizedBox(width: 6),
-                      Text(
-                        'gallery.only'.trParams({'name': controller.childName!}),
-                        style: anek(14, 680, height: 1, color: ready ? AppColors.white : context.app.ink),
+                      Flexible(
+                        child: Text(
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          'gallery.only'.trParams({'name': controller.childName!}),
+                          style: anek(14, 680, height: 1, color: ready ? AppColors.white : context.app.ink),
+                        ),
                       ),
                     ],
                   ),

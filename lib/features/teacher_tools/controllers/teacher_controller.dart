@@ -179,6 +179,11 @@ class TeacherHomeController extends GetxController with Loadable {
 }
 
 class MarkAttendanceController extends GetxController with Loadable {
+  MarkAttendanceController({this.classId});
+
+  /// Class to mark; defaults to the route's :classId.
+  final String? classId;
+
   @override
   bool get watchRevision => false;
 
@@ -191,7 +196,7 @@ class MarkAttendanceController extends GetxController with Loadable {
 
   @override
   Future<void> load() async {
-    final id = Get.parameters['classId'];
+    final id = classId ?? Get.parameters['classId'];
     if (id == null) {
       await run(() async {}, isEmpty: () => true);
       return;
@@ -459,6 +464,11 @@ class GradingController extends GetxController with Loadable {
 
 /// Marks entry: one class, one subject at a time; saves as you type.
 class MarksEntryController extends GetxController with Loadable {
+  MarksEntryController({this.classId});
+
+  /// Class to enter; defaults to the route's :classId.
+  final String? classId;
+
   /// Marks for an absent student.
   static const absentMark = -1;
   static const maxMarks = 20;
@@ -475,7 +485,7 @@ class MarksEntryController extends GetxController with Loadable {
   final saving = false.obs;
   Timer? _save;
 
-  String? get _classId => Get.parameters['classId'];
+  String? get _classId => classId ?? Get.parameters['classId'];
 
   @override
   Future<void> load() async {
@@ -514,7 +524,7 @@ class MarksEntryController extends GetxController with Loadable {
 
   Future<void> pickSubject(String id) async {
     if (subject.value == id) return;
-    await _flush();
+    await save();
     subject.value = id;
     try {
       await _draft();
@@ -530,10 +540,10 @@ class MarksEntryController extends GetxController with Loadable {
       values[studentId] = value;
     }
     _save?.cancel();
-    _save = Timer(const Duration(milliseconds: 600), () => unawaited(_flush()));
+    _save = Timer(const Duration(milliseconds: 600), () => unawaited(save()));
   }
 
-  Future<void> _flush() async {
+  Future<void> save() async {
     _save?.cancel();
     final id = _classId;
     if (id == null) return;
@@ -567,7 +577,7 @@ class MarksEntryController extends GetxController with Loadable {
 
   @override
   void onClose() {
-    if (_save?.isActive ?? false) unawaited(_flush());
+    if (_save?.isActive ?? false) unawaited(save());
     super.onClose();
   }
 }

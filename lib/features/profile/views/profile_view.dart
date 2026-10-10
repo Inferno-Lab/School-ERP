@@ -330,7 +330,14 @@ class _IdCard extends StatelessWidget {
                             children: [
                               Icon(PhosphorIconsRegular.camera, size: 15, color: on),
                               const SizedBox(width: 6),
-                              Text('profile.new_photo'.tr, style: anek(13, 650, height: 1, color: on)),
+                              Flexible(
+                                child: Text(
+                                  'profile.new_photo'.tr,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: anek(13, 650, height: 1, color: on),
+                                ),
+                              ),
                             ],
                           ),
                         ),

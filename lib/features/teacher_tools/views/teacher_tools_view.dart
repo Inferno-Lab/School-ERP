@@ -99,7 +99,14 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
                   children: [
                     Icon(PhosphorIconsRegular.arrowCounterClockwise, size: 15, color: c.ink),
                     const SizedBox(width: 6),
-                    Text('teacher.all_present'.tr, style: anek(14, 650, height: 1, color: c.ink)),
+                    Flexible(
+                      child: Text(
+                        'teacher.all_present'.tr,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: anek(14, 650, height: 1, color: c.ink),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1022,7 +1029,7 @@ class _GradeSheetViewState extends State<GradeSheetView> {
                     value: h.maxMarks == 0 ? 0 : _marks / h.maxMarks,
                     divisions: h.maxMarks,
                     label: 'teacher.marks'.tr,
-                    valueLabel: '$_marks',
+                    describe: (v) => '${(v * h.maxMarks).round()}',
                     fill: tone,
                     thumbWidth: 60,
                     thumbChild: Text('$_marks', style: anek(15, 760, height: 1, tabular: true, color: c.ink)),

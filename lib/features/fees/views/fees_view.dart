@@ -87,7 +87,14 @@ class _FeesViewState extends State<FeesView> {
                       children: [
                         Icon(PhosphorIconsRegular.receipt, size: 15, color: context.app.ink),
                         const SizedBox(width: 6),
-                        Text('fees.receipts'.tr, style: anek(14, 650, height: 1, color: context.app.ink)),
+                        Flexible(
+                          child: Text(
+                            'fees.receipts'.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: anek(14, 650, height: 1, color: context.app.ink),
+                          ),
+                        ),
                       ],
                     ),
                   ),

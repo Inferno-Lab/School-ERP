@@ -17,7 +17,8 @@ class LoginController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final loading = false.obs;
   final useOtp = false.obs;
-  final demoRole = UserRole.student.obs;
+  /// Demo role picked on the login shelf; none until the user taps one.
+  final demoRole = Rxn<UserRole>();
 
   Future<void> demo(UserRole role) => _enter(
     () => Get.find<AuthRepository>().loginAs(role),
