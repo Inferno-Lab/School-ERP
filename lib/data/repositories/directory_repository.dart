@@ -16,6 +16,9 @@ abstract class DirectoryRepository {
 
   Future<Teacher?> teacherOrNull(String id);
 
+  /// Display name for any account (parent, student or teacher), or null.
+  Future<String?> userName(String userId);
+
   Future<List<Teacher>> teachers();
 
   Future<SchoolInfo> school();
@@ -48,9 +51,11 @@ class MockDirectoryRepository implements DirectoryRepository {
   });
 
   @override
-  Future<List<SchoolClass>> classesForTeacher(String teacherId) => _ds.guard(
-    () => _ds.classes.where((item) => item.classTeacherId == teacherId).toList(),
-  );
+  Future<List<SchoolClass>> classesForTeacher(String teacherId) => _ds.guard(() {
+    // A teacher's classes: the ones they teach, plus any they are class teacher of.
+    final teaches = _findTeacher(teacherId)?.classIds ?? const <String>[];
+    return _ds.classes.where((item) => item.classTeacherId == teacherId || teaches.contains(item.id)).toList();
+  });
 
   @override
   Future<Teacher> teacher(String id) => _ds.guard(() {
@@ -61,6 +66,10 @@ class MockDirectoryRepository implements DirectoryRepository {
 
   @override
   Future<Teacher?> teacherOrNull(String id) => _ds.guard(() => _findTeacher(id));
+
+  @override
+  Future<String?> userName(String userId) =>
+      _ds.guard(() => _ds.users.where((u) => u.id == userId).firstOrNull?.name);
 
   @override
   Future<List<Teacher>> teachers() => _ds.guard(() => [..._ds.teachers]);
@@ -110,6 +119,12 @@ class RemoteDirectoryRepository implements DirectoryRepository {
 
   @override
   Future<Teacher?> teacherOrNull(String id) async => teacher(id);
+
+  @override
+  Future<String?> userName(String userId) async {
+    final json = await _remote.get('/users/$userId');
+    return (json as Map)['name'] as String?;
+  }
 
   @override
   Future<List<Teacher>> teachers() async {

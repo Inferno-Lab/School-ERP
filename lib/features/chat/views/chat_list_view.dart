@@ -106,6 +106,8 @@ class ChatListView extends GetView<ChatListController> {
                     title: 'chat.no_match',
                     body: 'chat.no_match_body'.trp({'q': controller.query.value}),
                   ),
+                if (threads.isEmpty && controller.query.value.isEmpty && suggested.isNotEmpty)
+                  const EmptyState(art: EmptyArt.chat, title: 'chat.no_chats', body: 'chat.no_chats_body'),
                 if (suggested.isNotEmpty && controller.query.value.isEmpty) ...[
                   Rise(index: 2, child: SectionLabel('chat.start_with'.tr)),
                   Rise(
@@ -412,7 +414,8 @@ class ChatThreadView extends GetView<ChatThreadController> {
                         state: controller.state.value,
                         onRetry: controller.load,
                         errorKey: controller.errorMessage.value,
-                        emptyTitle: 'chat.gone',
+                        emptyArt: EmptyArt.search,
+            emptyTitle: 'chat.gone',
                         emptyBody: 'chat.gone_body',
                         child: EmptyState(
                           title: 'chat.say_hello',
