@@ -158,6 +158,30 @@ extension MockWrites on MockJsonDataSource {
     bump();
   }
 
+  void reviewLeave({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  }) {
+    final i = leaves.indexWhere((l) => l.id == id);
+    if (i < 0) return;
+    final l = leaves[i];
+    leaves[i] = LeaveRequest(
+      id: l.id,
+      studentId: l.studentId,
+      from: l.from,
+      to: l.to,
+      reason: l.reason,
+      status: status,
+      appliedOn: l.appliedOn,
+      reviewedBy: reviewer,
+      reviewNote: note,
+      note: l.note,
+    );
+    bump();
+  }
+
   void rsvp({
     required String eventId,
     required String userId,

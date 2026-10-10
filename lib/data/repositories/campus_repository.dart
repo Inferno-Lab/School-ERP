@@ -378,6 +378,14 @@ abstract class LeaveRepository {
   Future<List<LeaveRequest>> forStudent(String studentId);
 
   Future<void> apply(LeaveRequest request);
+
+  /// A class teacher approves or declines a request.
+  Future<void> review({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  });
 }
 
 class MockLeaveRepository implements LeaveRepository {
@@ -393,6 +401,16 @@ class MockLeaveRepository implements LeaveRepository {
   @override
   Future<void> apply(LeaveRequest request) =>
       _ds.guard(() => _ds.applyLeave(request));
+
+  @override
+  Future<void> review({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  }) => _ds.guard(
+    () => _ds.reviewLeave(id: id, status: status, reviewer: reviewer, note: note),
+  );
 }
 
 class RemoteLeaveRepository implements LeaveRepository {
@@ -412,6 +430,18 @@ class RemoteLeaveRepository implements LeaveRepository {
   @override
   Future<void> apply(LeaveRequest request) =>
       _remote.post('/leave', request.toJson());
+
+  @override
+  Future<void> review({
+    required String id,
+    required LeaveStatus status,
+    required String reviewer,
+    String? note,
+  }) => _remote.post('/leave/$id/review', {
+    'status': status.name,
+    'reviewer': reviewer,
+    'note': ?note,
+  });
 }
 
 abstract class GalleryRepository {

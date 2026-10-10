@@ -106,7 +106,9 @@ class DayRibbonState extends State<DayRibbon> {
                   onHorizontalDragStart: widget.draggable ? (_) => setState(() => _dragging = true) : null,
                   onHorizontalDragUpdate: widget.draggable
                       ? (d) {
-                          setState(() => _lensX = (lensX + d.delta.dx).clamp(widget.lensWidth / 2, w - widget.lensWidth / 2));
+                          setState(
+                            () => _lensX = (lensX + d.delta.dx).clamp(widget.lensWidth / 2, w - widget.lensWidth / 2),
+                          );
                           final m = (start + ((_lensX! - offset) / k)).round().clamp(start, end);
                           widget.onScrub?.call((m - now).abs() <= 2 ? null : m);
                         }
@@ -131,14 +133,20 @@ class DayRibbonState extends State<DayRibbon> {
                                   Text(
                                     (scrubbing ? 'home.scrub_label' : 'home.now_label').tr,
                                     style: anek(10.5, 760, width: 120, height: 1.2, em: .14, color: AppColors.white)
-                                        .copyWith(shadows: const [Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1))]),
+                                        .copyWith(
+                                          shadows: const [
+                                            Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1)),
+                                          ],
+                                        ),
                                   ),
                                   Text(
                                     clockOf(lensMinute),
                                     style: context.type.mono.copyWith(
                                       fontSize: 12,
                                       color: AppColors.white,
-                                      shadows: const [Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1))],
+                                      shadows: const [
+                                        Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1)),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -164,6 +172,27 @@ class DayRibbonState extends State<DayRibbon> {
     final width = (b - a) * widget.pxPerMinute - 3;
     final past = b <= now;
     const radius = BorderRadius.vertical(bottom: Radius.circular(20));
+    if (p.subject == 'free') {
+      // A teacher's free period: hatch, labelled at the foot like a class.
+      Widget free = Hatch(
+        radius: radius,
+        background: c.paper2,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 8, 14),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('teacher.free'.tr, maxLines: 1, style: anek(13, 720, width: 104, height: 1, color: c.ink3)),
+              const SizedBox(height: 3),
+              Text(clockOf(a), style: context.type.mono.copyWith(fontSize: 11, color: c.ink3)),
+            ],
+          ),
+        ),
+      );
+      if (past) free = Opacity(opacity: c.dark ? .6 : .55, child: free);
+      return Positioned(left: left, top: 0, width: width, height: widget.height, child: free);
+    }
     if (p.kind != PeriodKind.klass) {
       return Positioned(
         left: left,
@@ -214,7 +243,12 @@ class DayRibbonState extends State<DayRibbon> {
           ),
           if (detail != null) ...[
             const SizedBox(height: 4),
-            Text(detail, maxLines: 1, overflow: TextOverflow.ellipsis, style: anek(12.5, 520, height: 1.1, color: pigment.on.withValues(alpha: .88))),
+            Text(
+              detail,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: anek(12.5, 520, height: 1.1, color: pigment.on.withValues(alpha: .88)),
+            ),
           ],
           const SizedBox(height: 3),
           Text(

@@ -12,6 +12,7 @@ import 'package:edunest/features/auth/views/onboarding_view.dart';
 import 'package:edunest/features/auth/views/splash_view.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
 import 'package:edunest/features/chat/views/chat_list_view.dart';
+import 'package:edunest/features/dashboard/controllers/academics_controller.dart';
 import 'package:edunest/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:edunest/features/events/controllers/events_controller.dart';
 import 'package:edunest/features/events/views/events_view.dart';
@@ -53,11 +54,11 @@ class ShellBinding extends Bindings {
       ..lazyPut(NoticesController.new);
     if (teacher) {
       Get
-        ..lazyPut(TeacherHomeController.new)
-        ..lazyPut(TeacherClassesController.new);
+        ..lazyPut(TeacherHomeController.new);
     } else {
       Get
         ..lazyPut(DashboardController.new)
+        ..lazyPut(AcademicsController.new)
         ..lazyPut(FeesController.new);
     }
   }
