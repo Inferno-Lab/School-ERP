@@ -54,15 +54,15 @@ vec4 blurAt(vec2 p) {
 void main() {
   vec2 frag = FlutterFragCoord().xy;
 
-  // FlutterFragCoord() is local to the glass. The backdrop texture is either the
-  // whole window (sample at fragment + glass origin) or a crop around the glass
-  // that may be padded (the glass sits in the middle; sample at the fragment).
+  // With the whole window as the backdrop, FlutterFragCoord() is a window coordinate (checked
+  // on device with a colour-coded debug pass): sample it as is, and subtract the glass origin
+  // for the shape. With a crop around the glass the glass sits in the middle of it, and the
+  // fragment is already the sampling point.
   bool fullScreen = all(lessThan(abs(uTexSize - uScreen), vec2(3.0)));
   vec2 pad = fullScreen ? vec2(0.0) : (uTexSize - uSize) * 0.5;
-  vec2 toTexture = fullScreen ? uOrigin : vec2(0.0);
   gFlip = !fullScreen;
-  vec2 local = frag - pad;
-  vec2 at = frag + toTexture;
+  vec2 local = fullScreen ? frag - uOrigin : frag - pad;
+  vec2 at = frag;
 
   vec2 hs = uSize * 0.5;
   vec2 p = local - hs;

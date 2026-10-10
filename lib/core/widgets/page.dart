@@ -105,7 +105,7 @@ class PageFrame extends StatelessWidget {
                       stops: const [0, .6, 1],
                       colors: [
                         (background ?? context.app.chalk).withValues(alpha: 1),
-                        (background ?? context.app.chalk).withValues(alpha: .96),
+                        (background ?? context.app.chalk).withValues(alpha: 1),
                         (background ?? context.app.chalk).withValues(alpha: 0),
                       ],
                     ),
