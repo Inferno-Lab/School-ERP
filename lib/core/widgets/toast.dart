@@ -88,7 +88,6 @@ class _ToastCard extends StatelessWidget {
             child: Glass(
               height: 56,
               radius: 28,
-              blur: 2.2,
               tint: c.glassTintStrong,
               padding: const EdgeInsets.only(left: 10, right: 16),
               child: Row(

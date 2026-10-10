@@ -34,7 +34,7 @@ abstract final class LiquidGlass {
 }
 
 /// Liquid glass for the floating controls layer. Content cards are never glass.
-class Glass extends StatefulWidget {
+class Glass extends StatelessWidget {
   const Glass({
     this.child,
     this.radius = 22,
@@ -45,7 +45,6 @@ class Glass extends StatefulWidget {
     this.height,
     this.shadow = true,
     this.rim = true,
-    this.blur,
     this.saturation,
     super.key,
   });
@@ -59,55 +58,25 @@ class Glass extends StatefulWidget {
   final double? height;
   final bool shadow;
   final bool rim;
-  final double? blur;
   final double? saturation;
-
-  @override
-  State<Glass> createState() => _GlassState();
-}
-
-class _GlassState extends State<Glass> with SingleTickerProviderStateMixin {
-  // Glass materialises by ramping refraction 0 -> 1, like water condensing.
-  late final _materialise = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    _materialise.forward();
-  }
-
-  @override
-  void dispose() {
-    _materialise.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.app;
-    final radius = BorderRadius.circular(widget.radius);
-    final shadows = widget.shadow
-        ? [
-            BoxShadow(
-              color: c.glassShadow.withValues(alpha: c.dark ? .3 : .06),
-              blurRadius: 1,
-              offset: const Offset(0, 1),
-            ),
-            BoxShadow(color: c.glassShadow, blurRadius: 28, spreadRadius: -8, offset: const Offset(0, 10)),
-          ]
+    final shape = BorderRadius.circular(radius);
+    // One soft shadow below the glass; a hairline shadow reads as a second outline.
+    final shadows = shadow
+        ? [BoxShadow(color: c.glassShadow, blurRadius: 28, spreadRadius: -8, offset: const Offset(0, 10))]
         : null;
-    final content = Padding(padding: widget.padding ?? EdgeInsets.zero, child: widget.child);
+    final content = Padding(padding: padding ?? EdgeInsets.zero, child: child);
 
     if (context.reduceTransparency) {
       return Container(
-        width: widget.width,
-        height: widget.height,
+        width: width,
+        height: height,
         decoration: BoxDecoration(
-          color: widget.tint?.withValues(alpha: 1) ?? c.paper,
-          borderRadius: radius,
+          color: tint?.withValues(alpha: 1) ?? c.paper,
+          borderRadius: shape,
           border: Border.all(color: c.line2),
           boxShadow: shadows,
         ),
@@ -115,33 +84,28 @@ class _GlassState extends State<Glass> with SingleTickerProviderStateMixin {
       );
     }
 
-    final lens = widget.kind == GlassKind.lens;
+    final lens = kind == GlassKind.lens;
     return CustomPaint(
       // The backdrop filter samples what is under the glass, so the shadow
       // must stay outside the shape (like CSS box-shadow) or it greys the glass.
-      painter: shadows == null ? null : _OuterShadow(radius: radius, shadows: shadows),
+      painter: shadows == null ? null : _OuterShadow(radius: shape, shadows: shadows),
       child: SizedBox(
-        width: widget.width,
-        height: widget.height,
+        width: width,
+        height: height,
         child: ClipRRect(
-          borderRadius: radius,
+          borderRadius: shape,
           child: _GlassFilter(
-            radius: widget.radius,
+            radius: radius,
             lens: lens,
-            blur: widget.blur ?? (lens ? .3 : 1.5),
-            saturation: widget.saturation ?? (lens ? 1.6 : 1.5),
+            saturation: saturation ?? (lens ? 1.6 : 1.5),
             specular: c.dark ? .62 : .92,
-            refraction: context.reduceMotion ? null : _materialise,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: widget.tint ?? c.glassTint,
-                borderRadius: radius,
-              ),
+              decoration: BoxDecoration(color: tint ?? c.glassTint, borderRadius: shape),
               child: DecoratedBox(
                 position: DecorationPosition.foreground,
-                decoration: widget.rim
+                decoration: rim
                     ? BoxDecoration(
-                        borderRadius: radius,
+                        borderRadius: shape,
                         border: Border.all(color: c.glassRim, width: .6),
                       )
                     : const BoxDecoration(),
@@ -187,28 +151,22 @@ class _GlassFilter extends SingleChildRenderObjectWidget {
   const _GlassFilter({
     required this.radius,
     required this.lens,
-    required this.blur,
     required this.saturation,
     required this.specular,
-    required this.refraction,
     super.child,
   });
 
   final double radius;
   final bool lens;
-  final double blur;
   final double saturation;
   final double specular;
-  final Animation<double>? refraction;
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderGlass(
     radius: radius,
     lens: lens,
-    blur: blur,
     saturation: saturation,
     specular: specular,
-    refraction: refraction,
     dpr: MediaQuery.devicePixelRatioOf(context),
   );
 
@@ -217,29 +175,26 @@ class _GlassFilter extends SingleChildRenderObjectWidget {
     renderObject
       ..radius = radius
       ..lens = lens
-      ..blur = blur
       ..saturation = saturation
       ..specular = specular
-      ..refraction = refraction
       ..dpr = MediaQuery.devicePixelRatioOf(context);
   }
 }
 
+// Liquid glass: convex squircle bezel, Snell refraction (n = 1.5), specular rim.
+// Port of the canvas recipe (kube.io): displacement is computed per pixel
+// instead of from a pre-baked map.
 class _RenderGlass extends RenderProxyBox {
   _RenderGlass({
     required double radius,
     required bool lens,
-    required double blur,
     required double saturation,
     required double specular,
-    required Animation<double>? refraction,
     required double dpr,
   }) : _radius = radius,
        _lens = lens,
-       _blur = blur,
        _saturation = saturation,
        _specular = specular,
-       _refraction = refraction,
        _dpr = dpr;
 
   ui.FragmentShader? _shader;
@@ -248,23 +203,12 @@ class _RenderGlass extends RenderProxyBox {
   set radius(double v) => _set(_radius != v, () => _radius = v);
   bool _lens;
   set lens(bool v) => _set(_lens != v, () => _lens = v);
-  double _blur;
-  set blur(double v) => _set(_blur != v, () => _blur = v);
   double _saturation;
   set saturation(double v) => _set(_saturation != v, () => _saturation = v);
   double _specular;
   set specular(double v) => _set(_specular != v, () => _specular = v);
   double _dpr;
   set dpr(double v) => _set(_dpr != v, () => _dpr = v);
-
-  Animation<double>? _refraction;
-  set refraction(Animation<double>? v) {
-    if (_refraction == v) return;
-    if (attached) _refraction?.removeListener(markNeedsPaint);
-    _refraction = v;
-    if (attached) _refraction?.addListener(markNeedsPaint);
-    markNeedsPaint();
-  }
 
   void _set(bool changed, VoidCallback apply) {
     if (!changed) return;
@@ -275,14 +219,12 @@ class _RenderGlass extends RenderProxyBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _refraction?.addListener(markNeedsPaint);
     LiquidGlass.showMaps.addListener(markNeedsPaint);
     LiquidGlass.live++;
   }
 
   @override
   void detach() {
-    _refraction?.removeListener(markNeedsPaint);
     LiquidGlass.showMaps.removeListener(markNeedsPaint);
     LiquidGlass.live--;
     super.detach();
@@ -298,10 +240,10 @@ class _RenderGlass extends RenderProxyBox {
   bool get alwaysNeedsCompositing => true;
 
   ui.ImageFilter _filter() {
-    final saturate = ui.ColorFilter.matrix(_saturationMatrix(_lens ? _saturation : 1.7));
     final program = LiquidGlass.program;
     if (!LiquidGlass.available || program == null) {
       // Frosted fallback for Skia, web and unsupported devices.
+      final saturate = ui.ColorFilter.matrix(_saturationMatrix(_lens ? _saturation : 1.7));
       return ui.ImageFilter.compose(outer: saturate, inner: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14));
     }
     final shader = _shader ??= program.fragmentShader();
@@ -310,7 +252,6 @@ class _RenderGlass extends RenderProxyBox {
     final shortest = size.shortestSide;
     final bezel = (_lens ? (shortest * .3).clamp(10, 34) : (shortest * .3).clamp(10, 18)).toDouble();
     final thickness = bezel * (_lens ? 1.6 : 1.22);
-    final t = Curves.easeOutBack.transform(_refraction?.value ?? 1);
     // Index 0 and 1 hold the texture size; the engine sets them.
     shader
       ..setFloat(2, origin.dx)
@@ -320,15 +261,17 @@ class _RenderGlass extends RenderProxyBox {
       ..setFloat(6, _radius * _dpr)
       ..setFloat(7, bezel * _dpr)
       ..setFloat(8, thickness * _dpr)
-      ..setFloat(9, t)
+      ..setFloat(9, 1)
       ..setFloat(10, _specular)
       ..setFloat(11, _saturation)
       ..setFloat(12, LiquidGlass.showMaps.value ? 1 : 0);
-    final glass = ui.ImageFilter.shader(shader);
-    if (_blur <= 0) return glass;
+    // The blur is not for looks: composing it makes the engine hand the shader a
+    // crop around the glass. A bare shader filter gets the whole screen on some
+    // backends, which breaks the shader's coordinates (ghost copies of other UI).
+    final sigma = (_lens ? .3 : 1.5) * _dpr / 2;
     return ui.ImageFilter.compose(
-      outer: glass,
-      inner: ui.ImageFilter.blur(sigmaX: _blur * _dpr / 2, sigmaY: _blur * _dpr / 2),
+      outer: ui.ImageFilter.shader(shader),
+      inner: ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
     );
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/widgets/dock.dart';
+import 'package:edunest/core/widgets/lazy_stack.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
 import 'package:edunest/features/chat/views/chat_list_view.dart';
 import 'package:edunest/features/dashboard/views/academics_view.dart';
@@ -42,7 +43,9 @@ class ShellView extends GetView<ShellController> {
           backgroundColor: context.app.chalk,
           body: Stack(
             children: [
-              Positioned.fill(child: IndexedStack(index: index, children: pages)),
+              Positioned.fill(
+                child: LazyIndexedStack(index: index, children: pages),
+              ),
               if (wide)
                 Positioned(
                   left: 20,
