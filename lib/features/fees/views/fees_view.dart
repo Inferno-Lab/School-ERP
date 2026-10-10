@@ -920,7 +920,7 @@ class _Slip extends StatelessWidget {
                   Text(Formatters.inr(receipt.amount), style: context.type.dl),
                   const SizedBox(height: 6),
                   Text(receipt.title, style: context.type.t),
-                  const _Dashed(top: 18, bottom: 8),
+                  const Padding(padding: EdgeInsets.only(top: 18, bottom: 8), child: DashedLine()),
                   for (final r in rows)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 7),
@@ -941,7 +941,7 @@ class _Slip extends StatelessWidget {
                         ],
                       ),
                     ),
-                  const _Dashed(top: 10, bottom: 10),
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 10), child: DashedLine()),
                   Text('fees.receipt_note'.tr, style: context.type.cap),
                 ],
               ),
@@ -978,26 +978,6 @@ class _Slip extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Dashed extends StatelessWidget {
-  const _Dashed({required this.top, required this.bottom});
-
-  final double top;
-  final double bottom;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.only(top: top, bottom: bottom),
-    child: LayoutBuilder(
-      builder: (context, box) => Row(
-        children: [
-          for (var i = 0; i < box.maxWidth ~/ 10; i++)
-            Container(width: 6, height: 1.5, margin: const EdgeInsets.only(right: 4), color: context.app.line2),
-        ],
-      ),
-    ),
-  );
 }
 
 class _PerforatedClipper extends CustomClipper<Path> {

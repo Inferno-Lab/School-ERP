@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/states.dart';
@@ -51,21 +53,20 @@ class PageFrame extends StatelessWidget {
     final inset = MediaQuery.paddingOf(context);
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     final top = inset.top + 8;
-    final bottomSpace = dockPage
+    // On a tab page a bottom bar floats above the dock.
+    final barLift = dockPage ? 76.0 : 0.0;
+    final bottomSpace = bottomBar != null
+        ? bottomBarHeight + 48 + barLift + inset.bottom
+        : dockPage
         ? kDockClearance + inset.bottom
-        : bottomBar != null
-        ? bottomBarHeight + 48 + inset.bottom
         : 32 + inset.bottom;
     final hasTopRow = leading != null || actions.isNotEmpty;
+    // On tablets the reading column stays phone-like and centred.
+    final side = padContent ? math.max<double>(20, (MediaQuery.sizeOf(context).width - 720) / 2) : 0.0;
     final list = ListView(
       controller: controller,
       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      padding: EdgeInsets.fromLTRB(
-        padContent ? 20 : 0,
-        topPadding ?? (hasTopRow ? top + 58 : top + 8),
-        padContent ? 20 : 0,
-        bottomSpace,
-      ),
+      padding: EdgeInsets.fromLTRB(side, topPadding ?? (hasTopRow ? top + 58 : top + 8), side, bottomSpace),
       children: [
         if (underlay == null) const OfflineCapsule(),
         ...children,
@@ -109,7 +110,7 @@ class PageFrame extends StatelessWidget {
               left: 16,
               right: 16,
               // Rides above the keyboard when the bar holds a text field.
-              bottom: keyboard > 0 ? keyboard + 12 : 28 + inset.bottom,
+              bottom: keyboard > 0 ? keyboard + 12 : 28 + barLift + inset.bottom,
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 520),

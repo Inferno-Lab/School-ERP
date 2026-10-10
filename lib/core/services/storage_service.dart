@@ -13,6 +13,7 @@ abstract final class StorageKeys {
   static const locale = 'locale';
   static const notifyHomework = 'notifyHomework';
   static const notifyFees = 'notifyFees';
+  static const readNotices = 'readNotices';
 }
 
 class StorageService extends GetxService {

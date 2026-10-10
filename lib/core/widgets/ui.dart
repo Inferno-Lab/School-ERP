@@ -191,6 +191,31 @@ class _PulseDotState extends State<PulseDot> with SingleTickerProviderStateMixin
   );
 }
 
+/// Dashed rule (receipt slips, exam sittings).
+class DashedLine extends StatelessWidget {
+  const DashedLine({this.color, this.dash = 6, this.gap = 4, this.thickness = 1.5, super.key});
+
+  final Color? color;
+  final double dash;
+  final double gap;
+  final double thickness;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) => Row(
+      children: [
+        for (var i = 0; i < box.maxWidth ~/ (dash + gap); i++)
+          Container(
+            width: dash,
+            height: thickness,
+            margin: EdgeInsets.only(right: gap),
+            color: color ?? context.app.line2,
+          ),
+      ],
+    ),
+  );
+}
+
 class Hr extends StatelessWidget {
   const Hr({this.indent = 0, super.key});
 
