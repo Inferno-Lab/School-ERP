@@ -399,6 +399,7 @@ class GalleryPhoto {
     required this.id,
     required this.url,
     required this.caption,
+    this.tagged = const [],
   });
 
   factory GalleryPhoto.fromJson(Map<String, dynamic> json) =>
@@ -407,6 +408,10 @@ class GalleryPhoto {
   final String id;
   final String url;
   final String caption;
+
+  /// Students who appear in the photo.
+  @JsonKey(defaultValue: <String>[])
+  final List<String> tagged;
 
   Map<String, dynamic> toJson() => _$GalleryPhotoToJson(this);
 }
