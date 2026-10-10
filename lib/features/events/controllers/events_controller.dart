@@ -4,35 +4,56 @@ import 'package:edunest/core/utils/loadable.dart';
 import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
+import 'package:edunest/data/repositories/directory_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EventsController extends GetxController with Loadable {
   List<SchoolEvent> items = [];
+  String? childName;
+
+  /// Answers given on this device before the server confirms them.
+  final pending = <String, RsvpStatus>{}.obs;
+
+  String? get _me => Get.find<AuthService>().user.value?.id;
+
+  List<SchoolEvent> get upcoming {
+    final today = DateUtils.dateOnly(DateTime.now());
+    return items.where((e) => !e.date.isBefore(today)).toList()..sort((a, b) => a.date.compareTo(b.date));
+  }
+
+  /// The next event that asks families to come and has no answer yet; else the next one.
+  SchoolEvent? get featured {
+    final list = upcoming;
+    return list.where((e) => e.category != 'general' && mine(e) == null).firstOrNull ?? list.firstOrNull;
+  }
+
+  RsvpStatus? mine(SchoolEvent e) =>
+      pending[e.id] ?? e.rsvps.where((r) => r.userId == _me).map((r) => r.status).firstOrNull;
+
+  int going(SchoolEvent e) {
+    final others = e.rsvps.where((r) => r.userId != _me && r.status == RsvpStatus.going).length;
+    return others + (mine(e) == RsvpStatus.going ? 1 : 0);
+  }
 
   @override
   Future<void> load() => run(() async {
     items = await Get.find<EventRepository>().all();
-    items.sort((a, b) => a.date.compareTo(b.date));
+    final id = Get.find<AuthService>().activeStudentId.value;
+    childName = id == null ? null : (await Get.find<DirectoryRepository>().student(id)).name.split(' ').first;
   }, isEmpty: () => items.isEmpty);
 
-  SchoolEvent? byId(String? id) {
-    for (final item in items) {
-      if (item.id == id) return item;
-    }
-    return null;
-  }
+  SchoolEvent? byId(String? id) => items.where((e) => e.id == id).firstOrNull;
 
   Future<void> rsvp(String eventId, RsvpStatus status) async {
-    final userId = Get.find<AuthService>().user.value?.id;
+    final userId = _me;
     if (userId == null) return;
+    pending[eventId] = status;
     try {
-      await Get.find<EventRepository>().rsvp(
-        eventId: eventId,
-        userId: userId,
-        status: status,
-      );
+      await Get.find<EventRepository>().rsvp(eventId: eventId, userId: userId, status: status);
       ToastHelper.show('events.saved', kind: ToastKind.success);
     } on AppException catch (error) {
+      pending.remove(eventId);
       ToastHelper.show(error.message, kind: ToastKind.error);
     }
   }

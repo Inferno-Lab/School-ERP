@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/theme/tokens.dart';
@@ -77,38 +79,47 @@ class _GlassSegmentedState extends State<GlassSegmented> {
                 AnimatedPositioned(
                   duration: still ? Duration.zero : const Duration(milliseconds: 550),
                   curve: kSpring,
-                  left: pad + widget.index * slot,
+                  left: pad + math.max(0, widget.index) * slot,
                   top: pad,
                   width: slot,
                   height: dropH,
-                  child: Transform.scale(
-                    scaleX: _moving && !still ? 1.2 : 1,
-                    scaleY: _moving && !still ? .88 : 1,
-                    child: dropletColor != null
-                        ? DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: dropletColor,
-                              borderRadius: BorderRadius.circular(dropH / 2),
-                              boxShadow: [
-                                BoxShadow(color: dropletColor.withValues(alpha: .45), blurRadius: 12, spreadRadius: -3, offset: const Offset(0, 4)),
-                              ],
+                  // index -1: nothing chosen yet, so no droplet.
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: widget.index < 0 ? 0 : 1,
+                    child: Transform.scale(
+                      scaleX: _moving && !still ? 1.2 : 1,
+                      scaleY: _moving && !still ? .88 : 1,
+                      child: dropletColor != null
+                          ? DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: dropletColor,
+                                borderRadius: BorderRadius.circular(dropH / 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: dropletColor.withValues(alpha: .45),
+                                    blurRadius: 12,
+                                    spreadRadius: -3,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Glass(
+                              kind: GlassKind.lens,
+                              radius: dropH / 2,
+                              tint: widget.onPigment
+                                  ? const Color(0xE6FFFFFF)
+                                  : (c.dark ? const Color(0x33FFFFFF) : const Color(0x8CFFFFFF)),
                             ),
-                          )
-                        : Glass(
-                            kind: GlassKind.lens,
-                            radius: dropH / 2,
-                            tint: widget.onPigment
-                                ? const Color(0xE6FFFFFF)
-                                : (c.dark ? const Color(0x33FFFFFF) : const Color(0x8CFFFFFF)),
-                          ),
+                    ),
                   ),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: pad),
                   child: Row(
                     children: [
-                      for (var i = 0; i < widget.labels.length; i++)
-                        Expanded(child: _segment(context, i)),
+                      for (var i = 0; i < widget.labels.length; i++) Expanded(child: _segment(context, i)),
                     ],
                   ),
                 ),
@@ -148,7 +159,9 @@ class _GlassSegmentedState extends State<GlassSegmented> {
               overflow: TextOverflow.fade,
               softWrap: false,
               style: anek(widget.fontSize, on ? 720 : (widget.onPigment ? 650 : 560), height: 1, color: color).copyWith(
-                shadows: widget.onPigment && !on ? const [Shadow(color: Color(0x66000000), blurRadius: 6, offset: Offset(0, 1))] : null,
+                shadows: widget.onPigment && !on
+                    ? const [Shadow(color: Color(0x66000000), blurRadius: 6, offset: Offset(0, 1))]
+                    : null,
               ),
             ),
           ),
