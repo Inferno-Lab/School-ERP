@@ -15,6 +15,12 @@ class HomeworkController extends GetxController with Loadable {
   List<Homework> items = [];
   String? studentId;
   Student? student;
+  Map<String, String> teachers = {};
+
+  int count(HomeworkStatus status) => items.where((item) {
+    final mine = studentId == null ? null : item.forStudent(studentId!);
+    return (mine?.status ?? HomeworkStatus.pending) == status;
+  }).length;
 
   List<Homework> get visible {
     final status = switch (tab.value) {
@@ -53,29 +59,28 @@ class HomeworkController extends GetxController with Loadable {
     await run(() async {
       student = await Get.find<DirectoryRepository>().student(studentId!);
       items = await Get.find<HomeworkRepository>().forClass(student!.classId);
+      teachers = {for (final t in await Get.find<DirectoryRepository>().teachers()) t.id: t.name};
     }, isEmpty: () => false);
   }
 
-  Future<void> submit(
-    Homework homework, {
-    required bool camera,
-    bool sample = false,
-  }) async {
-    final id = studentId;
-    if (id == null) return;
-    var fileName = 'Homework_scan.jpg';
-    if (!sample) {
-      try {
-        final file = await ImagePicker().pickImage(
-          source: camera ? ImageSource.camera : ImageSource.gallery,
-        );
-        if (file == null) return;
-        fileName = file.name;
-      } on Exception {
-        ToastHelper.show('errors.generic', kind: ToastKind.error);
-        return;
-      }
+  /// Upload a file from the gallery.
+  Future<void> upload(Homework homework) async {
+    try {
+      final file = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (file == null) return;
+      await send(homework, file.name);
+    } on Exception {
+      ToastHelper.show('errors.generic', kind: ToastKind.error);
     }
+  }
+
+  // shortcut: scanned pages are counted, not merged into a PDF; add PDF export when the API stores files.
+  Future<void> sendScan(Homework homework, int pages) =>
+      send(homework, 'homework.scan_file'.trParams({'n': '$pages'}));
+
+  Future<void> send(Homework homework, String fileName) async {
+    final id = studentId ?? Get.find<AuthService>().activeStudentId.value;
+    if (id == null) return;
     try {
       await Get.find<HomeworkRepository>().submit(
         homeworkId: homework.id,
@@ -83,7 +88,6 @@ class HomeworkController extends GetxController with Loadable {
         fileName: fileName,
       );
       ToastHelper.show('homework.sent', kind: ToastKind.success);
-      Get.back<void>();
     } on AppException catch (error) {
       ToastHelper.show(error.message, kind: ToastKind.error);
     }
@@ -92,6 +96,10 @@ class HomeworkController extends GetxController with Loadable {
 
 class HomeworkDetailController extends GetxController with Loadable {
   Homework? item;
+  String? teacher;
+  String? studentId;
+
+  HomeworkSubmission? get mine => studentId == null ? null : item?.forStudent(studentId!);
 
   @override
   Future<void> load() async {
@@ -101,7 +109,9 @@ class HomeworkDetailController extends GetxController with Loadable {
       return;
     }
     await run(() async {
+      studentId = Get.find<AuthService>().activeStudentId.value;
       item = await Get.find<HomeworkRepository>().byId(id);
+      if (item != null) teacher = (await Get.find<DirectoryRepository>().teacherOrNull(item!.teacherId))?.name;
     }, isEmpty: () => item == null);
   }
 }
