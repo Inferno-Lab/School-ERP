@@ -3,18 +3,16 @@ import 'package:get_storage/get_storage.dart';
 
 abstract final class StorageKeys {
   static const themeMode = 'themeMode';
-  static const accent = 'accent';
   static const textScale = 'textScale';
   static const onboardingSeen = 'onboardingSeen';
   static const sessionUser = 'sessionUser';
   static const activeStudent = 'activeStudent';
-  static const dynamicColor = 'dynamicColor';
   static const reduceMotion = 'reduceMotion';
+  static const reduceTransparency = 'reduceTransparency';
   static const simulateErrors = 'simulateErrors';
   static const locale = 'locale';
   static const notifyHomework = 'notifyHomework';
   static const notifyFees = 'notifyFees';
-  static const notifyChat = 'notifyChat';
 }
 
 class StorageService extends GetxService {

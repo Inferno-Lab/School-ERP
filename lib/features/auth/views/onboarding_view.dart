@@ -1,147 +1,133 @@
-import 'package:edunest/core/config/app_config.dart';
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/widgets/buttons.dart';
-import 'package:edunest/core/widgets/misc.dart';
+import 'package:edunest/core/widgets/glass.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/features/auth/controllers/splash_controller.dart';
-import 'package:edunest/features/auth/views/onboarding_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
   const OnboardingView({super.key});
 
   static const _pages = [
-    ('onboard.one_title', 'onboard.one_body'),
-    ('onboard.two_title', 'onboard.two_body'),
-    ('onboard.three_title', 'onboard.three_body'),
-    ('onboard.four_title', 'onboard.four_body'),
+    ('onboarding.one_kicker', 'onboarding.one_title', 'onboarding.one_body'),
+    ('onboarding.two_kicker', 'onboarding.two_title', 'onboarding.two_body'),
+    ('onboarding.three_kicker', 'onboarding.three_title', 'onboarding.three_body'),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final inset = MediaQuery.paddingOf(context);
     return Scaffold(
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              context.app.gradientStart.withValues(alpha: 0.14),
-              context.colors.surface,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 8, 0),
-                child: Row(
+      backgroundColor: context.app.chalk,
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: controller.controller,
+            itemCount: 3,
+            onPageChanged: (value) => controller.page.value = value,
+            itemBuilder: (context, i) => LayoutBuilder(
+              builder: (context, box) {
+                final artH = (box.maxHeight * .557).clamp(360.0, 520.0);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    NestMark(size: 28, color: context.colors.primary),
-                    const SizedBox(width: 8),
-                    Text(AppConfig.appName, style: context.text.titleMedium),
-                    const Spacer(),
-                    Obx(
-                      () => controller.isLast
-                          ? const SizedBox(width: 72)
-                          : TextButton(
-                              onPressed: controller.finish,
-                              child: Text('common.skip'.tr),
-                            ),
+                    SizedBox(
+                      height: artH,
+                      width: double.infinity,
+                      child: switch (i) {
+                        0 => const _DayArt(),
+                        1 => const _ParentArt(),
+                        _ => const _TeacherArt(),
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 34, 24, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Rise(child: Overline(_pages[i].$1.tr)),
+                          const SizedBox(height: 12),
+                          Rise(index: 1, child: Text(_pages[i].$2.tr, style: context.type.h1)),
+                          const SizedBox(height: 12),
+                          Rise(
+                            index: 2,
+                            child: Text(_pages[i].$3.tr, style: context.type.b.copyWith(color: context.app.ink2)),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                ),
-              ),
-              Expanded(
-                child: PageView.builder(
-                  controller: controller.controller,
-                  itemCount: OnboardingController.pageCount,
-                  onPageChanged: (value) => controller.page.value = value,
-                  itemBuilder: (context, index) {
-                    final page = _pages[index];
-                    return _Slide(title: page.$1, body: page.$2, index: index);
-                  },
-                ),
-              ),
-              const _Indicator(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                child: Obx(
-                  () => Row(
-                    children: [
-                      if (!controller.isFirst) ...[
-                        TextButton(
-                          onPressed: controller.previous,
-                          child: Text('onboard.previous'.tr),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                      Expanded(
-                        child: PrimaryButton(
-                          label: controller.isLast ? 'common.get_started' : 'common.next',
-                          onPressed: controller.next,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Slide extends StatelessWidget {
-  const _Slide({required this.title, required this.body, required this.index});
-
-  final String title;
-  final String body;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final headline = width < 360 ? 26.0 : 30.0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          Expanded(
-            flex: 5,
-            child: _Enter(child: OnboardingArt(index: index)),
-          ),
-          Flexible(
-            flex: 4,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    title.tr,
-                    textAlign: TextAlign.center,
-                    style: context.text.displaySmall?.copyWith(
-                      fontSize: headline,
-                      height: 1.15,
+          Positioned(
+            right: 16,
+            top: inset.top + 8,
+            child: Obx(
+              () => GlassPress(
+                onTap: controller.finish,
+                child: Glass(
+                  width: 84,
+                  height: 40,
+                  radius: 20,
+                  child: Center(
+                    child: Text(
+                      'common.skip'.tr,
+                      style: anek(14.5, 650, height: 1, color: controller.page.value == 0 ? AppColors.white : context.app.ink),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    body.tr,
-                    textAlign: TextAlign.center,
-                    style: context.text.bodyLarge?.copyWith(
-                      fontSize: 16,
-                      color: context.colors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                ),
               ),
             ),
+          ),
+          Positioned(
+            left: 24,
+            right: 24,
+            bottom: 40 + inset.bottom,
+            child: Obx(() {
+              final page = controller.page.value;
+              return Row(
+                children: [
+                  Semantics(
+                    label: 'onboarding.page_of'.trParams({'n': '${page + 1}'}),
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < 3; i++)
+                          AnimatedContainer(
+                            duration: AppDurations.medium,
+                            curve: kSpring,
+                            margin: const EdgeInsets.only(right: 6),
+                            width: i == page ? 22 : 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: i == page ? context.app.ink : context.app.line2,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    width: page == 2 ? 170 : 140,
+                    child: Btn(
+                      page == 2 ? 'common.get_started' : 'common.next',
+                      trailing: page == 2 ? null : PhosphorIconsBold.caretRight,
+                      expand: true,
+                      onPressed: controller.next,
+                    ),
+                  ),
+                ],
+              );
+            }),
           ),
         ],
       ),
@@ -149,52 +135,283 @@ class _Slide extends StatelessWidget {
   }
 }
 
-class _Enter extends StatelessWidget {
-  const _Enter({required this.child});
+/// Thursday's periods as rising columns; a lens glides across them.
+class _DayArt extends StatefulWidget {
+  const _DayArt();
 
-  final Widget child;
+  @override
+  State<_DayArt> createState() => _DayArtState();
+}
+
+class _DayArtState extends State<_DayArt> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 7));
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_c.repeat());
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final still = context.reduceMotion;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: still ? 1 : 0, end: 1),
-      duration: still ? Duration.zero : AppDurations.medium,
-      curve: AppCurves.ease,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, (1 - value) * 14),
-            child: child,
-          ),
+    const cols = [('hindi', 'HI', 250.0), ('social', 'SST', 330.0), ('', '', 170.0), ('computer', 'CS', 410.0), ('art', 'ART', 300.0), ('maths', 'MA', 360.0)];
+    return LayoutBuilder(
+      builder: (context, box) {
+        final scale = box.maxHeight / 470;
+        final colW = (box.maxWidth - 16) / 6 - 4;
+        return Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            for (var i = 0; i < cols.length; i++)
+              Positioned(
+                left: 8 + i * (colW + 4),
+                bottom: 0,
+                width: colW,
+                height: cols[i].$3 * scale,
+                child: cols[i].$1.isEmpty
+                    ? Hatch(
+                        radius: const BorderRadius.vertical(top: Radius.circular(14)),
+                        background: context.app.paper2,
+                      )
+                    : Container(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        alignment: Alignment.bottomCenter,
+                        decoration: BoxDecoration(
+                          color: AppColors.subject(cols[i].$1).fill,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                        ),
+                        child: Text(
+                          cols[i].$2,
+                          style: anek(12, 760, width: 120, height: 1, em: .06, color: AppColors.subject(cols[i].$1).on),
+                        ),
+                      ),
+              ),
+            AnimatedBuilder(
+              animation: _c,
+              builder: (context, child) {
+                final t = context.reduceMotion ? .5 : (1 - math.cos(_c.value * 2 * math.pi)) / 2;
+                final travel = box.maxWidth - 150 - 48;
+                return Positioned(left: 24 + travel * t, top: 130 * scale, child: child!);
+              },
+              child: const Glass(width: 150, height: 200, radius: 52, kind: GlassKind.lens, tint: Color(0x0AFFFFFF)),
+            ),
+          ],
         );
       },
-      child: child,
     );
   }
 }
 
-class _Indicator extends GetView<OnboardingController> {
-  const _Indicator();
+/// Two children's day cards with a swaying switch capsule.
+class _ParentArt extends StatefulWidget {
+  const _ParentArt();
+
+  @override
+  State<_ParentArt> createState() => _ParentArtState();
+}
+
+class _ParentArtState extends State<_ParentArt> with SingleTickerProviderStateMixin {
+  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 5));
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_c.repeat());
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    Widget kid(String subject, String over, String big, String line, double angle) => Transform.rotate(
+      angle: angle,
+      child: Container(
+        height: 176,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.subject(subject).fill,
+          borderRadius: BorderRadius.circular(26),
+          boxShadow: const [BoxShadow(color: Color(0x9910201B), blurRadius: 40, spreadRadius: -22, offset: Offset(0, 22))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Overline(over, color: const Color(0xCCFFFFFF)),
+            const SizedBox(height: 10),
+            Text(big, style: context.type.h2.copyWith(color: AppColors.white)),
+            const SizedBox(height: 4),
+            Text(line, style: context.type.s.copyWith(color: const Color(0xE0FFFFFF))),
+          ],
+        ),
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        final s = box.maxHeight / 470;
+        return Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            Positioned(
+              left: 34,
+              right: 34,
+              top: 96 * s,
+              child: kid('maths', 'onboarding.kid_a_over'.tr, 'onboarding.kid_a_big'.tr, 'onboarding.kid_a_line'.tr, -.07),
+            ),
+            Positioned(
+              left: 34,
+              right: 34,
+              top: 250 * s,
+              child: kid('hindi', 'onboarding.kid_b_over'.tr, 'onboarding.kid_b_big'.tr, 'onboarding.kid_b_line'.tr, .052),
+            ),
+            AnimatedBuilder(
+              animation: _c,
+              builder: (context, child) {
+                final t = context.reduceMotion ? 0 : (1 - math.cos(_c.value * 2 * math.pi)) / 2;
+                return Positioned(left: box.maxWidth / 2 - 105 + 22 * t, top: 226 * s, child: child!);
+              },
+              child: Glass(
+                width: 210,
+                height: 52,
+                radius: 26,
+                tint: const Color(0x1AFFFFFF),
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Row(
+                  children: [
+                    const Avatar('Aarav Sharma', background: Color(0xFFFBFCF9), foreground: Color(0xFF10201B)),
+                    Expanded(
+                      child: Text(
+                        'home.switch_child'.tr,
+                        textAlign: TextAlign.center,
+                        style: anek(15, 680, height: 1, color: AppColors.white).copyWith(
+                          shadows: const [Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1))],
+                        ),
+                      ),
+                    ),
+                    Avatar('Ananya Sharma', background: const Color(0xFFFBFCF9), foreground: AppColors.subject('hindi').fill),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// A class register with two absentees and a glass tally over it.
+class _TeacherArt extends StatelessWidget {
+  const _TeacherArt();
+
+  @override
+  Widget build(BuildContext context) {
+    const names = ['AS', 'DM', 'KS', 'MK', 'VJ', 'AR', 'IG', 'SK', 'AN', 'KP', 'RM', 'TS', 'NB', 'PD', 'YC', 'HV', 'OB', 'ZA', 'LF', 'EG'];
+    const absent = {6, 18};
+    const late = {12};
+    return LayoutBuilder(
+      builder: (context, box) {
+        final s = box.maxHeight / 470;
+        final w = math.min(box.maxWidth - 48, 342.0);
+        return Stack(
+          children: [
+            Positioned(
+              left: (box.maxWidth - w) / 2,
+              top: 110 * s,
+              width: w,
+              child: Wrap(
+                spacing: (w - 5 * 62) / 4,
+                runSpacing: 12,
+                children: [
+                  for (var i = 0; i < names.length; i++)
+                    _RegisterDot(initials: names[i], colorIndex: i % 4, absent: absent.contains(i), late: late.contains(i)),
+                ],
+              ),
+            ),
+            Positioned(
+              left: (box.maxWidth - w) / 2,
+              top: 110 * s + 268,
+              width: w,
+              child: Glass(
+                height: 56,
+                radius: 28,
+                tint: const Color(0x38FBFCF9),
+                padding: const EdgeInsets.only(left: 18, right: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          text: '${'onboarding.tally_present'.tr} · ',
+                          children: [
+                            TextSpan(text: '${'onboarding.tally_absent'.tr} · ', style: TextStyle(color: context.app.badText)),
+                            TextSpan(text: 'onboarding.tally_late'.tr, style: const TextStyle(color: AppColors.late)),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: anek(15, 680, height: 1, color: context.app.ink),
+                      ),
+                    ),
+                    Btn('common.submit', kind: BtnKind.ink, small: true, onPressed: () {}),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _RegisterDot extends StatelessWidget {
+  const _RegisterDot({required this.initials, required this.colorIndex, required this.absent, required this.late});
+
+  final String initials;
+  final int colorIndex;
+  final bool absent;
+  final bool late;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    final bg = absent ? c.paper : AppColors.houses[colorIndex];
+    final fg = absent ? c.badText : (colorIndex == 3 ? AppColors.mariInk : AppColors.white);
+    return SizedBox(
+      width: 62,
+      height: 62,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          for (var i = 0; i < OnboardingController.pageCount; i++)
-            AnimatedContainer(
-              duration: context.reduceMotion ? Duration.zero : AppDurations.fast,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              height: 8,
-              width: controller.page.value == i ? 22 : 8,
-              decoration: BoxDecoration(
-                color: controller.page.value == i
-                    ? context.colors.primary
-                    : context.colors.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(99),
+          Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: bg,
+              shape: BoxShape.circle,
+              border: absent ? Border.all(color: AppColors.bad, width: 2.5) : null,
+            ),
+            child: Text(initials, style: anek(16, 720, width: 115, height: 1, color: fg)),
+          ),
+          if (absent || late)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: absent ? AppColors.bad : AppColors.late, shape: BoxShape.circle),
+                child: Text(absent ? 'A' : 'L', style: anek(11, 760, height: 1, color: AppColors.white)),
               ),
             ),
         ],

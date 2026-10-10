@@ -1,6 +1,8 @@
 import 'dart:async';
 
-import 'package:edunest/core/widgets/floating_nav_bar.dart';
+import 'package:edunest/core/utils/extensions.dart';
+import 'package:edunest/core/widgets/dock.dart';
+import 'package:edunest/features/chat/controllers/chat_controller.dart';
 import 'package:edunest/features/chat/views/chat_list_view.dart';
 import 'package:edunest/features/dashboard/views/academics_view.dart';
 import 'package:edunest/features/dashboard/views/dashboard_view.dart';
@@ -18,20 +20,52 @@ class ShellView extends GetView<ShellController> {
 
   @override
   Widget build(BuildContext context) {
+    final chat = Get.find<ChatListController>();
     return Obx(() {
       final teacher = controller.isTeacher;
-      final destinations = teacher ? _teacherNav : _familyNav;
+      final unread = chat.unread.value;
+      final items = [
+        for (final item in teacher ? _teacherNav : _familyNav)
+          item.label == 'nav.chat'
+              ? DockItem(icon: item.icon, activeIcon: item.activeIcon, label: item.label, badge: unread)
+              : item,
+      ];
       final pages = teacher ? _teacherPages : _familyPages;
+      final index = controller.index.value;
+      final wide = context.isWide;
       return PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (!didPop) unawaited(controller.onBack());
         },
-        child: AdaptiveShell(
-          index: controller.index.value,
-          destinations: destinations,
-          onChanged: (value) => controller.index.value = value,
-          child: IndexedStack(index: controller.index.value, children: pages),
+        child: Scaffold(
+          backgroundColor: context.app.chalk,
+          body: Stack(
+            children: [
+              Positioned.fill(child: IndexedStack(index: index, children: pages)),
+              if (wide)
+                Positioned(
+                  left: 20,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: GlassRail(items: items, index: index, onChanged: controller.go),
+                  ),
+                )
+              else
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 20 + MediaQuery.paddingOf(context).bottom,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 460),
+                      child: GlassDock(items: items, index: index, onChanged: controller.go),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     });
@@ -39,73 +73,25 @@ class ShellView extends GetView<ShellController> {
 }
 
 const _familyNav = [
-  NavDestination(
-    icon: PhosphorIconsRegular.house,
-    activeIcon: PhosphorIconsFill.house,
-    label: 'nav.home',
-  ),
-  NavDestination(
-    icon: PhosphorIconsRegular.books,
-    activeIcon: PhosphorIconsFill.books,
-    label: 'nav.academics',
-  ),
-  NavDestination(
-    icon: PhosphorIconsRegular.wallet,
-    activeIcon: PhosphorIconsFill.wallet,
-    label: 'nav.fees',
-  ),
-  NavDestination(
-    icon: PhosphorIconsRegular.chatCircle,
-    activeIcon: PhosphorIconsFill.chatCircle,
-    label: 'nav.chat',
-  ),
-  NavDestination(
-    icon: PhosphorIconsRegular.user,
-    activeIcon: PhosphorIconsFill.user,
-    label: 'nav.profile',
-  ),
+  DockItem(icon: PhosphorIconsRegular.house, activeIcon: PhosphorIconsBold.house, label: 'nav.home'),
+  DockItem(icon: PhosphorIconsRegular.bookOpen, activeIcon: PhosphorIconsBold.bookOpen, label: 'nav.academics'),
+  DockItem(icon: PhosphorIconsRegular.wallet, activeIcon: PhosphorIconsBold.wallet, label: 'nav.fees'),
+  DockItem(icon: PhosphorIconsRegular.chatCircle, activeIcon: PhosphorIconsBold.chatCircle, label: 'nav.chat'),
+  DockItem(icon: PhosphorIconsRegular.user, activeIcon: PhosphorIconsBold.user, label: 'nav.profile'),
 ];
 
 const _teacherNav = [
-  NavDestination(
-    icon: PhosphorIconsRegular.house,
-    activeIcon: PhosphorIconsFill.house,
-    label: 'nav.home',
-  ),
-  NavDestination(
+  DockItem(icon: PhosphorIconsRegular.house, activeIcon: PhosphorIconsBold.house, label: 'nav.home'),
+  DockItem(
     icon: PhosphorIconsRegular.chalkboardTeacher,
-    activeIcon: PhosphorIconsFill.chalkboardTeacher,
+    activeIcon: PhosphorIconsBold.chalkboardTeacher,
     label: 'nav.classes',
   ),
-  NavDestination(
-    icon: PhosphorIconsRegular.megaphone,
-    activeIcon: PhosphorIconsFill.megaphone,
-    label: 'nav.notices',
-  ),
-  NavDestination(
-    icon: PhosphorIconsRegular.chatCircle,
-    activeIcon: PhosphorIconsFill.chatCircle,
-    label: 'nav.chat',
-  ),
-  NavDestination(
-    icon: PhosphorIconsRegular.user,
-    activeIcon: PhosphorIconsFill.user,
-    label: 'nav.profile',
-  ),
+  DockItem(icon: PhosphorIconsRegular.megaphone, activeIcon: PhosphorIconsBold.megaphone, label: 'nav.notices'),
+  DockItem(icon: PhosphorIconsRegular.chatCircle, activeIcon: PhosphorIconsBold.chatCircle, label: 'nav.chat'),
+  DockItem(icon: PhosphorIconsRegular.user, activeIcon: PhosphorIconsBold.user, label: 'nav.profile'),
 ];
 
-const _familyPages = [
-  DashboardView(),
-  AcademicsView(),
-  FeesView(),
-  ChatListView(),
-  ProfileView(),
-];
+const _familyPages = [DashboardView(), AcademicsView(), FeesView(), ChatListView(), ProfileView()];
 
-const _teacherPages = [
-  TeacherHomeView(),
-  TeacherClassesView(),
-  NoticesView(),
-  ChatListView(),
-  ProfileView(),
-];
+const _teacherPages = [TeacherHomeView(), TeacherClassesView(), NoticesView(), ChatListView(), ProfileView()];

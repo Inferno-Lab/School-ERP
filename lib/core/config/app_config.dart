@@ -5,6 +5,10 @@ class AppConfig {
   const AppConfig._();
 
   static const appName = 'EduNest';
+
+  /// Per-school build values; a school's build profile replaces these.
+  static const schoolName = 'Greenfield International School';
+  static const schoolTagline = 'Curiosity first. Kindness always.';
   static const logoAsset = 'assets/images/logo.svg';
   static const version = '1.0.0';
 

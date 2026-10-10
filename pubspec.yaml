@@ -45,16 +45,19 @@ flutter:
     - assets/lottie/
     - assets/images/
     - assets/icons/
+  shaders:
+    - shaders/liquid_glass.frag
   fonts:
-    - family: Poppins
+    - family: AnekLatin
       fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-        - asset: assets/fonts/Poppins-Medium.ttf
+        - asset: assets/fonts/AnekLatin.ttf
+    - family: AnekDevanagari
+      fonts:
+        - asset: assets/fonts/AnekDevanagari.ttf
+    - family: IBMPlexMono
+      fonts:
+        - asset: assets/fonts/IBMPlexMono-Regular.ttf
+        - asset: assets/fonts/IBMPlexMono-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Poppins-SemiBold.ttf
+        - asset: assets/fonts/IBMPlexMono-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Poppins-Bold.ttf
-          weight: 700
-    - family: PlusJakartaSans
-      fonts:
-        - asset: assets/fonts/PlusJakartaSans.ttf

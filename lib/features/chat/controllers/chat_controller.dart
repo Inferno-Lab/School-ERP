@@ -12,6 +12,8 @@ import 'package:get/get.dart';
 class ChatListController extends GetxController with Loadable {
   List<ChatThread> threads = [];
   final previews = <String, ChatMessage>{};
+  final unreadBy = <String, int>{};
+  final unread = 0.obs;
   final selectedId = RxnString();
 
   String? get pick => selectedId.value;
@@ -26,12 +28,17 @@ class ChatListController extends GetxController with Loadable {
     if (userId == null) return;
     final bundle = await Get.find<ChatRepository>().inbox(userId);
     threads = bundle.threads;
+    unreadBy.clear();
     for (final message in bundle.messages) {
+      if (!message.read && message.senderId != userId) {
+        unreadBy[message.threadId] = (unreadBy[message.threadId] ?? 0) + 1;
+      }
       final current = previews[message.threadId];
       if (current == null || message.sentAt.isAfter(current.sentAt)) {
         previews[message.threadId] = message;
       }
     }
+    unread.value = unreadBy.values.fold(0, (a, b) => a + b);
   }, isEmpty: () => threads.isEmpty);
 }
 
