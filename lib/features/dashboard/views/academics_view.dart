@@ -156,10 +156,15 @@ class _Book extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    subjectName(item.subject),
-                    maxLines: 2,
-                    style: anek(13, 700, width: 110, height: 1.1, color: pigment.on),
+                  // Long names ("Social studies", "Computer") shrink; never split mid-word.
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      subjectName(item.subject),
+                      maxLines: 1,
+                      style: anek(13, 700, width: 110, height: 1.1, color: pigment.on),
+                    ),
                   ),
                   if (item.pending.isNotEmpty)
                     Text(

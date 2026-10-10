@@ -79,6 +79,7 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                           child: Glass(
                             height: 44,
                             width: 160,
+                            onPigment: hasDay,
                             padding: const EdgeInsets.only(left: 5, right: 14),
                             child: Row(
                               children: [
@@ -637,9 +638,11 @@ class _ClassCard extends StatelessWidget {
                     child: Container(
                       height: 32,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                      alignment: Alignment.center,
                       decoration: BoxDecoration(color: c.paper2, borderRadius: BorderRadius.circular(16)),
-                      child: Text(a.$1.tr, style: anek(13, 640, height: 1, color: c.ink2)),
+                      child: Center(
+                        widthFactor: 1,
+                        child: Text(a.$1.tr, style: anek(13, 640, height: 1, color: c.ink2)),
+                      ),
                     ),
                   ),
               ],

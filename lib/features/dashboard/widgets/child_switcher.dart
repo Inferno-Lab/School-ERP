@@ -92,6 +92,7 @@ class _ChildCapsuleState extends State<ChildCapsule> {
             child: Glass(
               key: _anchor,
               height: 44,
+              onPigment: widget.onRibbon,
               padding: const EdgeInsets.only(left: 5, right: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

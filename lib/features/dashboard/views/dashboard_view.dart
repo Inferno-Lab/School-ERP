@@ -236,6 +236,7 @@ class _ProfileCapsule extends StatelessWidget {
         label: 'home.profile_capsule'.trp({'name': name, 'class': cls}),
         child: Glass(
           height: 44,
+          onPigment: onRibbon,
           padding: const EdgeInsets.only(left: 5, right: 14),
           child: Row(
             mainAxisSize: MainAxisSize.min,
