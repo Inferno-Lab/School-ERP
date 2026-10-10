@@ -1,11 +1,18 @@
-import 'package:edunest/core/theme/tokens.dart';
+import 'package:edunest/core/theme/app_colors.dart';
+import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
-import 'package:edunest/core/widgets/feature_page.dart';
+import 'package:edunest/core/utils/schedule.dart';
+import 'package:edunest/core/widgets/glass.dart';
+import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/states.dart';
+import 'package:edunest/core/widgets/toast.dart';
+import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/features/timetable/controllers/timetable_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class TimetableView extends GetView<TimetableController> {
   const TimetableView({super.key});
@@ -13,90 +20,251 @@ class TimetableView extends GetView<TimetableController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final index = controller.dayIndex.value;
       final day = controller.selected;
-      return FeaturePage(
-        title: 'timetable.title',
-        subtitle: 'timetable.subtitle',
-        onRefresh: controller.load,
-        child: ViewStateView(
-          state: controller.state.value,
-          onRetry: controller.load,
-          errorKey: controller.errorMessage.value,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 44,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: TimetableController.keys.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final selected = controller.dayIndex.value == index;
-                      return ChoiceChip(
-                        label: Text('day.${TimetableController.keys[index]}'.tr),
-                        selected: selected,
-                        onSelected: (_) => controller.dayIndex.value = index,
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (day != null)
-                  for (final period in day.periods) _Period(period: period),
-              ],
-            ),
+      final cls = controller.schoolClass;
+      final classes = day?.periods.where((p) => p.kind == PeriodKind.klass).length ?? 0;
+      return PageFrame(
+        leading: const BackGlass(),
+        actions: [
+          GlassIconButton(
+            icon: PhosphorIconsRegular.calendarPlus,
+            label: 'timetable.add_calendar'.tr,
+            onTap: () => ToastHelper.show('timetable.added', kind: ToastKind.success),
           ),
-        ),
+        ],
+        onRefresh: controller.load,
+        bottomBarHeight: 60,
+        bottomBar: _DayPicker(controller: controller, index: index),
+        children: [
+          PageTitle(
+            DateFormat('EEEE').format(controller.dateOf(index)),
+            subtitle: cls == null
+                ? null
+                : 'timetable.subtitle'.trParams({
+                    'class': '${cls.name} ${cls.section}',
+                    'room': cls.room,
+                    'n': '$classes',
+                  }),
+          ),
+          const SizedBox(height: 18),
+          ViewStateView(
+            state: controller.state.value,
+            onRetry: controller.load,
+            errorKey: controller.errorMessage.value,
+            child: day == null || day.periods.isEmpty
+                ? EmptyState(title: 'timetable.free_day', body: 'timetable.free_day_body')
+                : _Timeline(controller: controller, day: day),
+          ),
+        ],
       );
     });
   }
 }
 
-class _Period extends GetView<TimetableController> {
-  const _Period({required this.period});
+class _Timeline extends StatelessWidget {
+  const _Timeline({required this.controller, required this.day});
 
-  final PeriodSlot period;
+  final TimetableController controller;
+  final TimetableDay day;
+
+  static const k = 1.6;
 
   @override
   Widget build(BuildContext context) {
-    final now = controller.isNow(period);
-    final colors = context.app.subject(period.subject);
-    final teacher = period.teacherId == null ? '' : controller.teachers[period.teacherId] ?? '';
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: colors.tint,
-        borderRadius: BorderRadius.circular(AppRadius.tile),
-        border: now ? Border.all(color: colors.tone, width: 1.6) : null,
-      ),
-      child: Row(
+    final c = context.app;
+    final periods = day.periods;
+    final start = minutesOf(periods.first.start);
+    final end = minutesOf(periods.last.end);
+    final now = nowMinutes();
+    final showNow = controller.isToday && now >= start && now <= end;
+    double y(int m) => (m - start) * k;
+    return SizedBox(
+      height: (end - start) * k + 10,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          SizedBox(
-            width: 78,
+          for (final p in periods) ...[
+            if (p.kind == PeriodKind.klass)
+              Positioned(
+                left: 0,
+                top: y(minutesOf(p.start)) - 6,
+                child: Text(clockOf(minutesOf(p.start)), style: context.type.mono.copyWith(fontSize: 11.5)),
+              ),
+            Positioned(
+              left: 44,
+              right: 0,
+              top: y(minutesOf(p.start)),
+              height: (minutesOf(p.end) - minutesOf(p.start)) * k - 2,
+              child: _Block(period: p, controller: controller, past: controller.isToday && minutesOf(p.end) <= now),
+            ),
+          ],
+          if (showNow) ...[
+            Positioned(left: 32, right: -8, top: y(now) - 1, height: 2, child: ColoredBox(color: c.ink)),
+            Positioned(
+              left: -12,
+              top: y(now) - 9,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(6)),
+                child: Text(clockOf(now), style: context.type.mono.copyWith(fontSize: 11, color: c.chalk)),
+              ),
+            ),
+            Positioned(
+              left: 40,
+              right: -10,
+              top: y(now) - 30,
+              height: 60,
+              child: const IgnorePointer(
+                child: Glass(kind: GlassKind.lens, radius: 30, tint: Color(0x08FFFFFF)),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Block extends StatelessWidget {
+  const _Block({required this.period, required this.controller, required this.past});
+
+  final PeriodSlot period;
+  final TimetableController controller;
+  final bool past;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    if (period.kind != PeriodKind.klass) {
+      final mins = minutesOf(period.end) - minutesOf(period.start);
+      return Hatch(
+        radius: BorderRadius.circular(16),
+        background: c.paper2,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Align(
+            alignment: Alignment.centerLeft,
             child: Text(
-              '${period.start}\n${period.end}',
-              style: context.text.bodySmall?.copyWith(color: colors.tone),
+              'timetable.break_line'.trParams({'name': subjectName(period.subject), 'n': '$mins'}),
+              style: context.type.cap.copyWith(fontSize: 11),
             ),
           ),
+        ),
+      );
+    }
+    final pigment = AppColors.subject(period.subject);
+    final now = controller.isNow(period);
+    final hw = controller.homeworkDue.contains(period.subject);
+    final teacher = controller.teachers[period.teacherId];
+    Widget block = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(color: pigment.fill, borderRadius: BorderRadius.circular(16)),
+      child: Row(
+        children: [
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'subject.${period.subject}'.tr,
-                  style: context.text.titleMedium?.copyWith(color: colors.tone),
-                ),
-                if (teacher.isNotEmpty)
-                  Text(teacher, style: context.text.bodySmall?.copyWith(color: colors.tone)),
+                Text(subjectName(period.subject), maxLines: 1, style: anek(16, 700, width: 105, height: 1.1, color: pigment.on)),
+                if (teacher != null)
+                  Text(
+                    period.room.isEmpty ? teacher : '$teacher · ${period.room}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: anek(12.5, 520, height: 1.2, color: pigment.on.withValues(alpha: .88)),
+                  ),
               ],
             ),
           ),
           if (now)
-            Text('timetable.now'.tr, style: context.text.labelLarge?.copyWith(color: colors.tone)),
+            Stamp('home.now'.tr, color: pigment.on)
+          else if (hw)
+            Stamp('timetable.hw_due'.tr, color: pigment.on),
         ],
+      ),
+    );
+    if (past) block = Opacity(opacity: .5, child: ColorFiltered(colorFilter: _gray, child: block));
+    return Semantics(
+      label: '${subjectName(period.subject)}, ${clockOf(minutesOf(period.start))} – ${clockOf(minutesOf(period.end))}${teacher == null ? '' : ', $teacher'}',
+      child: block,
+    );
+  }
+}
+
+const _gray = ColorFilter.matrix(<double>[
+  .4825, .4649, .0526, 0, 0, //
+  .1382, .8148, .0470, 0, 0, //
+  .1382, .4649, .3969, 0, 0, //
+  0, 0, 0, 1, 0,
+]);
+
+class _DayPicker extends StatelessWidget {
+  const _DayPicker({required this.controller, required this.index});
+
+  final TimetableController controller;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    return Glass(
+      height: 60,
+      radius: 30,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          final slot = (box.maxWidth - 8) / 6;
+          return Stack(
+            children: [
+              AnimatedPositioned(
+                duration: context.reduceMotion ? Duration.zero : const Duration(milliseconds: 550),
+                curve: const Cubic(.3, 1.45, .45, 1),
+                left: 4 + index * slot + (slot - 56).clamp(0, 99) / 2,
+                top: 4,
+                width: slot.clamp(0, 56),
+                height: 52,
+                child: Glass(
+                  kind: GlassKind.lens,
+                  radius: 26,
+                  tint: c.dark ? const Color(0x38FFFFFF) : const Color(0x99FFFFFF),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < 6; i++)
+                      Expanded(
+                        child: Semantics(
+                          button: true,
+                          selected: i == index,
+                          label: DateFormat('EEEE d MMMM').format(controller.dateOf(i)),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => controller.dayIndex.value = i,
+                            child: SizedBox(
+                              height: 60,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('day.${TimetableController.keys[i]}'.tr, style: anek(12, 600, height: 1.1, color: c.ink3)),
+                                  Text(
+                                    '${controller.dateOf(i).day}',
+                                    style: anek(17, 720, height: 1.1, color: i == index ? c.ink : c.ink2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
