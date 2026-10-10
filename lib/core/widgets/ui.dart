@@ -423,7 +423,9 @@ class Chip2 extends StatelessWidget {
           children: [
             if (dot != null) ...[Dot(dot!), const SizedBox(width: 6)],
             if (icon != null) ...[Icon(icon, size: 15, color: fg), const SizedBox(width: 6)],
-            Text(label.tr, style: anek(14, 600, height: 1, color: fg), maxLines: 1),
+            Flexible(
+              child: Text(label.tr, style: anek(14, 600, height: 1, color: fg), maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
           ],
         ),
       ),

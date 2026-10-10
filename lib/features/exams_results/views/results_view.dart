@@ -85,7 +85,10 @@ class ResultsView extends GetView<ResultsController> {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Align(
                 alignment: Alignment.centerRight,
-                child: Text('results.out_of'.trParams({'n': '${result.subjects.firstOrNull?.maxMarks ?? 0}'}), style: context.type.cap.copyWith(fontSize: 11.5)),
+                child: Text(
+                  'results.out_of'.trParams({'n': '${result.subjects.firstOrNull?.maxMarks ?? 0}'}),
+                  style: context.type.cap.copyWith(fontSize: 11.5),
+                ),
               ),
             ),
             Padding(
@@ -117,9 +120,13 @@ class ResultsView extends GetView<ResultsController> {
                 child: Row(
                   children: [
                     Expanded(child: Text(controller.exams[i].name, style: context.type.t)),
-                    Text('${controller.resultFor(controller.exams[i])?.overallPercent.round() ?? 0}%', style: context.type.cap),
+                    Text(
+                      '${controller.resultFor(controller.exams[i])?.overallPercent.round() ?? 0}%',
+                      style: context.type.cap,
+                    ),
                     const SizedBox(width: 12),
-                    if (i == controller.examIndex.value) Icon(PhosphorIconsBold.check, size: 18, color: context.app.ink),
+                    if (i == controller.examIndex.value)
+                      Icon(PhosphorIconsBold.check, size: 18, color: context.app.ink),
                   ],
                 ),
               ),
@@ -167,7 +174,13 @@ class _Columns extends StatelessWidget {
 }
 
 class _Column extends StatelessWidget {
-  const _Column({required this.mark, required this.left, required this.width, required this.maxHeight, required this.delay});
+  const _Column({
+    required this.mark,
+    required this.left,
+    required this.width,
+    required this.maxHeight,
+    required this.delay,
+  });
 
   final SubjectMark mark;
   final double left;
@@ -209,7 +222,10 @@ class _Column extends StatelessWidget {
               children: [
                 Text('${mark.marks}', style: anek(20, 760, width: 118, height: 1, color: pigment.on)),
                 const SizedBox(height: 2),
-                Text(subjectAbbr[mark.subject] ?? '', style: anek(11, 700, height: 1, em: .06, color: pigment.on.withValues(alpha: .9))),
+                Text(
+                  subjectAbbr[mark.subject] ?? '',
+                  style: anek(11, 700, height: 1, em: .06, color: pigment.on.withValues(alpha: .9)),
+                ),
               ],
             ),
           ),
@@ -240,18 +256,20 @@ class _Summary extends StatelessWidget {
             children: [
               BigNumber(value: '${result.overallPercent.round()}', unit: '%', size: 68),
               const SizedBox(width: 14),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stamp('results.grade'.trParams({'g': result.grade}), color: AppColors.ok),
-                    const SizedBox(height: 6),
-                    Text(
-                      'results.rank'.trParams({'r': '${result.rank}', 't': '${result.totalStudents}'}),
-                      style: anek(13, 620, height: 1.2, color: c.ink3),
-                    ),
-                  ],
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stamp('results.grade'.trParams({'g': result.grade}), color: AppColors.ok),
+                      const SizedBox(height: 6),
+                      Text(
+                        'results.rank'.trParams({'r': '${result.rank}', 't': '${result.totalStudents}'}),
+                        style: anek(13, 620, height: 1.2, color: c.ink3),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const Spacer(),
@@ -280,7 +298,10 @@ class _Summary extends StatelessWidget {
             ),
           ),
         if (changes.isNotEmpty && prev != null) ...[
-          Rise(index: 2, child: SectionLabel('results.changed_since'.trParams({'exam': controller.previousExam?.name ?? ''}))),
+          Rise(
+            index: 2,
+            child: SectionLabel('results.changed_since'.trParams({'exam': controller.previousExam?.name ?? ''})),
+          ),
           Rise(
             index: 3,
             child: EduCard(
@@ -315,8 +336,18 @@ class _Summary extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            changes[i].$2 > 0 ? '+${changes[i].$2}' : changes[i].$2 == 0 ? '0' : '−${changes[i].$2.abs()}',
-                            style: anek(16, 700, height: 1, tabular: true, color: changes[i].$2 >= 0 ? AppColors.ok : c.badText),
+                            changes[i].$2 > 0
+                                ? '+${changes[i].$2}'
+                                : changes[i].$2 == 0
+                                ? '0'
+                                : '−${changes[i].$2.abs()}',
+                            style: anek(
+                              16,
+                              700,
+                              height: 1,
+                              tabular: true,
+                              color: changes[i].$2 >= 0 ? AppColors.ok : c.badText,
+                            ),
                           ),
                         ],
                       ),
@@ -334,7 +365,9 @@ class _Summary extends StatelessWidget {
   String _trendLine(List<TrendPoint> trend) {
     final last = trend.last;
     final earlier = trend.reversed.skip(1).toList();
-    final parts = earlier.map((t) => 'results.trend_part'.trParams({'p': '${t.percent.round()}', 'label': t.label})).join(' ${'common.and'.tr} ');
+    final parts = earlier
+        .map((t) => 'results.trend_part'.trParams({'p': '${t.percent.round()}', 'label': t.label}))
+        .join(' ${'common.and'.tr} ');
     final up = last.percent >= trend[trend.length - 2].percent;
     return (up ? 'results.up_from' : 'results.down_from').trParams({'parts': parts});
   }
