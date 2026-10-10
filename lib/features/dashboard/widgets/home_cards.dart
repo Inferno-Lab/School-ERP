@@ -57,8 +57,8 @@ class _DueRow extends StatelessWidget {
           leading: _MoneyCover(overdue: overdue),
           title: '${fee.title}$child',
           subtitle: overdue
-              ? 'home.fee_late'.trParams({'amount': Formatters.inr(fee.amount), 'n': '$late'})
-              : 'home.fee_due_on'.trParams({
+              ? 'home.fee_late'.trp({'amount': Formatters.inr(fee.amount), 'n': '$late'})
+              : 'home.fee_due_on'.trp({
                   'amount': Formatters.inr(fee.amount),
                   'date': DateFormat('EEE d MMM').format(fee.dueDate),
                 }),
@@ -74,7 +74,7 @@ class _DueRow extends StatelessWidget {
           leading: Cover(subject: hw.subject),
           title: '${hw.title}$child',
           subtitle:
-              '${subjectName(hw.subject)} · ${Formatters.countdown(hw.dueOn).trParams({'count': '${Formatters.daysUntil(hw.dueOn)}'}).toLowerCase()}',
+              '${subjectName(hw.subject)} · ${Formatters.countdown(hw.dueOn).trp({'count': '${Formatters.daysUntil(hw.dueOn)}'}).toLowerCase()}',
           trailing: Stamp(daysStamp(hw.dueOn), color: c.dark ? const Color(0xFFF6BA45) : AppColors.late),
           onTap: () => Get.toNamed<void>(AppRoutes.homeworkDetail.replaceFirst(':id', hw.id)),
         );
@@ -82,8 +82,8 @@ class _DueRow extends StatelessWidget {
         final event = item.event!;
         return _Row(
           leading: Cover(subject: _eventPigment(event)),
-          title: 'home.reply_to'.trParams({'title': event.title}),
-          subtitle: 'home.are_you_going'.trParams({'date': DateFormat('EEE d MMM').format(event.date)}),
+          title: 'home.reply_to'.trp({'title': event.title}),
+          subtitle: 'home.are_you_going'.trp({'date': DateFormat('EEE d MMM').format(event.date)}),
           trailing: Icon(PhosphorIconsRegular.caretRight, size: 18, color: c.ink3),
           onTap: () => Get.toNamed<void>(AppRoutes.eventDetail.replaceFirst(':id', event.id)),
         );
@@ -202,7 +202,7 @@ class ChildrenStrip extends StatelessWidget {
                 final now = period == null
                     ? 'home.no_class_now'.tr
                     : period.kind == PeriodKind.klass
-                    ? 'home.subject_now'.trParams({'subject': subjectName(period.subject)})
+                    ? 'home.subject_now'.trp({'subject': subjectName(period.subject)})
                     : subjectName(period.subject);
                 return Pressable(
                   onTap: () => Get.toNamed<void>(AppRoutes.attendance),

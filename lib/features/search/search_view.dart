@@ -20,6 +20,7 @@ import 'package:edunest/data/repositories/academic_repository.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -204,7 +205,7 @@ class _SearchViewState extends State<SearchView> {
                             selected: s == key,
                             child: Chip2(
                               key == 'all' && q.isNotEmpty
-                                  ? 'search.all_n'.trParams({'n': '$total'})
+                                  ? 'search.all_n'.trp({'n': '$total'})
                                   : 'search.scope_$key'.tr,
                               on: s == key,
                               onTap: () => c.scope.value = key,
@@ -227,11 +228,11 @@ class _SearchViewState extends State<SearchView> {
                         ],
                       ),
                     ] else
-                      const EmptyState(title: 'search.start', body: 'search.start_body'),
+                      const EmptyState(art: EmptyArt.search, title: 'search.start', body: 'search.start_body'),
                   ] else if (!c.ready.value)
                     const Padding(padding: EdgeInsets.only(top: 22), child: SkeletonList())
                   else if (hw.isEmpty && nt.isEmpty && pp.isEmpty && ev.isEmpty)
-                    EmptyState(title: 'search.nothing', body: 'search.nothing_body'.trParams({'q': q}))
+                    EmptyState(art: EmptyArt.search, title: 'search.nothing', body: 'search.nothing_body'.trp({'q': q}))
                   else ...[
                     if (hw.isNotEmpty)
                       ..._section('search.scope_homework', [
@@ -370,7 +371,7 @@ class _SearchViewState extends State<SearchView> {
     final sub = c.studentId == null ? null : h.forStudent(c.studentId!);
     final graded = sub?.grade;
     if (graded != null) {
-      return '${subjectName(h.subject)} · ${'search.graded'.trParams({'grade': graded})} · ${DateFormat('d MMM').format(h.dueOn)}';
+      return '${subjectName(h.subject)} · ${'search.graded'.trp({'grade': graded})} · ${DateFormat('d MMM').format(h.dueOn)}';
     }
     final days = Formatters.daysUntil(h.dueOn);
     final when = days == 0
@@ -378,7 +379,7 @@ class _SearchViewState extends State<SearchView> {
         : days == 1
         ? 'common.tomorrow'.tr.toLowerCase()
         : DateFormat('EEE d MMM').format(h.dueOn);
-    return '${subjectName(h.subject)} · ${'search.due'.trParams({'when': when})}';
+    return '${subjectName(h.subject)} · ${'search.due'.trp({'when': when})}';
   }
 
   List<Widget> _section(String key, List<Widget> rows) => [

@@ -16,6 +16,7 @@ import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/models/user.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:get/get.dart';
@@ -190,6 +191,8 @@ class NotificationsView extends GetView<NotificationsController> {
             errorKey: controller.errorMessage.value,
             emptyTitle: 'notifications.empty',
             emptyBody: 'notifications.empty_body',
+            emptyArt: EmptyArt.bell,
+            emptyHint: 'notifications.empty_hint',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -206,7 +209,7 @@ class NotificationsView extends GetView<NotificationsController> {
                             selected: controller.filter.value == f,
                             child: Chip2(
                               f == 'all'
-                                  ? 'notifications.all_n'.trParams({
+                                  ? 'notifications.all_n'.trp({
                                       'n': '${controller.items.length - controller.gone.length}',
                                     })
                                   : f == 'school'
@@ -221,7 +224,7 @@ class NotificationsView extends GetView<NotificationsController> {
                   ),
                 ],
                 if (groups.isEmpty)
-                  const EmptyState(title: 'notifications.none_here', body: 'notifications.none_here_body'),
+                  const EmptyState(art: EmptyArt.bell, title: 'notifications.none_here', body: 'notifications.none_here_body'),
                 for (var g = 0; g < groups.length; g++) ...[
                   Rise(index: 2 + g, child: SectionLabel(groups[g].$1.tr, top: 20)),
                   Rise(

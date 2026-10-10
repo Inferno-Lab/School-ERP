@@ -9,6 +9,7 @@ import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/features/timetable/controllers/timetable_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -41,7 +42,7 @@ class TimetableView extends GetView<TimetableController> {
             DateFormat('EEEE').format(controller.dateOf(index)),
             subtitle: cls == null
                 ? null
-                : 'timetable.subtitle'.trParams({
+                : 'timetable.subtitle'.trp({
                     'class': '${cls.name} ${cls.section}',
                     'room': cls.room,
                     'n': '$classes',
@@ -52,8 +53,12 @@ class TimetableView extends GetView<TimetableController> {
             state: controller.state.value,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyTitle: 'timetable.empty',
+            emptyBody: 'timetable.empty_body',
+            emptyArt: EmptyArt.clock,
+            emptyHint: 'timetable.empty_hint',
             child: day == null || day.periods.isEmpty
-                ? EmptyState(title: 'timetable.free_day', body: 'timetable.free_day_body')
+                ? const EmptyState(art: EmptyArt.calendar, title: 'timetable.free_day', body: 'timetable.free_day_body')
                 : _Timeline(controller: controller, day: day),
           ),
         ],
@@ -100,7 +105,13 @@ class _Timeline extends StatelessWidget {
             ),
           ],
           if (showNow) ...[
-            Positioned(left: 32, right: -8, top: y(now) - 1, height: 2, child: ColoredBox(color: c.ink)),
+            Positioned(
+              left: 32,
+              right: -8,
+              top: y(now) - 1,
+              height: 2,
+              child: ColoredBox(color: c.ink),
+            ),
             Positioned(
               left: -12,
               top: y(now) - 9,
@@ -108,15 +119,6 @@ class _Timeline extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(6)),
                 child: Text(clockOf(now), style: context.type.mono.copyWith(fontSize: 11, color: c.chalk)),
-              ),
-            ),
-            Positioned(
-              left: 40,
-              right: -10,
-              top: y(now) - 30,
-              height: 60,
-              child: const IgnorePointer(
-                child: Glass(kind: GlassKind.lens, radius: 30, tint: Color(0x08FFFFFF)),
               ),
             ),
           ],
@@ -146,7 +148,7 @@ class _Block extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'timetable.break_line'.trParams({'name': subjectName(period.subject), 'n': '$mins'}),
+              'timetable.break_line'.trp({'name': subjectName(period.subject), 'n': '$mins'}),
               style: context.type.cap.copyWith(fontSize: 11),
             ),
           ),
@@ -167,7 +169,11 @@ class _Block extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(subjectName(period.subject), maxLines: 1, style: anek(16, 700, width: 105, height: 1.1, color: pigment.on)),
+                Text(
+                  subjectName(period.subject),
+                  maxLines: 1,
+                  style: anek(16, 700, width: 105, height: 1.1, color: pigment.on),
+                ),
                 if (teacher != null)
                   Text(
                     period.room.isEmpty ? teacher : '$teacher · ${period.room}',
@@ -178,16 +184,19 @@ class _Block extends StatelessWidget {
               ],
             ),
           ),
-          if (now)
-            Stamp('home.now'.tr, color: pigment.on)
-          else if (hw)
-            Stamp('timetable.hw_due'.tr, color: pigment.on),
+          if (now) Stamp('home.now'.tr, color: pigment.on) else if (hw) Stamp('timetable.hw_due'.tr, color: pigment.on),
         ],
       ),
     );
-    if (past) block = Opacity(opacity: .5, child: ColorFiltered(colorFilter: _gray, child: block));
+    if (past) {
+      block = Opacity(
+        opacity: .5,
+        child: ColorFiltered(colorFilter: _gray, child: block),
+      );
+    }
     return Semantics(
-      label: '${subjectName(period.subject)}, ${clockOf(minutesOf(period.start))} – ${clockOf(minutesOf(period.end))}${teacher == null ? '' : ', $teacher'}',
+      label:
+          '${subjectName(period.subject)}, ${clockOf(minutesOf(period.start))} – ${clockOf(minutesOf(period.end))}${teacher == null ? '' : ', $teacher'}',
       child: block,
     );
   }
@@ -248,7 +257,10 @@ class _DayPicker extends StatelessWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('day.${TimetableController.keys[i]}'.tr, style: anek(12, 600, height: 1.1, color: c.ink3)),
+                                  Text(
+                                    'day.${TimetableController.keys[i]}'.tr,
+                                    style: anek(12, 600, height: 1.1, color: c.ink3),
+                                  ),
                                   Text(
                                     '${controller.dateOf(i).day}',
                                     style: anek(17, 720, height: 1.1, color: i == index ? c.ink : c.ink2),

@@ -15,6 +15,7 @@ import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -103,7 +104,7 @@ class LibraryView extends GetView<LibraryController> {
         actions: [
           if (fair != null)
             Chip2(
-              'library.fair'.trParams({
+              'library.fair'.trp({
                 'title': fair.title.replaceFirst(RegExp('^library ', caseSensitive: false), '').capitalizeFirst!,
                 'date': DateFormat('EEE d MMM').format(fair.date),
               }),
@@ -123,6 +124,8 @@ class LibraryView extends GetView<LibraryController> {
             errorKey: controller.errorMessage.value,
             emptyTitle: 'library.empty',
             emptyBody: 'library.empty_body',
+            emptyArt: EmptyArt.books,
+            emptyHint: 'library.empty_hint',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -130,7 +133,7 @@ class LibraryView extends GetView<LibraryController> {
                   Rise(
                     index: 1,
                     child: SectionLabel(
-                      'library.on_shelf'.trParams({'n': '${mine.length}', 'max': '${LibraryController.limit}'}),
+                      'library.on_shelf'.trp({'n': '${mine.length}', 'max': '${LibraryController.limit}'}),
                       top: 18,
                     ),
                   ),
@@ -153,7 +156,7 @@ class LibraryView extends GetView<LibraryController> {
                   child: SectionLabel('library.available_now', top: mine.isEmpty ? 18 : 22),
                 ),
                 if (shelf.isEmpty)
-                  const EmptyState(title: 'library.no_match', body: 'library.no_match_body')
+                  const EmptyState(art: EmptyArt.search, title: 'library.no_match', body: 'library.no_match_body')
                 else
                   Rise(
                     index: 3,
@@ -200,7 +203,7 @@ class _MineRow extends StatelessWidget {
       trailing = Stamp('library.overdue'.tr, color: c.badText);
     } else if (days != null && days <= 5) {
       trailing = Stamp(
-        days == 0 ? 'library.today'.tr : 'library.days'.trParams({'n': '$days'}),
+        days == 0 ? 'library.today'.tr : 'library.days'.trp({'n': '$days'}),
         color: c.dark ? const Color(0xFFF6BA45) : AppColors.late,
       );
     } else {
@@ -226,7 +229,7 @@ class _MineRow extends StatelessWidget {
                 Text(
                   due == null
                       ? book.author
-                      : 'library.return_by'.trParams({
+                      : 'library.return_by'.trp({
                           'author': book.author,
                           'date': DateFormat('EEE d MMM').format(due),
                         }),
@@ -327,7 +330,7 @@ class _Book extends StatelessWidget {
                     width: double.infinity,
                     child: Text(
                       away && book.dueDate != null
-                          ? 'library.back_on'.trParams({'date': DateFormat('d MMM').format(book.dueDate!)})
+                          ? 'library.back_on'.trp({'date': DateFormat('d MMM').format(book.dueDate!)})
                           : book.author,
                       maxLines: 2,
                       style: anek(10.5, 600, height: 1.2, color: pigment.on.withValues(alpha: .85)),
@@ -355,8 +358,8 @@ class _Book extends StatelessWidget {
 
   Future<void> _confirm(BuildContext context) async {
     final ok = await confirmSheet(
-      title: 'library.reserve_title'.trParams({'title': book.title}),
-      body: 'library.reserve_body'.trParams({'author': book.author}),
+      title: 'library.reserve_title'.trp({'title': book.title}),
+      body: 'library.reserve_body'.trp({'author': book.author}),
       confirm: 'library.reserve',
       danger: false,
       icon: PhosphorIconsRegular.bookmarkSimple,
@@ -434,7 +437,7 @@ class _SearchBarState extends State<_SearchBar> {
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
-                hintText: 'library.search'.trParams({'n': NumberFormat.decimalPattern('en_IN').format(widget.count)}),
+                hintText: 'library.search'.trp({'n': NumberFormat.decimalPattern('en_IN').format(widget.count)}),
                 hintStyle: anek(15.5, 520, color: c.ink3),
               ),
             ),

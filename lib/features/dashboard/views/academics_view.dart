@@ -10,6 +10,8 @@ import 'package:edunest/core/widgets/page.dart';
 import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/features/dashboard/controllers/academics_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
+import 'package:edunest/features/shell/shell_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -42,6 +44,11 @@ class AcademicsView extends GetView<AcademicsController> {
             state: state,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyTitle: 'academics.empty',
+            emptyBody: 'academics.empty_body',
+            emptyArt: EmptyArt.books,
+            emptyHint: 'academics.empty_hint',
+            emptyActions: [EmptyAction('common.ask_teacher', icon: PhosphorIconsRegular.chatCircle, onTap: () => ShellController.showTab(ShellController.chatTab))],
             child: controller.shelf.isEmpty
                 ? const SizedBox.shrink()
                 : Column(
@@ -156,7 +163,7 @@ class _Book extends StatelessWidget {
                   ),
                   if (item.pending.isNotEmpty)
                     Text(
-                      'academics.n_due'.trParams({'n': '${item.pending.length}'}),
+                      'academics.n_due'.trp({'n': '${item.pending.length}'}),
                       style: anek(13, 520, width: 110, height: 1.1, color: pigment.on.withValues(alpha: .85)),
                     ),
                 ],
@@ -181,9 +188,9 @@ class _SubjectCard extends StatelessWidget {
     final pigment = AppColors.subject(item.subject).fill;
     final next = item.nextToday;
     final line = next != null
-        ? 'academics.next_today'.trParams({'time': clockOf(minutesOf(next.start)), 'room': next.room})
+        ? 'academics.next_today'.trp({'time': clockOf(minutesOf(next.start)), 'room': next.room})
         : item.nextDay != null
-        ? 'academics.next_on'.trParams({'day': 'day.${item.nextDay}'.tr})
+        ? 'academics.next_on'.trp({'day': 'day.${item.nextDay}'.tr})
         : 'academics.no_class'.tr;
     final hw = item.pending.firstOrNull;
     return EduCard(
@@ -202,7 +209,7 @@ class _SubjectCard extends StatelessWidget {
               ),
               if (item.mark != null && examName != null)
                 Stamp(
-                  'academics.grade_in'.trParams({'grade': item.mark!.grade, 'exam': examName!}),
+                  'academics.grade_in'.trp({'grade': item.mark!.grade, 'exam': examName!}),
                   color: AppColors.ok,
                 ),
             ],
@@ -216,7 +223,7 @@ class _SubjectCard extends StatelessWidget {
             children: [
               if (hw != null)
                 Chip2(
-                  '${hw.title} · ${Formatters.countdown(hw.dueOn).trParams({'count': '${Formatters.daysUntil(hw.dueOn)}'}).toLowerCase()}',
+                  '${hw.title} · ${Formatters.countdown(hw.dueOn).trp({'count': '${Formatters.daysUntil(hw.dueOn)}'}).toLowerCase()}',
                   dot: AppColors.late,
                   onTap: () => Get.toNamed<void>(AppRoutes.homeworkDetail.replaceFirst(':id', hw.id)),
                 ),
@@ -246,7 +253,7 @@ class _Records extends StatelessWidget {
       (
         '${summary?.percent.round() ?? 0}%',
         'attendance.title'.tr,
-        '${DateFormat('MMMM').format(DateTime.now())} · ${'academics.streak'.trParams({'n': '${controller.streak}'})}',
+        '${DateFormat('MMMM').format(DateTime.now())} · ${'academics.streak'.trp({'n': '${controller.streak}'})}',
         AppRoutes.attendance,
       ),
       (
@@ -254,11 +261,11 @@ class _Records extends StatelessWidget {
         'home.homework'.tr,
         controller.due.isEmpty
             ? 'home.nothing_due'.tr
-            : 'academics.next_hw'.trParams({
+            : 'academics.next_hw'.trp({
                 'title': controller.due.first.title,
                 'when': Formatters.countdown(
                   controller.due.first.dueOn,
-                ).trParams({'count': '${Formatters.daysUntil(controller.due.first.dueOn)}'}).toLowerCase(),
+                ).trp({'count': '${Formatters.daysUntil(controller.due.first.dueOn)}'}).toLowerCase(),
               }),
         AppRoutes.homework,
       ),
@@ -267,7 +274,7 @@ class _Records extends StatelessWidget {
         'timetable.title'.tr,
         now == null
             ? 'academics.no_class_now'.tr
-            : '${'home.subject_now'.trParams({'subject': subjectName(now.subject)})}${next == null ? '' : ' · ${'academics.at'.trParams({'subject': subjectName(next.subject), 'time': clockOf(minutesOf(next.start))})}'}',
+            : '${'home.subject_now'.trp({'subject': subjectName(now.subject)})}${next == null ? '' : ' · ${'academics.at'.trp({'subject': subjectName(next.subject), 'time': clockOf(minutesOf(next.start))})}'}',
         AppRoutes.timetable,
       ),
       (
@@ -275,14 +282,14 @@ class _Records extends StatelessWidget {
         'results.title'.tr,
         latest == null
             ? 'results.none'.tr
-            : 'academics.results_line'.trParams({
+            : 'academics.results_line'.trp({
                     'exam': controller.latestExam?.name ?? '',
                     'rank': '${latest.rank}',
                     'total': '${latest.totalStudents}',
                   }) +
                   (delta == null || delta == 0
                       ? ''
-                      : ' · ${(delta > 0 ? 'academics.up' : 'academics.down').trParams({'n': '${delta.abs()}'})}'),
+                      : ' · ${(delta > 0 ? 'academics.up' : 'academics.down').trp({'n': '${delta.abs()}'})}'),
         AppRoutes.results,
       ),
     ];

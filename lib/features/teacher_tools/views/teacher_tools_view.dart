@@ -14,6 +14,7 @@ import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/data/models/student.dart';
 import 'package:edunest/features/teacher_tools/controllers/teacher_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -123,15 +124,15 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
                   text: Text.rich(
                     TextSpan(
                       children: [
-                        TextSpan(text: 'teacher.n_present'.trParams({'n': '${controller.present}'})),
+                        TextSpan(text: 'teacher.n_present'.trp({'n': '${controller.present}'})),
                         if (controller.absent > 0)
                           TextSpan(
-                            text: ' · ${'teacher.n_absent'.trParams({'n': '${controller.absent}'})}',
+                            text: ' · ${'teacher.n_absent'.trp({'n': '${controller.absent}'})}',
                             style: TextStyle(color: c.badText),
                           ),
                         if (controller.late > 0)
                           TextSpan(
-                            text: ' · ${'teacher.n_late'.trParams({'n': '${controller.late}'})}',
+                            text: ' · ${'teacher.n_late'.trp({'n': '${controller.late}'})}',
                             style: TextStyle(color: late),
                           ),
                       ],
@@ -153,7 +154,7 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
                 Text(
                   cls == null
                       ? 'teacher.attendance'.tr
-                      : '${'teacher.class_n'.trParams({'class': classLabel(cls)})} · ${DateFormat('EEEE').format(DateTime.now())}',
+                      : '${'teacher.class_n'.trp({'class': classLabel(cls)})} · ${DateFormat('EEEE').format(DateTime.now())}',
                   style: context.type.h2,
                 ),
                 const SizedBox(height: 6),
@@ -168,7 +169,8 @@ class MarkAttendanceView extends GetView<MarkAttendanceController> {
               state: controller.state.value,
               onRetry: controller.load,
               errorKey: controller.errorMessage.value,
-              emptyTitle: 'teacher.no_students',
+              emptyArt: EmptyArt.attendance,
+            emptyTitle: 'teacher.no_students',
               emptyBody: 'teacher.no_students_body',
               child: LayoutBuilder(
                 builder: (context, box) {
@@ -288,7 +290,7 @@ class _Kid extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: anek(12.5, 620, height: 1.1, color: c.ink),
               ),
-              Text('teacher.roll'.trParams({'n': student.rollNo}), style: context.type.cap.copyWith(fontSize: 11)),
+              Text('teacher.roll'.trp({'n': student.rollNo}), style: context.type.cap.copyWith(fontSize: 11)),
             ],
           ),
         ),
@@ -323,7 +325,7 @@ class AssignHomeworkView extends GetView<AssignHomeworkController> {
         topPadding: MediaQuery.paddingOf(context).top + 56,
         bottomBar: _ActionBar(
           text: Text(
-            'teacher.reach'.trParams({'n': '${controller.roster.value}'}),
+            'teacher.reach'.trp({'n': '${controller.roster.value}'}),
             style: anek(13, 620, height: 1.3, color: c.ink3),
           ),
           action: 'teacher.assign',
@@ -425,13 +427,13 @@ class AssignHomeworkView extends GetView<AssignHomeworkController> {
             const SizedBox(height: 6),
             Text(
               clash.contains(controller.subject)
-                  ? 'teacher.clash_same'.trParams({
+                  ? 'teacher.clash_same'.trp({
                       'subject': subjectName(controller.subject),
                       'class': classLabel(cls),
                     })
                   : clash.isEmpty
-                  ? 'teacher.clash_none'.trParams({'class': classLabel(cls)})
-                  : 'teacher.clash_other'.trParams({
+                  ? 'teacher.clash_none'.trp({'class': classLabel(cls)})
+                  : 'teacher.clash_other'.trp({
                       'subject': subjectName(controller.subject),
                       'class': classLabel(cls),
                       'others': clash.toSet().map(subjectName).join(', '),
@@ -546,14 +548,14 @@ String _ago(DateTime? t) {
   if (t == null) return '';
   final days = DateUtils.dateOnly(DateTime.now()).difference(DateUtils.dateOnly(t)).inDays;
   if (days <= 0) return 'common.today'.tr.toLowerCase();
-  return days == 1 ? 'teacher.one_day'.tr : 'teacher.n_days'.trParams({'n': '$days'});
+  return days == 1 ? 'teacher.one_day'.tr : 'teacher.n_days'.trp({'n': '$days'});
 }
 
 String _sent(DateTime? t) {
   if (t == null) return '';
   return DateUtils.isSameDay(t, DateTime.now())
-      ? 'teacher.sent_today'.trParams({'time': DateFormat('H:mm').format(t)})
-      : 'teacher.sent_on'.trParams({'date': DateFormat('EEE d MMM').format(t)});
+      ? 'teacher.sent_today'.trp({'time': DateFormat('H:mm').format(t)})
+      : 'teacher.sent_on'.trp({'date': DateFormat('EEE d MMM').format(t)});
 }
 
 void _openSheet(GradingController controller, int index) => unawaited(
@@ -589,12 +591,13 @@ class GradingView extends GetView<GradingController> {
                 onPressed: () => _openSheet(controller, 0),
               ),
         children: [
-          Rise(child: Text('teacher.to_grade_n'.trParams({'n': '${controller.total}'}), style: context.type.h1)),
+          Rise(child: Text('teacher.to_grade_n'.trp({'n': '${controller.total}'}), style: context.type.h1)),
           const SizedBox(height: 18),
           ViewStateView(
             state: controller.state.value,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyArt: EmptyArt.homework,
             emptyTitle: 'teacher.nothing_to_grade',
             emptyBody: 'teacher.nothing_to_grade_body',
             child: Column(
@@ -618,7 +621,7 @@ class GradingView extends GetView<GradingController> {
                                     children: [
                                       Text(g.homework.title, style: context.type.t),
                                       Text(
-                                        '${g.schoolClass == null ? '' : '${classLabel(g.schoolClass!)} · '}${'teacher.n_waiting'.trParams({'n': '${g.waiting.length}'})}',
+                                        '${g.schoolClass == null ? '' : '${classLabel(g.schoolClass!)} · '}${'teacher.n_waiting'.trp({'n': '${g.waiting.length}'})}',
                                         style: context.type.cap,
                                       ),
                                     ],
@@ -671,8 +674,8 @@ class _GradingCard extends StatelessWidget {
                     Text(
                       [
                         if (item.schoolClass != null) classLabel(item.schoolClass!),
-                        'teacher.due_on'.trParams({'date': DateFormat('EEE d MMM').format(h.dueOn)}),
-                        'teacher.n_marks'.trParams({'n': '${h.maxMarks}'}),
+                        'teacher.due_on'.trp({'date': DateFormat('EEE d MMM').format(h.dueOn)}),
+                        'teacher.n_marks'.trp({'n': '${h.maxMarks}'}),
                       ].join(' · '),
                       style: context.type.cap,
                     ),
@@ -680,7 +683,7 @@ class _GradingCard extends StatelessWidget {
                 ),
               ),
               Stamp(
-                'teacher.n_left'.trParams({'n': '$waiting'}),
+                'teacher.n_left'.trp({'n': '$waiting'}),
                 color: c.dark ? const Color(0xFFF6BA45) : AppColors.late,
               ),
             ],
@@ -729,7 +732,7 @@ class _GradingCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'teacher.progress'.trParams({
+            'teacher.progress'.trp({
               'graded': '$graded',
               'waiting': '$waiting',
               'sent': '${item.submitted}',
@@ -777,7 +780,7 @@ class _GradingCard extends StatelessWidget {
           if (waiting > shown.length)
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 6, 0, 10),
-              child: Text('teacher.n_more'.trParams({'n': '${waiting - shown.length}'}), style: context.type.cap),
+              child: Text('teacher.n_more'.trp({'n': '${waiting - shown.length}'}), style: context.type.cap),
             ),
         ],
       ),
@@ -898,7 +901,7 @@ class _GradeSheetViewState extends State<GradeSheetView> {
     if (_queue.isEmpty) {
       return const PageFrame(
         leading: BackGlass(),
-        children: [EmptyState(title: 'teacher.nothing_to_grade', body: 'teacher.nothing_to_grade_body')],
+        children: [EmptyState(art: EmptyArt.homework, title: 'teacher.nothing_to_grade', body: 'teacher.nothing_to_grade_body')],
       );
     }
     final (g, s) = _queue[_i];
@@ -979,7 +982,7 @@ class _GradeSheetViewState extends State<GradeSheetView> {
                   width: 130,
                   child: Center(
                     child: Text(
-                      'teacher.n_of'.trParams({'i': '${_i + 1}', 'n': '${_queue.length}'}),
+                      'teacher.n_of'.trp({'i': '${_i + 1}', 'n': '${_queue.length}'}),
                       style: anek(14, 680, height: 1, tabular: true, color: AppColors.white),
                     ),
                   ),
@@ -1077,12 +1080,12 @@ class _GradeSheetViewState extends State<GradeSheetView> {
               text: Text(
                 _queue.length - 1 == 0
                     ? 'teacher.last_one'.tr
-                    : 'teacher.left_after'.trParams({'n': '${_queue.length - 1}'}),
+                    : 'teacher.left_after'.trp({'n': '${_queue.length - 1}'}),
                 style: anek(13, 620, height: 1.3, color: c.ink3),
               ),
               action: next == null
                   ? 'teacher.save'
-                  : 'teacher.save_next'.trParams({
+                  : 'teacher.save_next'.trp({
                       'name': (widget.controller.names[next.$2.studentId] ?? '').split(' ').first,
                     }),
               loading: _saving,
@@ -1136,7 +1139,7 @@ class _MarksEntryViewState extends State<MarksEntryView> {
       final n = int.tryParse(t);
       if (n == null || n < 0 || n > MarksEntryController.maxMarks) {
         ToastHelper.show(
-          'teacher.marks_range'.trParams({'max': '${MarksEntryController.maxMarks}'}),
+          'teacher.marks_range'.trp({'max': '${MarksEntryController.maxMarks}'}),
           kind: ToastKind.error,
         );
         return;
@@ -1169,14 +1172,14 @@ class _MarksEntryViewState extends State<MarksEntryView> {
       return PageFrame(
         leading: const BackGlass(),
         actions: [
-          Chip2('teacher.marks_chip'.trParams({'max': '${MarksEntryController.maxMarks}'})),
+          Chip2('teacher.marks_chip'.trp({'max': '${MarksEntryController.maxMarks}'})),
         ],
         bottomBar: controller.students.isEmpty
             ? null
             : _ActionBar(
                 sub: controller.saving.value ? 'teacher.saving'.tr : 'teacher.saved_typing'.tr,
                 text: Text(
-                  next == null ? 'teacher.all_entered'.tr : 'teacher.next_name'.trParams({'name': next.name}),
+                  next == null ? 'teacher.all_entered'.tr : 'teacher.next_name'.trp({'name': next.name}),
                   style: context.type.t.copyWith(fontSize: 15),
                 ),
                 action: 'teacher.next',
@@ -1186,7 +1189,7 @@ class _MarksEntryViewState extends State<MarksEntryView> {
               ),
         children: [
           Text(
-            cls == null ? 'teacher.marks'.tr : 'teacher.marks_title'.trParams({'class': classLabel(cls)}),
+            cls == null ? 'teacher.marks'.tr : 'teacher.marks_title'.trp({'class': classLabel(cls)}),
             style: context.type.h2,
           ),
           const SizedBox(height: 14),
@@ -1194,6 +1197,7 @@ class _MarksEntryViewState extends State<MarksEntryView> {
             state: controller.state.value,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyArt: EmptyArt.attendance,
             emptyTitle: 'teacher.no_students',
             emptyBody: 'teacher.no_students_body',
             child: Column(
@@ -1452,7 +1456,7 @@ class PostNoticeView extends GetView<PostNoticeController> {
         topPadding: MediaQuery.paddingOf(context).top + 56,
         bottomBar: _ActionBar(
           text: Text(
-            'teacher.notified'.trParams({'n': '${controller.reach}'}),
+            'teacher.notified'.trp({'n': '${controller.reach}'}),
             style: anek(13, 620, height: 1.3, color: c.ink3),
           ),
           action: 'teacher.post',
@@ -1472,7 +1476,7 @@ class PostNoticeView extends GetView<PostNoticeController> {
             children: [
               for (final a in PostNoticeController.audiences)
                 Chip2(
-                  a == 'school' ? 'teacher.aud_school'.tr : 'teacher.aud_$a'.trParams({'class': cls}),
+                  a == 'school' ? 'teacher.aud_school'.tr : 'teacher.aud_$a'.trp({'class': cls}),
                   on: controller.audience.value == a,
                   onTap: () => controller.audience.value = a,
                 ),

@@ -13,6 +13,7 @@ import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/features/events/controllers/events_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -63,6 +64,8 @@ class EventsView extends GetView<EventsController> {
             errorKey: controller.errorMessage.value,
             emptyTitle: 'events.empty',
             emptyBody: 'events.empty_body',
+            emptyArt: EmptyArt.calendar,
+            emptyHint: 'events.empty_hint',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -89,7 +92,7 @@ class EventsView extends GetView<EventsController> {
                     ),
                   ),
                 ],
-                if (featured == null) const EmptyState(title: 'events.none_coming', body: 'events.none_coming_body'),
+                if (featured == null) const EmptyState(art: EmptyArt.calendar, title: 'events.none_coming', body: 'events.none_coming_body'),
               ],
             ),
           ),
@@ -480,6 +483,7 @@ class EventDetailView extends GetView<EventsController> {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(16)),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               '${event.date.day}',
@@ -514,7 +518,7 @@ class EventDetailView extends GetView<EventsController> {
                         _Fact(
                           icon: PhosphorIconsRegular.clock,
                           title: _time(event.time),
-                          sub: 'events.gates'.trParams({'time': DateFormat('h:mm').format(gates)}),
+                          sub: 'events.gates'.trp({'time': DateFormat('h:mm').format(gates)}),
                         ),
                         const Hr(indent: 46),
                         _Fact(icon: PhosphorIconsRegular.mapPin, title: event.venue),
@@ -529,7 +533,7 @@ class EventDetailView extends GetView<EventsController> {
                   Rise(
                     index: 2,
                     child: Text(
-                      going == 1 ? 'events.one_going'.tr : 'events.n_going'.trParams({'n': '$going'}),
+                      going == 1 ? 'events.one_going'.tr : 'events.n_going'.trp({'n': '$going'}),
                       style: anek(13, 600, height: 1.3, color: c.ink3),
                     ),
                   ),

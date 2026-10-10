@@ -424,7 +424,12 @@ class Chip2 extends StatelessWidget {
             if (dot != null) ...[Dot(dot!), const SizedBox(width: 6)],
             if (icon != null) ...[Icon(icon, size: 15, color: fg), const SizedBox(width: 6)],
             Flexible(
-              child: Text(label.tr, style: anek(14, 600, height: 1, color: fg), maxLines: 1, overflow: TextOverflow.ellipsis),
+              child: Text(
+                label.tr,
+                style: anek(14, 600, height: 1, color: fg),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -644,7 +649,7 @@ class _FieldState extends State<Field> {
   }
 }
 
-/// Fade-and-rise entrance with a 60ms stagger, skipped under Reduce motion.
+/// Fade-and-rise entrance with a 35ms stagger (first five items), skipped under Reduce motion.
 class Rise extends StatefulWidget {
   const Rise({required this.child, this.index = 0, super.key});
 
@@ -663,9 +668,15 @@ class _RiseState extends State<Rise> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _timer = Timer(Duration(milliseconds: 60 * widget.index), () {
-      if (mounted) _c.forward();
-    });
+    // Stagger the first few items only; a long list should not wait on its tail.
+    final delay = 35 * widget.index.clamp(0, 5);
+    if (delay == 0) {
+      _c.forward();
+    } else {
+      _timer = Timer(Duration(milliseconds: delay), () {
+        if (mounted) _c.forward();
+      });
+    }
   }
 
   @override
@@ -683,7 +694,7 @@ class _RiseState extends State<Rise> with SingleTickerProviderStateMixin {
       child: widget.child,
       builder: (context, child) => Opacity(
         opacity: _a.value,
-        child: Transform.translate(offset: Offset(0, 16 * (1 - _a.value)), child: child),
+        child: Transform.translate(offset: Offset(0, 12 * (1 - _a.value)), child: child),
       ),
     );
   }

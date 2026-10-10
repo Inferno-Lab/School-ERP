@@ -14,6 +14,7 @@ import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/models/user.dart';
 import 'package:edunest/features/notices/controllers/notices_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -98,6 +99,8 @@ class NoticesView extends GetView<NoticesController> {
             errorKey: controller.errorMessage.value,
             emptyTitle: 'notices.empty',
             emptyBody: 'notices.empty_body',
+            emptyArt: EmptyArt.notice,
+            emptyHint: 'notices.empty_hint',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -140,7 +143,7 @@ class NoticesView extends GetView<NoticesController> {
                   ),
                 ],
                 if (pinned.isEmpty && week.isEmpty && earlier.isEmpty)
-                  const EmptyState(title: 'notices.none_here', body: 'notices.none_here_body'),
+                  const EmptyState(art: EmptyArt.notice, title: 'notices.none_here', body: 'notices.none_here_body'),
               ],
             ),
           ),
@@ -405,7 +408,7 @@ class NoticeDetailView extends GetView<NoticeDetailController> {
                     Expanded(
                       child: Text(
                         sittings.isNotEmpty
-                            ? 'notices.exam_days'.trParams({'n': '${sittings.length}'})
+                            ? 'notices.exam_days'.trp({'n': '${sittings.length}'})
                             : 'notices.school_closed'.tr,
                         style: anek(13, 600, height: 1.3, color: c.ink3),
                       ),
@@ -547,7 +550,7 @@ class _Sitting extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(child: Text(subjects.map(subjectName).join(' · '), style: context.type.t)),
               Text(
-                subjects.length > 1 ? 'notices.sittings'.trParams({'n': '${subjects.length}'}) : '8:30–11:00',
+                subjects.length > 1 ? 'notices.sittings'.trp({'n': '${subjects.length}'}) : '8:30–11:00',
                 style: context.type.mono.copyWith(color: c.ink3),
               ),
             ],

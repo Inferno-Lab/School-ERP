@@ -40,7 +40,10 @@ String shortClass(SchoolClass c) => '${c.name.replaceAll(RegExp('[^0-9]'), '')} 
 /// Glass capsule with stacked child avatars. Tap to open the switcher,
 /// swipe sideways to switch straight away.
 class ChildCapsule extends StatefulWidget {
-  const ChildCapsule({super.key});
+  const ChildCapsule({this.onRibbon = true, super.key});
+
+  /// Over the day ribbon the label is white; on plain chalk it is ink.
+  final bool onRibbon;
 
   @override
   State<ChildCapsule> createState() => _ChildCapsuleState();
@@ -81,7 +84,7 @@ class _ChildCapsuleState extends State<ChildCapsule> {
       final label = current == null ? '' : '${current.$1.name.split(' ').first} · ${shortClass(current.$2)}';
       return Semantics(
         button: true,
-        label: 'home.viewing_child'.trParams({'name': label}),
+        label: 'home.viewing_child'.trp({'name': label}),
         child: GestureDetector(
           onHorizontalDragEnd: (d) => _switchBy((d.primaryVelocity ?? 0) < 0 ? 1 : -1),
           child: GlassPress(
@@ -89,7 +92,6 @@ class _ChildCapsuleState extends State<ChildCapsule> {
             child: Glass(
               key: _anchor,
               height: 44,
-              radius: 22,
               padding: const EdgeInsets.only(left: 5, right: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -116,12 +118,14 @@ class _ChildCapsuleState extends State<ChildCapsule> {
                   SizedBox(width: others.isEmpty ? 8 : 0),
                   Text(
                     label,
-                    style: anek(14, 680, height: 1, color: AppColors.white).copyWith(
-                      shadows: const [Shadow(color: Color(0x4D000000), blurRadius: 8, offset: Offset(0, 1))],
+                    style: anek(14, 680, height: 1, color: widget.onRibbon ? AppColors.white : context.app.ink).copyWith(
+                      shadows: widget.onRibbon
+                          ? const [Shadow(color: Color(0x4D000000), blurRadius: 8, offset: Offset(0, 1))]
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(PhosphorIconsBold.caretDown, size: 13, color: AppColors.white),
+                  Icon(PhosphorIconsBold.caretDown, size: 13, color: widget.onRibbon ? AppColors.white : context.app.ink),
                 ],
               ),
             ),
@@ -147,7 +151,7 @@ class _ChildCapsuleState extends State<ChildCapsule> {
           opacity: animation,
           child: ScaleTransition(
             alignment: Alignment.topLeft,
-            scale: Tween(begin: .6, end: 1.0).animate(t),
+            scale: Tween<double>(begin: .6, end: 1).animate(t),
             child: child,
           ),
         );
@@ -182,7 +186,6 @@ class _SwitcherPopover extends StatelessWidget {
               children: [
                 Glass(
                   radius: 30,
-                  blur: 2.4,
                   tint: c.dark ? const Color(0xA614231E) : const Color(0x9EFBFCF9),
                   padding: const EdgeInsets.all(8),
                   child: Column(
@@ -197,7 +200,7 @@ class _SwitcherPopover extends StatelessWidget {
                             background: colors[i % 2],
                           ),
                           title: kids[i].$1.name,
-                          subtitle: 'home.child_line'.trParams({
+                          subtitle: 'home.child_line'.trp({
                             'class': '${kids[i].$2.name} ${kids[i].$2.section}',
                             'roll': kids[i].$1.rollNo,
                           }),

@@ -18,17 +18,28 @@ extension AppContext on BuildContext {
 
   bool get reduceMotion =>
       MediaQuery.disableAnimationsOf(this) ||
-      (Get.isRegistered<ThemeService>() &&
-          Get.find<ThemeService>().reduceMotion.value);
+      (Get.isRegistered<ThemeService>() && Get.find<ThemeService>().reduceMotion.value);
 
-  bool get reduceTransparency =>
-      Get.isRegistered<ThemeService>() &&
-      Get.find<ThemeService>().reduceTransparency.value;
+  bool get reduceTransparency => Get.isRegistered<ThemeService>() && Get.find<ThemeService>().reduceTransparency.value;
 }
 
 extension DateOnly on DateTime {
   DateTime get dateOnly => DateTime(year, month, day);
 
-  bool isSameDay(DateTime other) =>
-      year == other.year && month == other.month && day == other.day;
+  bool isSameDay(DateTime other) => year == other.year && month == other.month && day == other.day;
+}
+
+extension SafeTranslate on String {
+  /// Translates this key and fills `@name` placeholders.
+  ///
+  /// GetX's own `trParams` replaces keys in map order, so `@n` also rewrote the
+  /// start of `@name` ("1ame"). This replaces the longest keys first.
+  String trp(Map<String, String> params) {
+    final keys = params.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+    var out = tr;
+    for (final key in keys) {
+      out = out.replaceAll('@$key', params[key]!);
+    }
+    return out;
+  }
 }

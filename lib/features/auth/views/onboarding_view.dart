@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:edunest/core/theme/app_colors.dart';
@@ -57,7 +56,7 @@ class OnboardingView extends GetView<OnboardingController> {
                           children: [
                             Rise(
                               child: Overline(
-                                '${_pages[i].$1.tr} · ${'onboarding.page_of'.trParams({'n': '${i + 1}'})}',
+                                '${_pages[i].$1.tr} · ${'onboarding.page_of'.trp({'n': '${i + 1}'})}',
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -108,7 +107,7 @@ class OnboardingView extends GetView<OnboardingController> {
               return Row(
                 children: [
                   Semantics(
-                    label: 'onboarding.page_of'.trParams({'n': '${page + 1}'}),
+                    label: 'onboarding.page_of'.trp({'n': '${page + 1}'}),
                     child: Row(
                       children: [
                         for (var i = 0; i < 3; i++)
@@ -146,28 +145,9 @@ class OnboardingView extends GetView<OnboardingController> {
   }
 }
 
-/// Thursday's periods as rising columns; a lens glides across them.
-class _DayArt extends StatefulWidget {
+/// Thursday's periods as rising columns.
+class _DayArt extends StatelessWidget {
   const _DayArt();
-
-  @override
-  State<_DayArt> createState() => _DayArtState();
-}
-
-class _DayArtState extends State<_DayArt> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(seconds: 7));
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_c.repeat());
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +164,6 @@ class _DayArtState extends State<_DayArt> with SingleTickerProviderStateMixin {
         final scale = box.maxHeight / 470;
         final colW = (box.maxWidth - 16) / 6 - 4;
         return Stack(
-          clipBehavior: Clip.hardEdge,
           children: [
             for (var i = 0; i < cols.length; i++)
               Positioned(
@@ -210,15 +189,6 @@ class _DayArtState extends State<_DayArt> with SingleTickerProviderStateMixin {
                         ),
                       ),
               ),
-            AnimatedBuilder(
-              animation: _c,
-              builder: (context, child) {
-                final t = context.reduceMotion ? .5 : (1 - math.cos(_c.value * 2 * math.pi)) / 2;
-                final travel = box.maxWidth - 150 - 48;
-                return Positioned(left: 24 + travel * t, top: 130 * scale, child: child!);
-              },
-              child: const Glass(width: 150, height: 200, radius: 52, kind: GlassKind.lens, tint: Color(0x0AFFFFFF)),
-            ),
           ],
         );
       },
@@ -240,7 +210,7 @@ class _ParentArtState extends State<_ParentArt> with SingleTickerProviderStateMi
   @override
   void initState() {
     super.initState();
-    unawaited(_c.repeat());
+    _c.repeat();
   }
 
   @override
@@ -279,7 +249,6 @@ class _ParentArtState extends State<_ParentArt> with SingleTickerProviderStateMi
       builder: (context, box) {
         final s = box.maxHeight / 470;
         return Stack(
-          clipBehavior: Clip.hardEdge,
           children: [
             Positioned(
               left: 34,
@@ -379,7 +348,7 @@ class _TeacherArt extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final s = box.maxHeight / 470;
-        final w = math.min(box.maxWidth - 48, 342.0);
+        final w = math.min<double>(box.maxWidth - 48, 342);
         return Stack(
           children: [
             Positioned(

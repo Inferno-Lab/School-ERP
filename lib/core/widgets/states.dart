@@ -3,6 +3,7 @@ import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/view_state.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +17,9 @@ class ViewStateView extends StatelessWidget {
     required this.onRetry,
     this.emptyTitle = 'empty.title',
     this.emptyBody = 'empty.body',
-    this.emptyAction,
-    this.onEmpty,
+    this.emptyArt = EmptyArt.books,
+    this.emptyActions = const [],
+    this.emptyHint,
     this.errorKey,
     this.skeleton,
     super.key,
@@ -28,23 +30,25 @@ class ViewStateView extends StatelessWidget {
   final VoidCallback onRetry;
   final String emptyTitle;
   final String emptyBody;
-  final String? emptyAction;
-  final VoidCallback? onEmpty;
+  final EmptyArt emptyArt;
+  final List<EmptyAction> emptyActions;
+  final String? emptyHint;
   final String? errorKey;
   final Widget? skeleton;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: context.reduceMotion ? Duration.zero : const Duration(milliseconds: 280),
+      duration: context.reduceMotion ? Duration.zero : const Duration(milliseconds: 220),
       child: switch (state) {
         ViewState.loading => KeyedSubtree(key: const ValueKey('loading'), child: skeleton ?? const SkeletonList()),
         ViewState.empty => EmptyState(
           key: const ValueKey('empty'),
           title: emptyTitle,
           body: emptyBody,
-          action: emptyAction,
-          onAction: onEmpty,
+          art: emptyArt,
+          actions: emptyActions,
+          hint: emptyHint,
         ),
         ViewState.error => ErrorState(key: const ValueKey('error'), messageKey: errorKey, onRetry: onRetry),
         ViewState.success => KeyedSubtree(key: const ValueKey('ok'), child: child),
@@ -53,35 +57,88 @@ class ViewStateView extends StatelessWidget {
   }
 }
 
-/// Quiet-desk empty state: closed notebooks, a short line, an optional action.
+/// A button under an empty state: the next thing the person can do.
+class EmptyAction {
+  const EmptyAction(this.label, {required this.onTap, this.icon, this.primary = false});
+
+  final String label;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final bool primary;
+}
+
+/// What a screen shows while it has nothing yet: a scene of what will be here,
+/// what to expect, and something useful to do meanwhile.
 class EmptyState extends StatelessWidget {
-  const EmptyState({required this.title, required this.body, this.action, this.onAction, super.key});
+  const EmptyState({
+    required this.title,
+    required this.body,
+    this.art = EmptyArt.books,
+    this.actions = const [],
+    this.hint,
+    super.key,
+  });
 
   final String title;
   final String body;
-  final String? action;
-  final VoidCallback? onAction;
+  final EmptyArt art;
+  final List<EmptyAction> actions;
+
+  /// A small note in a well, e.g. when to expect the content.
+  final String? hint;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.app;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 36),
-      child: Column(
-        children: [
-          const ClosedNotebooks(),
-          const SizedBox(height: 26),
-          Text(title.tr, style: context.type.dl.copyWith(fontSize: 40), textAlign: TextAlign.center),
-          const SizedBox(height: 12),
-          Text(
-            body.tr,
-            style: context.type.b.copyWith(color: context.app.ink2),
-            textAlign: TextAlign.center,
+      padding: const EdgeInsets.symmetric(vertical: 28),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 340),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              EmptyArtView(art),
+              const SizedBox(height: 20),
+              Text(title.tr, style: context.type.h2, textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              Text(body.tr, style: context.type.b.copyWith(color: c.ink2), textAlign: TextAlign.center),
+              if (hint != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(color: c.paper2, borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(PhosphorIconsRegular.clockCountdown, size: 16, color: c.ink3),
+                      const SizedBox(width: 8),
+                      Flexible(child: Text(hint!.tr, style: context.type.cap)),
+                    ],
+                  ),
+                ),
+              ],
+              if (actions.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final a in actions)
+                      Btn(
+                        a.label,
+                        kind: a.primary ? BtnKind.ink : BtnKind.quiet,
+                        icon: a.icon,
+                        small: true,
+                        onPressed: a.onTap,
+                      ),
+                  ],
+                ),
+              ],
+            ],
           ),
-          if (action != null) ...[
-            const SizedBox(height: 18),
-            Btn(action!, kind: BtnKind.quiet, onPressed: onAction),
-          ],
-        ],
+        ),
       ),
     );
   }

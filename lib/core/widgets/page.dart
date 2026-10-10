@@ -89,6 +89,28 @@ class PageFrame extends StatelessWidget {
                 child: list,
               ),
             ),
+          // Fades content out under the status bar so the clock never sits on text.
+          if (underlay == null)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: inset.top + 10,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        (background ?? context.app.chalk).withValues(alpha: .96),
+                        (background ?? context.app.chalk).withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (hasTopRow)
             Positioned(
               left: 16,

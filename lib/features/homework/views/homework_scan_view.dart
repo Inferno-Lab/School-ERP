@@ -238,7 +238,7 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
                 ),
                 Semantics(
                   button: true,
-                  label: 'scan.capture'.trParams({'n': '$next'}),
+                  label: 'scan.capture'.trp({'n': '$next'}),
                   child: GlassPress(
                     onTap: camera == null ? null : () => unawaited(_capture()),
                     child: Container(
@@ -276,7 +276,7 @@ class _HomeworkScanViewState extends State<HomeworkScanView> with WidgetsBinding
             right: 0,
             bottom: 12 + inset.bottom,
             child: Text(
-              'scan.footer'.trParams({'n': '$next'}),
+              'scan.footer'.trp({'n': '$next'}),
               textAlign: TextAlign.center,
               style: anek(12, 520, height: 1.3, color: const Color(0xB3FFFFFF)),
             ),

@@ -17,6 +17,7 @@ import 'package:edunest/features/dashboard/views/dashboard_view.dart' show greet
 import 'package:edunest/features/dashboard/widgets/day_ribbon.dart';
 import 'package:edunest/features/shell/shell_controller.dart';
 import 'package:edunest/features/teacher_tools/controllers/teacher_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -37,7 +38,10 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
       final ready = controller.state.value == ViewState.success && t != null;
       final periods = controller.today.map((p) => p.slot).toList();
       final classOf = {for (final p in controller.today) p.slot.id: p.schoolClass};
-      final ribbonH = 156 + inset.top;
+      // With no periods there is no ribbon: a slim header and dark controls.
+      final hasDay = ready && periods.isNotEmpty;
+      final ribbonH = hasDay ? 156 + inset.top : inset.top + 64;
+      final ink = hasDay ? AppColors.white : context.app.ink;
       return PageFrame(
         dockPage: true,
         padContent: false,
@@ -48,16 +52,13 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
             height: ribbonH,
             child: Stack(
               children: [
-                if (ready && periods.isNotEmpty)
+                if (hasDay)
                   Positioned.fill(
                     child: DayRibbon(
                       periods: periods,
                       height: ribbonH,
                       pxPerMinute: 2.1,
-                      lensWidth: 106,
-                      lensHeight: 136,
-                      lensTop: inset.top + 12,
-                      showLensLabel: false,
+                      showLabel: false,
                       draggable: false,
                       blockLabel: (p) {
                         final c = classOf[p.id];
@@ -65,9 +66,7 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                       },
                       blockAccent: (p) => classOf[p.id]?.id != null && classOf[p.id]?.id == controller.own?.id,
                     ),
-                  )
-                else
-                  Positioned.fill(child: ColoredBox(color: context.app.paper2)),
+                  ),
                 Positioned(
                   left: 16,
                   right: 16,
@@ -80,7 +79,6 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                           child: Glass(
                             height: 44,
                             width: 160,
-                            radius: 22,
                             padding: const EdgeInsets.only(left: 5, right: 14),
                             child: Row(
                               children: [
@@ -103,8 +101,8 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                                           14,
                                           680,
                                           height: 1.05,
-                                          color: AppColors.white,
-                                        ).copyWith(shadows: _shade),
+                                          color: ink,
+                                        ).copyWith(shadows: hasDay ? _shade : null),
                                       ),
                                       Text(
                                         [
@@ -117,8 +115,8 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                                           11.5,
                                           520,
                                           height: 1.05,
-                                          color: Colors.white.withValues(alpha: .9),
-                                        ).copyWith(shadows: _shade),
+                                          color: hasDay ? Colors.white.withValues(alpha: .9) : context.app.ink3,
+                                        ).copyWith(shadows: hasDay ? _shade : null),
                                       ),
                                     ],
                                   ),
@@ -131,7 +129,7 @@ class TeacherHomeView extends GetView<TeacherHomeController> {
                       GlassIconButton(
                         icon: PhosphorIconsRegular.bell,
                         label: 'menu.notifications'.tr,
-                        color: AppColors.white,
+                        color: ink,
                         onTap: () => Get.toNamed<void>(AppRoutes.notifications),
                       ),
                     ],
@@ -170,13 +168,13 @@ class _Body extends StatelessWidget {
     final next = controller.next;
     final String line;
     if (now != null) {
-      line = 'teacher.now_line'.trParams({
+      line = 'teacher.now_line'.trp({
         'class': classLabel(now.schoolClass!),
         'room': now.slot.room.isEmpty ? now.schoolClass!.room : now.slot.room,
         'until': clockOf(minutesOf(now.slot.end)),
       });
     } else if (next != null) {
-      line = 'teacher.next_line'.trParams({
+      line = 'teacher.next_line'.trp({
         'class': classLabel(next.schoolClass!),
         'room': next.slot.room.isEmpty ? next.schoolClass!.room : next.slot.room,
         'at': clockOf(minutesOf(next.slot.start)),
@@ -200,7 +198,7 @@ class _Body extends StatelessWidget {
           _Task(
             big: '${(controller.students[cls.id]?.length ?? 0) - (controller.entered[cls.id] ?? 0)}',
             title: 'teacher.marks_due'.tr,
-            sub: 'teacher.marks_line'.trParams({
+            sub: 'teacher.marks_line'.trp({
               'class': classLabel(cls),
               'n': '${controller.entered[cls.id]}',
               'total': '${controller.students[cls.id]?.length ?? 0}',
@@ -264,11 +262,10 @@ class _Body extends StatelessWidget {
                           children: [
                             Icon(a.$1, size: 22, color: c.ink),
                             const SizedBox(height: 8),
-                            Text(
-                              a.$2.tr,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: anek(13, 650, height: 1.2, color: c.ink),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(a.$2.tr, maxLines: 1, style: anek(13, 650, height: 1.2, color: c.ink)),
                             ),
                           ],
                         ),
@@ -281,7 +278,7 @@ class _Body extends StatelessWidget {
           ),
         ),
         if (tasks.isNotEmpty) ...[
-          Rise(index: 3, child: SectionLabel('teacher.needs_you'.trParams({'n': '${tasks.length}'}))),
+          Rise(index: 3, child: SectionLabel('teacher.needs_you'.trp({'n': '${tasks.length}'}))),
           Rise(
             index: 4,
             child: EduCard(
@@ -294,9 +291,9 @@ class _Body extends StatelessWidget {
           ),
         ] else ...[
           const SizedBox(height: 22),
-          Rise(
+          const Rise(
             index: 3,
-            child: const EmptyState(title: 'teacher.all_clear', body: 'teacher.all_clear_body'),
+            child: EmptyState(art: EmptyArt.attendance, title: 'teacher.all_clear', body: 'teacher.all_clear_body'),
           ),
         ],
         if (controller.own != null) ...[
@@ -305,8 +302,8 @@ class _Body extends StatelessWidget {
             index: 5,
             child: Text(
               ownTaken == null
-                  ? 'teacher.attendance_open'.trParams({'class': classLabel(controller.own!)})
-                  : 'teacher.attendance_taken'.trParams({
+                  ? 'teacher.attendance_open'.trp({'class': classLabel(controller.own!)})
+                  : 'teacher.attendance_taken'.trp({
                       'class': classLabel(controller.own!),
                       'n': '${ownTaken.$1}',
                       'total': '${ownTaken.$2}',
@@ -325,7 +322,7 @@ class _Body extends StatelessWidget {
     return [
       g.homework.title,
       if (g.schoolClass != null) classLabel(g.schoolClass!),
-      if (days > 0) 'teacher.oldest'.trParams({'n': '$days'}),
+      if (days > 0) 'teacher.oldest'.trp({'n': '$days'}),
     ].join(' · ');
   }
 }
@@ -466,7 +463,7 @@ class TeacherClassesView extends GetView<TeacherHomeController> {
                   'teacher.classes',
                   subtitle: controller.classes.isEmpty
                       ? null
-                      : 'teacher.classes_sub'.trParams({
+                      : 'teacher.classes_sub'.trp({
                           'n': '${controller.classes.length}',
                           'students': '$total',
                           'day': DateFormat('EEEE').format(DateTime.now()),
@@ -485,6 +482,8 @@ class TeacherClassesView extends GetView<TeacherHomeController> {
             state: controller.state.value,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyArt: EmptyArt.books,
+            emptyHint: 'teacher.no_classes_hint',
             emptyTitle: 'teacher.no_classes',
             emptyBody: 'teacher.no_classes_body',
             child: Column(
@@ -530,16 +529,16 @@ class _ClassCard extends StatelessWidget {
     final count = controller.students[cls.id]?.length ?? cls.studentIds.length;
     final String when;
     if (live != null) {
-      when = 'teacher.now_until'.trParams({'time': clockOf(minutesOf(live.slot.end))});
+      when = 'teacher.now_until'.trp({'time': clockOf(minutesOf(live.slot.end))});
     } else if (upcoming != null) {
       when = mine
-          ? 'teacher.subject_at'.trParams({
+          ? 'teacher.subject_at'.trp({
               'subject': subjectName(subject),
               'time': clockOf(minutesOf(upcoming.slot.start)),
             })
           : clockOf(minutesOf(upcoming.slot.start));
     } else if (done != null) {
-      when = 'teacher.done_at'.trParams({'time': clockOf(minutesOf(done.slot.end))});
+      when = 'teacher.done_at'.trp({'time': clockOf(minutesOf(done.slot.end))});
     } else {
       when = 'teacher.not_today'.tr;
     }
@@ -583,7 +582,7 @@ class _ClassCard extends StatelessWidget {
                           children: [
                             Flexible(
                               child: Text(
-                                'teacher.class_n'.trParams({'class': classLabel(cls)}),
+                                'teacher.class_n'.trp({'class': classLabel(cls)}),
                                 style: context.type.t,
                               ),
                             ),
@@ -593,13 +592,13 @@ class _ClassCard extends StatelessWidget {
                         )
                       else
                         Text(
-                          '${'teacher.class_n'.trParams({'class': classLabel(cls)})} · ${subjectName(subject)}',
+                          '${'teacher.class_n'.trp({'class': classLabel(cls)})} · ${subjectName(subject)}',
                           style: context.type.t,
                         ),
                       const SizedBox(height: 3),
                       Text(
                         [
-                          if (count > 0) 'teacher.n_students'.trParams({'n': '$count'}),
+                          if (count > 0) 'teacher.n_students'.trp({'n': '$count'}),
                           room,
                           when,
                         ].join(' · '),
@@ -610,7 +609,7 @@ class _ClassCard extends StatelessWidget {
                         Text(
                           taken == null
                               ? 'teacher.attendance_not_taken'.tr
-                              : 'teacher.attendance_done'.trParams({'n': '${taken.$1}'}),
+                              : 'teacher.attendance_done'.trp({'n': '${taken.$1}'}),
                           style: anek(
                             13,
                             650,

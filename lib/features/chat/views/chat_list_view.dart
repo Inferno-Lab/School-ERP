@@ -14,6 +14,8 @@ import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/models/student.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
+import 'package:edunest/core/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -78,6 +80,9 @@ class ChatListView extends GetView<ChatListController> {
             errorKey: controller.errorMessage.value,
             emptyTitle: 'chat.empty',
             emptyBody: 'chat.empty_body',
+            emptyArt: EmptyArt.chat,
+            emptyHint: 'chat.empty_hint',
+            emptyActions: [EmptyAction('common.ask_office', icon: PhosphorIconsRegular.lifebuoy, onTap: () => Get.toNamed<void>(AppRoutes.help))],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -99,7 +104,7 @@ class ChatListView extends GetView<ChatListController> {
                 ] else if (controller.query.value.isNotEmpty)
                   EmptyState(
                     title: 'chat.no_match',
-                    body: 'chat.no_match_body'.trParams({'q': controller.query.value}),
+                    body: 'chat.no_match_body'.trp({'q': controller.query.value}),
                   ),
                 if (suggested.isNotEmpty && controller.query.value.isEmpty) ...[
                   Rise(index: 2, child: SectionLabel('chat.start_with'.tr)),
@@ -185,12 +190,12 @@ class _ThreadRow extends StatelessWidget {
     final mine = last != null && last.senderId == controller.me;
     final preview = last == null
         ? 'chat.no_messages'.tr
-        : (mine ? 'chat.you'.trParams({'text': last.text}) : last.text);
+        : (mine ? 'chat.you'.trp({'text': last.text}) : last.text);
     return Semantics(
       button: true,
       label: [
         thread.title,
-        if (unread > 0) 'chat.n_unread'.trParams({'n': '$unread'}),
+        if (unread > 0) 'chat.n_unread'.trp({'n': '$unread'}),
         preview,
       ].join(', '),
       excludeSemantics: true,
@@ -275,7 +280,7 @@ class _Suggested extends StatelessWidget {
     final p = AppColors.subject(teacher.subject);
     return Semantics(
       button: true,
-      label: 'chat.start_named'.trParams({'name': teacher.name}),
+      label: 'chat.start_named'.trp({'name': teacher.name}),
       excludeSemantics: true,
       child: Pressable(
         onTap: () => unawaited(controller.startWith(teacher)),
@@ -411,7 +416,7 @@ class ChatThreadView extends GetView<ChatThreadController> {
                         emptyBody: 'chat.gone_body',
                         child: EmptyState(
                           title: 'chat.say_hello',
-                          body: 'chat.say_hello_body'.trParams({'name': thread?.title ?? ''}),
+                          body: 'chat.say_hello_body'.trp({'name': thread?.title ?? ''}),
                         ),
                       ),
                     )
@@ -498,7 +503,7 @@ class ChatThreadView extends GetView<ChatThreadController> {
                           ),
                           if (thread != null)
                             Text(
-                              thread.online ? 'chat.online'.trParams({'sub': thread.subtitle}) : thread.subtitle,
+                              thread.online ? 'chat.online'.trp({'sub': thread.subtitle}) : thread.subtitle,
                               style: context.type.cap.copyWith(fontSize: 12),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -595,7 +600,7 @@ class ChatThreadView extends GetView<ChatThreadController> {
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                            hintText: 'chat.message_to'.trParams({'name': thread.title}),
+                            hintText: 'chat.message_to'.trp({'name': thread.title}),
                             hintStyle: anek(16, 450, height: 1.3, color: c.ink3),
                           ),
                         ),

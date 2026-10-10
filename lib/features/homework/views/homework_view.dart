@@ -8,7 +8,9 @@ import 'package:edunest/core/utils/formatters.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/glass_controls.dart';
 import 'package:edunest/core/widgets/page.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:edunest/core/widgets/states.dart';
+import 'package:edunest/features/shell/shell_controller.dart';
 import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
@@ -45,9 +47,9 @@ class HomeworkView extends GetView<HomeworkController> {
         bottomBarHeight: 56,
         bottomBar: GlassSegmented(
           labels: [
-            'homework.tab_due'.trParams({'n': '${counts[0]}'}),
-            'homework.tab_sent'.trParams({'n': '${counts[1]}'}),
-            'homework.tab_graded'.trParams({'n': '${counts[2]}'}),
+            'homework.tab_due'.trp({'n': '${counts[0]}'}),
+            'homework.tab_sent'.trp({'n': '${counts[1]}'}),
+            'homework.tab_graded'.trp({'n': '${counts[2]}'}),
           ],
           index: tab,
           semanticLabel: 'homework.status'.tr,
@@ -60,12 +62,7 @@ class HomeworkView extends GetView<HomeworkController> {
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
             child: groups.isEmpty
-                ? EmptyState(
-                    title: tab == 0 ? 'homework.all_done' : 'empty.title',
-                    body: tab == 0 ? 'homework.all_done_body' : 'empty.body',
-                    action: tab == 0 ? 'homework.see_graded' : null,
-                    onAction: () => controller.tab.value = 2,
-                  )
+                ? _empty(controller, tab)
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -85,19 +82,48 @@ class HomeworkView extends GetView<HomeworkController> {
     });
   }
 
+  /// Nothing at all yet reads differently from a tab that is simply clear.
+  Widget _empty(HomeworkController controller, int tab) {
+    if (controller.items.isEmpty) {
+      return EmptyState(
+        art: EmptyArt.homework,
+        title: 'homework.none_yet',
+        body: 'homework.none_yet_body',
+        hint: 'homework.none_yet_hint',
+        actions: [
+          EmptyAction(
+            'homework.ask_teacher',
+            icon: PhosphorIconsRegular.chatCircle,
+            onTap: () => ShellController.showTab(ShellController.chatTab),
+          ),
+        ],
+      );
+    }
+    return switch (tab) {
+      0 => EmptyState(
+        art: EmptyArt.attendance,
+        title: 'homework.all_done',
+        body: 'homework.all_done_body',
+        actions: [EmptyAction('homework.see_graded', icon: PhosphorIconsRegular.checks, onTap: () => controller.tab.value = 2)],
+      ),
+      1 => const EmptyState(art: EmptyArt.plane, title: 'homework.none_sent', body: 'homework.none_sent_body'),
+      _ => const EmptyState(art: EmptyArt.columns, title: 'homework.none_graded', body: 'homework.none_graded_body'),
+    };
+  }
+
   String _summary(int tab, List<int> counts, List<Homework> items) {
     switch (tab) {
       case 0:
         if (items.isEmpty) return 'homework.summary_none'.tr;
         final soonest = [...items]..sort((a, b) => a.dueOn.compareTo(b.dueOn));
-        return 'homework.summary_due'.trParams({
+        return 'homework.summary_due'.trp({
           'n': '${counts[0]}',
-          'when': Formatters.countdown(soonest.first.dueOn).trParams({'count': '${Formatters.daysUntil(soonest.first.dueOn)}'}).toLowerCase(),
+          'when': Formatters.countdown(soonest.first.dueOn).trp({'count': '${Formatters.daysUntil(soonest.first.dueOn)}'}).toLowerCase(),
         });
       case 1:
-        return 'homework.summary_sent'.trParams({'n': '${counts[1]}'});
+        return 'homework.summary_sent'.trp({'n': '${counts[1]}'});
       default:
-        return 'homework.summary_graded'.trParams({'n': '${counts[2]}'});
+        return 'homework.summary_graded'.trp({'n': '${counts[2]}'});
     }
   }
 
@@ -151,7 +177,7 @@ class _HomeworkRow extends StatelessWidget {
     late final Color tone;
     switch (tab) {
       case 1:
-        meta = 'homework.sent_meta'.trParams({
+        meta = 'homework.sent_meta'.trp({
           'date': DateFormat('d MMM').format(mine?.submittedAt ?? item.dueOn),
           'file': mine?.fileName ?? '',
         });
@@ -164,8 +190,8 @@ class _HomeworkRow extends StatelessWidget {
       default:
         meta = [
           if (teacher.isNotEmpty) teacher,
-          if (item.attachments.isNotEmpty) 'homework.n_files'.trParams({'n': '${item.attachments.length}'}),
-          'homework.n_marks'.trParams({'n': '${item.maxMarks}'}),
+          if (item.attachments.isNotEmpty) 'homework.n_files'.trp({'n': '${item.attachments.length}'}),
+          'homework.n_marks'.trp({'n': '${item.maxMarks}'}),
         ].join(' · ');
         if (days < 0) {
           stamp = 'homework.stamp_late'.tr;
@@ -318,7 +344,7 @@ class _DetailBody extends StatelessWidget {
     final days = Formatters.daysUntil(item.dueOn);
     final submitted = item.submissions.where((s) => s.status != HomeworkStatus.pending).length;
     final status = mine?.status ?? HomeworkStatus.pending;
-    final dueLabel = '${Formatters.countdown(item.dueOn).trParams({'count': '$days'})} · ${DateFormat('EEE d MMM').format(item.dueOn)}';
+    final dueLabel = '${Formatters.countdown(item.dueOn).trp({'count': '$days'})} · ${DateFormat('EEE d MMM').format(item.dueOn)}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -329,8 +355,8 @@ class _DetailBody extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Stamp(dueLabel, color: days < 0 ? c.badText : (c.dark ? const Color(0xFFF6BA45) : AppColors.late)),
-              Chip2('homework.n_marks'.trParams({'n': '${item.maxMarks}'}), height: 30),
-              Chip2('homework.state_${status.name}'.tr, height: 30),
+              Chip2('homework.n_marks'.trp({'n': '${item.maxMarks}'}), height: 30),
+              Chip2('status.${status.name}', height: 30),
             ],
           ),
         ),
@@ -357,7 +383,7 @@ class _DetailBody extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'homework.sent_meta'.trParams({
+                    'homework.sent_meta'.trp({
                       'date': DateFormat('d MMM').format(mine!.submittedAt ?? DateTime.now()),
                       'file': mine!.fileName ?? '',
                     }),
@@ -373,7 +399,7 @@ class _DetailBody extends StatelessWidget {
           ),
         ],
         if (item.attachments.isNotEmpty) ...[
-          Rise(index: 2, child: SectionLabel('homework.attached'.trParams({'n': '${item.attachments.length}'}))),
+          Rise(index: 2, child: SectionLabel('homework.attached'.trp({'n': '${item.attachments.length}'}))),
           Rise(
             index: 3,
             child: EduCard(
@@ -392,7 +418,7 @@ class _DetailBody extends StatelessWidget {
         Rise(
           index: 4,
           child: Text(
-            'homework.assigned_line'.trParams({
+            'homework.assigned_line'.trp({
               'date': DateFormat('EEE d MMM').format(item.assignedOn),
               'n': '$submitted',
               'total': '${item.submissions.length}',

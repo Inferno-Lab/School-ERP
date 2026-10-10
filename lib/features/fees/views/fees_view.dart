@@ -18,6 +18,7 @@ import 'package:edunest/core/widgets/toast.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/features/fees/controllers/fees_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -108,6 +109,9 @@ class _FeesViewState extends State<FeesView> {
             errorKey: controller.errorMessage.value,
             emptyTitle: 'fees.empty',
             emptyBody: 'fees.empty_body',
+            emptyArt: EmptyArt.wallet,
+            emptyHint: 'fees.empty_hint',
+            emptyActions: [EmptyAction('common.ask_office', icon: PhosphorIconsRegular.lifebuoy, onTap: () => Get.toNamed<void>(AppRoutes.help))],
             child: account == null ? const SizedBox.shrink() : _Body(controller: controller, account: account),
           ),
         ],
@@ -192,7 +196,7 @@ class _Body extends StatelessWidget {
                     text: '${Formatters.inr(paid)} ',
                     children: [
                       TextSpan(
-                        text: 'fees.of_paid'.trParams({'total': Formatters.inr(total)}),
+                        text: 'fees.of_paid'.trp({'total': Formatters.inr(total)}),
                         style: context.type.cap,
                       ),
                     ],
@@ -247,7 +251,7 @@ class _Body extends StatelessWidget {
                       Obx(
                         () => Text(
                           theme.notifyFees.value && next != null
-                              ? 'fees.next_reminder'.trParams({
+                              ? 'fees.next_reminder'.trp({
                                   'date': DateFormat('EEE d MMM').format(
                                     next.dueDate.subtract(const Duration(days: 3)).isBefore(DateTime.now())
                                         ? DateTime.now().add(const Duration(days: 1))
@@ -360,12 +364,12 @@ class _DueCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Overline(
-                  'fees.due_now'.trParams({'title': item.title.toLowerCase()}),
+                  'fees.due_now'.trp({'title': item.title.toLowerCase()}),
                   color: ink.withValues(alpha: .75),
                 ),
               ),
               Stamp(
-                overdue ? 'fees.days_late'.trParams({'n': '${-days}'}) : 'fees.due_in'.trParams({'n': '$days'}),
+                overdue ? 'fees.days_late'.trp({'n': '${-days}'}) : 'fees.due_in'.trp({'n': '$days'}),
                 color: overdue ? const Color(0xFF7A1E12) : ink,
               ),
             ],
@@ -377,7 +381,7 @@ class _DueCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  (overdue ? 'fees.was_due' : 'fees.due_on').trParams({
+                  (overdue ? 'fees.was_due' : 'fees.due_on').trp({
                     'date': DateFormat('EEE d MMM').format(item.dueDate),
                   }),
                   style: context.type.s.copyWith(color: ink.withValues(alpha: .8)),
@@ -423,12 +427,12 @@ class _TimelineRow extends StatelessWidget {
       ),
     };
     final line = switch (status) {
-      MoneyStatus.paid => 'fees.paid_line'.trParams({
+      MoneyStatus.paid => 'fees.paid_line'.trp({
         'date': DateFormat('d MMM').format(item.paidOn ?? item.dueDate),
         'method': 'fees.${item.method ?? 'upi'}'.tr,
       }),
-      MoneyStatus.overdue => 'fees.overdue_since'.trParams({'date': DateFormat('d MMM').format(item.dueDate)}),
-      _ => 'fees.due_line'.trParams({
+      MoneyStatus.overdue => 'fees.overdue_since'.trp({'date': DateFormat('d MMM').format(item.dueDate)}),
+      _ => 'fees.due_line'.trp({
         'date': DateFormat('EEE d MMM').format(item.dueDate),
         'n': '${Formatters.daysUntil(item.dueDate)}',
       }),
@@ -567,7 +571,7 @@ class _PaySheetState extends State<PaySheet> {
             ],
           ),
           const SizedBox(height: 8),
-          Text('fees.to_school'.trParams({'school': AppConfig.schoolName}), style: context.type.cap),
+          Text('fees.to_school'.trp({'school': AppConfig.schoolName}), style: context.type.cap),
           SectionLabel('fees.pay_with'.tr, top: 20),
           for (final m in _methods)
             Padding(
@@ -709,13 +713,13 @@ class _SlideToPay extends StatelessWidget {
         const thumb = 76.0;
         final max = box.maxWidth - thumb - 4;
         final label = paid
-            ? 'fees.paid_amount'.trParams({'amount': amount})
+            ? 'fees.paid_amount'.trp({'amount': amount})
             : busy
             ? 'fees.processing'.tr
-            : 'fees.slide'.trParams({'amount': amount});
+            : 'fees.slide'.trp({'amount': amount});
         return Semantics(
           slider: true,
-          label: 'fees.slide'.trParams({'amount': amount}),
+          label: 'fees.slide'.trp({'amount': amount}),
           onIncrease: paid || busy ? null : () => onEnd(max),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 400),
@@ -801,7 +805,7 @@ class ReceiptView extends StatelessWidget {
       if (args['student'] != null)
         (
           'fees.student'.tr,
-          '${args['student']} · ${args['class'] ?? ''} · ${'fees.roll'.trParams({'n': '${args['roll'] ?? ''}'.padLeft(2, '0')})}',
+          '${args['student']} · ${args['class'] ?? ''} · ${'fees.roll'.trp({'n': '${args['roll'] ?? ''}'.padLeft(2, '0')})}',
           false,
         ),
       ('fees.paid_on'.tr, DateFormat('EEE d MMM y, HH:mm').format(receipt.paidOn), false),

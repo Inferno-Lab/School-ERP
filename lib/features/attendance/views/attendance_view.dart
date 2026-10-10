@@ -14,6 +14,7 @@ import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/features/attendance/controllers/attendance_controller.dart';
 import 'package:edunest/features/dashboard/views/dashboard_view.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -33,11 +34,14 @@ class AttendanceView extends GetView<AttendanceController> {
           Glass(
             height: 44,
             width: 200,
-            radius: 22,
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Row(
               children: [
-                _MonthArrow(icon: PhosphorIconsBold.caretLeft, label: 'attendance.prev_month', onTap: () => controller.shiftMonth(-1)),
+                _MonthArrow(
+                  icon: PhosphorIconsBold.caretLeft,
+                  label: 'attendance.prev_month',
+                  onTap: () => controller.shiftMonth(-1),
+                ),
                 Expanded(
                   child: Text(
                     DateFormat('MMMM y').format(month),
@@ -60,6 +64,10 @@ class AttendanceView extends GetView<AttendanceController> {
             state: controller.state.value,
             onRetry: controller.load,
             errorKey: controller.errorMessage.value,
+            emptyTitle: 'attendance.empty',
+            emptyBody: 'attendance.empty_body',
+            emptyArt: EmptyArt.attendance,
+            emptyHint: 'attendance.empty_hint',
             child: _Body(controller: controller),
           ),
         ],
@@ -104,10 +112,9 @@ class _Body extends StatelessWidget {
     final now = DateTime.now();
     final thisMonth = controller.focused.value.month == now.month && controller.focused.value.year == now.year;
     final marked = controller.monthDays;
-    final problems = marked
-        .where((d) => d.status == AttendanceStatus.absent || d.status == AttendanceStatus.lateArrival)
-        .toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final problems =
+        marked.where((d) => d.status == AttendanceStatus.absent || d.status == AttendanceStatus.lateArrival).toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -115,12 +122,14 @@ class _Body extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(child: BigNumber(value: '${s.percent.round()}', unit: '%', size: 68)),
+              Expanded(
+                child: BigNumber(value: '${s.percent.round()}', unit: '%', size: 68),
+              ),
               if (thisMonth && controller.streak > 0)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Chip2(
-                    'academics.streak'.trParams({'n': '${controller.streak}'}),
+                    'academics.streak'.trp({'n': '${controller.streak}'}),
                     icon: PhosphorIconsRegular.flame,
                     background: c.mariSoft,
                     foreground: c.mariText,
@@ -133,12 +142,12 @@ class _Body extends StatelessWidget {
         Rise(
           index: 1,
           child: Text(
-            'attendance.summary_line'.trParams({
-              'p': '${s.present}',
-              'a': '${s.absent}',
-              'l': '${s.lateCount}',
-              'h': '${s.holiday}',
-            }) +
+            'attendance.summary_line'.trp({
+                  'p': '${s.present}',
+                  'a': '${s.absent}',
+                  'l': '${s.lateCount}',
+                  'h': '${s.holiday}',
+                }) +
                 (thisMonth ? ' ${'attendance.so_far'.tr}' : ''),
             style: context.type.s,
           ),
@@ -152,10 +161,22 @@ class _Body extends StatelessWidget {
             spacing: 14,
             runSpacing: 8,
             children: [
-              _Legend(tile: const _Tile(status: AttendanceStatus.present, small: true), label: 'attendance.present'.tr),
-              _Legend(tile: const _Tile(status: AttendanceStatus.absent, small: true), label: 'attendance.absent'.tr),
-              _Legend(tile: const _Tile(status: AttendanceStatus.lateArrival, small: true), label: 'attendance.late'.tr),
-              _Legend(tile: const _Tile(status: AttendanceStatus.holiday, small: true), label: 'attendance.holiday'.tr),
+              _Legend(
+                tile: const _Tile(status: AttendanceStatus.present, small: true),
+                label: 'attendance.present'.tr,
+              ),
+              _Legend(
+                tile: const _Tile(status: AttendanceStatus.absent, small: true),
+                label: 'attendance.absent'.tr,
+              ),
+              _Legend(
+                tile: const _Tile(status: AttendanceStatus.lateArrival, small: true),
+                label: 'attendance.late'.tr,
+              ),
+              _Legend(
+                tile: const _Tile(status: AttendanceStatus.holiday, small: true),
+                label: 'attendance.holiday'.tr,
+              ),
             ],
           ),
         ),
@@ -174,7 +195,10 @@ class _Body extends StatelessWidget {
         for (var i = 0; i < problems.length; i++)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: Rise(index: 4 + i, child: _ProblemCard(day: problems[i], controller: controller)),
+            child: Rise(
+              index: 4 + i,
+              child: _ProblemCard(day: problems[i], controller: controller),
+            ),
           ),
       ],
     );
@@ -190,7 +214,11 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
-    children: [tile, const SizedBox(width: 6), Text(label, style: context.type.cap)],
+    children: [
+      tile,
+      const SizedBox(width: 6),
+      Text(label, style: context.type.cap),
+    ],
   );
 }
 
@@ -318,7 +346,11 @@ class _Calendar extends StatelessWidget {
                     width: cell + (i < 6 ? gap : 0),
                     child: Padding(
                       padding: EdgeInsets.only(right: i < 6 ? gap : 0),
-                      child: Text(weekdays[i], textAlign: TextAlign.center, style: anek(11, 700, height: 1.45, em: .08, color: context.app.ink3)),
+                      child: Text(
+                        weekdays[i],
+                        textAlign: TextAlign.center,
+                        style: anek(11, 700, em: .08, color: context.app.ink3),
+                      ),
                     ),
                   ),
               ],
@@ -350,8 +382,13 @@ class _Calendar extends StatelessWidget {
                       top: (pickedIndex ~/ 7) * (44 + gap) - 6,
                       width: 56,
                       height: 56,
-                      child: const IgnorePointer(
-                        child: Glass(kind: GlassKind.lens, radius: 18, tint: Color(0x0AFFFFFF)),
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: context.app.ink, width: 2),
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -377,13 +414,14 @@ class _DayCell extends StatelessWidget {
     final future = date.isAfter(today);
     final sunday = date.weekday == DateTime.sunday;
     final status = record?.status ?? (sunday ? AttendanceStatus.holiday : null);
-    final label = '${DateFormat('d MMMM').format(date)}, ${switch (status) {
-      AttendanceStatus.present => 'attendance.present'.tr,
-      AttendanceStatus.absent => 'attendance.absent'.tr,
-      AttendanceStatus.lateArrival => 'attendance.late'.tr,
-      AttendanceStatus.holiday => 'attendance.holiday'.tr,
-      null => future ? 'attendance.upcoming'.tr : 'attendance.not_marked'.tr,
-    }}';
+    final label =
+        '${DateFormat('d MMMM').format(date)}, ${switch (status) {
+          AttendanceStatus.present => 'attendance.present'.tr,
+          AttendanceStatus.absent => 'attendance.absent'.tr,
+          AttendanceStatus.lateArrival => 'attendance.late'.tr,
+          AttendanceStatus.holiday => 'attendance.holiday'.tr,
+          null => future ? 'attendance.upcoming'.tr : 'attendance.not_marked'.tr,
+        }}';
     return Semantics(
       button: true,
       label: label,
@@ -394,13 +432,19 @@ class _DayCell extends StatelessWidget {
         },
         child: Opacity(
           opacity: future && sunday ? .6 : 1,
-          child: _Tile(status: future && !sunday ? null : status, day: date.day, future: future, today: date.isSameDay(today)),
+          child: _Tile(
+            status: future && !sunday ? null : status,
+            day: date.day,
+            future: future,
+            today: date.isSameDay(today),
+          ),
         ),
       ),
     );
   }
 
-  Future<void> _openDay(AttendanceDay record) => showSheet<void>(AttendanceDaySheet(day: record, controller: controller));
+  Future<void> _openDay(AttendanceDay record) =>
+      showSheet<void>(AttendanceDaySheet(day: record, controller: controller));
 }
 
 class _ProblemCard extends StatelessWidget {
@@ -419,17 +463,25 @@ class _ProblemCard extends StatelessWidget {
       onTap: () => showSheet<void>(AttendanceDaySheet(day: day, controller: controller)),
       child: Row(
         children: [
-          SizedBox(width: 44, child: _Tile(status: day.status, day: day.date.day)),
+          SizedBox(
+            width: 44,
+            child: _Tile(status: day.status, day: day.date.day),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text((absent ? 'attendance.absent_on' : 'attendance.late_on').trParams({'day': weekday}), style: context.type.t),
+                Text(
+                  (absent ? 'attendance.absent_on' : 'attendance.late_on').trp({'day': weekday}),
+                  style: context.type.t,
+                ),
                 const SizedBox(height: 2),
                 Text(
                   absent
-                      ? (leave == null ? 'attendance.no_reason'.tr : 'attendance.leave_sent'.trParams({'reason': leave.reason}))
+                      ? (leave == null
+                            ? 'attendance.no_reason'.tr
+                            : 'attendance.leave_sent'.trp({'reason': leave.reason}))
                       : 'attendance.late_note'.tr,
                   style: context.type.cap,
                   maxLines: 1,
@@ -494,14 +546,14 @@ class AttendanceDaySheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            (absent ? 'attendance.absent_body' : 'attendance.late_body').trParams({
+            (absent ? 'attendance.absent_body' : 'attendance.late_body').trp({
               'teacher': controller.classTeacher ?? 'attendance.class_teacher'.tr,
               'name': name,
             }),
             style: context.type.s,
           ),
           if (missed.isNotEmpty) ...[
-            SectionLabel('attendance.classes_missed'.trParams({'n': '${missed.length}'}), top: 20),
+            SectionLabel('attendance.classes_missed'.trp({'n': '${missed.length}'}), top: 20),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               decoration: BoxDecoration(color: c.paper2, borderRadius: BorderRadius.circular(AppRadius.card)),

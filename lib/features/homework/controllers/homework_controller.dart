@@ -1,3 +1,4 @@
+import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/utils/app_exception.dart';
 import 'package:edunest/core/utils/loadable.dart';
@@ -76,7 +77,7 @@ class HomeworkController extends GetxController with Loadable {
 
   // shortcut: scanned pages are counted, not merged into a PDF; add PDF export when the API stores files.
   Future<void> sendScan(Homework homework, int pages) =>
-      send(homework, 'homework.scan_file'.trParams({'n': '$pages'}));
+      send(homework, 'homework.scan_file'.trp({'n': '$pages'}));
 
   Future<void> send(Homework homework, String fileName) async {
     final id = studentId ?? Get.find<AuthService>().activeStudentId.value;

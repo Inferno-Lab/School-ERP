@@ -78,6 +78,10 @@ class HomeSnapshot {
   final int dueTotal;
 
   List<PeriodSlot> get periods => today?.periods ?? const [];
+
+  /// A new school: no timetable, nothing due, no notices, no exam. Home then
+  /// welcomes the family and suggests first steps instead of empty sections.
+  bool get isNew => periods.isEmpty && due.isEmpty && notices.isEmpty && nextExam == null;
 }
 
 class DashboardController extends GetxController with Loadable {

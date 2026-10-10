@@ -110,7 +110,7 @@ class ProfileView extends GetView<ProfileController> {
                       facts: [
                         (
                           'profile.class'.tr,
-                          '${controller.schoolClass?.name.replaceAll(RegExp('[^0-9]'), '') ?? ''} ${controller.schoolClass?.section ?? ''} · ${'fees.roll'.trParams({'n': student.rollNo})}',
+                          '${controller.schoolClass?.name.replaceAll(RegExp('[^0-9]'), '') ?? ''} ${controller.schoolClass?.section ?? ''} · ${'fees.roll'.trp({'n': student.rollNo})}',
                         ),
                         ('profile.house'.tr, student.house),
                         ('profile.born'.tr, _dob(student.dob)),

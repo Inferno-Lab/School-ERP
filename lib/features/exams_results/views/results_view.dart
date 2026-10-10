@@ -14,6 +14,7 @@ import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:edunest/features/dashboard/views/dashboard_view.dart';
 import 'package:edunest/features/exams_results/controllers/results_controller.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -74,6 +75,8 @@ class ResultsView extends GetView<ResultsController> {
                 state: controller.state.value,
                 onRetry: controller.load,
                 errorKey: controller.errorMessage.value,
+                emptyArt: EmptyArt.columns,
+                emptyHint: 'results.empty_hint',
                 emptyTitle: 'results.none_title',
                 emptyBody: 'results.none',
                 child: const SizedBox.shrink(),
@@ -86,7 +89,7 @@ class ResultsView extends GetView<ResultsController> {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  'results.out_of'.trParams({'n': '${result.subjects.firstOrNull?.maxMarks ?? 0}'}),
+                  'results.out_of'.trp({'n': '${result.subjects.firstOrNull?.maxMarks ?? 0}'}),
                   style: context.type.cap.copyWith(fontSize: 11.5),
                 ),
               ),
@@ -262,10 +265,10 @@ class _Summary extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Stamp('results.grade'.trParams({'g': result.grade}), color: AppColors.ok),
+                      Stamp('results.grade'.trp({'g': result.grade}), color: AppColors.ok),
                       const SizedBox(height: 6),
                       Text(
-                        'results.rank'.trParams({'r': '${result.rank}', 't': '${result.totalStudents}'}),
+                        'results.rank'.trp({'rank': '${result.rank}', 'total': '${result.totalStudents}'}),
                         style: anek(13, 620, height: 1.2, color: c.ink3),
                       ),
                     ],
@@ -280,7 +283,7 @@ class _Summary extends StatelessWidget {
                     width: 90,
                     height: 46,
                     child: Semantics(
-                      label: 'results.trend'.trParams({'v': trend.map((t) => '${t.percent.round()}').join(', ')}),
+                      label: 'results.trend'.trp({'v': trend.map((t) => '${t.percent.round()}').join(', ')}),
                       child: CustomPaint(painter: _Spark(trend.map((t) => t.percent).toList(), c.ink, c.chalk)),
                     ),
                   ),
@@ -300,7 +303,7 @@ class _Summary extends StatelessWidget {
         if (changes.isNotEmpty && prev != null) ...[
           Rise(
             index: 2,
-            child: SectionLabel('results.changed_since'.trParams({'exam': controller.previousExam?.name ?? ''})),
+            child: SectionLabel('results.changed_since'.trp({'exam': controller.previousExam?.name ?? ''})),
           ),
           Rise(
             index: 3,
@@ -366,10 +369,10 @@ class _Summary extends StatelessWidget {
     final last = trend.last;
     final earlier = trend.reversed.skip(1).toList();
     final parts = earlier
-        .map((t) => 'results.trend_part'.trParams({'p': '${t.percent.round()}', 'label': t.label}))
+        .map((t) => 'results.trend_part'.trp({'p': '${t.percent.round()}', 'label': t.label}))
         .join(' ${'common.and'.tr} ');
     final up = last.percent >= trend[trend.length - 2].percent;
-    return (up ? 'results.up_from' : 'results.down_from').trParams({'parts': parts});
+    return (up ? 'results.up_from' : 'results.down_from').trp({'parts': parts});
   }
 }
 

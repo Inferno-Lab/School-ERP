@@ -13,6 +13,8 @@ import 'package:edunest/core/widgets/states.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
+import 'package:edunest/core/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -63,6 +65,9 @@ class TransportView extends GetView<TransportController> {
               errorKey: controller.errorMessage.value,
               emptyTitle: 'transport.empty',
               emptyBody: 'transport.empty_body',
+              emptyArt: EmptyArt.bus,
+              emptyHint: 'transport.empty_hint',
+              emptyActions: [EmptyAction('common.ask_office', icon: PhosphorIconsRegular.lifebuoy, onTap: () => Get.toNamed<void>(AppRoutes.help))],
               child: const SizedBox.shrink(),
             ),
           ],
@@ -105,7 +110,7 @@ class TransportView extends GetView<TransportController> {
                               child: Text(
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                'transport.live'.trParams({'route': route.routeName.split(' · ').first}),
+                                'transport.live'.trp({'route': route.routeName.split(' · ').first}),
                                 style: anek(14, 680, height: 1, color: c.ink),
                               ),
                             ),
@@ -155,7 +160,7 @@ class _RouteMap extends StatelessWidget {
     final progress = route.progress.clamp(0.0, 1.0);
     final bus = metric.getTangentForOffset(metric.length * progress)!.position * scale;
     return Semantics(
-      label: 'transport.map_label'.trParams({'route': route.routeName}),
+      label: 'transport.map_label'.trp({'route': route.routeName}),
       image: true,
       child: ClipRect(
         child: Stack(
@@ -385,7 +390,7 @@ class _StopsSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Overline('transport.to'.trParams({'stop': stops.isEmpty ? '' : stops.last.name})),
+                    Overline('transport.to'.trp({'stop': stops.isEmpty ? '' : stops.last.name})),
                     const SizedBox(height: 8),
                     Text.rich(
                       TextSpan(
@@ -456,7 +461,7 @@ class _StopsSheet extends StatelessWidget {
                 ),
               ),
               Semantics(
-                label: 'transport.call_driver'.trParams({'name': route.driver.name}),
+                label: 'transport.call_driver'.trp({'name': route.driver.name}),
                 excludeSemantics: true,
                 child: Btn(
                   'transport.call',
@@ -496,9 +501,9 @@ class _StopRow extends StatelessWidget {
             ),
           );
     final name = last
-        ? 'transport.your_stop'.trParams({'stop': stop.name})
+        ? 'transport.your_stop'.trp({'stop': stop.name})
         : next
-        ? 'transport.next_stop'.trParams({'stop': stop.name})
+        ? 'transport.next_stop'.trp({'stop': stop.name})
         : stop.name;
     final time = stop.time.startsWith('0') ? stop.time.substring(1) : stop.time;
     return Row(

@@ -19,6 +19,7 @@ import 'package:edunest/data/models/campus.dart';
 import 'package:edunest/data/repositories/academic_repository.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
 import 'package:edunest/data/repositories/directory_repository.dart';
+import 'package:edunest/core/widgets/empty_art.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -124,8 +125,8 @@ class LeaveView extends GetView<LeaveController> {
                   ? null
                   : [
                       controller.childName!,
-                      'leave.taken'.trParams({'n': '${controller.takenThisTerm}'}),
-                      if (controller.waiting > 0) 'leave.waiting_n'.trParams({'n': '${controller.waiting}'}),
+                      'leave.taken'.trp({'n': '${controller.takenThisTerm}'}),
+                      if (controller.waiting > 0) 'leave.waiting_n'.trp({'n': '${controller.waiting}'}),
                     ].join(' · '),
             ),
           ),
@@ -142,7 +143,20 @@ class LeaveView extends GetView<LeaveController> {
                 ],
                 const Rise(index: 3, child: SectionLabel('leave.requests')),
                 if (items.isEmpty)
-                  const EmptyState(title: 'leave.empty', body: 'leave.empty_body')
+                  EmptyState(
+                    art: EmptyArt.plane,
+                    title: 'leave.empty',
+                    body: 'leave.empty_body',
+                    hint: 'leave.empty_hint',
+                    actions: [
+                      EmptyAction(
+                        'leave.new',
+                        icon: PhosphorIconsRegular.plus,
+                        primary: true,
+                        onTap: () => Get.toNamed<void>(AppRoutes.leaveApply),
+                      ),
+                    ],
+                  )
                 else
                   Rise(
                     index: 3,
@@ -217,7 +231,7 @@ class _Unexplained extends StatelessWidget {
               children: [
                 Text('leave.no_reason'.tr, style: context.type.t),
                 Text(
-                  'leave.no_reason_body'.trParams({'day': DateFormat('EEEE').format(date)}),
+                  'leave.no_reason_body'.trp({'day': DateFormat('EEEE').format(date)}),
                   style: context.type.cap,
                 ),
               ],
@@ -281,8 +295,8 @@ class _Request extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       teacher == null
-                          ? 'leave.sent_on'.trParams({'date': DateFormat('EEE d MMM').format(item.appliedOn)})
-                          : 'leave.sent_to'.trParams({
+                          ? 'leave.sent_on'.trp({'date': DateFormat('EEE d MMM').format(item.appliedOn)})
+                          : 'leave.sent_to'.trp({
                               'date': DateFormat('EEE d MMM').format(item.appliedOn),
                               'name': teacher!,
                             }),
@@ -460,7 +474,7 @@ class LeaveApplyController extends GetxController {
       );
       Get.back<void>();
       ToastHelper.show(
-        teacherName == null ? 'leave.sent' : 'leave.sent_named'.trParams({'name': teacherName!}),
+        teacherName == null ? 'leave.sent' : 'leave.sent_named'.trp({'name': teacherName!}),
         kind: ToastKind.success,
       );
     } on AppException catch (error) {
@@ -572,7 +586,7 @@ class LeaveApplyView extends GetView<LeaveApplyController> {
             controller: controller.note,
             label: controller.teacherName == null
                 ? '${'leave.note'.tr} · ${'common.optional'.tr}'
-                : '${'leave.note_for'.trParams({'name': controller.teacherName!})} · ${'common.optional'.tr}',
+                : '${'leave.note_for'.trp({'name': controller.teacherName!})} · ${'common.optional'.tr}',
             hint: past ? 'leave.note_hint_past' : 'leave.note_hint',
             maxLines: 4,
             minHeight: 76,
@@ -658,7 +672,7 @@ class _RangeCalendar extends StatelessWidget {
             children: [
               Expanded(child: Text(DateFormat('MMMM y').format(month), style: context.type.t)),
               if (n > 0)
-                Text(n == 1 ? 'leave.one_day'.tr : 'leave.n_days'.trParams({'n': '$n'}), style: context.type.cap),
+                Text(n == 1 ? 'leave.one_day'.tr : 'leave.n_days'.trp({'n': '$n'}), style: context.type.cap),
               const SizedBox(width: 4),
               arrow(PhosphorIconsRegular.caretLeft, -1, 'leave.prev_month'),
               arrow(PhosphorIconsRegular.caretRight, 1, 'leave.next_month'),

@@ -3,7 +3,6 @@ import 'package:edunest/core/theme/app_typography.dart';
 import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/schedule.dart';
-import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/ui.dart';
 import 'package:edunest/data/models/academics.dart';
 import 'package:flutter/material.dart';
@@ -16,15 +15,12 @@ class DayRibbon extends StatefulWidget {
     required this.periods,
     this.height = 236,
     this.pxPerMinute = 2.4,
-    this.lensWidth = 120,
-    this.lensHeight = 176,
-    this.lensTop = 46,
     this.draggable = true,
     this.onScrub,
     this.blockLabel,
     this.blockDetail,
     this.blockAccent,
-    this.showLensLabel = true,
+    this.showLabel = true,
     this.leftInset = 0,
     this.now,
     super.key,
@@ -33,9 +29,6 @@ class DayRibbon extends StatefulWidget {
   final List<PeriodSlot> periods;
   final double height;
   final double pxPerMinute;
-  final double lensWidth;
-  final double lensHeight;
-  final double lensTop;
   final bool draggable;
 
   /// Minute of day under the lens (null when it is back on "now").
@@ -43,7 +36,7 @@ class DayRibbon extends StatefulWidget {
   final String Function(PeriodSlot)? blockLabel;
   final String? Function(PeriodSlot)? blockDetail;
   final bool Function(PeriodSlot)? blockAccent;
-  final bool showLensLabel;
+  final bool showLabel;
 
   /// Space reserved on the left (tablet rail) before blocks start.
   final double leftInset;
@@ -56,11 +49,14 @@ class DayRibbon extends StatefulWidget {
 }
 
 class DayRibbonState extends State<DayRibbon> {
-  double? _lensX;
+  double? _markerX;
+
+  /// Width of the draggable strip around the now marker.
+  static const _grab = 56.0;
   var _dragging = false;
 
   void backToNow() {
-    setState(() => _lensX = null);
+    setState(() => _markerX = null);
     widget.onScrub?.call(null);
   }
 
@@ -86,30 +82,27 @@ class DayRibbonState extends State<DayRibbon> {
         }
         double xOf(int minute) => offset + (minute - start) * k;
         final nowX = xOf(now);
-        final lensX = (_lensX ?? nowX).clamp(widget.lensWidth / 2, w - widget.lensWidth / 2);
-        final lensMinute = (start + (lensX - offset) / k).round().clamp(start, end);
-        final scrubbing = _lensX != null && (lensMinute - now).abs() > 2;
+        final markerX = (_markerX ?? nowX).clamp(_grab / 2, w - _grab / 2);
+        final minute = (start + (markerX - offset) / k).round().clamp(start, end);
+        final scrubbing = _markerX != null && (minute - now).abs() > 2;
 
         return SizedBox(
           height: widget.height,
           child: Stack(
-            clipBehavior: Clip.hardEdge,
             children: [
               for (final p in periods) _block(context, p, xOf, now),
               Positioned(
-                left: lensX - widget.lensWidth / 2,
-                top: widget.lensTop,
-                width: widget.lensWidth,
-                height: widget.lensHeight,
+                left: markerX - _grab / 2,
+                top: 0,
+                width: _grab,
+                height: widget.height,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragStart: widget.draggable ? (_) => setState(() => _dragging = true) : null,
                   onHorizontalDragUpdate: widget.draggable
                       ? (d) {
-                          setState(
-                            () => _lensX = (lensX + d.delta.dx).clamp(widget.lensWidth / 2, w - widget.lensWidth / 2),
-                          );
-                          final m = (start + ((_lensX! - offset) / k)).round().clamp(start, end);
+                          setState(() => _markerX = (markerX + d.delta.dx).clamp(_grab / 2, w - _grab / 2));
+                          final m = (start + ((_markerX! - offset) / k)).round().clamp(start, end);
                           widget.onScrub?.call((m - now).abs() <= 2 ? null : m);
                         }
                       : null,
@@ -117,42 +110,11 @@ class DayRibbonState extends State<DayRibbon> {
                   child: Semantics(
                     slider: widget.draggable,
                     label: 'home.scrub'.tr,
-                    value: clockOf(lensMinute),
-                    child: AnimatedScale(
-                      scale: _dragging && !context.reduceMotion ? 1.04 : 1,
-                      duration: AppDurations.fast,
-                      curve: kSpring,
-                      child: Glass(
-                        kind: GlassKind.lens,
-                        radius: widget.lensWidth * .37,
-                        tint: const Color(0x0AFFFFFF),
-                        padding: const EdgeInsets.only(top: 12),
-                        child: widget.showLensLabel
-                            ? Column(
-                                children: [
-                                  Text(
-                                    (scrubbing ? 'home.scrub_label' : 'home.now_label').tr,
-                                    style: anek(10.5, 760, width: 120, height: 1.2, em: .14, color: AppColors.white)
-                                        .copyWith(
-                                          shadows: const [
-                                            Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1)),
-                                          ],
-                                        ),
-                                  ),
-                                  Text(
-                                    clockOf(lensMinute),
-                                    style: context.type.mono.copyWith(
-                                      fontSize: 12,
-                                      color: AppColors.white,
-                                      shadows: const [
-                                        Shadow(color: Color(0x59000000), blurRadius: 6, offset: Offset(0, 1)),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : null,
-                      ),
+                    value: clockOf(minute),
+                    child: _NowMarker(
+                      label: widget.showLabel ? (scrubbing ? 'home.scrub_label' : 'home.now_label').tr : null,
+                      time: clockOf(minute),
+                      lifted: _dragging && !context.reduceMotion,
                     ),
                   ),
                 ),
@@ -313,6 +275,58 @@ class RibbonScale extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// A marigold line through the day with a small label: where "now" (or the
+/// scrubbed time) sits. Solid, not glass, so it never competes with the blocks.
+class _NowMarker extends StatelessWidget {
+  const _NowMarker({required this.time, required this.lifted, this.label});
+
+  final String? label;
+  final String time;
+  final bool lifted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        Positioned.fill(
+          child: Center(
+            child: Container(
+              width: 3,
+              decoration: BoxDecoration(
+                color: AppColors.mari,
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: const [BoxShadow(color: Color(0x4010201B), blurRadius: 4)],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 10,
+          child: AnimatedScale(
+            scale: lifted ? 1.08 : 1,
+            duration: AppDurations.fast,
+            curve: kSpring,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.mari,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [BoxShadow(color: Color(0x4010201B), blurRadius: 8, offset: Offset(0, 2))],
+              ),
+              child: Text(
+                [?label, time].join(' · '),
+                maxLines: 1,
+                style: anek(10.5, 760, height: 1.1, color: AppColors.mariInk, tabular: true),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

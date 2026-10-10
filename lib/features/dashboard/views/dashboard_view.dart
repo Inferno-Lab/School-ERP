@@ -18,6 +18,7 @@ import 'package:edunest/features/dashboard/controllers/dashboard_controller.dart
 import 'package:edunest/features/dashboard/widgets/child_switcher.dart';
 import 'package:edunest/features/dashboard/widgets/day_ribbon.dart';
 import 'package:edunest/features/dashboard/widgets/home_cards.dart';
+import 'package:edunest/features/dashboard/widgets/home_welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -44,7 +45,10 @@ class _DashboardViewState extends State<DashboardView> {
       final data = controller.snapshot;
       final parent = auth.role == UserRole.parent;
       final wide = context.isWide;
-      final ribbonH = parent ? 196.0 : 236.0;
+      // With no classes today there is no ribbon: a slim header and dark controls.
+      final hasDay = data != null && data.periods.isNotEmpty;
+      final ribbonH = hasDay ? (parent ? 196.0 : 236.0) : 0.0;
+      final controlInk = hasDay ? AppColors.white : context.app.ink;
       final top = MediaQuery.paddingOf(context).top;
       controller.state.value; // rebuild on state changes
       return Scaffold(
@@ -68,12 +72,12 @@ class _DashboardViewState extends State<DashboardView> {
               padding: EdgeInsets.only(bottom: wide ? 40 : kDockClearance + MediaQuery.paddingOf(context).bottom),
               children: [
                 SizedBox(
-                  height: ribbonH + 36,
+                  height: hasDay || data == null ? ribbonH + 36 : top + 64,
                   child: Stack(
                     children: [
                       if (data == null)
-                        _RibbonPlaceholder(height: ribbonH + top - 47)
-                      else
+                        const _RibbonPlaceholder(height: 189)
+                      else if (hasDay)
                         Positioned(
                           left: 0,
                           right: 0,
@@ -83,17 +87,14 @@ class _DashboardViewState extends State<DashboardView> {
                             periods: data.periods,
                             height: ribbonH,
                             pxPerMinute: wide ? 3.6 : 2.4,
-                            lensWidth: parent ? 102 : (wide ? 130 : 120),
-                            lensHeight: parent ? 126 : (wide ? 200 : 176),
-                            lensTop: parent ? 58 : 46,
                             leftInset: wide ? 110 : 0,
-                            showLensLabel: !parent,
+                            showLabel: !parent,
                             draggable: !parent,
                             onScrub: (m) => setState(() => _scrub = m),
                             blockDetail: wide ? (p) => data.teacherNames[p.teacherId] : null,
                           ),
                         ),
-                      if (data != null)
+                      if (hasDay)
                         Positioned(
                           left: 0,
                           right: 0,
@@ -107,7 +108,7 @@ class _DashboardViewState extends State<DashboardView> {
                       Positioned(
                         left: wide ? 130 : 16,
                         top: top + 8,
-                        child: parent ? const ChildCapsule() : _ProfileCapsule(data: data),
+                        child: parent ? ChildCapsule(onRibbon: hasDay) : _ProfileCapsule(data: data, onRibbon: hasDay),
                       ),
                       Positioned(
                         right: wide ? 24 : 16,
@@ -118,7 +119,7 @@ class _DashboardViewState extends State<DashboardView> {
                               GlassIconButton(
                                 icon: PhosphorIconsRegular.magnifyingGlass,
                                 label: 'common.search'.tr,
-                                color: AppColors.white,
+                                color: controlInk,
                                 onTap: () => Get.toNamed<void>(AppRoutes.search),
                               ),
                               const SizedBox(width: 10),
@@ -126,7 +127,7 @@ class _DashboardViewState extends State<DashboardView> {
                             GlassIconButton(
                               icon: PhosphorIconsRegular.bell,
                               label: 'notifications.title'.tr,
-                              color: AppColors.white,
+                              color: controlInk,
                               badge: true,
                               onTap: () => Get.toNamed<void>(AppRoutes.notifications),
                             ),
@@ -218,9 +219,10 @@ class _RibbonPlaceholder extends StatelessWidget {
 }
 
 class _ProfileCapsule extends StatelessWidget {
-  const _ProfileCapsule({required this.data});
+  const _ProfileCapsule({required this.data, this.onRibbon = true});
 
   final HomeSnapshot? data;
+  final bool onRibbon;
 
   @override
   Widget build(BuildContext context) {
@@ -231,10 +233,9 @@ class _ProfileCapsule extends StatelessWidget {
       onTap: () => Get.toNamed<void>(AppRoutes.profile),
       child: Semantics(
         button: true,
-        label: 'home.profile_capsule'.trParams({'name': name, 'class': cls}),
+        label: 'home.profile_capsule'.trp({'name': name, 'class': cls}),
         child: Glass(
           height: 44,
-          radius: 22,
           padding: const EdgeInsets.only(left: 5, right: 14),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -247,11 +248,13 @@ class _ProfileCapsule extends StatelessWidget {
                 children: [
                   Text(
                     name.split(' ').first,
-                    style: anek(14, 680, height: 1.05, color: AppColors.white).copyWith(shadows: _shadow),
+                    style: anek(14, 680, height: 1.05, color: onRibbon ? AppColors.white : context.app.ink)
+                        .copyWith(shadows: onRibbon ? _shadow : null),
                   ),
                   Text(
                     cls,
-                    style: anek(11.5, 560, height: 1.05, color: const Color(0xE0FFFFFF)).copyWith(shadows: _shadow),
+                    style: anek(11.5, 560, height: 1.05, color: onRibbon ? const Color(0xE0FFFFFF) : context.app.ink3)
+                        .copyWith(shadows: onRibbon ? _shadow : null),
                   ),
                 ],
               ),
@@ -284,13 +287,17 @@ class _StudentBody extends StatelessWidget {
         const SizedBox(height: 8),
         Rise(index: 1, child: Text(greeting(data.student.name.split(' ').first), style: context.type.h1)),
         const SizedBox(height: 18),
-        Rise(
-          index: 2,
-          child: NowCard(data: data, scrub: scrub),
-        ),
-        Rise(index: 3, child: DueSection(items: data.due)),
-        const SizedBox(height: 12),
-        Rise(index: 5, child: StatsRow(data: data)),
+        if (data.isNew)
+          const Rise(index: 2, child: HomeWelcome())
+        else ...[
+          Rise(
+            index: 2,
+            child: NowCard(data: data, scrub: scrub),
+          ),
+          Rise(index: 3, child: DueSection(items: data.due)),
+          const SizedBox(height: 12),
+          Rise(index: 5, child: StatsRow(data: data)),
+        ],
       ],
     );
   }
@@ -322,25 +329,32 @@ class _ParentBody extends StatelessWidget {
         ),
         Rise(index: 2, child: SectionLabel('home.both_children'.tr)),
         Rise(index: 2, child: ChildrenStrip(children: data.children)),
-        Rise(
-          index: 3,
-          child: SectionLabel(
-            'home.due_across'.trParams({'amount': Formatters.inr(data.dueTotal)}),
-            action: 'nav.fees',
-            onAction: () => Get.toNamed<void>(AppRoutes.fees),
-          ),
-        ),
-        Rise(index: 4, child: DueList(items: data.due.take(4).toList(), showChild: true)),
-        for (final child in quiet)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Center(
-              child: Text(
-                'home.nothing_due_for'.trParams({'name': child.student.name.split(' ').first}),
-                style: context.type.cap.copyWith(color: c.ink3),
-              ),
+        if (data.isNew)
+          const Padding(
+            padding: EdgeInsets.only(top: 16),
+            child: Rise(index: 3, child: HomeWelcome()),
+          )
+        else ...[
+          Rise(
+            index: 3,
+            child: SectionLabel(
+              'home.due_across'.trp({'amount': Formatters.inr(data.dueTotal)}),
+              action: 'nav.fees',
+              onAction: () => Get.toNamed<void>(AppRoutes.fees),
             ),
           ),
+          Rise(index: 4, child: DueList(items: data.due.take(4).toList(), showChild: true)),
+          for (final child in quiet)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Center(
+                child: Text(
+                  'home.nothing_due_for'.trp({'name': child.student.name.split(' ').first}),
+                  style: context.type.cap.copyWith(color: c.ink3),
+                ),
+              ),
+            ),
+        ],
       ],
     );
   }
@@ -370,8 +384,12 @@ class _WideBody extends StatelessWidget {
                 style: context.type.h1.copyWith(fontSize: 40),
               ),
               const SizedBox(height: 18),
-              NowCard(data: data, scrub: scrub, large: true),
-              DueSection(items: data.due),
+              if (data.isNew) ...[
+                const HomeWelcome(),
+              ] else ...[
+                NowCard(data: data, scrub: scrub, large: true),
+                DueSection(items: data.due),
+              ],
             ],
           ),
         ),
@@ -382,18 +400,22 @@ class _WideBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 22),
-              StatsRow(data: data),
-              SectionLabel('home.pinned_notices'.tr),
-              EduCard(
-                child: Column(
-                  children: [
-                    for (var i = 0; i < data.notices.where((n) => n.pinned).length; i++) ...[
-                      if (i > 0) const Hr(),
-                      NoticeLine(notice: data.notices.where((n) => n.pinned).elementAt(i)),
-                    ],
-                  ],
-                ),
-              ),
+              if (!data.isNew) ...[
+                StatsRow(data: data),
+                if (data.notices.any((n) => n.pinned)) ...[
+                  SectionLabel('home.pinned_notices'.tr),
+                  EduCard(
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < data.notices.where((n) => n.pinned).length; i++) ...[
+                          if (i > 0) const Hr(),
+                          NoticeLine(notice: data.notices.where((n) => n.pinned).elementAt(i)),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ],
               if (parent) ...[SectionLabel('home.both_children'.tr), ChildrenStrip(children: data.children)],
             ],
           ),
@@ -418,7 +440,26 @@ class NowCard extends StatelessWidget {
     if (periods.isEmpty) {
       return EduCard(
         padding: const EdgeInsets.all(16),
-        child: Text('home.no_classes_today'.tr, style: context.type.t),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: c.mariSoft, borderRadius: BorderRadius.circular(12)),
+              child: Icon(PhosphorIconsRegular.sun, size: 20, color: c.mariText),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('home.no_classes_today'.tr, style: context.type.t),
+                  Text('home.no_classes_body'.tr, style: context.type.cap),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
     }
     final now = nowMinutes();
@@ -437,14 +478,14 @@ class NowCard extends StatelessWidget {
     late final String meta;
     var pct = ((minute - a) / (b - a)).clamp(0.0, 1.0);
     if (isNow && now < start) {
-      when = 'home.starts_at'.trParams({'time': clockOf(start)});
+      when = 'home.starts_at'.trp({'time': clockOf(start)});
       title = '${subjectName(p.subject)} · $who';
-      meta = 'home.room_line'.trParams({'room': p.room, 'start': clockOf(a), 'end': clockOf(b)});
+      meta = 'home.room_line'.trp({'room': p.room, 'start': clockOf(a), 'end': clockOf(b)});
       pct = 0;
     } else if (isNow && now > end) {
       when = 'home.done_today'.tr;
       title = 'home.school_over'.tr;
-      meta = 'home.ended_at'.trParams({'time': clockOf(end)});
+      meta = 'home.ended_at'.trp({'time': clockOf(end)});
       pct = 1;
     } else {
       final label = isNow ? 'home.now'.tr : (minute < now ? 'home.earlier'.tr : 'home.later'.tr);
@@ -453,12 +494,12 @@ class NowCard extends StatelessWidget {
         title = '${subjectName(p.subject)} · $who';
         final left = (b - minute).clamp(0, 999);
         meta =
-            'home.room_line'.trParams({'room': p.room, 'start': clockOf(a), 'end': clockOf(b)}) +
-            (isNow ? ' · ${'home.min_left'.trParams({'n': '$left'})}' : '');
+            'home.room_line'.trp({'room': p.room, 'start': clockOf(a), 'end': clockOf(b)}) +
+            (isNow ? ' · ${'home.min_left'.trp({'n': '$left'})}' : '');
       } else {
         final next = nextClassAfter(periods, p);
         title = subjectName(p.subject);
-        meta = 'home.until_next'.trParams({
+        meta = 'home.until_next'.trp({
           'time': clockOf(b),
           'next': next == null ? 'home.home_time'.tr : subjectName(next.subject),
         });
@@ -525,7 +566,7 @@ class DueSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionLabel(
-          'home.due_count'.trParams({'n': '${items.length}'}),
+          'home.due_count'.trp({'n': '${items.length}'}),
           top: 24,
           action: 'common.see_all',
           onAction: () => Get.toNamed<void>(AppRoutes.homework),
@@ -535,7 +576,7 @@ class DueSection extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Icon(PhosphorIconsRegular.checkCircle, color: AppColors.ok),
+                const Icon(PhosphorIconsRegular.checkCircle, color: AppColors.ok),
                 const SizedBox(width: 12),
                 Expanded(child: Text('home.nothing_due'.tr, style: context.type.t)),
               ],
@@ -598,7 +639,7 @@ class StatsRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Overline(exam == null ? 'home.exam'.tr : 'home.exam_in'.trParams({'name': exam.name})),
+                  Overline(exam == null ? 'home.exam'.tr : 'home.exam_in'.trp({'name': exam.name})),
                   const SizedBox(height: 10),
                   if (exam == null)
                     Text('home.no_exam'.tr, style: context.type.t)
@@ -607,7 +648,7 @@ class StatsRow extends StatelessWidget {
                   const SizedBox(height: 10),
                   if (exam != null)
                     Text(
-                      'home.exam_meta'.trParams({
+                      'home.exam_meta'.trp({
                         'date': DateFormat('d MMM').format(exam.startDate),
                         'n': '${exam.subjects.length}',
                       }),
@@ -655,7 +696,7 @@ String daysStamp(DateTime date) {
   final d = Formatters.daysUntil(date);
   if (d == 0) return 'time.today'.tr;
   if (d == 1) return 'time.one_day'.tr;
-  return 'time.n_days'.trParams({'n': '$d'});
+  return 'time.n_days'.trp({'n': '$d'});
 }
 
 MoneyStatus feeTone(DueItem item) => moneyStatus(item.installment!);
