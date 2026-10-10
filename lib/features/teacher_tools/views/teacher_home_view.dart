@@ -558,6 +558,7 @@ class _ClassCard extends StatelessWidget {
     return EduCard(
       ring: mine ? AppColors.mari : null,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.all(14),

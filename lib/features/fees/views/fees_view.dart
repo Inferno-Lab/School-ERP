@@ -368,6 +368,7 @@ class _DueCard extends StatelessWidget {
                   color: ink.withValues(alpha: .75),
                 ),
               ),
+              const SizedBox(width: 10),
               Stamp(
                 overdue ? 'fees.days_late'.trp({'n': '${-days}'}) : 'fees.due_in'.trp({'n': '$days'}),
                 color: overdue ? const Color(0xFF7A1E12) : ink,
