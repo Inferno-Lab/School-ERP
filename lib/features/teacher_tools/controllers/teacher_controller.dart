@@ -308,7 +308,7 @@ class AssignHomeworkController extends GetxController {
     var d = DateUtils.dateOnly(DateTime.now());
     while (out.length < 5) {
       d = DateTime(d.year, d.month, d.day + 1);
-      if (d.weekday != DateTime.sunday && d.weekday != DateTime.saturday) out.add(d);
+      if (!isWeeklyOff(d)) out.add(d);
     }
     return out;
   }
