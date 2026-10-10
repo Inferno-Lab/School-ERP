@@ -105,13 +105,15 @@ void main() {
     attendance
       ..cycle(studentId)
       ..allPresent();
-    expect(attendance.marks[studentId], AttendanceStatus.present);
+    // Only exceptions are kept; "all present" clears them.
+    expect(attendance.marks[studentId], isNull);
+    expect(attendance.present, attendance.students.length);
     await real(tester, attendance.submit);
 
     final marks = Get.put(MarksEntryController(classId: 'cls_8a'));
     await real(tester, marks.load);
     marks.values[studentId] = 91;
-    await real(tester, marks.save);
+    await real<void>(tester, marks.save);
     final draft = await real(
       tester,
       () => Get.find<ExamRepository>().marksDraft('cls_8a', 'maths'),

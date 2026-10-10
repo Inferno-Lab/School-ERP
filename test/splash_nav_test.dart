@@ -20,10 +20,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1700));
     await tester.pump(const Duration(milliseconds: 800));
     expect(Get.currentRoute, AppRoutes.onboarding);
-    expect(find.text('Everything Your School Needs, in One Place'), findsOneWidget);
+    expect(find.text('Know where to be before the bell.'), findsOneWidget);
   });
 
-  testWidgets('onboarding next, previous, and skip reach login', (tester) async {
+  testWidgets('onboarding next and skip reach login', (tester) async {
     await bootMock();
     Get.testMode = false;
     await tester.pumpWidget(
@@ -44,19 +44,11 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Everything Your School Needs, in One Place'), findsOneWidget);
-    expect(find.text('Previous'), findsNothing);
-
+    expect(find.text('Know where to be before the bell.'), findsOneWidget);
     await tester.tap(find.text('Next'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Previous'), findsOneWidget);
-    expect(find.text('Better Connections. Better Learning.'), findsOneWidget);
-
-    await tester.tap(find.text('Previous'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Everything Your School Needs, in One Place'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(find.text('Every child, at one glance.'), findsOneWidget);
 
     await tester.tap(find.text('Skip'));
     await tester.pump();
@@ -86,7 +78,7 @@ void main() {
     );
     await tester.pump();
     expect(tester.takeException(), isNull);
-    expect(find.text('Everything Your School Needs, in One Place'), findsOneWidget);
+    expect(find.text('Know where to be before the bell.'), findsOneWidget);
     expect(find.text('Skip'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
   });
