@@ -79,22 +79,20 @@ class OnboardingView extends GetView<OnboardingController> {
           Positioned(
             right: 16,
             top: inset.top + 8,
-            child: Obx(
-              () => GlassPress(
-                onTap: controller.finish,
-                child: Glass(
-                  width: 84,
-                  height: 40,
-                  radius: 20,
-                  child: Center(
-                    child: Text(
-                      'common.skip'.tr,
-                      style: anek(
-                        14.5,
-                        650,
-                        height: 1,
-                        color: context.app.ink,
-                      ),
+            child: GlassPress(
+              onTap: controller.finish,
+              child: Glass(
+                width: 84,
+                height: 40,
+                radius: 20,
+                child: Center(
+                  child: Text(
+                    'common.skip'.tr,
+                    style: anek(
+                      14.5,
+                      650,
+                      height: 1,
+                      color: context.app.ink,
                     ),
                   ),
                 ),
