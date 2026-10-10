@@ -2,6 +2,7 @@
 // ignore_for_file: avoid_setters_without_getters
 import 'dart:ui' as ui;
 
+import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class Glass extends StatelessWidget {
     this.height,
     this.shadow = true,
     this.rim = true,
+    this.onPigment = false,
     this.saturation,
     super.key,
   });
@@ -58,6 +60,10 @@ class Glass extends StatelessWidget {
   final double? height;
   final bool shadow;
   final bool rim;
+
+  /// Sits over a pigment or photo with white content: clear glass. Otherwise
+  /// the glass is frosted, so text scrolling behind it never collides with labels.
+  final bool onPigment;
   final double? saturation;
 
   @override
@@ -100,7 +106,7 @@ class Glass extends StatelessWidget {
             saturation: saturation ?? (lens ? 1.6 : 1.5),
             specular: c.dark ? .62 : .92,
             child: DecoratedBox(
-              decoration: BoxDecoration(color: tint ?? c.glassTint, borderRadius: shape),
+              decoration: BoxDecoration(color: tint ?? (onPigment ? c.glassTint : c.glassTintStrong), borderRadius: shape),
               child: DecoratedBox(
                 position: DecorationPosition.foreground,
                 decoration: rim
@@ -248,6 +254,7 @@ class _RenderGlass extends RenderProxyBox {
     }
     final shader = _shader ??= program.fragmentShader();
     final origin = localToGlobal(Offset.zero) * _dpr;
+    final screen = ui.PlatformDispatcher.instance.implicitView?.physicalSize ?? size * _dpr;
     final px = size * _dpr;
     final shortest = size.shortestSide;
     final bezel = (_lens ? (shortest * .3).clamp(10, 34) : (shortest * .3).clamp(10, 18)).toDouble();
@@ -264,15 +271,12 @@ class _RenderGlass extends RenderProxyBox {
       ..setFloat(9, 1)
       ..setFloat(10, _specular)
       ..setFloat(11, _saturation)
-      ..setFloat(12, LiquidGlass.showMaps.value ? 1 : 0);
-    // The blur is not for looks: composing it makes the engine hand the shader a
-    // crop around the glass. A bare shader filter gets the whole screen on some
-    // backends, which breaks the shader's coordinates (ghost copies of other UI).
-    final sigma = (_lens ? .3 : 1.5) * _dpr / 2;
-    return ui.ImageFilter.compose(
-      outer: ui.ImageFilter.shader(shader),
-      inner: ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-    );
+      ..setFloat(12, LiquidGlass.showMaps.value ? 1 : 0)
+      ..setFloat(13, (_lens ? 1 : 7) * _dpr)
+      ..setFloat(14, screen.width)
+      ..setFloat(15, screen.height);
+    // A bare shader filter: the shader frosts and refracts the backdrop itself.
+    return ui.ImageFilter.shader(shader);
   }
 
   @override
@@ -306,9 +310,12 @@ class GlassIconButton extends StatelessWidget {
     this.color,
     this.size = 44,
     this.badge = false,
+    this.onPigment,
     super.key,
   });
 
+  /// Defaults to true for white icons: they only make sense over a pigment.
+  final bool? onPigment;
   final IconData icon;
   final VoidCallback? onTap;
   final String label;
@@ -327,6 +334,7 @@ class GlassIconButton extends StatelessWidget {
           width: size,
           height: size,
           radius: size / 2,
+          onPigment: onPigment ?? color == AppColors.white,
           child: Stack(
             alignment: Alignment.center,
             children: [
