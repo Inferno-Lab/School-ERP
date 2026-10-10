@@ -10,8 +10,8 @@ class AppConfig {
   static const schoolName = 'Greenfield International School';
   static const schoolTagline = 'Curiosity first. Kindness always.';
   static const logoAsset = 'assets/images/logo.svg';
-  static const version = '2.0.1';
-  static const build = 211;
+  static const version = '2.0.2';
+  static const build = 212;
 
   /// Flip to false to route every repository through the remote stub.
   static bool useMockData = true;
