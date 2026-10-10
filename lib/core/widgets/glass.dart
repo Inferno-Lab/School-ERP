@@ -85,7 +85,11 @@ class _GlassState extends State<Glass> with SingleTickerProviderStateMixin {
     final radius = BorderRadius.circular(widget.radius);
     final shadows = widget.shadow
         ? [
-            BoxShadow(color: c.glassShadow.withValues(alpha: c.dark ? .3 : .06), blurRadius: 1, offset: const Offset(0, 1)),
+            BoxShadow(
+              color: c.glassShadow.withValues(alpha: c.dark ? .3 : .06),
+              blurRadius: 1,
+              offset: const Offset(0, 1),
+            ),
             BoxShadow(color: c.glassShadow, blurRadius: 28, spreadRadius: -8, offset: const Offset(0, 10)),
           ]
         : null;
@@ -106,40 +110,71 @@ class _GlassState extends State<Glass> with SingleTickerProviderStateMixin {
     }
 
     final lens = widget.kind == GlassKind.lens;
-    return Container(
-      width: widget.width,
-      height: widget.height,
-      decoration: BoxDecoration(borderRadius: radius, boxShadow: shadows),
-      child: ClipRRect(
-        borderRadius: radius,
-        child: _GlassFilter(
-          radius: widget.radius,
-          lens: lens,
-          blur: widget.blur ?? (lens ? .3 : 1.5),
-          saturation: widget.saturation ?? (lens ? 1.6 : 1.5),
-          specular: c.dark ? .62 : .92,
-          refraction: context.reduceMotion ? null : _materialise,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: widget.tint ?? c.glassTint,
-              borderRadius: radius,
-            ),
-            position: DecorationPosition.background,
+    return CustomPaint(
+      // The backdrop filter samples what is under the glass, so the shadow
+      // must stay outside the shape (like CSS box-shadow) or it greys the glass.
+      painter: shadows == null ? null : _OuterShadow(radius: radius, shadows: shadows),
+      child: SizedBox(
+        width: widget.width,
+        height: widget.height,
+        child: ClipRRect(
+          borderRadius: radius,
+          child: _GlassFilter(
+            radius: widget.radius,
+            lens: lens,
+            blur: widget.blur ?? (lens ? .3 : 1.5),
+            saturation: widget.saturation ?? (lens ? 1.6 : 1.5),
+            specular: c.dark ? .62 : .92,
+            refraction: context.reduceMotion ? null : _materialise,
             child: DecoratedBox(
-              position: DecorationPosition.foreground,
-              decoration: widget.rim
-                  ? BoxDecoration(
-                      borderRadius: radius,
-                      border: Border.all(color: c.glassRim, width: .6),
-                    )
-                  : const BoxDecoration(),
-              child: content,
+              decoration: BoxDecoration(
+                color: widget.tint ?? c.glassTint,
+                borderRadius: radius,
+              ),
+              child: DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: widget.rim
+                    ? BoxDecoration(
+                        borderRadius: radius,
+                        border: Border.all(color: c.glassRim, width: .6),
+                      )
+                    : const BoxDecoration(),
+                child: content,
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
+
+class _OuterShadow extends CustomPainter {
+  const _OuterShadow({required this.radius, required this.shadows});
+
+  final BorderRadius radius;
+  final List<BoxShadow> shadows;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shape = radius.toRRect(Offset.zero & size);
+    canvas
+      ..save()
+      ..clipPath(
+        Path.combine(
+          PathOperation.difference,
+          Path()..addRect((Offset.zero & size).inflate(80)),
+          Path()..addRRect(shape),
+        ),
+      );
+    for (final s in shadows) {
+      canvas.drawRRect(shape.shift(s.offset).inflate(s.spreadRadius), s.toPaint());
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_OuterShadow old) => old.radius != radius || old.shadows != shadows;
 }
 
 class _GlassFilter extends SingleChildRenderObjectWidget {
