@@ -223,7 +223,7 @@ class _DayPicker extends StatelessWidget {
       radius: 30,
       child: LayoutBuilder(
         builder: (context, box) {
-          final slot = (box.maxWidth - 8) / 6;
+          final slot = (box.maxWidth - 8) / TimetableController.keys.length;
           return Stack(
             children: [
               AnimatedPositioned(
@@ -233,17 +233,21 @@ class _DayPicker extends StatelessWidget {
                 top: 4,
                 width: slot.clamp(0, 56),
                 height: 52,
-                child: Glass(
-                  kind: GlassKind.lens,
-                  radius: 26,
-                  tint: c.dark ? const Color(0x38FFFFFF) : const Color(0x99FFFFFF),
+                // A plain pill: glass nested in glass drew unreliably on devices.
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: c.dark ? const Color(0x38FFFFFF) : const Color(0xCCFFFFFF),
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(color: const Color(0x66FFFFFF)),
+                    boxShadow: [BoxShadow(color: c.glassShadow, blurRadius: 10, spreadRadius: -3, offset: const Offset(0, 3))],
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Row(
                   children: [
-                    for (var i = 0; i < 6; i++)
+                    for (var i = 0; i < TimetableController.keys.length; i++)
                       Expanded(
                         child: Semantics(
                           button: true,

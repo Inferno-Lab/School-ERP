@@ -10,7 +10,7 @@ import 'package:edunest/data/repositories/directory_repository.dart';
 import 'package:get/get.dart';
 
 class TimetableController extends GetxController with Loadable {
-  final dayIndex = (DateTime.now().weekday - 1).clamp(0, 5).obs;
+  final dayIndex = (DateTime.now().weekday - 1).clamp(0, 6).obs;
   List<TimetableDay> days = [];
   SchoolClass? schoolClass;
   final teachers = <String, String>{}.obs;
@@ -18,7 +18,7 @@ class TimetableController extends GetxController with Loadable {
   /// Subjects with homework due by the next school day.
   Set<String> homeworkDue = {};
 
-  static const keys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  static const keys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
   TimetableDay? get selected {
     final key = keys[dayIndex.value];

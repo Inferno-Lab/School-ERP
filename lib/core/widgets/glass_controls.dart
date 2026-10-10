@@ -90,28 +90,26 @@ class _GlassSegmentedState extends State<GlassSegmented> {
                     child: Transform.scale(
                       scaleX: _moving && !still ? 1.2 : 1,
                       scaleY: _moving && !still ? .88 : 1,
-                      child: dropletColor != null
-                          ? DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: dropletColor,
-                                borderRadius: BorderRadius.circular(dropH / 2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: dropletColor.withValues(alpha: .45),
-                                    blurRadius: 12,
-                                    spreadRadius: -3,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Glass(
-                              kind: GlassKind.lens,
-                              radius: dropH / 2,
-                              tint: widget.onPigment
-                                  ? const Color(0xE6FFFFFF)
-                                  : (c.dark ? const Color(0x33FFFFFF) : const Color(0x8CFFFFFF)),
+                      // A plain pill, not a second glass: a backdrop filter nested in a backdrop filter
+                      // inside a fading layer failed to draw on devices until the third or fourth tap.
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: dropletColor ??
+                              (widget.onPigment
+                                  ? const Color(0xF2FFFFFF)
+                                  : (c.dark ? const Color(0x40FFFFFF) : const Color(0xCCFFFFFF))),
+                          borderRadius: BorderRadius.circular(dropH / 2),
+                          border: dropletColor == null ? Border.all(color: const Color(0x66FFFFFF)) : null,
+                          boxShadow: [
+                            BoxShadow(
+                              color: (dropletColor ?? const Color(0xFF10201B)).withValues(alpha: .28),
+                              blurRadius: 12,
+                              spreadRadius: -3,
+                              offset: const Offset(0, 4),
                             ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

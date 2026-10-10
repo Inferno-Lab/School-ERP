@@ -46,7 +46,8 @@ class ToastHost extends StatelessWidget {
           left: 0,
           right: 0,
           top: MediaQuery.paddingOf(context).top + 6,
-          child: Obx(() {
+          // Above the Navigator there is no Material, so text would get the debug double underline.
+          child: Material(type: MaterialType.transparency, child: Obx(() {
             final items = ToastHelper._items.toList();
             return Column(
               children: [
@@ -58,7 +59,7 @@ class ToastHost extends StatelessWidget {
                   ),
               ],
             );
-          }),
+          })),
         ),
       ],
     );
@@ -88,7 +89,7 @@ class _ToastCard extends StatelessWidget {
             child: Glass(
               height: 56,
               radius: 28,
-              tint: c.paper.withValues(alpha: .9),
+              tint: c.paper.withValues(alpha: .97),
               padding: const EdgeInsets.only(left: 10, right: 16),
               child: Row(
                 children: [
