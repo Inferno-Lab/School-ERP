@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - build/**
+    - packages/**
     - android/**
     - ios/**
   errors:
