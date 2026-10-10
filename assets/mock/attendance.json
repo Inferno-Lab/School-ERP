@@ -32,7 +32,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -67,7 +67,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -102,7 +102,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -137,7 +137,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -172,7 +172,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -207,7 +207,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -242,7 +242,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -277,7 +277,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -312,7 +312,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -347,7 +347,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -382,7 +382,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -417,7 +417,7 @@
   {
     "studentId": "stu_aarav",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aarav",
@@ -487,7 +487,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -522,7 +522,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -557,7 +557,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -592,7 +592,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -627,7 +627,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -662,7 +662,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -697,7 +697,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -732,7 +732,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -767,7 +767,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -802,7 +802,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -837,7 +837,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -872,7 +872,7 @@
   {
     "studentId": "stu_diya",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_diya",
@@ -942,7 +942,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -977,7 +977,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1012,7 +1012,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1047,7 +1047,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1082,7 +1082,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1117,7 +1117,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1152,7 +1152,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1187,7 +1187,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1222,7 +1222,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1257,7 +1257,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1292,7 +1292,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1327,7 +1327,7 @@
   {
     "studentId": "stu_kabir",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kabir",
@@ -1397,7 +1397,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1432,7 +1432,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1467,7 +1467,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1502,7 +1502,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1537,7 +1537,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1572,7 +1572,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1607,7 +1607,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1642,7 +1642,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1677,7 +1677,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1712,7 +1712,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1747,7 +1747,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1782,7 +1782,7 @@
   {
     "studentId": "stu_myra",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_myra",
@@ -1852,7 +1852,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -1887,7 +1887,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -1922,7 +1922,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -1957,7 +1957,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -1992,7 +1992,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2027,7 +2027,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2062,7 +2062,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2097,7 +2097,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2132,7 +2132,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2167,7 +2167,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2202,7 +2202,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2237,7 +2237,7 @@
   {
     "studentId": "stu_vivaan",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_vivaan",
@@ -2307,7 +2307,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2342,7 +2342,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2377,7 +2377,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2412,7 +2412,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2447,7 +2447,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2482,7 +2482,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2517,7 +2517,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2552,7 +2552,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2587,7 +2587,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2622,7 +2622,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2657,7 +2657,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2692,7 +2692,7 @@
   {
     "studentId": "stu_anika",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_anika",
@@ -2762,7 +2762,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -2797,7 +2797,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -2832,7 +2832,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -2867,7 +2867,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -2902,7 +2902,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -2937,7 +2937,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -2972,7 +2972,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -3007,7 +3007,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -3042,7 +3042,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -3077,7 +3077,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -3112,7 +3112,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -3147,7 +3147,7 @@
   {
     "studentId": "stu_ishaan",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ishaan",
@@ -3217,7 +3217,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3252,7 +3252,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3287,7 +3287,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3322,7 +3322,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3357,7 +3357,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3392,7 +3392,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3427,7 +3427,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3462,7 +3462,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3497,7 +3497,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3532,7 +3532,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3567,7 +3567,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3602,7 +3602,7 @@
   {
     "studentId": "stu_sara",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_sara",
@@ -3672,7 +3672,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3707,7 +3707,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3742,7 +3742,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3777,7 +3777,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3812,7 +3812,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3847,7 +3847,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3882,7 +3882,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3917,7 +3917,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3952,7 +3952,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -3987,7 +3987,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -4022,7 +4022,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -4057,7 +4057,7 @@
   {
     "studentId": "stu_arjun_s",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_arjun_s",
@@ -4127,7 +4127,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4162,7 +4162,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4197,7 +4197,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4232,7 +4232,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4267,7 +4267,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4302,7 +4302,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4337,7 +4337,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4372,7 +4372,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4407,7 +4407,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4442,7 +4442,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4477,7 +4477,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4512,7 +4512,7 @@
   {
     "studentId": "stu_kiara",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_kiara",
@@ -4582,7 +4582,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4617,7 +4617,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4652,7 +4652,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4687,7 +4687,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4722,7 +4722,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4757,7 +4757,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4792,7 +4792,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4827,7 +4827,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4862,7 +4862,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4897,7 +4897,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4932,7 +4932,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -4967,7 +4967,7 @@
   {
     "studentId": "stu_ananya",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_ananya",
@@ -5037,7 +5037,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5072,7 +5072,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5107,7 +5107,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5142,7 +5142,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5177,7 +5177,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5212,7 +5212,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5247,7 +5247,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5282,7 +5282,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5317,7 +5317,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5352,7 +5352,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5387,7 +5387,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5422,7 +5422,7 @@
   {
     "studentId": "stu_reyansh",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_reyansh",
@@ -5492,7 +5492,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5527,7 +5527,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5562,7 +5562,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5597,7 +5597,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5632,7 +5632,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5667,7 +5667,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5702,7 +5702,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5737,7 +5737,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5772,7 +5772,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5807,7 +5807,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5842,7 +5842,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5877,7 +5877,7 @@
   {
     "studentId": "stu_aisha",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_aisha",
@@ -5947,7 +5947,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -5982,7 +5982,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6017,7 +6017,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6052,7 +6052,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6087,7 +6087,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6122,7 +6122,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6157,7 +6157,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6192,7 +6192,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6227,7 +6227,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6262,7 +6262,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6297,7 +6297,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6332,7 +6332,7 @@
   {
     "studentId": "stu_advait",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_advait",
@@ -6402,7 +6402,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-7",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6437,7 +6437,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-14",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6472,7 +6472,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-21",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6507,7 +6507,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-28",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6542,7 +6542,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-35",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6577,7 +6577,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-42",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6612,7 +6612,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-49",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6647,7 +6647,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-56",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6682,7 +6682,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-63",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6717,7 +6717,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-70",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6752,7 +6752,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-77",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",
@@ -6787,7 +6787,7 @@
   {
     "studentId": "stu_mishka",
     "date": "today-84",
-    "status": "holiday"
+    "status": "present"
   },
   {
     "studentId": "stu_mishka",

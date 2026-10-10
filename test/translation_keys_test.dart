@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:edunest/core/translations/app_translations.dart';
@@ -16,5 +17,20 @@ void main() {
       }
     }
     expect(missing, isEmpty);
+  });
+
+  test('keys built from data exist: weekdays and every subject in the timetable', () {
+    final english = AppTranslations().keys['en']!;
+    final missing = <String>{
+      for (final d in ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']) 'day.$d',
+    };
+    final timetable = jsonDecode(File('assets/mock/timetable.json').readAsStringSync()) as List;
+    for (final row in timetable) {
+      for (final p in (row as Map)['periods'] as List) {
+        final subject = (p as Map)['subject'] as String;
+        if (p['kind'] == 'class') missing.addAll(['subject.$subject', 'subject_short.$subject']);
+      }
+    }
+    expect(missing.where((k) => !english.containsKey(k)), isEmpty);
   });
 }
