@@ -375,6 +375,7 @@ class LeaveRequest {
     required this.appliedOn,
     this.reviewedBy,
     this.reviewNote,
+    this.note,
   });
 
   factory LeaveRequest.fromJson(Map<String, dynamic> json) =>
@@ -389,6 +390,9 @@ class LeaveRequest {
   final DateTime appliedOn;
   final String? reviewedBy;
   final String? reviewNote;
+
+  /// The family's note to the class teacher.
+  final String? note;
 
   Map<String, dynamic> toJson() => _$LeaveRequestToJson(this);
 }

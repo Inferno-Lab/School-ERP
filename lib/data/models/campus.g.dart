@@ -264,6 +264,7 @@ LeaveRequest _$LeaveRequestFromJson(Map<String, dynamic> json) => LeaveRequest(
   appliedOn: DateTime.parse(json['appliedOn'] as String),
   reviewedBy: json['reviewedBy'] as String?,
   reviewNote: json['reviewNote'] as String?,
+  note: json['note'] as String?,
 );
 
 Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
@@ -277,6 +278,7 @@ Map<String, dynamic> _$LeaveRequestToJson(LeaveRequest instance) =>
       'appliedOn': instance.appliedOn.toIso8601String(),
       'reviewedBy': ?instance.reviewedBy,
       'reviewNote': ?instance.reviewNote,
+      'note': ?instance.note,
     };
 
 const _$LeaveStatusEnumMap = {
