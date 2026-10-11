@@ -53,9 +53,7 @@ class _DashboardViewState extends State<DashboardView> {
       controller.state.value; // rebuild on state changes
       return Scaffold(
         backgroundColor: context.app.chalk,
-        body: Stack(
-          children: [
-            Positioned.fill(child: NotificationListener<ScrollUpdateNotification>(
+        body: NotificationListener<ScrollUpdateNotification>(
           // Pull down on Home opens search.
           onNotification: (n) {
             if (n.metrics.pixels < -90 && !_pulled) {
@@ -64,12 +62,8 @@ class _DashboardViewState extends State<DashboardView> {
             }
             return false;
           },
-          child: RefreshIndicator(
-            onRefresh: controller.load,
-            color: context.app.ink,
-            backgroundColor: context.app.paper,
-            edgeOffset: ribbonH,
-            child: ListView(
+          // No refresh circle here: pulling down is the search gesture, and Home reloads itself on any change.
+          child: ListView(
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               padding: EdgeInsets.only(bottom: wide ? 40 : kDockClearance + MediaQuery.paddingOf(context).bottom),
               children: [
@@ -188,18 +182,6 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
               ],
             ),
-          ),
-        )),
-            // Cards fade out before the dock so the glass sits on clean page colour.
-            if (!wide)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: kDockClearance + 44 + MediaQuery.paddingOf(context).bottom,
-                child: IgnorePointer(child: EdgeFade(color: context.app.chalk, solid: .72, up: true)),
-              ),
-          ],
         ),
       );
     });
