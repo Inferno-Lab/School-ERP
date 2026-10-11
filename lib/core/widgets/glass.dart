@@ -34,8 +34,9 @@ abstract final class LiquidGlass {
   }
 }
 
-/// Blur strength (logical px) under frosted glass.
-const _frost = 6.0;
+/// Blur under bars and pills, from the canvas filters (stdDeviation 1.4 to 1.6): glass is clear, not frosted.
+/// Lenses and thumbs use 0.3 to 0.4 there, which is no blur at all.
+const _frost = 1.6;
 
 /// Liquid glass for the floating controls layer. Content cards are never glass.
 class Glass extends StatelessWidget {
