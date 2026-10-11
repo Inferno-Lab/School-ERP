@@ -1,5 +1,6 @@
 // Render-object setters only feed paint; nothing reads them back.
 // ignore_for_file: avoid_setters_without_getters
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:edunest/core/theme/app_colors.dart';
@@ -34,8 +35,8 @@ abstract final class LiquidGlass {
   }
 }
 
-/// Blur under bars and pills, from the canvas filters (stdDeviation 1.4 to 1.6): glass is clear, not frosted.
-/// Lenses and thumbs use 0.3 to 0.4 there, which is no blur at all.
+/// Blur sigma (logical px) under bars and pills, from the canvas filters (stdDeviation 1.4 to 1.6): glass is
+/// clear, not frosted. Lenses and thumbs use 0.3 to 0.4 there, which is no blur at all.
 const _frost = 1.6;
 
 /// Liquid glass for the floating controls layer. Content cards are never glass.
@@ -104,39 +105,24 @@ class Glass extends StatelessWidget {
         height: height,
         child: ClipRRect(
           borderRadius: shape,
-          // Passthrough keeps the incoming (often tight) constraints, exactly as the ClipRRect gave them.
-          child: Stack(
-            fit: StackFit.passthrough,
-            children: [
-              // Frost first, with the engine's own blur (smooth at any radius); the shader layer painted
-              // after it then refracts the blurred backdrop, as in the CSS recipe. A lens stays clear.
-              if (LiquidGlass.available && !lens)
-                Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(sigmaX: _frost, sigmaY: _frost, tileMode: TileMode.mirror),
-                    child: const SizedBox.expand(),
-                  ),
-                ),
-              _GlassFilter(
-                radius: radius,
-                lens: lens,
-                saturation: saturation ?? (lens ? 1.6 : 1.5),
-                specular: c.dark ? .62 : .92,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: tint ?? (onPigment ? c.glassTint : c.glassTintStrong), borderRadius: shape),
-                  child: DecoratedBox(
-                    position: DecorationPosition.foreground,
-                    decoration: rim
-                        ? BoxDecoration(
-                            borderRadius: shape,
-                            border: Border.all(color: c.glassRim, width: .6),
-                          )
-                        : const BoxDecoration(),
-                    child: content,
-                  ),
-                ),
+          child: _GlassFilter(
+            radius: radius,
+            lens: lens,
+            saturation: saturation ?? (lens ? 1.6 : 1.5),
+            specular: c.dark ? .62 : .92,
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: tint ?? (onPigment ? c.glassTint : c.glassTintStrong), borderRadius: shape),
+              child: DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: rim
+                    ? BoxDecoration(
+                        borderRadius: shape,
+                        border: Border.all(color: c.glassRim, width: .6),
+                      )
+                    : const BoxDecoration(),
+                child: content,
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -270,8 +256,15 @@ class _RenderGlass extends RenderProxyBox {
     return ui.ImageFilter.compose(outer: saturate, inner: ui.ImageFilter.blur(sigmaX: 14, sigmaY: 14));
   }
 
-  /// The shader filter for a glass whose top-left sits at [origin] (physical px, window space).
-  ui.ImageFilter _shaderFilter(Offset origin) {
+  /// The shader filter for a glass placed in the window by [toWindow] (layout px to physical px). Its
+  /// translation is the glass's top-left; its axis lengths over the device pixel ratio are the stretch
+  /// a Transform.scale above it adds (1 when there is none).
+  ui.ImageFilter _shaderFilter(Matrix4 toWindow) {
+    final origin = Offset(toWindow.storage[12], toWindow.storage[13]);
+    final scale = Offset(
+      math.sqrt(toWindow.storage[0] * toWindow.storage[0] + toWindow.storage[1] * toWindow.storage[1]) / _dpr,
+      math.sqrt(toWindow.storage[4] * toWindow.storage[4] + toWindow.storage[5] * toWindow.storage[5]) / _dpr,
+    );
     final shader = _shader ??= LiquidGlass.program!.fragmentShader();
     final screen = ui.PlatformDispatcher.instance.implicitView?.physicalSize ?? size * _dpr;
     final px = size * _dpr;
@@ -291,8 +284,11 @@ class _RenderGlass extends RenderProxyBox {
       ..setFloat(10, _specular)
       ..setFloat(11, _saturation)
       ..setFloat(12, LiquidGlass.showMaps.value ? 1 : 0)
-      ..setFloat(13, screen.width)
-      ..setFloat(14, screen.height);
+      ..setFloat(13, _lens ? 0 : _frost * _dpr)
+      ..setFloat(14, screen.width)
+      ..setFloat(15, screen.height)
+      ..setFloat(16, scale.dx)
+      ..setFloat(17, scale.dy);
     // A bare shader filter: it refracts the backdrop, which the Glass widget has already blurred.
     return ui.ImageFilter.shader(shader);
   }
@@ -316,14 +312,14 @@ class _RenderGlass extends RenderProxyBox {
 /// showed while scrolling, and during page transitions).
 class _GlassLayer extends BackdropFilterLayer {
   Offset paintOffset = Offset.zero;
-  ui.ImageFilter Function(Offset origin)? shaderFilter;
+  ui.ImageFilter Function(Matrix4 toWindow)? shaderFilter;
 
   @override
   bool get alwaysNeedsAddToScene => shaderFilter != null;
 
-  /// Physical-pixel window position of the glass: the paint offset carried through every ancestor
+  /// Where the glass is in the window, in physical pixels: the paint offset carried through every ancestor
   /// offset and transform (the root transform is the device pixel ratio).
-  Offset _windowOrigin() {
+  Matrix4 _windowMatrix() {
     var m = Matrix4.translationValues(paintOffset.dx, paintOffset.dy, 0);
     for (Layer? p = parent; p != null; p = p.parent) {
       if (p is TransformLayer) {
@@ -333,7 +329,7 @@ class _GlassLayer extends BackdropFilterLayer {
         m = Matrix4.translationValues(p.offset.dx, p.offset.dy, 0).multiplied(m);
       }
     }
-    return Offset(m.storage[12], m.storage[13]);
+    return m;
   }
 
   @override
@@ -346,7 +342,7 @@ class _GlassLayer extends BackdropFilterLayer {
     // Pushed straight to the scene: the `filter` setter marks the layer dirty, which a layer that
     // always re-adds itself must not do.
     engineLayer = builder.pushBackdropFilter(
-      build(_windowOrigin()),
+      build(_windowMatrix()),
       blendMode: blendMode,
       oldLayer: engineLayer as ui.BackdropFilterEngineLayer?,
     );

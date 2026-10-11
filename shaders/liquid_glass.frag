@@ -16,7 +16,9 @@ uniform float uRefraction;  // 0..1.5, animated for "materialise"
 uniform float uSpecular;    // rim light strength
 uniform float uSaturation;  // 1 = unchanged
 uniform float uDebug;       // 1 = draw the displacement field (design system)
+uniform float uBlur;        // blur sigma in window px; 0 = clear
 uniform vec2 uScreen;       // window size in physical px
+uniform vec2 uScale;        // window px per unscaled px: the glass may sit under a Transform.scale
 
 uniform sampler2D uTexture;
 
@@ -37,6 +39,20 @@ vec4 sampleAt(vec2 p) {
   return texture(uTexture, uv);
 }
 
+// Light blur from the canvas filters (sigma 1.4 to 1.6): a 5x5 binomial kernel whose step equals sigma.
+// Small and separable-looking, so no ghost copies of text and no second backdrop pass.
+vec4 blurAt(vec2 p) {
+  if (uBlur < 0.5) return sampleAt(p);
+  const float w[5] = float[5](1.0, 4.0, 6.0, 4.0, 1.0);
+  vec4 acc = vec4(0.0);
+  for (int y = 0; y < 5; y++) {
+    for (int x = 0; x < 5; x++) {
+      acc += sampleAt(p + vec2(float(x - 2), float(y - 2)) * uBlur) * (w[x] * w[y]);
+    }
+  }
+  return acc / 256.0;
+}
+
 void main() {
   vec2 frag = FlutterFragCoord().xy;
 
@@ -47,7 +63,8 @@ void main() {
   bool fullScreen = all(lessThan(abs(uTexSize - uScreen), vec2(3.0)));
   vec2 pad = fullScreen ? vec2(0.0) : (uTexSize - uSize) * 0.5;
   gFlip = !fullScreen;
-  vec2 local = fullScreen ? frag - uOrigin : frag - pad;
+  // Shape maths runs in the glass's own unscaled pixels; uScale maps it onto the screen.
+  vec2 local = (fullScreen ? frag - uOrigin : frag - pad) / uScale;
   vec2 at = frag;
 
   vec2 hs = uSize * 0.5;
@@ -85,13 +102,13 @@ void main() {
     float m = h * tan(theta - thetaR);
     // Convex glass pulls light from further inside the shape.
     shift = -n * m * uRefraction;
-    color = sampleAt(at + shift);
+    color = blurAt(at + shift * uScale);
 
     vec2 light = vec2(-0.6, -0.8);
     float d = dot(n, light);
     rim = pow(1.0 - t, 2.5) * (d > 0.0 ? d : -d * 0.5) * uSpecular;
   } else {
-    color = sampleAt(at);
+    color = blurAt(at);
   }
 
   float lum = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));
