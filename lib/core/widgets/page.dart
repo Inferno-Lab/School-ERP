@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:edunest/core/widgets/states.dart';
@@ -48,7 +49,7 @@ class PageFrame extends StatelessWidget {
   final double? topPadding;
   final bool padContent;
 
-  /// Fade content out under the top controls; off where art already fills the top edge.
+  /// Thin status-bar scrim; off where art already fills the top edge.
   final bool topFade;
   final ScrollController? controller;
 
@@ -85,32 +86,30 @@ class PageFrame extends StatelessWidget {
             Positioned.fill(child: list)
           else
             Positioned.fill(
-              child: RefreshIndicator(
-                onRefresh: onRefresh!,
-                color: context.app.ink,
-                backgroundColor: context.app.paper,
-                edgeOffset: top + 50,
-                child: list,
-              ),
+              child: _PullToRefresh(onRefresh: onRefresh!, top: top + 10, child: list),
             ),
-          // Content never slides under glass: it fades out beneath the status bar and the top controls,
-          // so the glass always sits on clean page colour (a card edge showing inside it looked like a bug).
+          // A thin scrim keeps the clock readable over text. Nothing else covers content: glass has to
+          // show what scrolls beneath it, and page-coloured bands read as dark shadows in dark themes.
           if (underlay == null && topFade)
             Positioned(
               left: 0,
               right: 0,
               top: 0,
-              height: hasTopRow ? top + 70 : inset.top + 18,
-              child: IgnorePointer(child: EdgeFade(color: background ?? context.app.chalk, solid: hasTopRow ? .78 : .6)),
-            ),
-          // The same under the dock or a bottom bar.
-          if (dockPage || bottomBar != null)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: (bottomBar != null ? bottomBarHeight + 60 : 96) + (dockPage ? 76 : 0) + inset.bottom,
-              child: IgnorePointer(child: EdgeFade(color: background ?? context.app.chalk, solid: .7, up: true)),
+              height: inset.top + 10,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        (background ?? context.app.chalk).withValues(alpha: .96),
+                        (background ?? context.app.chalk).withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           if (hasTopRow)
             Positioned(
@@ -225,25 +224,72 @@ class SectionLabel extends StatelessWidget {
   );
 }
 
-/// Page colour that holds solid for [solid] of its length, then fades to nothing.
-class EdgeFade extends StatelessWidget {
-  const EdgeFade({required this.color, required this.solid, this.up = false});
+/// Flutter's pull-to-refresh logic with our own indicator: a whole circle parked in the empty middle of
+/// the top control row, so it never lands on lectures or cards and is never clipped mid-pull.
+class _PullToRefresh extends StatefulWidget {
+  const _PullToRefresh({required this.onRefresh, required this.top, required this.child});
 
-  final Color color;
-  final double solid;
-  final bool up;
+  final Future<void> Function() onRefresh;
+  final double top;
+  final Widget child;
+
+  @override
+  State<_PullToRefresh> createState() => _PullToRefreshState();
+}
+
+class _PullToRefreshState extends State<_PullToRefresh> {
+  RefreshIndicatorStatus? _status;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: up ? Alignment.bottomCenter : Alignment.topCenter,
-          end: up ? Alignment.topCenter : Alignment.bottomCenter,
-          stops: [0, solid, 1],
-          colors: [color, color.withValues(alpha: .94), color.withValues(alpha: 0)],
+    final c = context.app;
+    final busy = _status == RefreshIndicatorStatus.refresh || _status == RefreshIndicatorStatus.snap;
+    // Only when releasing will refresh. Flutter reports `drag` for any scroll that starts at the top edge
+    // (dragging up on a short page, a touch that wobbles), so showing the circle then made it flicker up
+    // at random.
+    final visible = busy || _status == RefreshIndicatorStatus.armed;
+    return Stack(
+      children: [
+        RefreshIndicator.noSpinner(
+          onRefresh: widget.onRefresh,
+          onStatusChange: (s) => setState(() => _status = s),
+          child: widget.child,
         ),
-      ),
+        Positioned(
+          top: widget.top,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: Center(
+              child: AnimatedScale(
+                scale: visible ? 1 : .7,
+                duration: AppDurations.fast,
+                curve: kEase,
+                child: AnimatedOpacity(
+                  opacity: visible ? 1 : 0,
+                  duration: AppDurations.fast,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: c.paper,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: c.line2),
+                      boxShadow: [BoxShadow(color: c.glassShadow, blurRadius: 12, offset: const Offset(0, 4))],
+                    ),
+                    child: busy
+                        ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: CircularProgressIndicator(strokeWidth: 2.4, color: c.ink),
+                          )
+                        : Icon(PhosphorIconsBold.arrowClockwise, size: 18, color: c.ink),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

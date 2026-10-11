@@ -51,20 +51,20 @@ import 'package:get/get.dart';
 class ShellBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(ShellController.new);
+    Get.lazyPut(ShellController.new, fenix: true);
     final teacher = Get.find<AuthService>().role == UserRole.teacher;
     Get
-      ..lazyPut(ChatListController.new)
-      ..lazyPut(ProfileController.new)
-      ..lazyPut(NoticesController.new);
+      ..lazyPut(ChatListController.new, fenix: true)
+      ..lazyPut(ProfileController.new, fenix: true)
+      ..lazyPut(NoticesController.new, fenix: true);
     if (teacher) {
       Get
-        ..lazyPut(TeacherHomeController.new);
+        ..lazyPut(TeacherHomeController.new, fenix: true);
     } else {
       Get
-        ..lazyPut(DashboardController.new)
-        ..lazyPut(AcademicsController.new)
-        ..lazyPut(FeesController.new);
+        ..lazyPut(DashboardController.new, fenix: true)
+        ..lazyPut(AcademicsController.new, fenix: true)
+        ..lazyPut(FeesController.new, fenix: true);
     }
   }
 }
@@ -81,8 +81,8 @@ class AppPages {
       }),
       transition: Transition.fadeIn,
     ),
-    GetPage(name: AppRoutes.onboarding, page: () => const OnboardingView(), binding: BindingsBuilder<void>(() => Get.lazyPut(OnboardingController.new)), transition: Transition.fadeIn),
-    GetPage(name: AppRoutes.login, page: () => const LoginView(), binding: BindingsBuilder<void>(() => Get.lazyPut(LoginController.new)), transition: Transition.fadeIn),
+    GetPage(name: AppRoutes.onboarding, page: () => const OnboardingView(), binding: BindingsBuilder<void>(() => Get.lazyPut(OnboardingController.new, fenix: true)), transition: Transition.fadeIn),
+    GetPage(name: AppRoutes.login, page: () => const LoginView(), binding: BindingsBuilder<void>(() => Get.lazyPut(LoginController.new, fenix: true)), transition: Transition.fadeIn),
     GetPage(name: AppRoutes.shell, page: () => const ShellView(), binding: ShellBinding(), middlewares: [AuthMiddleware()], transition: Transition.fadeIn, transitionDuration: AppDurations.medium),
     _page(AppRoutes.attendance, const AttendanceView(), AttendanceController.new),
     _page(AppRoutes.homework, const HomeworkView(), HomeworkController.new),
@@ -91,8 +91,8 @@ class AppPages {
       page: () => const HomeworkDetailView(),
       binding: BindingsBuilder<void>(() {
         Get
-          ..lazyPut(HomeworkDetailController.new)
-          ..lazyPut(HomeworkController.new);
+          ..lazyPut(HomeworkDetailController.new, fenix: true)
+          ..lazyPut(HomeworkController.new, fenix: true);
       }),
       middlewares: [AuthMiddleware()],
       transition: Transition.fadeIn,
@@ -116,7 +116,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.search,
       page: () => const SearchView(),
-      binding: BindingsBuilder<void>(() => Get.lazyPut(AppSearchController.new)),
+      binding: BindingsBuilder<void>(() => Get.lazyPut(AppSearchController.new, fenix: true)),
       middlewares: [AuthMiddleware()],
       transition: Transition.fadeIn,
       transitionDuration: AppDurations.fast,
@@ -141,7 +141,7 @@ class AppPages {
     return GetPage(
       name: name,
       page: () => page,
-      binding: BindingsBuilder<void>(() => Get.lazyPut<T>(controller)),
+      binding: BindingsBuilder<void>(() => Get.lazyPut<T>(controller, fenix: true)),
       middlewares: [AuthMiddleware()],
       transition: Transition.fadeIn,
       transitionDuration: AppDurations.medium,
@@ -156,7 +156,7 @@ class AppPages {
     return GetPage(
       name: name,
       page: () => page,
-      binding: BindingsBuilder<void>(() => Get.lazyPut<T>(controller)),
+      binding: BindingsBuilder<void>(() => Get.lazyPut<T>(controller, fenix: true)),
       middlewares: [
         AuthMiddleware(),
         RoleMiddleware([UserRole.teacher]),
