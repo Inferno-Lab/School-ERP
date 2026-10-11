@@ -16,7 +16,6 @@ uniform float uRefraction;  // 0..1.5, animated for "materialise"
 uniform float uSpecular;    // rim light strength
 uniform float uSaturation;  // 1 = unchanged
 uniform float uDebug;       // 1 = draw the displacement field (design system)
-uniform float uBlur;        // frost radius in px; 0 = clear
 uniform vec2 uScreen;       // window size in physical px
 
 uniform sampler2D uTexture;
@@ -36,19 +35,6 @@ vec4 sampleAt(vec2 p) {
   if (gFlip) uv.y = 1.0 - uv.y;
 #endif
   return texture(uTexture, uv);
-}
-
-// Frosted backdrop: a golden-angle disc of taps around the point. The engine's
-// own blur is not applied to what this shader samples, so frost is done here.
-vec4 blurAt(vec2 p) {
-  if (uBlur < 0.5) return sampleAt(p);
-  vec4 acc = sampleAt(p);
-  for (int i = 0; i < 16; i++) {
-    float a = float(i) * 2.39996323;
-    float d = uBlur * sqrt((float(i) + 0.5) / 16.0);
-    acc += sampleAt(p + vec2(cos(a), sin(a)) * d);
-  }
-  return acc / 17.0;
 }
 
 void main() {
@@ -99,13 +85,13 @@ void main() {
     float m = h * tan(theta - thetaR);
     // Convex glass pulls light from further inside the shape.
     shift = -n * m * uRefraction;
-    color = blurAt(at + shift);
+    color = sampleAt(at + shift);
 
     vec2 light = vec2(-0.6, -0.8);
     float d = dot(n, light);
     rim = pow(1.0 - t, 2.5) * (d > 0.0 ? d : -d * 0.5) * uSpecular;
   } else {
-    color = blurAt(at);
+    color = sampleAt(at);
   }
 
   float lum = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));

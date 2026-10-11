@@ -34,6 +34,9 @@ abstract final class LiquidGlass {
   }
 }
 
+/// Blur strength (logical px) under frosted glass.
+const _frost = 6.0;
+
 /// Liquid glass for the floating controls layer. Content cards are never glass.
 class Glass extends StatelessWidget {
   const Glass({
@@ -100,24 +103,39 @@ class Glass extends StatelessWidget {
         height: height,
         child: ClipRRect(
           borderRadius: shape,
-          child: _GlassFilter(
-            radius: radius,
-            lens: lens,
-            saturation: saturation ?? (lens ? 1.6 : 1.5),
-            specular: c.dark ? .62 : .92,
-            child: DecoratedBox(
-              decoration: BoxDecoration(color: tint ?? (onPigment ? c.glassTint : c.glassTintStrong), borderRadius: shape),
-              child: DecoratedBox(
-                position: DecorationPosition.foreground,
-                decoration: rim
-                    ? BoxDecoration(
-                        borderRadius: shape,
-                        border: Border.all(color: c.glassRim, width: .6),
-                      )
-                    : const BoxDecoration(),
-                child: content,
+          // Passthrough keeps the incoming (often tight) constraints, exactly as the ClipRRect gave them.
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [
+              // Frost first, with the engine's own blur (smooth at any radius); the shader layer painted
+              // after it then refracts the blurred backdrop, as in the CSS recipe. A lens stays clear.
+              if (LiquidGlass.available && !lens)
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: _frost, sigmaY: _frost, tileMode: TileMode.mirror),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              _GlassFilter(
+                radius: radius,
+                lens: lens,
+                saturation: saturation ?? (lens ? 1.6 : 1.5),
+                specular: c.dark ? .62 : .92,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: tint ?? (onPigment ? c.glassTint : c.glassTintStrong), borderRadius: shape),
+                  child: DecoratedBox(
+                    position: DecorationPosition.foreground,
+                    decoration: rim
+                        ? BoxDecoration(
+                            borderRadius: shape,
+                            border: Border.all(color: c.glassRim, width: .6),
+                          )
+                        : const BoxDecoration(),
+                    child: content,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -272,10 +290,9 @@ class _RenderGlass extends RenderProxyBox {
       ..setFloat(10, _specular)
       ..setFloat(11, _saturation)
       ..setFloat(12, LiquidGlass.showMaps.value ? 1 : 0)
-      ..setFloat(13, (_lens ? 1 : 7) * _dpr)
-      ..setFloat(14, screen.width)
-      ..setFloat(15, screen.height);
-    // A bare shader filter: the shader frosts and refracts the backdrop itself.
+      ..setFloat(13, screen.width)
+      ..setFloat(14, screen.height);
+    // A bare shader filter: it refracts the backdrop, which the Glass widget has already blurred.
     return ui.ImageFilter.shader(shader);
   }
 
