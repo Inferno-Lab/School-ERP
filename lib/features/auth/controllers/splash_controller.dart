@@ -10,7 +10,7 @@ class SplashController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    Future<void>.delayed(const Duration(milliseconds: 1500), _go);
+    Future<void>.delayed(const Duration(milliseconds: 1900), _go);
   }
 
   void _go() {
