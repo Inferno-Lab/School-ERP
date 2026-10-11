@@ -244,8 +244,10 @@ class _PullToRefreshState extends State<_PullToRefresh> {
   Widget build(BuildContext context) {
     final c = context.app;
     final busy = _status == RefreshIndicatorStatus.refresh || _status == RefreshIndicatorStatus.snap;
-    final armed = busy || _status == RefreshIndicatorStatus.armed;
-    final visible = _status == RefreshIndicatorStatus.drag || armed;
+    // Only when releasing will refresh. Flutter reports `drag` for any scroll that starts at the top edge
+    // (dragging up on a short page, a touch that wobbles), so showing the circle then made it flicker up
+    // at random.
+    final visible = busy || _status == RefreshIndicatorStatus.armed;
     return Stack(
       children: [
         RefreshIndicator.noSpinner(
@@ -260,11 +262,11 @@ class _PullToRefreshState extends State<_PullToRefresh> {
           child: IgnorePointer(
             child: Center(
               child: AnimatedScale(
-                scale: armed ? 1 : .7,
+                scale: visible ? 1 : .7,
                 duration: AppDurations.fast,
                 curve: kEase,
                 child: AnimatedOpacity(
-                  opacity: visible ? (armed ? 1 : .6) : 0,
+                  opacity: visible ? 1 : 0,
                   duration: AppDurations.fast,
                   child: Container(
                     width: 40,
