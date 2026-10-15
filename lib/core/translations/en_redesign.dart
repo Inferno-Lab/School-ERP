@@ -42,6 +42,7 @@ const enRedesign = <String, String>{
   'onboarding.three_body':
       "Everyone starts present, so you tap only who isn't. Homework, grading, marks and notices are on the same screen.",
   'onboarding.page_of': '@n of 3',
+  'onboarding.now': 'Now',
   'onboarding.kid_a_over': 'Aarav · Class 8 A',
   'onboarding.kid_a_big': 'Arrived 7:52',
   'onboarding.kid_a_line': 'Present · Computer now · 1 thing due',
@@ -595,7 +596,7 @@ const enRedesign = <String, String>{
   'dev.empty_hint': 'A new school with no content yet',
   'dev.slow': 'Slow network',
   'dev.slow_hint': 'Adds 0.4–0.9 s to each call',
-  'dev.readout': 'glass layers on screen: @n · frame @ms ms · @hz Hz · @engine',
+  'dev.readout': 'frame @ms ms · @hz Hz',
 
   // teacher
   'teacher.free': 'Free',

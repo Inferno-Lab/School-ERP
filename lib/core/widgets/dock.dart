@@ -2,12 +2,18 @@ import 'dart:async';
 
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
-import 'package:edunest/core/theme/tokens.dart';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/utils/haptics.dart';
 import 'package:edunest/core/widgets/glass.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:get/get.dart';
+
+/// A short spring with a little settle, the same family as a flicked sheet.
+const _lensSpring = SpringDescription(mass: 1, stiffness: 340, damping: 32);
+
+/// Label colour on the ink selection pill. Paper in daylight, chalk at night.
+Color _onInk(AppColors c) => c.dark ? c.chalk : c.paper;
 
 class DockItem {
   const DockItem({required this.icon, required this.activeIcon, required this.label, this.badge = 0});
@@ -18,8 +24,7 @@ class DockItem {
   final int badge;
 }
 
-/// Floating glass dock. The selected tab is a thicker glass droplet that
-/// stretches as it slides between tabs.
+/// Floating dock. The bar is paper; the selected tab is an ink pill that slides.
 class GlassDock extends StatefulWidget {
   const GlassDock({required this.items, required this.index, required this.onChanged, super.key});
 
@@ -31,88 +36,90 @@ class GlassDock extends StatefulWidget {
   State<GlassDock> createState() => _GlassDockState();
 }
 
-class _GlassDockState extends State<GlassDock> {
-  var _moving = false;
-  Timer? _settle;
+class _GlassDockState extends State<GlassDock> with SingleTickerProviderStateMixin {
+  late final AnimationController _x = AnimationController.unbounded(
+    vsync: this,
+    value: widget.index.toDouble(),
+  );
 
   @override
   void didUpdateWidget(GlassDock old) {
     super.didUpdateWidget(old);
-    if (old.index != widget.index) {
-      setState(() => _moving = true);
-      _settle?.cancel();
-      _settle = Timer(const Duration(milliseconds: 260), () {
-        if (mounted) setState(() => _moving = false);
-      });
-    }
+    if (old.index != widget.index) _glide(widget.index);
   }
 
   @override
   void dispose() {
-    _settle?.cancel();
+    _x.dispose();
     super.dispose();
+  }
+
+  void _glide(int index) {
+    final target = index.toDouble();
+    if (context.reduceMotion) {
+      _x.value = target;
+      return;
+    }
+    unawaited(_x.animateWith(SpringSimulation(_lensSpring, _x.value, target, _x.velocity)));
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.app;
-    final still = context.reduceMotion;
-    return Glass(
-      height: 64,
-      radius: 32,
-      child: LayoutBuilder(
-        builder: (context, box) {
-          const pad = 7.0;
-          final slot = (box.maxWidth - pad * 2) / widget.items.length;
-          final drop = (slot - 4.8).clamp(52.0, 76.0);
-          return Stack(
-            children: [
-              AnimatedPositioned(
-                duration: still ? Duration.zero : const Duration(milliseconds: 550),
-                curve: const Cubic(.3, 1.35, .4, 1),
-                left: pad + widget.index * slot + (slot - drop) / 2,
-                top: 6,
-                width: drop,
-                height: 52,
-                child: AnimatedScale(
-                  scale: _moving && !still ? 1.12 : 1,
-                  duration: AppDurations.fast,
-                  curve: kEase,
-                  child: Transform.scale(
-                    scaleX: _moving && !still ? 1.14 : 1,
-                    scaleY: _moving && !still ? .76 : 1,
-                    child: Glass(
-                      kind: GlassKind.lens,
-                      radius: 26,
-                      tint: c.dark ? const Color(0x24FFFFFF) : const Color(0x42FFFFFF),
-                      shadow: false,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: pad),
-                child: Row(
+    return AnimatedBuilder(
+      animation: _x,
+      builder: (context, _) {
+        return SizedBox(
+          height: 64,
+          child: LayoutBuilder(
+            builder: (context, box) {
+              const pad = 6.0;
+              final slot = (box.maxWidth - pad * 2) / widget.items.length;
+              const pillH = 52.0;
+              final pillW = slot - 4;
+              final left = pad + _x.value * slot + (slot - pillW) / 2;
+              return Glass(
+                height: 64,
+                radius: 32,
+                child: Stack(
                   children: [
-                    for (var i = 0; i < widget.items.length; i++)
-                      Expanded(
-                        child: _DockButton(
-                          item: widget.items[i],
-                          on: i == widget.index,
-                          onTap: () {
-                            if (i == widget.index) return;
-                            Haptics.selection();
-                            widget.onChanged(i);
-                          },
+                    Positioned(
+                      left: left,
+                      top: (64 - pillH) / 2,
+                      width: pillW,
+                      height: pillH,
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(26)),
                         ),
                       ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: pad),
+                      child: Row(
+                        children: [
+                          for (var i = 0; i < widget.items.length; i++)
+                            Expanded(
+                              child: _DockButton(
+                                item: widget.items[i],
+                                on: i == widget.index,
+                                onTap: () {
+                                  if (i == widget.index) return;
+                                  Haptics.selection();
+                                  widget.onChanged(i);
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -127,7 +134,7 @@ class _DockButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.app;
-    final color = on ? c.ink : c.ink3;
+    final color = on ? _onInk(c) : c.ink3;
     return Semantics(
       button: true,
       selected: on,
@@ -173,7 +180,7 @@ class _DockButton extends StatelessWidget {
 }
 
 /// Vertical glass rail used from 840px wide (tablet).
-class GlassRail extends StatelessWidget {
+class GlassRail extends StatefulWidget {
   const GlassRail({required this.items, required this.index, required this.onChanged, super.key});
 
   final List<DockItem> items;
@@ -181,57 +188,101 @@ class GlassRail extends StatelessWidget {
   final ValueChanged<int> onChanged;
 
   @override
+  State<GlassRail> createState() => _GlassRailState();
+}
+
+class _GlassRailState extends State<GlassRail> with SingleTickerProviderStateMixin {
+  late final AnimationController _y = AnimationController.unbounded(
+    vsync: this,
+    value: widget.index.toDouble(),
+  );
+
+  @override
+  void didUpdateWidget(GlassRail old) {
+    super.didUpdateWidget(old);
+    if (old.index != widget.index) _glide(widget.index);
+  }
+
+  @override
+  void dispose() {
+    _y.dispose();
+    super.dispose();
+  }
+
+  void _glide(int index) {
+    final target = index.toDouble();
+    if (context.reduceMotion) {
+      _y.value = target;
+      return;
+    }
+    unawaited(_y.animateWith(SpringSimulation(_lensSpring, _y.value, target, _y.velocity)));
+  }
+
+  @override
   Widget build(BuildContext context) {
     final c = context.app;
     const slot = 76.0;
-    return Glass(
-      width: 76,
-      height: slot * items.length + 20,
-      radius: 38,
-      child: Stack(
-        children: [
-          AnimatedPositioned(
-            duration: context.reduceMotion ? Duration.zero : const Duration(milliseconds: 550),
-            curve: const Cubic(.3, 1.35, .4, 1),
-            left: 8,
-            top: 10 + index * slot + (slot - 60) / 2,
-            width: 60,
-            height: 60,
-            child: Glass(
-              kind: GlassKind.lens,
-              radius: 30,
-              tint: c.dark ? const Color(0x24FFFFFF) : const Color(0x66FFFFFF),
-              shadow: false,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Column(
+    final height = slot * widget.items.length + 20;
+    return AnimatedBuilder(
+      animation: _y,
+      builder: (context, _) {
+        const pill = 60.0;
+        final top = 10 + _y.value * slot + (slot - pill) / 2;
+        return SizedBox(
+          width: 76,
+          height: height,
+          child: Glass(
+            width: 76,
+            height: height,
+            radius: 38,
+            child: Stack(
               children: [
-                for (var i = 0; i < items.length; i++)
-                  Semantics(
-                    button: true,
-                    selected: i == index,
-                    label: items[i].label.tr,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => onChanged(i),
-                      child: SizedBox(
-                        width: 76,
-                        height: slot,
-                        child: Icon(
-                          i == index ? items[i].activeIcon : items[i].icon,
-                          size: 24,
-                          color: i == index ? c.ink : c.ink3,
-                        ),
-                      ),
+                Positioned(
+                  left: (76 - pill) / 2,
+                  top: top,
+                  width: pill,
+                  height: pill,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(color: c.ink, borderRadius: BorderRadius.circular(30)),
                     ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < widget.items.length; i++)
+                        Semantics(
+                          button: true,
+                          selected: i == widget.index,
+                          label: widget.items[i].label.tr,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              if (i == widget.index) return;
+                              Haptics.selection();
+                              widget.onChanged(i);
+                            },
+                            child: SizedBox(
+                              width: 76,
+                              height: slot,
+                              child: Icon(
+                                i == widget.index ? widget.items[i].activeIcon : widget.items[i].icon,
+                                size: 24,
+                                color: i == widget.index ? _onInk(c) : c.ink3,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

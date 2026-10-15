@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:edunest/core/theme/app_colors.dart';
@@ -44,19 +45,6 @@ class GlassSegmented extends StatefulWidget {
 }
 
 class _GlassSegmentedState extends State<GlassSegmented> {
-  var _moving = false;
-
-  @override
-  void didUpdateWidget(GlassSegmented old) {
-    super.didUpdateWidget(old);
-    if (old.index != widget.index) {
-      setState(() => _moving = true);
-      Future<void>.delayed(const Duration(milliseconds: 260), () {
-        if (mounted) setState(() => _moving = false);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final c = context.app;
@@ -69,7 +57,7 @@ class _GlassSegmentedState extends State<GlassSegmented> {
       child: Glass(
         height: widget.height,
         radius: widget.height / 2,
-        tint: widget.onPigment ? const Color(0x0FFFFFFF) : null,
+        onPigment: widget.onPigment,
         child: LayoutBuilder(
           builder: (context, box) {
             final slot = (box.maxWidth - pad * 2) / widget.labels.length;
@@ -87,28 +75,10 @@ class _GlassSegmentedState extends State<GlassSegmented> {
                   child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 200),
                     opacity: widget.index < 0 ? 0 : 1,
-                    child: Transform.scale(
-                      scaleX: _moving && !still ? 1.2 : 1,
-                      scaleY: _moving && !still ? .88 : 1,
-                      // A plain pill, not a second glass: a backdrop filter nested in a backdrop filter
-                      // inside a fading layer failed to draw on devices until the third or fourth tap.
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: dropletColor ??
-                              (widget.onPigment
-                                  ? const Color(0xF2FFFFFF)
-                                  : (c.dark ? const Color(0x40FFFFFF) : const Color(0xCCFFFFFF))),
-                          borderRadius: BorderRadius.circular(dropH / 2),
-                          border: dropletColor == null ? Border.all(color: const Color(0x66FFFFFF)) : null,
-                          boxShadow: [
-                            BoxShadow(
-                              color: (dropletColor ?? const Color(0xFF10201B)).withValues(alpha: .28),
-                              blurRadius: 12,
-                              spreadRadius: -3,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: dropletColor ?? (widget.onPigment ? AppColors.white : c.ink),
+                        borderRadius: BorderRadius.circular(dropH / 2),
                       ),
                     ),
                   ),
@@ -134,7 +104,7 @@ class _GlassSegmentedState extends State<GlassSegmented> {
     final on = i == widget.index;
     final Color color;
     if (on) {
-      color = widget.dropletText ?? (widget.onPigment ? const Color(0xFF10201B) : c.ink);
+      color = widget.dropletText ?? (widget.onPigment ? const Color(0xFF10201B) : (c.dark ? c.chalk : c.paper));
     } else {
       color = widget.onPigment ? AppColors.white : c.ink3;
     }
@@ -233,13 +203,14 @@ class _GlassSwitchState extends State<GlassSwitch> {
                     width: 41,
                     height: 28,
                     child: AnimatedScale(
-                      scale: _pressed && !still ? 1.3 : 1,
+                      scale: _pressed && !still ? .96 : 1,
                       duration: AppDurations.fast,
                       curve: kSpring,
                       child: Glass(
                         kind: GlassKind.lens,
                         radius: 14,
-                        tint: Color.fromRGBO(255, 255, 255, _pressed ? .12 : .78),
+                        // Dark thumb on the light "on" track at night, white thumb everywhere else.
+                        tint: on && c.dark ? c.chalk : AppColors.white,
                       ),
                     ),
                   ),
@@ -297,7 +268,7 @@ class _GlassSliderState extends State<GlassSlider> {
     final travel = width - widget.thumbWidth;
     final next = _snap((dx - widget.thumbWidth / 2) / travel);
     if (next != widget.value) {
-      if (widget.divisions != null) HapticFeedback.selectionClick();
+      if (widget.divisions != null) unawaited(HapticFeedback.selectionClick());
       widget.onChanged(next);
     }
   }

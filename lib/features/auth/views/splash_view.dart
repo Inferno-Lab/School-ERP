@@ -10,7 +10,11 @@ import 'package:edunest/features/auth/controllers/splash_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// Three notebooks fan out around the exact centre of the screen, under a warm glow, with the name below.
+/// Progress of one beat inside the splash timeline.
+double _beat(double t, double from, double to, [Curve curve = kEase]) =>
+    curve.transform(((t - from) / (to - from)).clamp(0.0, 1.0));
+
+/// Three notebooks fan open under a warm glow; the name and school rise after.
 class SplashView extends GetView<SplashController> {
   const SplashView({super.key});
 
@@ -18,8 +22,8 @@ class SplashView extends GetView<SplashController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.app.chalk,
-      // Until the window has its final size the screen stays plain chalk, like the native launch
-      // screen, so a first frame drawn at transient metrics is never seen.
+      // Until the window has its final size the screen stays plain chalk, like
+      // the native launch screen, so a first frame at transient metrics is never seen.
       body: const _SettledSize(child: _Mark()),
     );
   }
@@ -69,107 +73,214 @@ class _SettledSizeState extends State<_SettledSize> with WidgetsBindingObserver 
   Widget build(BuildContext context) => _ready ? widget.child : const SizedBox.expand();
 }
 
-class _Mark extends StatelessWidget {
+class _Mark extends StatefulWidget {
   const _Mark();
+
+  @override
+  State<_Mark> createState() => _MarkState();
+}
+
+class _MarkState extends State<_Mark> with TickerProviderStateMixin {
+  late final AnimationController _enter = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  );
+  late final AnimationController _breathe = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2400),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (context.reduceMotion) {
+        _enter.value = 1;
+        return;
+      }
+      unawaited(_enter.forward().then((_) {
+        if (mounted && !context.reduceMotion) unawaited(_breathe.repeat(reverse: true));
+      }));
+    });
+  }
+
+  @override
+  void dispose() {
+    _enter.dispose();
+    _breathe.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final still = context.reduceMotion;
     final c = context.app;
-    return SizedBox.expand(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Spacer(flex: 5),
-          // 270 wide so the fan (books at 32, 92 and 152, each 86 wide) is centred in its own box.
-          SizedBox(
-            width: 270,
-            height: 230,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: still ? 1 : 0, end: 1),
-              duration: const Duration(milliseconds: 1400),
-              builder: (context, t, _) {
-                final fan = kSpring.transform(((t - .07) / .64).clamp(0, 1));
-                final glow = Curves.easeOut.transform((t / .8).clamp(0, 1));
-                return Stack(
+    return AnimatedBuilder(
+      animation: Listenable.merge([_enter, _breathe]),
+      builder: (context, _) {
+        final t = still ? 1.0 : _enter.value;
+        final breath = still ? 0.0 : Curves.easeInOut.transform(_breathe.value);
+
+        final glow = _beat(t, 0, .28);
+        final stack = _beat(t, .06, .42, kSpring);
+        final fan = _beat(t, .22, .62, kSpring);
+        final name = _beat(t, .48, .72);
+        final school = _beat(t, .58, .82);
+        final tag = _beat(t, .72, .95);
+
+        final glowScale = .72 + .28 * glow + .04 * breath * glow;
+        final glowOpacity = (.5 + .12 * breath) * glow;
+
+        return SizedBox.expand(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 5),
+              SizedBox(
+                width: 270,
+                height: 230,
+                child: Stack(
                   alignment: Alignment.center,
                   children: [
                     Opacity(
-                      opacity: .55 * glow,
-                      child: Container(
-                        width: 250,
-                        height: 250,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [AppColors.mari.withValues(alpha: .45), AppColors.mari.withValues(alpha: 0)],
+                      opacity: glowOpacity,
+                      child: Transform.scale(
+                        scale: glowScale,
+                        child: Container(
+                          width: 250,
+                          height: 250,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                AppColors.mari.withValues(alpha: .5),
+                                AppColors.mari.withValues(alpha: 0),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    _Book(subject: 'maths', left: 32 + 40 * (1 - fan), top: 24, angle: -.244 * fan),
-                    _Book(subject: 'science', left: 152 - 40 * (1 - fan), top: 24, angle: .244 * fan),
-                    const _Book(subject: 'hindi', left: 92, top: 10, angle: 0),
+                    _Book(
+                      subject: 'maths',
+                      left: 32 + 48 * (1 - fan),
+                      top: 24 + 36 * (1 - stack),
+                      angle: -.26 * fan,
+                      rise: stack,
+                    ),
+                    _Book(
+                      subject: 'science',
+                      left: 152 - 48 * (1 - fan),
+                      top: 24 + 36 * (1 - stack),
+                      angle: .26 * fan,
+                      rise: stack,
+                    ),
+                    _Book(
+                      subject: 'hindi',
+                      left: 92,
+                      top: 10 + 28 * (1 - stack),
+                      angle: 0,
+                      rise: stack,
+                    ),
                   ],
-                );
-              },
-            ),
+                ),
+              ),
+              const SizedBox(height: 22),
+              Opacity(
+                opacity: name,
+                child: Transform.translate(
+                  offset: Offset(0, 18 * (1 - name)),
+                  child: Text(
+                    AppConfig.appName,
+                    textAlign: TextAlign.center,
+                    style: anek(46, 780, width: 125, height: .9, em: -.03, color: c.ink),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Opacity(
+                opacity: school,
+                child: Transform.translate(
+                  offset: Offset(0, 12 * (1 - school)),
+                  child: Text(
+                    AppConfig.schoolName,
+                    textAlign: TextAlign.center,
+                    style: context.type.cap,
+                  ),
+                ),
+              ),
+              const Spacer(flex: 4),
+              Opacity(
+                opacity: tag,
+                child: Transform.translate(
+                  offset: Offset(0, 8 * (1 - tag)),
+                  child: Text(
+                    AppConfig.schoolTagline,
+                    textAlign: TextAlign.center,
+                    style: context.type.cap.copyWith(fontSize: 12),
+                  ),
+                ),
+              ),
+              SizedBox(height: 44 + MediaQuery.paddingOf(context).bottom),
+            ],
           ),
-          const SizedBox(height: 22),
-          Rise(
-            index: 4,
-            child: Text(
-              AppConfig.appName,
-              textAlign: TextAlign.center,
-              style: anek(46, 780, width: 125, height: .9, em: -.03, color: c.ink),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Rise(
-            index: 5,
-            child: Text(AppConfig.schoolName, textAlign: TextAlign.center, style: context.type.cap),
-          ),
-          const Spacer(flex: 4),
-          Text(
-            AppConfig.schoolTagline,
-            textAlign: TextAlign.center,
-            style: context.type.cap.copyWith(fontSize: 12),
-          ),
-          SizedBox(height: 44 + MediaQuery.paddingOf(context).bottom),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
 class _Book extends StatelessWidget {
-  const _Book({required this.subject, required this.left, required this.top, required this.angle});
+  const _Book({
+    required this.subject,
+    required this.left,
+    required this.top,
+    required this.angle,
+    required this.rise,
+  });
 
   final String subject;
   final double left;
   final double top;
   final double angle;
+  final double rise;
 
   @override
   Widget build(BuildContext context) {
+    final r = rise.clamp(0.0, 1.0);
     return Positioned(
       left: left,
       top: top,
-      child: Transform.rotate(
-        angle: angle,
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          width: 86,
-          height: 168,
-          decoration: BoxDecoration(
-            color: AppColors.subject(subject).fill,
-            borderRadius: const BorderRadius.horizontal(left: Radius.circular(6), right: Radius.circular(16)),
-            boxShadow: const [
-              BoxShadow(color: Color(0x6610201B), blurRadius: 30, spreadRadius: -12, offset: Offset(0, 14)),
-            ],
+      child: Opacity(
+        opacity: r,
+        child: Transform.rotate(
+          angle: angle,
+          alignment: Alignment.bottomCenter,
+          child: Transform.scale(
+            scale: .86 + .14 * r,
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: 86,
+              height: 168,
+              decoration: BoxDecoration(
+                color: AppColors.subject(subject).fill,
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(6),
+                  right: Radius.circular(16),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0x6610201B).withValues(alpha: .25 + .4 * r),
+                    blurRadius: 18 + 14 * r,
+                    spreadRadius: -12,
+                    offset: Offset(0, 8 + 8 * r),
+                  ),
+                ],
+              ),
+              foregroundDecoration: spineDecoration,
+            ),
           ),
-          foregroundDecoration: spineDecoration,
         ),
       ),
     );
