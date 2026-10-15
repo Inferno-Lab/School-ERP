@@ -19,7 +19,7 @@ void main() {
     // Plain chalk until the window size settles, then the mark.
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.text('EduNest'), findsOneWidget);
-    await tester.pump(const Duration(milliseconds: 1900));
+    await tester.pump(const Duration(milliseconds: 2400));
     await tester.pump(const Duration(milliseconds: 800));
     expect(Get.currentRoute, AppRoutes.onboarding);
     expect(find.text('Know where to be before the bell.'), findsOneWidget);

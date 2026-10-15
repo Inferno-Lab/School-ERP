@@ -291,16 +291,16 @@ class _SlideToPay extends StatelessWidget {
                   child: Glass(
                       kind: GlassKind.lens,
                       radius: 28,
-                      tint: const Color(0x29FFFFFF),
+                      tint: AppColors.white,
                       child: Center(
                         child: busy
                             ? const SizedBox.square(
                                 dimension: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.white),
+                                child: CircularProgressIndicator(strokeWidth: 2.4, color: Color(0xFF10201B)),
                               )
                             : Icon(
                                 paid ? PhosphorIconsBold.check : PhosphorIconsBold.caretRight,
-                                color: AppColors.white,
+                                color: const Color(0xFF10201B),
                                 size: 22,
                               ),
                       ),

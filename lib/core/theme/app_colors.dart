@@ -102,10 +102,10 @@ class AppColors extends ThemeExtension<AppColors> {
     okSoft: Color(0xFFDCEFE3),
     badSoft: Color(0xFFF8DED9),
     lateSoft: Color(0xFFFBEBCB),
-    glassTint: Color(0x14FBFCF9),
-    glassTintStrong: Color(0x6BFBFCF9),
-    glassShadow: Color(0x5210201B),
-    glassRim: Color(0x99FFFFFF),
+    glassTint: Color(0x5CFFFFFF),
+    glassTintStrong: Color(0x99FBFCF9),
+    glassShadow: Color(0x3310201B),
+    glassRim: Color(0x73FFFFFF),
     dark: false,
   );
 
@@ -124,9 +124,9 @@ class AppColors extends ThemeExtension<AppColors> {
     okSoft: Color(0xFF173A28),
     badSoft: Color(0xFF41201B),
     lateSoft: Color(0xFF3B2C0F),
-    glassTint: Color(0x2414241F),
-    glassTintStrong: Color(0x8014241F),
-    glassShadow: Color(0x99000000),
+    glassTint: Color(0x661C1C1E),
+    glassTintStrong: Color(0x8C1C1C1E),
+    glassShadow: Color(0x66000000),
     glassRim: Color(0x38FFFFFF),
     dark: true,
   );

@@ -100,6 +100,7 @@ class _DesignSystemViewState extends State<DesignSystemView> {
                   child: Glass(
                     width: 160,
                     height: 44,
+                    onPigment: true,
                     child: Center(
                       child: Text('dev.sheet_glass'.tr, style: anek(15, 680, height: 1, color: AppColors.white)),
                     ),
@@ -108,7 +109,7 @@ class _DesignSystemViewState extends State<DesignSystemView> {
                 const Positioned(
                   left: 20,
                   top: 80,
-                  child: Glass(width: 120, height: 52, radius: 26, kind: GlassKind.lens, tint: Color(0x0AFFFFFF)),
+                  child: Glass(width: 120, height: 52, radius: 26, onPigment: true),
                 ),
                 Positioned(
                   left: 150,
@@ -137,19 +138,6 @@ class _DesignSystemViewState extends State<DesignSystemView> {
                     on: true,
                     height: 32,
                     onTap: () => theme.setReduceTransparency(value: !theme.reduceTransparency.value),
-                  ),
-                ),
-              ),
-              const Hr(),
-              ValueListenableBuilder<bool>(
-                valueListenable: LiquidGlass.showMaps,
-                builder: (context, on, _) => _Row(
-                  title: 'dev.maps',
-                  hint: 'dev.maps_hint',
-                  trailing: GlassSwitch(
-                    value: on,
-                    label: 'dev.maps'.tr,
-                    onChanged: (v) => LiquidGlass.showMaps.value = v,
                   ),
                 ),
               ),
@@ -198,10 +186,8 @@ class _DesignSystemViewState extends State<DesignSystemView> {
         const SizedBox(height: 12),
         Text(
           'dev.readout'.trp({
-            'n': '${LiquidGlass.live}',
             'ms': _frameMs.toStringAsFixed(1),
             'hz': '$hz',
-            'engine': LiquidGlass.available ? 'shader' : 'blur',
           }),
           style: context.type.mono.copyWith(color: c.ink3),
         ),

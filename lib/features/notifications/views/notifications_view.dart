@@ -217,7 +217,7 @@ class _Row extends StatelessWidget {
               height: 52,
               radius: 26,
               kind: GlassKind.lens,
-              tint: const Color(0x1FFFFFFF),
+              onPigment: true,
               shadow: false,
               child: Icon(
                 PhosphorIconsRegular.trash,

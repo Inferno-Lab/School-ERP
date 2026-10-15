@@ -284,6 +284,7 @@ class _IdCard extends StatelessWidget {
                           height: 36,
                           width: 120,
                           radius: 18,
+                          onPigment: on == AppColors.white,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

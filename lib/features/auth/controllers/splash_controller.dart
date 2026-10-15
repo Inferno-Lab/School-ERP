@@ -10,7 +10,8 @@ class SplashController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    Future<void>.delayed(const Duration(milliseconds: 1900), _go);
+    // Entrance is ~1.8s after the window settles; give it room to finish.
+    Future<void>.delayed(const Duration(milliseconds: 2400), _go);
   }
 
   void _go() {
@@ -35,14 +36,22 @@ class OnboardingController extends GetxController {
 
   Future<void> next() async {
     if (page.value < 2) {
-      await controller.nextPage(
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-      );
+      await goTo(page.value + 1);
       return;
     }
     await finish();
   }
+
+  Future<void> previous() async {
+    if (page.value == 0) return;
+    await goTo(page.value - 1);
+  }
+
+  Future<void> goTo(int index) => controller.animateToPage(
+    index,
+    duration: const Duration(milliseconds: 520),
+    curve: Curves.easeInOutCubic,
+  );
 
   Future<void> finish() async {
     await Get.find<StorageService>().write(StorageKeys.onboardingSeen, true);
