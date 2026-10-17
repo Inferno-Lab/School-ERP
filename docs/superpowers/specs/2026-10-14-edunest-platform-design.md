@@ -1,6 +1,6 @@
 # EduNest platform: architecture, backend, admin panel, console and design
 
-Status: draft for review · 2026-10-14
+Status: draft for review · 2026-10-14, revised 2026-10-18 (new design language, console-driven onboarding and deployment, free testing of all three products together)
 Replaces: `2026-10-10-edunest-platform-monorepo-design.md` (deleted; it is in git history).
 Scope: this is the plan. Nothing in it is built yet except the Flutter app on mock data.
 
@@ -67,7 +67,10 @@ These are design targets, not current load. The architecture is built and load-t
 | A developer console to manage everything | You |
 | Built scalable from the start: everything a 500-school platform needs exists at launch | You |
 | Take ideas from the pasted prompt only where they are genuinely good | You |
-| Admin and console design follows your reference screenshots and the Collect UI pieces you picked, at that calibre, built under the impeccable and ui-ux-pro-max rules | You |
+| Admin and console share one design language of our own, at the calibre of your references, built under the impeccable and ui-ux-pro-max rules (section 15) | You |
+| The mascot character, pencil-shaped charts and fee jars on the canvas are childish and are replaced in the build (15.3); the canvas is not edited | You |
+| Onboarding a school and deploying for it is done from the console, and is configurable (12.10) | You |
+| Testing runs the app, admin and console together, hosted and managed for free, behaving like production (section 30) | You |
 | Admin and console do **not** use Chalk & Glass; the mobile app keeps it | You |
 | Admin and console are rich in animation and effects, built with the best libraries | You |
 | Everything else in this document | My calls (listed in section 29) |
@@ -174,8 +177,8 @@ edunest/
 │  ├─ realtime/          Socket.IO service (chat, presence, live bus)
 │  ├─ workers/           BullMQ workers (same codebase as api, different entry)
 │  ├─ renderer/          Typst PDF service
-│  ├─ admin/             React admin panel (static SPA, light-first, violet accent)
-│  ├─ console/           React console (static SPA, dark-first, lime accent)
+│  ├─ admin/             React admin panel (static SPA, light-first)
+│  ├─ console/           React console (static SPA, dark-first)
 │  └─ console-api/       NestJS control-plane API
 ├─ packages/
 │  ├─ contracts/         Zod: DTOs, events, app-config schema, permission catalog, error codes
@@ -244,7 +247,7 @@ Resolved lowest to highest. A higher layer may change a value only where the low
 
 | # | Layer | Set by | Lives in | Examples |
 | --- | --- | --- | --- | --- |
-| 0 | **Build profile** | Us | `schools/<slug>/school.yaml` + vault | Bundle id, app name, icon, splash, Firebase project. A store build changes it. |
+| 0 | **Build profile** | Us (written by the console) | `schools/<slug>/school.yaml` + vault | Bundle id, app name, icon, splash, Firebase project. A store build changes it. |
 | 1 | **Platform defaults** | Code | `packages/modules` manifests | Every module, its settings with defaults, permissions, nav entries, home sections |
 | 2 | **Plan + entitlements** | Us (console) | Signed entitlement document | Modules bought, limits (students, storage, SMS quota), add-ons |
 | 3 | **Platform overrides + locks** | Us (console) | Same signed document | Forced values and locks: "school may change X", "X is fixed" |
@@ -452,15 +455,16 @@ The app already has an assistant feature flag and repository. It becomes a modul
 ### 12.1 Registry
 For each school: slug, legal name, short name, domains, region, cell, plan, status (`onboarding → live → suspended → offboarding → archived`), contacts, contract dates, GSTIN, versions (API, admin, app per store), config version, health, usage, onboarding progress.
 
-### 12.2 Provisioning
-An idempotent, resumable workflow. Every step is retryable with a visible log, and the steps run in this order:
+### 12.2 Provisioning (driven by blueprints)
+Provisioning is data, not code. A **blueprint** is a versioned, editable list of steps with parameters, kept in the catalog (12.4) and edited in the console. The console picks the blueprint by target, plan and region (12.11). The workflow is idempotent and resumable; every step is retryable, has a visible log, and can be dry-run first. A step can be skipped only where the blueprint marks it optional, and the reason is recorded. The default blueprint runs these steps in order:
 1. Choose the cell and create the school's database, Postgres role and pool secret.
-2. Create the KMS key, bucket prefix policy, Valkey namespace, queue registrations and routing-table entry.
-3. Run the latest migrations and seed defaults (role templates, statuses, vocabularies, templates, layouts).
-4. Create the CloudFront tenant for `<slug>.edunest.app`, plus the custom domain with ACM validation if the school has one.
+2. Create the encryption key, bucket prefix policy, cache namespace, queue registrations and routing-table entry.
+3. Run the latest migrations and seed defaults (role templates, statuses, vocabularies, templates, layouts), or the demo data if the wizard asked for it.
+4. Create the edge entry for the school's address (`<slug>.edunest.app`, or a path in test), plus the custom domain with certificate validation if the school has one.
 5. Push the entitlement document and create the first school admin, who gets an invite with passkey setup.
-6. Generate `schools/<slug>/school.yaml` and open a pull request for the app build profile.
-7. Open the store-onboarding checklist for the school's Apple and Google accounts (section 19.3).
+6. Write the school's build profile (`schools/<slug>/school.yaml`) through the console's GitHub App as a signed commit to a protected path, which runs validation. Nobody opens a pull request by hand.
+7. Queue the first app build and open the store-onboarding checklist for the school's Apple and Google accounts (section 19.3).
+8. Send the invites and record the school as `live`.
 
 ### 12.3 Plans, entitlements and billing
 - **Plans:** module bundles, limits, add-ons (SMS packs, WhatsApp, dedicated cell, assistant). Per-school overrides and locks. The signed entitlement document is pushed to the cell and also pulled at API start.
@@ -494,6 +498,57 @@ Per-school and per-cell dashboards: availability, latency, error rate, queue bac
 ### 12.9 Compliance desk
 Data-processing agreements per school, sub-processor list, DSR tasks that need us as processor, breach workflow (detect → assess → notify the school within hours so it can meet the 72-hour Board notification → record), and retention policy per data class.
 
+### 12.10 Onboarding and deploying from the console
+Everything needed to bring a school on, and to change what is deployed for it afterwards, is a button in the console. Nobody uses a terminal for it, and the sequence is configurable (below).
+
+**The new-school wizard.** Every step has defaults from the blueprint and the plan, is saved as a draft, and can be resumed by another console user.
+1. **Basics:** name, short name, slug (checked live for clashes and rules), board, address, contacts, GSTIN, languages.
+2. **Plan and modules:** pick a plan; switch modules, limits and add-ons on or off; set locks (what the school may and may not change later).
+3. **Branding:** logo, brand colour (with a contrast check), app name, icon and splash, shown in a live phone preview.
+4. **Placement:** region, cell (automatic or chosen), deploy target (12.11), and address (platform subdomain, path, or custom domain).
+5. **First admin:** name, phone and email, how to deliver the invite, extra roles from the templates.
+6. **Starting data:** empty, demo data, or an import template.
+7. **Review:** a plain list of exactly what will happen, a dry run, the capacity check, and the approval if the plan requires one. **Launch** opens a live progress view of the provisioning steps.
+
+**What the console can deploy.** Each of these is an *action* with who may run it, whether it needs approval, a dry run, live progress, a rollback and an audit entry:
+- create, suspend, resume, offboard and erase a school;
+- push a new plan, entitlements, locks and config overrides;
+- release API, admin or app versions to one school, a wave or the fleet, and roll back;
+- run or retry migrations, and move a school to another cell;
+- add or change a custom domain;
+- build the app for a school (Android and iOS), upload it to the school's store accounts, and ship a code-push patch;
+- take a backup, run a restore, and run the restore drill.
+
+**What is configurable.** All of the following are data in the catalog, edited in the console, versioned and diffed. A change needs a second approver, runs in a dry run against the staging fleet, and only then activates:
+- **Blueprints:** which steps run, their order within the allowed order, which are optional, their parameters, per target, plan or region.
+- **Wizard defaults and rules:** slug and bundle-id naming rules, default plans and modules per plan, required fields, which plans need approval.
+- **Deploy policies:** wave definitions, automatic halt thresholds, maintenance windows, freeze switch, concurrency limits.
+- **Deploy targets:** which drivers a target uses and which credentials it references (12.11).
+- **Approval rules** for each action and each console role.
+
+**How it runs.** `console-api` does not hold broad cloud rights. Per-school tasks (database, key, bucket, edge entry) call the target's drivers with narrowly scoped roles. Builds, infrastructure changes and releases are **GitHub Actions workflows** that the console dispatches with its GitHub App; the workflows use short-lived OIDC credentials, and their logs stream back to the console. The repository stays the source of truth for infrastructure and build code; the console is the button and the record.
+
+**Guardrails:**
+- One action in flight per school, and a global freeze switch.
+- Danger actions need the typed school code and a second approver.
+- The console can never read school records.
+- Some steps are not ours to press: the school creates its own Apple and Google accounts and presses "Submit for review" (19.3), and a custom domain needs the school's DNS record. The console shows these as a checklist with the exact values to copy.
+
+### 12.11 Deploy targets
+A **target** is a set of drivers that carry out the blueprint steps in one kind of place. The same blueprint, wizard and actions run on every target; only the drivers differ, so nothing built for testing is thrown away.
+
+| Step | `aws-cell` (production, staging) | `free-test` (section 30) | `local` (the laptop) |
+| --- | --- | --- | --- |
+| School database | RDS database and role | One Neon project per school, created through Neon's API | Local Postgres database |
+| Encryption keys | KMS key per school | An app-held key per school (envelope encryption) | A fixed dev key |
+| Files | S3 prefix | R2 prefix | MinIO |
+| Cache and queues | Valkey namespace | Valkey in the same VM, or a free hosted one | Local Valkey |
+| School address | CloudFront tenant | A path or subdomain on the free CDN | `localhost` |
+| App builds | EC2 Mac and Linux runners | GitHub Actions (Android) | Local build |
+| Messages | Live providers | Sandbox inbox in the console | Local inbox |
+
+Adding a target means implementing the driver interface and writing its blueprint. A cell has exactly one target.
+
 ## 13. Admin panel: product (`apps/admin`)
 
 The admin is built from the module manifests and the user's abilities: its navigation shows only enabled modules and permitted screens.
@@ -512,7 +567,7 @@ The admin is built from the module manifests and the user's abilities: its navig
 ### 13.2 Areas and screens
 
 **Home** (school brand colour): Dashboard, Approvals, Activity.
-- Dashboard: the "Needs you" queue (rules: attendance not submitted by N classes, leaves waiting, concessions waiting, overdue fees, unpublished timetable changes, homework to grade, failed deliveries, setup incomplete), each item with one action that deep-links to a pre-filtered screen; the Today timeline (periods, exams, events, substitutions); the KPI strip (present today, fees collected, outstanding, attendance rate, periods covered, each with its trend against last period), the weekly attendance capsule chart, teacher and class performance; charts; recent activity. It shows an "All caught up" state when the queue is empty. Widgets can be arranged per user.
+- Dashboard: the "Needs you" queue (rules: attendance not submitted by N classes, leaves waiting, concessions waiting, overdue fees, unpublished timetable changes, homework to grade, failed deliveries, setup incomplete), each item with one action that deep-links to a pre-filtered screen; the Today timeline (periods, exams, events, substitutions); the KPI strip (present today, fees collected, outstanding, attendance rate, periods covered, each with its trend against last period), the weekly attendance column chart, teacher and class performance; charts; recent activity. It shows an "All caught up" state when the queue is empty. Widgets can be arranged per user.
 
 **People** (Sapphire): Students, Guardians, Staff, Admissions, ID cards, Certificates, Imports, Duplicates.
 - Student profile drawer: Overview, Attendance (calendar heatmap), Fees, Results, Homework, Guardians and pickup, Documents, Health (restricted), Transport, Library, Activity.
@@ -597,7 +652,7 @@ Report cards, certificates, ID cards and receipts use a **block-based designer**
 The admin is fully translated (English, Hindi, Marathi) with ICU messages. Devanagari gets its own line-height and tested truncation. Numbers use Indian digit grouping (₹1,23,456.00), and dates follow the school's locale with absolute dates in tooltips.
 
 ### 13.10 Empty states
-Every collection has an illustrated empty state (section 16.6) that says what will appear, why it is empty, and the one next action (plus "Import from Excel" where it applies).
+Every collection has an illustrated empty state (section 16.9) that says what will appear, why it is empty, and the one next action (plus "Import from Excel" where it applies).
 
 ### 13.11 Errors and resilience
 - Widget-level and page-level error boundaries with retry.
@@ -623,8 +678,12 @@ Ours only. It holds metadata, never school records.
   - Mobile builds and store status, health, usage and billing.
   - Contacts and notes, support sessions, audit.
   - Danger zone: suspend, offboard, erase, with typed confirmation and a second approver.
-- **Onboarding pipeline:** provisioning runs with step logs, the store-onboarding checklist and the setup progress mirrored from the admin.
-- **Cells:** capacity (schools, database size, connections, peak RPS), placement, move-school runs, creation of a new cell (a PR to `infra/` plus Argo CD sync, tracked here).
+- **New school and deployments:**
+  - The new-school wizard (12.10), with saved drafts, a review with a dry run, and a live provisioning view with step logs.
+  - An actions screen for deploying anything for a school or for the fleet (releases, builds, domains, migrations, moves, backups), each with its approval, progress and rollback.
+  - The store-onboarding checklist and the setup progress mirrored from the admin.
+- **Blueprints and targets:** the editable provisioning blueprints, wizard defaults and rules, deploy policies, approval rules and deploy targets (12.10, 12.11), with versions, diffs and dry runs.
+- **Cells:** capacity (schools, database size, connections, peak RPS), placement, move-school runs, creation of a new cell (the console dispatches the infrastructure workflow, which opens the pull request to `infra/` and applies it after approval; Argo CD sync is tracked here).
 - **Releases:** trains, waves and gates, live progress, halt, rollback, release notes.
 - **Migrations:** per-school status per migration, failures, retry, backfill throttle.
 - **Mobile builds:**
@@ -641,161 +700,166 @@ Ours only. It holds metadata, never school records.
 
 ## 15. Design: references and how they were used
 
-The admin and console design follows references you chose. They set the calibre the product must reach; we don't copy them screen for screen. The visible design is the canvas at https://claude.ai/artifact/Q5TnE23fM6GZx93T2hhZhC (12 screens, every one interactive).
+The admin and console follow **one design language of our own**, called **Nest** while we work on it. The references you chose set the calibre the product must reach. We took principles from them (how things grow, how density is handled, how empty and error moments feel) and copied no screen, chart or component. The visible design is the canvas at https://claude.ai/artifact/Q5TnE23fM6GZx93T2hhZhC (17 boards: design language, components, moments, empty states, the admin in light and dark, students, timetable, settings, phone, and the console login, fleet and school page).
 
-**Your screenshots:**
-- **CareOps operations dashboard.** Calm tinted backdrop around a floating white frame, KPI strip with faded decimals and trend chips, rounded capsule bar chart, people cards, a segmented tick bar for performance.
-- **VidRush settings and billing.** Dark, a ticket-shaped plan card with notches and a warm glow, credit balance with a progress bar.
-- **Acme sidebar.** Workspace switcher, search with a `/` shortcut, pinned items with mono tags.
-- **Vizora dark dashboard.** KPI cards with icon tiles and mono labels, a smooth line chart with a moving tooltip and a dashed comparison series.
-- **Spark Pixel light dashboard.** Raised active nav item on a grey sidebar, pixel (dot-matrix) bar chart with tooltip.
-- **1042 Studio 404.** Giant type with a physical object between the words.
+Two earlier directions were withdrawn completely: the first themed concept, and a second round that borrowed a different look for each page. Nothing from either is kept.
 
-**Collect UI pieces studied:**
-- **Keyboard-shortcut sidebar.** An icon rail that expands, with shortcut hints.
-- **Floating navigation pill.** It grows upward into a menu.
-- **Private/Public pill.** It morphs into a dropdown.
-- **Sign-up form.** Two stage lights swing onto the focused field.
-- **Settings page.** Label and description on the left, control on the right, toggle rows, one "Save changes" button.
-- **Profile dropdown.** Dark, with recent items, a segmented usage bar with a warning, shortcuts beside menu items and the user card at the bottom.
+### 15.1 What the references taught us
 
-**The two skills still govern the build:**
-- From impeccable: every interactive state, the craft floor and Reduce Motion.
-- From ui-ux-pro-max: the 10-category checklist (16.11).
+| Reference | What we took (the principle, not the look) |
+| --- | --- |
+| CareOps operations dashboard | A calm tinted floor under one floating frame; a dense KPI strip that still breathes. |
+| Bloggr bento dashboard | Tiles of different sizes and tints on one grid, so the dashboard has rhythm instead of a wall of identical cards. |
+| Toggl calendar and reports table | A week grid where colour carries meaning, and tables with generous rows and quiet headers. |
+| Dark onboarding modal, "session is live" modal, dark toast | Dark overlays for moments that interrupt; light surfaces for what you choose. Blurred colour art behind a modal; a toast with avatars and two actions. |
+| File-cabinet empty state, Tiimo illustration screens | An empty screen is a designed screen: an illustration, one honest sentence and the next step. |
+| FlowBooks and Glimpse sign-ups | A split sign-in: an animated brand panel on one side, a quiet form on the other. |
+| Performance report table | Pills for status, numbers aligned, a clear way to read a row. |
+| Trip dates range calendar | A range picker whose highlight is one continuous band. |
+| Collect UI: navigation, interaction, login, settings, profile | Collapsible sidebar, a floating nav pill, menus that grow out of their button, settings rows with the label on the left and the control on the right, a dark account menu. |
 
-The earlier design directions are withdrawn completely; nothing from them is kept.
+The two skills still govern the build. From **impeccable**: every interactive state, the craft floor and Reduce Motion. From **ui-ux-pro-max**: the 10-category checklist (16.12).
 
-## 16. The EduNest web design system (admin and console)
+### 15.2 What you asked of the design
+- **One look across every page.** Admin, console, login, empty states and overlays share the same tokens, shapes and motion. A page that looks like it came from another product is a bug.
+- **A login with life.** Animated brand panel, step transitions, and wrong input that **vibrates** (16.6).
+- **Empty pages with artwork of our own** (16.9), never a blank table.
+- **Smooth motion everywhere**, from the best libraries (16.8), with Reduce Motion honoured.
 
-One system serves both products. The admin defaults to light with a violet accent; the console defaults to dark with a lime accent. Each has a complete second theme.
+### 15.3 Where the build differs from the canvas
+The canvas is approved as the base. On your instruction, three kinds of element on it were judged **childish** and are **replaced in the build**. The canvas itself is not edited; the build is the source of truth for these:
+
+| On the canvas | In the build |
+| --- | --- |
+| The bird-like mascot "Nesti" (login, empty states, 404, dashboard welcome, celebrations) | No character anywhere. Grown-up spot illustrations drawn from real school objects (16.9). The welcome tile shows the day's facts, not a figure. |
+| Pencil-shaped columns for weekly charts | Slim rounded-top columns with hairline gridlines and a ghost of the previous period (16.7). |
+| Dot rows for class attendance and "fee jars" with waves | A segmented bar with counts for present, late and absent, and a ring or segmented bar with a target marker for fees collected, pending and overdue (16.7). |
+
+Everything else on the canvas is built as shown: layout, tokens, type, buttons, menus, tables, drawers, dialogs, toasts, the calendar, the command palette, the timetable, the settings page, the login flow and the console pages. Where a canvas page showed the mascot or one of the replaced charts, the build uses the replacement in the same place and size.
+
+## 16. The Nest design system (admin and console)
+
+One system serves both products. The admin defaults to light; the console defaults to dark and is otherwise identical: same cards, same type, same shapes, same motion. Each has a complete second theme.
 
 ### 16.1 Principles
-- **Calm surfaces, one accent, data first.** Colour is spent on the primary action, selection and data, not on decoration.
-- **Things grow out of what you touched.** Menus, dropdowns and the mobile nav morph out of their trigger. Nothing pops in from nowhere.
-- **Numbers move only when they change.** Live figures roll digit by digit and charts draw once. Re-visiting a page never replays animation.
-- **Keyboard first:** shortcuts on every nav item, `/` for search, Ctrl K for the command palette.
-- **Dense but breathable.** Mono uppercase labels, generous card padding, tight tables.
+- **Calm surfaces, one ink, one brand colour.** Colour is spent on the primary action, selection and data, not decoration. One dark pill button per screen is *the* action.
+- **Things grow out of what you touched.** Menus, dropdowns, drawers and the phone nav morph out of their trigger. Nothing pops in from nowhere.
+- **Wrong should wobble.** An error moves once, then stays calm, and says what to do.
+- **Numbers move only when they change.** Live figures roll digit by digit and charts draw once. Re-visiting a page does not replay animation.
+- **Nothing is blank.** Every empty, error, no-results and forbidden state has an illustration, a sentence and a next step.
+- **Keyboard first.** `/` or Ctrl K finds anything; every nav item has a shortcut; focus rings are always visible.
+- **Adult tone.** No toy shapes, no mascots, no exclamation-mark copy except in a celebration.
 
 ### 16.2 Layout
-- **App frame:** a white (or near-black) frame with a 20 px radius, floating 12 px inside a tinted backdrop.
-- **Sidebar (252 px):**
-  - Collapses to a 76 px icon rail; collapsed items show a tooltip with their shortcut.
-  - Contents, top to bottom: workspace switcher (school logo, name, campus), search with `/`, groups under mono uppercase labels, a contextual card (for example "Term 1 exams in 6 days"), and the user.
-  - The active item is a raised tile.
-- **Content:** a 12-column grid, 20 px gaps, cards with a 16 px radius and a 1 px border.
-- **Page header:** a mono date or context line above a 30 px title. Actions sit on the right: the range dropdown and a dark "New" button, both of which morph open.
-- **Drawers:** float 12 px in from the edges with a 20 px radius instead of touching the window edge.
-- **Phone layout:** a floating bottom pill with the current section and three icons that grows upward into the full menu.
+- **App frame:** a floating frame (28 px radius) inside a tinted floor.
+- **Sidebar (272 px):** collapses to an 88 px rail; labels fade and tooltips carry shortcuts. Top to bottom: school logo and name, search, grouped navigation, a contextual card (for example "Term 1, exams in 6 days"), and the user.
+- **Content:** a bento grid of tiles with different sizes and soft tints. Cards use 26 px inner padding and 20 px gaps.
+- **Page header:** the date or context line above a display title; actions on the right (range menu, the dark "New" button), both morph menus.
+- **Drawers** float in from the edge with rounded corners. **Bulk-action bar** is a dark floating pill. **Save bar** rises when anything changes.
+- **Phone layout:** a floating dark pill with four icons; the active one expands to show its name.
 
 ### 16.3 Colour tokens
+Every colour has a soft tint (surfaces), a deep tone (text on the tint) and a dark twin. These are the values on the canvas; CI checks every text and background pair against WCAG AA and the build adjusts any pair that fails (the third ink tone is the likeliest, and is only for non-essential meta text).
 
-| Role | Admin light | Admin dark | Console dark | Console light |
-| --- | --- | --- | --- | --- |
-| backdrop | `#F3F2F8` | `#050506` | `#000000` | `#F2F2F4` |
-| frame / card | `#FFFFFF` | `#0D0D0F` / `#131316` | `#09090B` / `#0F0F12` | `#FFFFFF` |
-| sunk (tracks, hovers) | `#F3F2F7` | `#1A1A1F` | `#17171B` | `#F2F2F4` |
-| line / line-strong | `#ECEBF2` / `#DEDCE8` | `#1F1F24` / `#2B2B32` | `#1C1C21` / `#27272E` | `#E9E9EC` / `#DCDCE1` |
-| ink / ink-2 / ink-3 | `#16151C` / `#55536A` / `#8A889C` | `#F4F4F6` / `#A3A3AE` / `#6A6A75` | `#F4F4F6` / `#A1A1AA` / `#63636D` | `#111114` / `#55555E` / `#8B8B95` |
-| accent / soft | `#6D5AE6` / `#EEEBFD` (chart tint `#CFC8FA`) | `#8B7CF6` / `#1E1A36` | `#C6F432` / 12% lime | `#4D7C0F` / `#EEF6DC` |
-| primary button | `#16151C` on white text | `#F4F4F6` on dark text | `#F4F4F6` | `#111114` |
-| positive / negative / warning | `#16A34A` / `#E5484D` / `#D97706` | `#3DD68C` / `#FF6369` / `#F5A524` | same as admin dark | same as admin light |
+| Role | Light | Dark |
+| --- | --- | --- |
+| floor / frame / card | `#E9E5FB` / `#FBFAFE` / `#FFFFFF` | `#07060B` / `#0E0C15` / `#161320` |
+| sunk (tracks, wells) | `#F4F2FA` | `#1D192B` |
+| line / line-strong | `#EAE7F4` / `#DAD5EC` | `#241F35` / `#332D4D` |
+| ink / ink-2 / ink-3 | `#14111F` / `#575270` / `#8C87A3` | `#F4F2FB` / `#B4AFCB` / `#7C7796` |
+| violet (brand, focus, selection) / tint / deep | `#6A4CF5` / `#EEEAFF` / `#4A31C9` | `#8E78FF` / `#241D4D` / `#C4B8FF` |
+| amber (attention, money) / tint | `#FFC23D` / `#FFF3D1` | `#FFCB52` / `#2E2410` |
+| coral (people, notices) / tint | `#FF7A59` / `#FFE9E2` | `#FF8A6B` / `#33190F` |
+| mint (done, healthy) / tint | `#17A673` / `#DFF6EC` | `#3DD6A0` / `#0E2A21` |
+| blue (info) / tint | `#3B82F6` / `#E3EEFF` | `#6AA3FF` / `#14233F` |
+| red (danger and errors only) / tint | `#E5484D` / `#FDECEC` | `#FF6369` / `#2D1318` |
+| ink card (primary button, dark tiles) | `#17141F` | `#26213A` |
 
-- Every pair is checked against WCAG AA in CI.
-- The school's brand colour appears on its logo, the sign-in page and the app preview. It does not appear in the working chrome, so contrast never depends on a school's choice.
+- The school's own brand colour appears on its logo, the sign-in page and the app preview. It never appears in the working chrome, so contrast never depends on a school's choice.
+- Every status carries a dot and a word, never colour alone.
 
 ### 16.4 Type
-- **Geist** for all UI text (400/500/600/700).
-- **Geist Mono** for labels, codes, admission numbers, axes, shortcuts and versions.
-- **Noto Sans Devanagari** is chained in the font stack (by unicode range) for Hindi and Marathi, matched in weight.
-- **Scale:**
-  - 12 meta; 13–14 UI and tables; 16 forms and body; 18 card titles; 26–30 page titles; 40 display.
-  - Big figures are 30 px with tight tracking (−0.03em), tabular numerals, and decimals faded to 55%.
-- Line height is 1.5 for body and 1.2 for headings; Devanagari gets +0.1.
+- **Bricolage Grotesque** (500/700/800) for page titles, big numbers and empty-state headlines.
+- **Manrope** (400–800) for everything else.
+- **Noto Sans Devanagari**, chained by unicode range, for Hindi and Marathi, matched in weight.
+- Scale: 12.5 meta (never smaller); 14–15 UI and tables; 16–17 forms and body; 18–24 card titles; 26–30 page titles; 40+ display and key figures with tight tracking (−0.03em) and tabular numerals.
+- Line height 1.5 for body, 1.15 for headings; Devanagari gets +0.1.
 
 ### 16.5 Shape, depth, icons
-- **Radii:** 8 (chips), 10 (buttons and inputs), 12 (tiles), 16 (cards), 20 (frame, drawers, dialogs), full (pills).
-- **Depth:**
-  - A soft two-layer shadow for floating things.
-  - Borders do the work in dark mode.
-  - The primary button gets a soft dark glow on hover.
-- **Icons:** Lucide, 1.6 px stroke, one family. Icon-only buttons always have a name and a tooltip with the shortcut.
+- **Radii:** 12 (chips, small controls), 18 (inner wells, inputs), 26–28 (cards, frame, drawers, dialogs), full (buttons, pills, tabs).
+- **Depth:** soft violet-tinted shadows for floating things; borders do the work in dark mode.
+- **Icons:** one family (Lucide), 1.7 px stroke, round caps. Icon-only buttons always have a name and a tooltip with the shortcut.
 
-### 16.6 Signature components (all on the canvas)
-- **Morphing dropdown:**
-  - The button's own box grows into the menu (width, height and radius animate together) while the options fade up in a 40 ms stagger.
-  - Used for ranges, approvals, audiences and the "New" menu.
-- **Visibility pill:** a two-option switch whose highlight slides, next to a single pill that morphs into an audience list.
-- **Floating nav pill (phone):** grows upward into the full menu.
-- **Spotlight sign-in:** two stage lights on a dark card swing onto whichever field is active and warm it with light. The button lights up when ready.
-- **Ticket plan card:** a notched ticket with a dashed tear line and a two-colour glow, holding plan, renewal and status.
-- **Account menu:** recent items, a segmented usage bar with a warning, shortcuts beside each item and the user card. It scales and blurs in from the avatar.
-- **Data pieces:**
-  - KPI strip with faded decimals and trend chips.
-  - Capsule bar chart: rounded tracks with fills that grow, and hover tooltips.
-  - Segmented tick bar for performance and release progress.
-  - Pixel (dot-matrix) bar chart with pop-in cells.
-  - Smooth line chart with a dashed comparison and a tooltip that follows the pointer.
-- **Lists and overlays:**
-  - Floating drawer.
-  - Dark bulk-action pill with shortcuts.
-  - Stacked toasts that fan out on hover.
-  - Command palette.
-  - Save bar that rises when anything changes.
-  - Copy button that morphs into "Copied".
-  - OTP boxes with a live caret.
-- **404 page:** giant type and a shortcut pad that tilts with the pointer; its keys jump to real sections.
+### 16.6 Signature components
+- **Morph menu:** the button's own box grows into the menu while options rise in a short stagger. Used for ranges, approvals, audiences and "New".
+- **Sliding segmented control:** the highlight glides between options.
+- **Sign-in (admin and console):** a split screen. The left panel is an animated brand panel (violet for the admin, deep ink for the console) with floating, abstract product cards and a toast that loops. The right side is the form: credentials, then a code, then a success state. **Errors vibrate:** a wrong or empty field shakes sideways (about 380 ms, four swings), turns red and shows the message under it; the lock on the brand panel shakes with it. Under Reduce Motion the shake is replaced by a red border, an icon pulse and the message.
+- **Dark modals:** onboarding (blurred colour art, two pills, step dots) and celebration ("Greenfield is live", with a copy-link button that morphs into "Copied").
+- **Toasts:** stacked, fan out on hover, with avatars and two actions for notifications.
+- **Range calendar:** one continuous highlighted band, start and end tabs, quick ranges, a ring on today.
+- **Radio cards, command palette** (grouped, keyboard-driven), **typed confirmation** (type the code, wrong text vibrates).
+- **Ticket plan card** with a notch and tear line; **bulk-action pill**; **floating drawer**; **account menu** that scales in from the avatar; **save bar**; **copy button** that morphs.
+- **Skeletons** after 300 ms that match the final layout, then crossfade to content.
 
-### 16.7 Motion
-- **Libraries:**
-  - **Motion** (motion.dev) for layout morphs, shared elements, springs and presence.
-  - **GSAP** for authored sequences (the spotlight, the 404 pad, chart reveals).
-  - **View Transitions** for route continuity.
-  - **NumberFlow** for rolling numbers.
-  - **ECharts** for large or complex charts; the signature charts above are plain SVG and CSS, so they stay tiny.
+### 16.7 Charts: quiet data
+Charts are drawn in SVG and CSS in our own grammar, so they stay tiny. Large or unusual charts use ECharts with the same tokens. Charts never look like toys: no pencils, jars, coins or cartoon shapes.
+- **Trend over time:** smooth line or area with a soft gradient, a dashed previous period, and a tooltip that follows the pointer.
+- **Counts per day or week:** slim rounded-top columns (12 px), hairline gridlines, a pale ghost column behind each for the previous period, today in solid violet, value on hover.
+- **Part of a whole** (present, late, absent; collected, pending, overdue): a segmented bar with counts and a target marker, or a thin ring with the figure in the centre. Segments draw once and the number rolls to its value.
+- **Progress:** a tick bar (releases, setup, plan usage), the leading tick blinking while work is in flight.
+- **Tables** carry inline sparklines and 10-day tick marks.
+- Every chart has a text summary and a table view.
+
+### 16.8 Motion
+- **Libraries:** **Motion** (motion.dev) for layout morphs, shared elements, springs and presence; **GSAP** for authored sequences (the sign-in panel, illustration drawing, chart reveals); **View Transitions** for route continuity; **NumberFlow** for rolling numbers; **ECharts** for complex charts.
 - **Tokens:**
-  - The main curve is `cubic-bezier(.32,.72,0,1)`, the smooth deceleration used across the references.
-  - Durations: 120 ms (press), 200 ms (hover, colour), 350 ms (menus, popovers), 550 ms (morphs, drawers, nav pill).
-  - A gentle overshoot spring for switches and pops.
-  - Exits run at about 65% of the entry duration.
-- **Rules:**
-  - Input is never blocked, and every animation can be interrupted.
-  - Only transform, opacity, clip and size animate on small elements; nothing large reflows.
-  - Loops stop when hidden.
+  - Main curve is an expo-out (`cubic-bezier(.22,1,.36,1)`), plus a gentle overshoot spring for presses, switches and pops.
+  - Durations: 120 ms press, 200 ms hover and colour, 350 ms menus and popovers, 600–900 ms entrances and morphs.
+  - Lists rise in a capped stagger. Exits run at about 65% of the entry time.
+- **Rules:** input is never blocked and every animation can be interrupted; only transform, opacity, clip and size animate on small elements; loops stop when hidden; effects are budgeted for an old office laptop and simplified if they miss 60 fps.
 - **Reduce Motion:** every movement becomes an instant state change or a crossfade, and feedback stays visible.
 
-### 16.8 Components list (`packages/web-ui`)
-AppFrame, Sidebar (collapsible, with shortcut tooltips), WorkspaceSwitcher, SearchField, CommandPalette, MorphMenu, VisibilityPill, FloatingNav, PageHeader, KpiStrip, Card, CapsuleBars, TickBar, PixelChart, LineChart, DataTable (selection, bulk pill, saved views, virtual rows), Drawer, Dialog, ConfirmTyped, Toasts (stacked), SaveBar, Tabs/Segmented (sliding knob), Switch, Checkbox, Radio, Field (inline errors with a nudge), OtpInput, Chip/StatusChip/TrendChip, AvatarStack, Skeleton, EmptyState, TicketCard, UsageBar, AccountMenu, NotFound.
+### 16.9 Illustrations (replacing the mascot)
+A set of **spot illustrations** in `packages/web-ui/illustrations`, flat and geometric, drawn from real school objects, in the brand palette with a fine outline detail. **No faces, characters or animals.** Each is an SVG with named layers, so an illustrator can later replace a file without touching code.
 
-All of these are built on Radix primitives, which handle focus, keyboard and screen readers. Each one is shown live on the canvas and in Storybook in both themes.
+| Where | Scene |
+| --- | --- |
+| Students empty | An open register with empty rows and a pen resting on it |
+| Notices empty | A noticeboard with a single pinned card |
+| Payments empty | A receipt strip rolling out of a counter machine |
+| Homework empty | A stack of notebooks and a ruler |
+| Search with no match | A sheet of paper under a magnifier |
+| All caught up | A completed checklist with a soft check mark |
+| Error and retry | A plug just out of its socket |
+| No access | A padlock on a folder |
+| 404 | A torn page with oversized "404" type |
+| Celebration (school is live) | A sealed envelope with a stamp |
+| Console: empty fleet | A map grid with the first pin |
+| Onboarding | An open timetable card and a calendar page |
 
-### 16.9 Accessibility
-- WCAG 2.2 AA.
-- Visible 2 px focus rings in the accent.
-- Full keyboard use, including keyboard alternatives for drag.
-- `aria-sort` on tables, and live regions for changing counts.
-- Charts have a text summary and a table view.
-- Targets are at least 24 px with a pointer and 44 px on touch.
-- Zoom to 200%, and long Hindi/Marathi strings are tested.
+Motion: strokes draw in once, the scene eases in with a slight parallax toward the pointer, and one slow idle movement (a page lifting, a pin settling). Under Reduce Motion the scene is static.
 
-### 16.10 Craft floor
-- No nested cards.
-- No emoji or Unicode symbols as icons.
-- No colour-only meaning: every status has a dot and a word.
-- No decorative gradients except named materials: the ticket card glow, the sign-in spotlights, the profile page glow.
-- Browser surfaces (selection, caret, scrollbars, focus) are themed.
-- Copy is the product's language: buttons name their action, and errors say what to do.
+### 16.10 Components list (`packages/web-ui`)
+AppFrame, Sidebar (collapsible, shortcut tooltips), SchoolSwitcher, SearchField, CommandPalette, MorphMenu, Segmented, FloatingNav, PageHeader, BentoTile, KpiTile, TrendChart, ColumnChart, SegmentBar, RingMeter, TickBar, DataTable (selection, bulk pill, saved views, virtual rows), Drawer, Dialog, ConfirmTyped, DarkModal, Toasts (stacked), SaveBar, WeekGrid, RangeCalendar, RadioCards, Switch, Checkbox, Field (inline errors with the vibrate), OtpInput, Chip, StatusChip, TrendChip, AvatarStack, Skeleton, EmptyState (with Illustration), Illustration, TicketCard, UsageBar, AccountMenu, SignInPanel, NotFound.
 
-### 16.11 Pre-delivery checklist (ui-ux-pro-max, per area)
-Contrast in both themes · focus visible on every control · keyboard-only run of the area's core flow · icon buttons named · no colour-only meaning · inline errors with `aria-describedby` and an error summary on submit · feedback within 100 ms, skeletons after 300 ms · empty, error, no-results and forbidden states designed · exits faster than entries, interruptible, Reduce Motion checked · CLS under 0.1 · no horizontal scroll at 360, 768, 1024, 1280, 1440, 1920 · zoom 200% · long Hindi/Marathi strings · sortable tables · charts with a table alternative · Lighthouse (sign-in, dashboard) performance ≥ 90 and accessibility 100 · axe: zero serious issues · impeccable detector clean · finish review recorded.
+All are built on Radix primitives (focus, keyboard and screen readers) and shown live in Storybook in both themes.
+
+### 16.11 Accessibility and craft floor
+- WCAG 2.2 AA; visible 2.5 px violet focus rings; full keyboard use, including alternatives for drag; `aria-sort` on tables; live regions for changing counts; charts with a text summary and table view; targets at least 24 px with a pointer and 44 px on touch; zoom to 200%; long Hindi and Marathi strings tested.
+- No nested cards; no emoji as icons; no colour-only meaning; no decorative gradients except named materials (the sign-in panel, the modal art, the ticket glow); browser surfaces (selection, caret, scrollbars) themed; copy names the action and errors say what to do.
+
+### 16.12 Pre-delivery checklist (ui-ux-pro-max, per area)
+Contrast in both themes · focus visible on every control · keyboard-only run of the area's core flow · icon buttons named · no colour-only meaning · inline errors with `aria-describedby` and an error summary on submit · feedback within 100 ms, skeletons after 300 ms · empty, error, no-results and forbidden states designed with illustrations · exits faster than entries, interruptible, Reduce Motion checked · CLS under 0.1 · no horizontal scroll at 360, 768, 1024, 1280, 1440, 1920 · zoom 200% · long Hindi/Marathi strings · sortable tables · charts with a table alternative · Lighthouse (sign-in, dashboard) performance ≥ 90 and accessibility 100 · axe: zero serious issues · impeccable detector clean · finish review recorded.
 
 ## 17. Console specifics
-- The same system, dark by default, with lime as the accent and the comparison colour.
-- **Production marker:** the workspace switcher always shows the environment with a pulsing red dot for production. Staging and local get their own chip colours.
-- **Pinned schools** in the sidebar carry their cell as a mono tag.
-- **Release progress** is a lime tick bar that fills as schools update, with a blinking leading tick. Wave rows show done, rolling (spinner) and pending states, and Pause turns the rolling marker amber.
-- **Live table:** a school's version slides from the old value to the new one, and its row glows once.
-- **Support session:** the whole app frame takes a red border glow, and a red pill with a countdown and an End button sits at the top until the session ends.
-- **Destructive actions** need the school code typed, show who must approve, and say exactly what happens.
+- The same system, dark by default; the same violet is the accent and the comparison colour. The console must never look like a different product from the admin.
+- **Production marker:** the school switcher always shows the environment, with a pulsing red dot for production. Staging, test and local get their own chip colours.
+- **Pinned schools** in the sidebar carry their cell as a small tag.
+- **Release progress** is a violet tick bar that fills as schools update, with a blinking leading tick. Wave rows show done, rolling and pending states, and Pause turns the rolling marker amber.
+- **Live table:** a school's version slides from the old value to the new one and its row glows once.
+- **Provisioning view:** a vertical stepper with a live log; a failed step turns red, shakes once, and shows Retry and Skip (where the blueprint allows) beside the log.
+- **Support session:** the whole frame takes a red border glow, and a red pill with a countdown and an End button sits at the top until the session ends.
+- **Destructive actions** need the school code typed, show who must approve, and say exactly what happens; a wrong code vibrates.
 
 ## 18. Shared web engineering
 
@@ -858,7 +922,8 @@ The API keeps the last two contract minor versions working. Config can require a
   - A scripted region failover rebuilds cells from OpenTofu + Argo CD and restores databases there.
   - A full drill runs in staging every quarter.
 - **Environments:**
-  - **Local:** Docker Compose with one cell, the demo school, MinIO, Mailpit and the mock gateway.
+  - **Local:** Docker Compose with one cell, the demo school, MinIO, Mailpit and the mock gateway (the `local` target).
+  - **Test track:** the `free-test` target on free hosting plans, for testing app, admin and console together (section 30).
   - **Preview per PR:** an ephemeral namespace with a demo school, admin, console and API, deleted on merge.
   - **Staging:** a cell running the **synthetic fleet** of 500 school databases generated from the mock-data generator, plus the internal demo schools.
   - **Production.**
@@ -923,7 +988,7 @@ Card data never touches our servers (Razorpay Checkout). Webhook secrets are per
 | Load | k6 against the 500-school synthetic fleet at 1.5× the morning peak and a broadcast storm |
 | Resilience | Pod kills, an RDS failover, Valkey failover and region-failover drills in staging |
 | Restore | Weekly automated per-school restore drill |
-| Design | impeccable detector and finish review per area; ui-ux-pro-max checklist (16.11) |
+| Design | impeccable detector and finish review per area; ui-ux-pro-max checklist (16.12) |
 
 CI blocks merge on: types, lint, boundaries, tests, stale generated code, breaking API changes, migration lint, bundle budgets, Lighthouse thresholds, axe criticals, missing translation keys, licence policy and the security scanners.
 
@@ -933,15 +998,15 @@ Every step below is part of the launch. The order exists because each step needs
 
 | Step | Builds | Exit check |
 | --- | --- | --- |
-| **0. Foundations** | Monorepo move, pnpm/Turborepo + pub workspaces/Melos, CI with affected builds and all gates, ADR folder. Full impeccable and ui-ux-pro-max install; `impeccable init` (PRODUCT.md); `concept-seed` decision pages for admin and console, where you confirm or re-roll the directions; direction contracts saved to surface briefs. OpenTofu accounts and networks; EKS dev and staging; Argo CD. | `pnpm turbo run test` green across TS and Dart; the app runs from `apps/mobile`; you have confirmed both design directions. |
-| **1. Platform core** | `contracts` + codegen; `tenancy` (router, pools, school context); identity (OTP, passwords, passkeys, TOTP, sessions); `authz` + compiler + role templates; `config-engine` + `/app-config`; audit; files; jobs; realtime skeleton; renderer skeleton; console-api registry + provisioning v1; the staging cell; the synthetic fleet generator. | Provision a school in staging from the console; log in as each role; tenancy property tests pass; the staging cell holds 500 synthetic schools. |
+| **0. Foundations** | Monorepo move, pnpm/Turborepo + pub workspaces/Melos, CI with affected builds and all gates, ADR folder. Full impeccable and ui-ux-pro-max install; `impeccable init` (PRODUCT.md); surface briefs and DESIGN.md for admin and console written from the approved canvas and the replacements in 15.3. OpenTofu accounts and networks; EKS dev and staging; Argo CD. | `pnpm turbo run test` green across TS and Dart; the app runs from `apps/mobile`; DESIGN.md exists for both surfaces and matches the canvas. |
+| **1. Platform core** | `contracts` + codegen; `tenancy` (router, pools, school context); identity (OTP, passwords, passkeys, TOTP, sessions); `authz` + compiler + role templates; `config-engine` + `/app-config`; audit; files; jobs; realtime skeleton; renderer skeleton; console-api registry + provisioning v1 (blueprint engine and the `aws-cell`, `free-test` and `local` drivers); the staging cell; the synthetic fleet generator. | Provision a school from the console with the wizard on the local, free-test and staging targets; log in as each role; tenancy property tests pass; the staging cell holds 500 synthetic schools. |
 | **2. Vertical slice: attendance** | Attendance end to end: API + jobs; admin shell + design system v1 (tokens, motion system, sidebar, morph menus, DataTable, KPI strip, charts); the app on the real API for attendance; console fleet board v1; Sentry + Grafana live. | A teacher marks attendance in the app, the admin shows it live, a guardian gets the push, and the console shows the school healthy; impeccable finish review passed for the admin shell. |
 | **3. People and academics** | People, admissions, guardians, staff, imports, duplicates; years, classes, subjects, timetable builder, substitutions; homework; exams, marks grid, results, report-card designer and generation; certificates and ID cards; calendar; search; command palette. | Demo school fully set up through the admin; app academic screens on the real API; the Playwright journeys for this step pass. |
 | **4. Finance** | Fee setup, assignment, invoices, Razorpay per school, autopay, cashier collect, receipts, concessions and refunds with approvals, late fees, defaulters and reminders, reconciliation, cash closing, Tally export, reports. | End-to-end payment in Razorpay test mode for both the online and counter paths; webhook idempotency and double-click tests pass; reconciliation matches. |
 | **5. Communication** | Notices with approvals and app preview, events and RSVPs, chat and office inbox (realtime), broadcasts, notification templates, push + SMS (DLT) + WhatsApp + email, delivery log, quiet hours. | A 5,000-family broadcast reaches every test device within 60 s p95 in staging. |
 | **6. Operations and assistant** | Transport with live tracking, library, gallery with photo consent, leave, gate and pickup, assistant module. | All app modules run on the real API; the mock path survives only as the demo school. |
-| **7. Admin experience complete** | Setup flow, setup checklist, year-end rollover, live app preview (Flutter web), config center with drafts, approvals, history and rollback, roles matrix with diff, custom fields, vocabularies, string overrides, reports builder and schedules, guided tours, What's new, all illustrations and every signature component and motion in 16.6–16.7. | Every admin area has passed its impeccable finish review and the 16.11 checklist; DESIGN.md written for the admin. |
-| **8. Console complete** | Onboarding pipeline, cells and move-school, releases and waves with auto-halt, migration orchestrator, mobile builds matrix, catalog with update offers, flags and kill switches, health and status pages, support access, billing, compliance desk, team. | A full release goes through staging waves with an injected failure that halts and rolls back by itself; DESIGN.md written for the console. |
+| **7. Admin experience complete** | Setup flow, setup checklist, year-end rollover, live app preview (Flutter web), config center with drafts, approvals, history and rollback, roles matrix with diff, custom fields, vocabularies, string overrides, reports builder and schedules, guided tours, What's new, all illustrations and every signature component and motion in 16.6–16.9. | Every admin area has passed its impeccable finish review and the 16.12 checklist; DESIGN.md written for the admin. |
+| **8. Console complete** | New-school wizard, blueprint and target editors, deploy actions with approvals and dry runs, cells and move-school, releases and waves with auto-halt, migration orchestrator, mobile builds matrix, catalog with update offers, flags and kill switches, health and status pages, support access, billing, compliance desk, team. | A full release goes through staging waves with an injected failure that halts and rolls back by itself; DESIGN.md written for the console. |
 | **9. Mobile distribution** | Build-profile injection, the EduNest picker app, wave build pipeline on EC2 Mac and Linux, fastlane per school, Shorebird, store checklists, offline store, deep links, push categories. | Demo school apps in TestFlight and Play internal; the EduNest app is in review; a Shorebird patch reaches test devices. |
 | **10. Production readiness** | Production cells, DR in Hyderabad, region-failover drill, k6 at 1.5× peak on the 500-school fleet, penetration test and fixes, DPDP readiness review, runbooks, on-call rota, status pages. | All SLOs met under load; the pen test has no open high-severity findings; the lawyer has signed off; the restore drill is green. **Pilot schools go live.** |
 
@@ -992,7 +1057,7 @@ Each item has an owner and must be done before the pilot. None of it is optional
 | Razorpay KYC for each school's merchant account | School | Fees go to the school |
 | AWS organisation, India region quotas, EC2 Mac capacity | You | Infrastructure |
 | Penetration test vendor | You | Section 21.3 |
-| Illustrator for the empty-state and onboarding illustrations | You | Section 16.6 |
+| Illustrator (optional) to polish the spot illustrations; we draw the first set ourselves | You | Section 16.9 |
 | Cyber insurance | You | Operating children's data at scale |
 
 ## 28. Risks I want you to see
@@ -1009,59 +1074,71 @@ Each item has an owner and must be done before the pilot. None of it is optional
 3. Drizzle instead of Prisma.
 4. Each school is its own Razorpay merchant.
 5. Both delivery paths built: school-branded apps (the school submits) and the EduNest picker app.
-6. The admin and console design follows your reference screenshots and Collect UI pieces (section 15); the canvas shows it.
-7. Fonts: Geist and Geist Mono, with Noto Sans Devanagari for Hindi and Marathi.
+6. The admin and console follow one design language of our own (section 15); the canvas shows it, with the mascot, pencil columns and fee jars replaced in the build (15.3).
+7. Fonts: Bricolage Grotesque and Manrope, with Noto Sans Devanagari for Hindi and Marathi.
 8. Motion stack: Motion, GSAP, View Transitions, NumberFlow, ECharts, dnd-kit; Lenis and Lottie rejected.
-9. Light-default admin (violet accent), dark-default console (lime accent), each with a complete second theme.
+9. Light-default admin and dark-default console, one violet brand colour for both, each with a complete second theme.
 10. The assistant module on Claude, opt-in per school.
 11. Typst for every PDF.
 12. Self-hosted observability, errors and analytics in India; no behavioural analytics in family and student apps.
+13. Onboarding and deployment run from the console through editable blueprints and deploy targets, so the same wizard works on production, test and the laptop (12.10, 12.11).
+14. The test track uses Oracle Cloud Always Free for the backend, Neon for databases, Cloudflare for static hosting and files, and GitHub Actions for builds (section 30).
+15. Spot illustrations drawn from school objects replace the mascot; slim columns, segmented bars and rings replace pencils, dots and jars (15.3, 16.7, 16.9).
 
-## 30. Before the real servers: demo and testing at no cost
+## 30. Before the real servers: testing the whole platform at no cost
 
-Until the first school signs, we have no budget for servers. The platform still has to be built, tested and shown, so it runs in three places. All three use the same code; a single setting picks which one it is. Nothing built for them is thrown away later.
+Until the first school signs, we have no budget for servers. The platform still has to be built, tested and shown, and **the app, the admin panel and the console have to work together while we test**, exactly as they will for a real school: create a school in the console, deploy it, open its admin, run its app. So testing uses the same code and the same wizard as production. A single setting (the **deploy target**, 12.11) picks the place it runs. Nothing built for testing is thrown away later.
 
 **1. The workshop: everything on one laptop.**
-- One start command brings up the whole platform on a single computer: the backend, the admin panel, the console and a demo school called Greenfield, already filled with the app's existing dummy data.
-- The phone app connects to it over the office Wi-Fi.
-- Payments run in the gateway's test mode, so no money moves.
-- SMS, WhatsApp and email never leave the laptop. They land in a local inbox page, so you can see exactly what a parent would have received.
-- It works without internet and costs nothing.
-- This is where daily building and testing happens. It needs Docker Desktop (free) and a laptop with 16 GB of memory to be comfortable.
+- One start command brings up the backend, the admin panel, the console and a demo school called Greenfield, already filled with the app's existing dummy data.
+- The console's new-school wizard works here too, on the `local` target, so a second school can be created in a minute.
+- The phone app connects over the office Wi-Fi. Payments run in the gateway's test mode, and SMS, WhatsApp and email land in a local inbox page.
+- It works without internet and costs nothing. It needs Docker Desktop (free) and a laptop with 16 GB of memory to be comfortable.
+- This is where daily building happens.
 
 **2. The showroom: always online, free, no server at all.**
-- A showcase build of the admin panel and the console runs entirely in the visitor's browser, with the demo school built in. This is the same trick the app uses today with its dummy data.
-- It is hosted free on Cloudflare Pages (static hosting, no visitor limit), at a link we can send to anyone.
-- Every visitor gets their own private copy to play with. Their changes stay in their browser, and "Reset demo" starts fresh.
-- The same site offers the Android app to download and a web version of the app, so people without an Android phone can try it too.
-- It cannot break and cannot leak anything, because there is no real data in it. This is what we use for sales meetings and for showing schools.
+- A showcase build of the admin and the console runs entirely in the visitor's browser with the demo school built in, including a simulated new-school wizard. It is the same idea the app uses today with its dummy data.
+- Hosted free on Cloudflare Pages, at a link we can send to anyone. Every visitor gets a private copy; changes stay in their browser and "Reset demo" starts fresh.
+- The same site offers the Android app to download and a web version of the app.
+- It cannot break or leak anything because it has no real data. It is for sales meetings and showing schools.
 
-**3. The test track: a small real backend on free plans.**
-- When two or three friendly people (our team, a teacher we know) need to try it with their own logins on their own phones, a small real backend runs on free hosting plans:
-  - the database on Neon's free plan;
-  - the server on Render's free plan;
-  - files on Cloudflare R2's free allowance;
-  - email on a free sending plan;
-  - SMS and WhatsApp simulated.
-- Free plans have limits:
-  - The server goes to sleep when nobody uses it, so the first visit after a quiet spell takes 30–60 seconds to wake up.
-  - Storage is small.
-  - There are no uptime promises.
-- That is fine for testing and not fine for a school.
+**3. The test track: the real platform, small, on free plans.**
+This is the one that matters for testing together. It is a miniature of production on the `free-test` target. You open the test console, create a school with the wizard, and a few minutes later that school has its own database, its own admin address, an invite waiting in the sandbox inbox and an Android app you can install, all talking to each other.
 
-**One rule that never bends:** only demo data goes into the showroom or the test track, never a real child's details. Free hosting gives no guarantees about where data sits or how it is protected, and India's data-protection rules for children's data are strict. The day a real school signs, it goes onto the real setup in Mumbai (section 20), with nothing to rewrite.
+| Part | Where it runs, free | Notes |
+| --- | --- | --- |
+| Admin, console, web version of the app, showroom | **Cloudflare Pages** | Static files on a free CDN. |
+| Backend (school API, workers, realtime, console API) | **A free always-on virtual machine on Oracle Cloud's Always Free tier**, run with Docker Compose and exposed through a free Cloudflare Tunnel | Always on, no cold start. Oracle cut the free ARM allowance in 2026 to about 2 CPUs and 12 GB, which is enough for the test stack. Needs a card for identity checks and is not charged while we stay inside the free limits. Capacity in a region can be unavailable. **Fallback:** a free Render web service, which sleeps when idle and takes 30–60 seconds to wake. |
+| Databases | **Neon free plan**: one project per test school and one for the console registry | The free plan allows 100 projects with 0.5 GB each and sleeps when idle. This matches our database-per-school design exactly, so the wizard's "create database" step is the same step as in production. |
+| Files | **Cloudflare R2** | The free allowance is 10 GB with free downloads. |
+| Email | A free transactional email plan | SMS and WhatsApp are simulated into the console's sandbox inbox, so you see exactly what a parent would get. |
+| Payments | **Razorpay test mode** | No money moves. |
+| Building the app | **GitHub Actions** | The wizard's "Build app" button runs the workflow and gives an Android install link, which can also go through Firebase App Distribution (free). iPhones need Apple's paid membership and TestFlight. |
+| Releases and updates | The console's Releases screen dispatches the same workflow production uses; the VM pulls the new images | We update the test track from the console like a real fleet. |
+| Addresses | Without a domain: `<test-site>/s/<slug>` for each school. With a domain (about ₹1,000 a year): `<slug>.test.<domain>` | A setting called tenant addressing picks one. |
+| Health and alerts | The console's own health page, a free uptime pinger and a free error-tracking plan | Good enough for a small team. |
+
+Differences from production, so nobody is surprised:
+- It is one machine, so there is no failover, no disaster-recovery region, no firewall tier and no load testing worth quoting.
+- Neon databases sleep when idle, so the first request after a quiet spell is slower.
+- Keys are held by the app instead of a key-management service.
+- There are no uptime promises, and free plans change their terms.
+
+**4. Real schools: production.** The day a real school signs, its school is created from the same console on the `aws-cell` target in Mumbai (section 20). Nothing is rewritten.
+
+**One rule that never bends:** only demo data goes into the showroom or the test track, never a real child's details. Free hosting gives no guarantees about where data sits or how it is protected, and India's rules for children's data are strict.
 
 **Order:**
-1. The workshop is ready at the end of build step 2.
-2. The showroom follows as soon as the admin screens exist (step 3 onward), and is updated with every release.
-3. The test track opens when the attendance slice works end to end.
+1. The workshop is ready at the end of build step 1 (the console's blueprint engine and the `local` target).
+2. The test track opens at the end of build step 2, when the attendance slice works end to end, and gains each module as it lands.
+3. The showroom follows once the admin screens exist (step 3 onward) and is updated with every release.
 
 **Cost:** ₹0 for all three. Optional extras:
-- A domain name (about ₹1,000 a year).
-- Google Play's one-time $25 registration, for testing through the Play Store. Before that, the Android app can be shared as a file or through Firebase App Distribution, which is free.
+- A domain name (about ₹1,000 a year), for nicer school addresses.
+- Google Play's one-time $25 registration, for testing through the Play Store. Until then the Android app is shared as a link.
 - Apple's developer membership ($99 a year), only for testing on iPhones through TestFlight.
 
-Free plans change their terms. Check them again on the day we set things up.
+Free plans change their terms. The figures above were checked on 18 October 2026; check them again on the day we set things up.
 
 ## Sources
 
@@ -1071,4 +1148,5 @@ Free plans change their terms. Check them again on the day we set things up.
 - CloudFront SaaS Manager: https://aws.amazon.com/blogs/aws/reduce-your-operational-overhead-today-with-amazon-cloudfront-saas-manager · https://docs.amazonaws.cn/en_us/AmazonCloudFront/latest/DeveloperGuide/distribution-config-options.html
 - GSAP free licence: https://webflow.com/updates/gsap-becomes-free · https://gsap.com/community/standard-license/
 - Apple 4.2.6: https://www.imore.com/apple-eases-template-based-apps · https://runtimewire.com/article/apple-guideline-426-app-generation-submission
+- Free-tier terms checked 2026-10-18: Oracle Always Free ARM reduction https://www.infoq.com/news/2026/07/oracle-cloud-free-tier-limits/ · Neon free plan https://neon.com/faqs/free-plan-limits-and-quotas · Cloudflare R2 pricing https://developers.cloudflare.com/r2/pricing/
 - Earlier sources (pub workspaces, Melos, white-label Flutter, single-tenant control planes, CASL): see the replaced spec in git history.
