@@ -38,6 +38,9 @@ export const users = pgTable(
     passwordHash: text('password_hash'),
     avatarUrl: text('avatar_url'),
     status: text('status').notNull().default('active'),
+    failedLogins: integer('failed_logins').notNull().default(0),
+    lockedUntil: timestamp('locked_until', { withTimezone: true }),
+    lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
     createdAt: at('created_at'),
   },
   (t) => [
