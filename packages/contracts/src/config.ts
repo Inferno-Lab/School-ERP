@@ -1,0 +1,63 @@
+import { z } from 'zod';
+
+export const SettingType = z.enum(['boolean', 'string', 'number', 'enum', 'color', 'json']);
+
+/** Every setting a school can change (config layer 4). Defaults here are the platform defaults (layer 1). */
+export const SchoolSettingsSchema = z.object({
+  'school.name': z.string().min(2).max(80),
+  'school.shortName': z.string().min(2).max(20),
+  'school.tagline': z.string().max(120).default(''),
+  'school.phone': z.string().max(24).default(''),
+  'school.email': z.string().max(120).default(''),
+  'school.address': z.string().max(240).default(''),
+  'school.language': z.enum(['en', 'hi', 'mr']).default('en'),
+  'brand.color': z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Use a colour like #6A4CF5'),
+  'brand.logoText': z.string().max(2).default(''),
+  'modules.enabled': z.array(z.string()).default([]),
+  'approvals.feeWaiver': z.enum(['principal', 'office', 'anyone']).default('principal'),
+  'approvals.notice': z.enum(['required', 'off']).default('required'),
+  'attendance.notifyParents': z.boolean().default(true),
+  'attendance.lockAfterDays': z.number().int().min(0).max(30).default(2),
+  'fees.lateFeePct': z.number().min(0).max(25).default(0),
+  'fees.remindDaysBefore': z.number().int().min(0).max(30).default(3),
+  'security.twoFactor': z.boolean().default(true),
+  'demo.mode': z.boolean().default(false),
+  'vocab.student': z.string().max(24).default('Student'),
+  'vocab.class': z.string().max(24).default('Class'),
+});
+export type SchoolSettings = z.infer<typeof SchoolSettingsSchema>;
+export type SettingKey = keyof SchoolSettings;
+
+export const SettingsPatch = z.object({
+  expectedVersion: z.number().int().optional(),
+  changes: z.record(z.string(), z.unknown()),
+});
+export type SettingsPatch = z.infer<typeof SettingsPatch>;
+
+export interface SettingsDoc {
+  version: number;
+  values: Record<string, unknown>;
+  /** Keys the platform has locked: the school cannot change them. */
+  locked: string[];
+  updatedAt: string | null;
+}
+
+export interface EntitlementDoc {
+  plan: string;
+  modules: string[];
+  limits: { students: number; storageGb: number; smsPerMonth: number };
+  locks: string[];
+  overrides: Record<string, unknown>;
+  version: number;
+}
+
+/** What the apps fetch: layers 1 to 5 resolved for one audience, with the version it was built from. */
+export interface EffectiveConfig {
+  version: number;
+  school: { name: string; shortName: string; color: string; logoText: string; language: string; tagline: string };
+  modules: string[];
+  nav: { module: string; label: string; icon: string; href: string }[];
+  settings: Record<string, unknown>;
+  vocabulary: Record<string, string>;
+  limits: EntitlementDoc['limits'];
+}
