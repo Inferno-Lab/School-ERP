@@ -3,6 +3,7 @@ packages:
   - packages/*
 onlyBuiltDependencies:
   - esbuild
+  - "@swc/core"
   - "@nestjs/core"
   - "@embedded-postgres/windows-x64"
   - "@embedded-postgres/linux-x64"

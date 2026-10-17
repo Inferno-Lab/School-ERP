@@ -36,6 +36,10 @@ export interface ApiErrorBody {
   message: string;
   /** Field-level problems, keyed by field path. */
   fields?: Record<string, string>;
+  /** Sign-in only: how many wrong passwords or codes are left before the account is locked for a while. */
+  attemptsLeft?: number;
+  /** Seconds to wait before trying again, when rate limited or locked. */
+  retryAfter?: number;
   requestId?: string;
 }
 

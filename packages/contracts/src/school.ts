@@ -39,18 +39,25 @@ export interface StudentDetail extends StudentRow {
   bloodGroup: string | null;
   house: string | null;
   address: string | null;
+  /** Masked. Use the reveal call for the full number; that is written to the audit log. */
   guardianPhone: string | null;
   guardianEmail: string | null;
+  guardianName: string;
+  routeName: string | null;
+  facts: { attendancePct: number; exam: { name: string; grade: string; pct: number } | null; homework: { onTime: number; total: number }; libraryOut: number };
+  chips: { house: string | null };
   admittedOn: string | null;
-  recentActivity: { id: string; at: string; label: string }[];
+  recentActivity: { id: string; at: string; label: string; sub: string; tone: 'g' | 'v' | 'a' }[];
   roll24: (AttendanceStatus | null)[];
 }
 
 export const StudentQuery = z.object({
   query: z.string().trim().max(80).optional(),
   classId: z.string().optional(),
-  feeStatus: FeeStatus.optional(),
+  house: z.string().max(20).optional(),
+  feeStatus: z.enum(['paid', 'due', 'overdue']).optional(),
   attendance: z.enum(['low', 'perfect']).optional(),
+  newThisYear: z.stringbool().optional(),
   sort: z.enum(['name', 'class', 'attendance', 'due']).default('name'),
   dir: z.enum(['asc', 'desc']).default('asc'),
   page: z.coerce.number().int().min(1).default(1),
@@ -59,11 +66,57 @@ export const StudentQuery = z.object({
 export type StudentQuery = z.infer<typeof StudentQuery>;
 
 export interface StudentSummary {
+  inView: number;
   total: number;
+  /** Present or late, on the latest school day, among students in view. */
   presentToday: number;
-  feesDue: number;
-  lowAttendance: number;
+  /** Students in view that have a mark on that day. */
+  markedToday: number;
+  /** Of those present, how many were marked after 09:00. */
+  presentSince: number;
+  overdueAmount: number;
+  overdueFamilies: number;
+  avgAttendance: number;
+  /** Percentage points against the previous period of the same length. */
+  avgDelta: number;
+  dayLabel: string;
 }
+
+export interface StudentViews {
+  all: number;
+  pinned: { classId: string; name: string; count: number } | null;
+  overdue: number;
+  newThisYear: number;
+}
+
+export interface ContactReveal {
+  phone: string;
+  email: string | null;
+}
+
+export const StudentImport = z.object({ csv: z.string().min(10).max(2_000_000) });
+export type StudentImport = z.infer<typeof StudentImport>;
+export interface ImportResult {
+  created: number;
+  skipped: number;
+  errors: { line: number; message: string }[];
+}
+
+export const MessageRequest = z.object({
+  ids: z.array(z.string()).min(1).max(500),
+  body: z.string().trim().min(2, 'Write the message').max(500),
+  channel: z.enum(['sms', 'whatsapp', 'push']).default('sms'),
+});
+export type MessageRequest = z.infer<typeof MessageRequest>;
+
+export const AssignFee = z.object({
+  ids: z.array(z.string()).min(1).max(500),
+  head: z.enum(['tuition', 'transport', 'activities', 'lab']),
+  title: z.string().trim().min(3, 'Name the fee').max(80),
+  amount: z.number().int().positive('Enter an amount'),
+  dueOn: IsoDate,
+});
+export type AssignFee = z.infer<typeof AssignFee>;
 
 export const StudentCreate = z.object({
   name: z.string().trim().min(2, 'Enter the full name').max(80),
@@ -110,11 +163,17 @@ export interface AttendanceWeekPoint {
 
 // Fees
 export interface FeeSummary {
+  monthLabel: string;
+  due: number;
   collected: number;
   pending: number;
   overdue: number;
-  target: number;
-  byClass: { classId: string; className: string; collected: number; due: number }[];
+  overdueFamilies: number;
+  pct: number;
+  collectedDelta: number;
+  byHead: { head: 'tuition' | 'transport' | 'activities' | 'lab'; label: string; due: number; collected: number; pct: number }[];
+  daily: { date: string; label: string; full: string; amount: number; isToday: boolean }[];
+  dailyTarget: number;
 }
 
 export const PaymentCreate = z.object({
@@ -158,14 +217,17 @@ export interface NoticeRow {
 }
 
 // Approvals
-export type ApprovalKind = 'leave' | 'fee_waiver' | 'admission' | 'notice';
+export type ApprovalKind = 'leave' | 'fee_waiver' | 'admission' | 'notice' | 'attendance';
 export interface ApprovalRow {
   id: string;
   kind: ApprovalKind;
   title: string;
   subtitle: string;
   initials: string;
-  tone: 'coral' | 'amber' | 'blue' | 'mint';
+  tone: 'coral' | 'amber' | 'blue' | 'mint' | 'violet';
+  /** Button label, and the line shown after it is done. */
+  action: string;
+  doneText: string;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   decidedAt: string | null;
@@ -212,6 +274,7 @@ export interface TimetableView {
   periods: PeriodDef[];
   slots: SlotRow[];
   clashes: Clash[];
+  unplaced: { subjectId: string; name: string; color: string; missing: number }[];
   publishedAt: string | null;
   draftChanges: number;
   version: number;
@@ -235,20 +298,26 @@ export interface TeacherLoad {
 // Dashboard
 export interface DashboardData {
   greetingName: string;
-  dateLabel: string;
-  term: { name: string; note: string };
-  kpis: {
-    present: { value: number; total: number };
-    absent: number;
-    feesCollectedWeek: number;
-    feesPendingTotal: number;
-    approvals: number;
+  roleLabel: string;
+  schoolName: string;
+  /** The latest school day shown, and whether it is today. */
+  day: { date: string; label: string; isToday: boolean; clock: string };
+  term: { name: string; examsLabel: string; daysToGo: number; progress: number };
+  subtitle: { marked: number; classes: number };
+  present: { value: number; total: number; deltaPct: number; versus: string };
+  fees: { collected: number; due: number; pct: number; deltaPct: number; overdueFamilies: number; monthLabel: string };
+  approvals: { count: number; avatars: { initials: string; tone: ApprovalRow['tone'] }[] };
+  charts: {
+    attendance: { goal: number; points: AttendanceWeekPoint[] };
+    fees: { goal: number; points: { date: string; label: string; full: string; amount: number; isToday: boolean }[] };
+    homework: { goal: number; points: { date: string; label: string; full: string; pct: number; isToday: boolean }[] };
   };
-  week: AttendanceWeekPoint[];
-  feeBreakdown: { collected: number; pending: number; overdue: number; target: number };
-  classRolls: { classId: string; name: string; present: number; late: number; absent: number; unmarked: number }[];
+  feeHeads: FeeSummary['byHead'];
+  classRolls: { classId: string; name: string; present: number; late: number; absent: number; unmarked: number; size: number; pct: number }[];
   needsYou: ApprovalRow[];
-  today: { id: string; time: string; title: string; subtitle: string; state: 'done' | 'now' | 'next' }[];
+  timeline: { id: string; time: string; title: string; subtitle: string; state: 'done' | 'now' | 'next' }[];
+  timelineProgress: number;
+  badges: { attendance: number; admissions: number };
 }
 
 // Search (command palette)

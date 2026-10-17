@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import net from 'node:net';
 import { promisify } from 'node:util';
 import pg from 'pg';
 
@@ -13,6 +14,18 @@ export interface DevPostgres {
   url: string;
   port: number;
   stop: () => Promise<void>;
+}
+
+/** Asks the system for a port nobody is using. */
+export function freePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const srv = net.createServer();
+    srv.once('error', reject);
+    srv.listen(0, '127.0.0.1', () => {
+      const { port } = srv.address() as net.AddressInfo;
+      srv.close(() => resolve(port));
+    });
+  });
 }
 
 /** Finds the PostgreSQL binaries that the `embedded-postgres` package ships for this platform. */
@@ -35,7 +48,7 @@ function binDir(): string {
  * It is started with `pg_ctl`, which drops administrator rights on Windows (PostgreSQL refuses to run with them).
  */
 export async function startDevPostgres(opts: { dataDir: string; port?: number; fresh?: boolean }): Promise<DevPostgres> {
-  const port = opts.port ?? 54329;
+  const port = opts.port ?? (await freePort());
   const dataDir = path.resolve(opts.dataDir);
   const bin = binDir();
   const exe = (n: string) => path.join(bin, process.platform === 'win32' ? `${n}.exe` : n);

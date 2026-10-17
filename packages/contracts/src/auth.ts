@@ -18,6 +18,10 @@ export const LoginChallenge = z.object({
 });
 export type LoginChallenge = z.infer<typeof LoginChallenge>;
 
+export type LoginResponse =
+  | { step: 'otp'; challenge: LoginChallenge }
+  | { step: 'done'; tokens: TokenPair };
+
 export const VerifyRequest = z.object({
   challengeId: z.string().min(1),
   code: z.string().regex(/^\d{6}$/, 'The code is 6 digits'),
@@ -50,5 +54,6 @@ export interface AccessClaims {
   /** School slug (school tokens) or "console" for control-plane tokens. */
   aud: string;
   sid: string;
+  name: string;
   perms: string[];
 }

@@ -1,0 +1,62 @@
+import { Inject, Injectable, SetMetadata, createParamDecorator, type CanActivate, type ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { verifyJwt } from '@edunest/security';
+import { MODULES, closeModules } from '@edunest/config-engine';
+import type { AccessClaims, Permission } from '@edunest/contracts';
+import type { FastifyRequest } from 'fastify';
+import { ENV, type Env } from '../env.js';
+import { ApiError } from '../common/errors.js';
+import type { AuthedUser } from '../tenancy/tenant.js';
+
+/** The route needs no sign-in. */
+export const Public = () => SetMetadata('public', true);
+/** The route needs every one of these permissions. */
+export const Require = (...perms: Permission[]) => SetMetadata('perms', perms);
+/** The route belongs to a module the school must have switched on. */
+export const RequireModule = (key: string) => SetMetadata('module', key);
+export const CurrentUser = createParamDecorator((_: unknown, ctx: ExecutionContext): AuthedUser => ctx.switchToHttp().getRequest<FastifyRequest>().user!);
+
+const KNOWN_MODULES = new Set(MODULES.map((m) => m.key));
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  constructor(
+    private readonly reflector: Reflector,
+    @Inject(ENV) private readonly env: Env,
+  ) {}
+
+  canActivate(ctx: ExecutionContext): boolean {
+    const targets = [ctx.getHandler(), ctx.getClass()];
+    if (this.reflector.getAllAndOverride<boolean>('public', targets) || this.reflector.getAllAndOverride<boolean>('noTenant', targets)) return true;
+    const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+    const header = req.headers.authorization;
+    const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
+    if (!token) throw new ApiError('unauthenticated', 'Sign in to continue.');
+    const claims = verifyJwt<AccessClaims & Record<string, unknown>>(token, this.env.JWT_SECRET);
+    if (!claims || claims.aud !== req.tenant?.info.slug) throw new ApiError('unauthenticated', 'Your session has ended. Sign in again.');
+    req.user = { id: claims.sub, sid: claims.sid, name: claims.name, permissions: claims.perms };
+    return true;
+  }
+}
+
+@Injectable()
+export class PermissionsGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
+
+  canActivate(ctx: ExecutionContext): boolean {
+    const targets = [ctx.getHandler(), ctx.getClass()];
+    const needed = this.reflector.getAllAndOverride<Permission[] | undefined>('perms', targets);
+    const mod = this.reflector.getAllAndOverride<string | undefined>('module', targets);
+    const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+    if (mod) {
+      if (!KNOWN_MODULES.has(mod)) throw new Error(`Unknown module ${mod}`);
+      const entitled = closeModules(req.tenant!.info.entitlement.modules);
+      if (!entitled.includes(mod)) throw new ApiError('locked', 'This feature is not part of your school’s plan.');
+    }
+    if (needed?.length) {
+      const have = req.user?.permissions ?? [];
+      if (!needed.every((p) => have.includes(p))) throw new ApiError('forbidden', 'You do not have access to this. Ask your principal to change your role.');
+    }
+    return true;
+  }
+}

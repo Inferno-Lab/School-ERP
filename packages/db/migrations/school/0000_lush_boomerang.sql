@@ -236,7 +236,8 @@ CREATE TABLE "students" (
 CREATE TABLE "subjects" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"color" text NOT NULL
+	"color" text NOT NULL,
+	"per_week" integer DEFAULT 5 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "substitutions" (
@@ -257,7 +258,9 @@ CREATE TABLE "timetable_slots" (
 	"teacher_id" text NOT NULL,
 	"room" text,
 	"published_teacher_id" text,
-	"published_subject_id" text
+	"published_subject_id" text,
+	"cover_teacher_id" text,
+	"published_cover_id" text
 );
 --> statement-breakpoint
 CREATE TABLE "transport_assignments" (

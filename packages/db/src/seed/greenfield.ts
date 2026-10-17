@@ -127,7 +127,7 @@ async function run(db: PoolClient, input: SeedInput): Promise<Omit<SeedReport, '
   await bulkInsert(db, 'roles', ['id', 'key', 'name', 'description', 'permissions', 'locked'],
     ROLE_TEMPLATES.map((t) => [`role_${t.key}`, t.key, t.name, t.description, JSON.stringify(t.permissions), t.key === 'principal']));
   await bulkInsert(db, 'periods', ['idx', 'label', 'starts_at', 'ends_at', 'kind'], PERIOD_ROWS);
-  await bulkInsert(db, 'subjects', ['id', 'name', 'color'], SUBJECTS.map((s) => [s.id, s.name, s.color]));
+  await bulkInsert(db, 'subjects', ['id', 'name', 'color', 'per_week'], SUBJECTS.map((s) => [s.id, s.name, s.color, s.perWeek]));
 
   const adminId = newId('usr');
   await bulkInsert(db, 'users', ['id', 'kind', 'name', 'email', 'phone', 'password_hash'], [
@@ -144,7 +144,7 @@ async function run(db: PoolClient, input: SeedInput): Promise<Omit<SeedReport, '
     ['brand.logoText', s.logoText], ['modules.enabled', input.modules], ['approvals.feeWaiver', 'principal'],
     ['approvals.notice', 'required'], ['attendance.notifyParents', true], ['attendance.lockAfterDays', 2],
     ['fees.lateFeePct', 0], ['fees.remindDaysBefore', 3], ['fees.dailyTarget', 150000], ['attendance.goalPct', 95],
-    ['homework.goalPct', 85], ['term.name', 'Term 1'], ['term.examsStart', examsStart], ['security.twoFactor', true],
+    ['homework.goalPct', 85], ['students.pinnedClass', 'cls_8a'], ['dashboard.rollClasses', ['cls_8a', 'cls_8b', 'cls_9a', 'cls_9b', 'cls_10a', 'cls_10b']], ['term.name', 'Term 1'], ['term.examsStart', examsStart], ['security.twoFactor', true],
     ['demo.mode', input.demoMode], ['vocab.student', 'Student'], ['vocab.class', 'Class'],
   ];
   await bulkInsert(db, 'settings', ['key', 'value', 'updated_by'], settings.map(([k, v]) => [k, JSON.stringify(v), 'system']));
@@ -303,7 +303,8 @@ async function seedAttendance(ctx: Ctx, classes: ClassRow[], students: StudentRo
       const day = days24[di]!;
       if (day === last && UNMARKED.includes(c.name)) continue;
       const sid = `att_${c.id}_${day}`;
-      sessions.push([sid, c.id, day, staffByClass.get(c.id), `${day}T03:${String(30 + (di % 20)).padStart(2, '0')}:00Z`]);
+      const minute = 2 * 60 + 20 + ((classes.indexOf(c) * 7 + di * 3) % 110);
+      sessions.push([sid, c.id, day, staffByClass.get(c.id), `${day}T${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}:00Z`]);
       for (const s of byClass.get(c.id) ?? []) {
         const present = r.chance(Math.min(0.995, s.rate + mood[di]!));
         let status = 'present';

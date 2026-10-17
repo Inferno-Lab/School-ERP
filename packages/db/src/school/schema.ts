@@ -104,6 +104,7 @@ export const subjects = pgTable('subjects', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   color: text('color').notNull(),
+  perWeek: integer('per_week').notNull().default(5),
 });
 
 export const staffSubjects = pgTable(
@@ -268,6 +269,9 @@ export const timetableSlots = pgTable(
     /** Published value, so unpublished edits can be counted and reverted. */
     publishedTeacherId: text('published_teacher_id'),
     publishedSubjectId: text('published_subject_id'),
+    /** A standing cover: this teacher takes the period instead of `teacherId` until the timetable changes again. */
+    coverTeacherId: text('cover_teacher_id'),
+    publishedCoverId: text('published_cover_id'),
   },
   (t) => [uniqueIndex('timetable_slot_uq').on(t.classId, t.day, t.period), index('timetable_teacher_idx').on(t.teacherId, t.day, t.period)],
 );

@@ -1,5 +1,5 @@
 {
-  "id": "4ce30b43-a23c-4485-a1e9-47cd19cd63f4",
+  "id": "2a577fa8-b280-402c-8bf8-b097cb6104c2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1915,6 +1915,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "per_week": {
+          "name": "per_week",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 5
         }
       },
       "indexes": {},
@@ -2091,6 +2098,18 @@
         },
         "published_subject_id": {
           "name": "published_subject_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_teacher_id": {
+          "name": "cover_teacher_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "published_cover_id": {
+          "name": "published_cover_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false

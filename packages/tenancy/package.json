@@ -1,0 +1,32 @@
+{
+  "name": "@edunest/tenancy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@edunest/contracts": "workspace:*",
+    "@edunest/db": "workspace:*",
+    "@edunest/security": "workspace:*",
+    "pg": "^8.16.0",
+    "drizzle-orm": "^0.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.0"
+  }
+}

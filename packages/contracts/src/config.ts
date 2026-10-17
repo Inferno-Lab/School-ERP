@@ -25,6 +25,8 @@ export const SchoolSettingsSchema = z.object({
   'homework.goalPct': z.number().min(50).max(100).default(85),
   'term.name': z.string().max(30).default('Term 1'),
   'term.examsStart': z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  'students.pinnedClass': z.string().optional(),
+  'dashboard.rollClasses': z.array(z.string()).max(8).default([]),
   'security.twoFactor': z.boolean().default(true),
   'demo.mode': z.boolean().default(false),
   'vocab.student': z.string().max(24).default('Student'),
