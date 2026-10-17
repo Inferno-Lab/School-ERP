@@ -220,6 +220,8 @@ CREATE TABLE "schools" (
 	"onboarding_done" integer DEFAULT 0 NOT NULL,
 	"onboarding_total" integer DEFAULT 8 NOT NULL,
 	"checklist" jsonb DEFAULT '{}'::jsonb NOT NULL,
+	"ring" text DEFAULT 'rest' NOT NULL,
+	"profile_yaml" text,
 	"created_by" text DEFAULT 'system' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone

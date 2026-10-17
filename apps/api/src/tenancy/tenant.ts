@@ -5,7 +5,7 @@ import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { PoolManager, Registry, type TenantInfo } from '@edunest/tenancy';
 import type { Pool } from 'pg';
 import type { FastifyRequest } from 'fastify';
-import { ApiError } from '../common/errors.js';
+import { ApiError } from '@edunest/nest-kit';
 
 export type SchoolDb = NodePgDatabase<typeof schema>;
 

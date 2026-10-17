@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { newId } from '@edunest/db';
 import { addDays, dayName, dayMonth, istToday, latestSchoolDay, schoolDaysEnding, type FeeSummary, type InvoiceRow, type PaymentCreate } from '@edunest/contracts';
-import { ApiError, notFound } from '../common/errors.js';
+import { ApiError, notFound } from '@edunest/nest-kit';
 import type { TenantCtx } from '../tenancy/tenant.js';
 import { AuditService, Messenger, SettingsService } from './support.js';
 

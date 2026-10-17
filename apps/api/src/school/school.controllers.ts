@@ -6,7 +6,7 @@ import {
 } from '@edunest/contracts';
 import { MODULES, closeModules } from '@edunest/config-engine';
 import { z } from 'zod';
-import { ZodPipe } from '../common/zod.pipe.js';
+import { ZodPipe } from '@edunest/nest-kit';
 import { CurrentUser, Require, RequireModule } from '../auth/guards.js';
 import { NoTenant, Tenant, type AuthedUser, type TenantCtx } from '../tenancy/tenant.js';
 import { ApprovalsService } from './approvals.service.js';

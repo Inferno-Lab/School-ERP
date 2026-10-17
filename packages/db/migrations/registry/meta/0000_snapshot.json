@@ -1,5 +1,5 @@
 {
-  "id": "8ae06ae3-1d07-4eed-9f58-292372fdbd90",
+  "id": "65b05e4d-e5ed-4a4c-b95c-5eb620057554",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1429,6 +1429,19 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'::jsonb"
+        },
+        "ring": {
+          "name": "ring",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'rest'"
+        },
+        "profile_yaml": {
+          "name": "profile_yaml",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_by": {
           "name": "created_by",

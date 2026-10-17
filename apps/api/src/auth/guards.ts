@@ -5,7 +5,7 @@ import { MODULES, closeModules } from '@edunest/config-engine';
 import type { AccessClaims, Permission } from '@edunest/contracts';
 import type { FastifyRequest } from 'fastify';
 import { ENV, type Env } from '../env.js';
-import { ApiError } from '../common/errors.js';
+import { ApiError } from '@edunest/nest-kit';
 import type { AuthedUser } from '../tenancy/tenant.js';
 
 /** The route needs no sign-in. */
@@ -34,6 +34,10 @@ export class AuthGuard implements CanActivate {
     if (!token) throw new ApiError('unauthenticated', 'Sign in to continue.');
     const claims = verifyJwt<AccessClaims & Record<string, unknown>>(token, this.env.JWT_SECRET);
     if (!claims || claims.aud !== req.tenant?.info.slug) throw new ApiError('unauthenticated', 'Your session has ended. Sign in again.');
+    // A support session opened from the console can look but never change anything.
+    if ((claims as { support?: boolean }).support && req.method !== 'GET' && req.method !== 'HEAD') {
+      throw new ApiError('forbidden', 'This is a read-only support session. Nothing can be changed from here.');
+    }
     req.user = { id: claims.sub, sid: claims.sid, name: claims.name, permissions: claims.perms };
     return true;
   }

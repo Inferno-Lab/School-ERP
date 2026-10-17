@@ -3,7 +3,7 @@ import { newId } from '@edunest/db';
 import { initials, type LoginChallenge, type LoginRequest, type LoginResponse, type Permission, type SessionUser, type TokenPair } from '@edunest/contracts';
 import { hashPassword, maskEmail, maskPhone, randomCode, randomToken, sha256, signJwt, verifyPassword, constantTimeEqual } from '@edunest/security';
 import { ENV, type Env } from '../env.js';
-import { ApiError } from '../common/errors.js';
+import { ApiError } from '@edunest/nest-kit';
 import { AuditService, Messenger, SettingsService } from '../school/support.js';
 import type { TenantCtx } from '../tenancy/tenant.js';
 

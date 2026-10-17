@@ -6,7 +6,7 @@ import {
   type Paged, type StudentCreate, type StudentDetail, type StudentQuery, type StudentRow, type StudentSummary, type StudentViews,
 } from '@edunest/contracts';
 import { maskPhone } from '@edunest/security';
-import { ApiError, notFound } from '../common/errors.js';
+import { ApiError, notFound } from '@edunest/nest-kit';
 import type { TenantCtx } from '../tenancy/tenant.js';
 import { AuditService, Messenger, SettingsService } from './support.js';
 

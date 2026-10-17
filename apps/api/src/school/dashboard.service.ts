@@ -22,7 +22,7 @@ export class DashboardService {
     private readonly fees: FeesService,
   ) {}
 
-  async get(t: TenantCtx, user: { id: string }): Promise<DashboardData> {
+  async get(t: TenantCtx, user: { id: string; name: string }): Promise<DashboardData> {
     const today = istToday();
     const last = latestSchoolDay(today, OFF_DAYS);
     const doc = await this.settings.doc(t);
@@ -66,7 +66,7 @@ export class DashboardService {
     const goalH = Number(v['homework.goalPct'] ?? 85);
     const days = schoolDaysEnding(last, 6, OFF_DAYS);
     return {
-      greetingName: me.rows[0]?.name ?? 'there', roleLabel: me.rows[0]?.role_name ?? '', schoolName: String(v['school.name'] ?? t.info.name),
+      greetingName: me.rows[0]?.name ?? user.name, roleLabel: me.rows[0]?.role_name ?? (user.id.startsWith('support:') ? 'EduNest support' : ''), schoolName: String(v['school.name'] ?? t.info.name),
       day: { date: last, label: dayLabel(last), isToday, clock },
       term: { name: String(v['term.name'] ?? 'Term 1'), examsLabel: `Exams start ${dayMonth(examsStart)}`, daysToGo, progress: Math.max(0, Math.min(100, Math.round(100 * (1 - daysToGo / REVISION_WINDOW_DAYS)))) },
       subtitle: { marked: Number(classCount.rows[0]!.n) - unmarked.length, classes: Number(classCount.rows[0]!.n) },

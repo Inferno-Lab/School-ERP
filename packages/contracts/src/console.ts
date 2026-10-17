@@ -19,21 +19,19 @@ export const Slug = z
   .regex(SLUG_RE, 'Use 4 to 32 letters, numbers or dashes, starting with a letter')
   .refine((s) => !(RESERVED_SLUGS as readonly string[]).includes(s), 'That address is reserved');
 
-export const STEP_KEYS = [
-  'database',
-  'keys',
-  'storage',
-  'edge',
-  'migrate',
-  'seed',
-  'entitlements',
-  'admin-user',
-  'build-profile',
-  'build-app',
-  'invites',
-  'activate',
-] as const;
+export const STEP_KEYS = ['database', 'keys-storage', 'migrate-seed', 'domain', 'admin', 'build-profile', 'store-checklist'] as const;
 export const StepKey = z.enum(STEP_KEYS);
+
+/** What each setup step is called on screen. */
+export const STEP_LABELS: Record<(typeof STEP_KEYS)[number], string> = {
+  database: 'Database',
+  'keys-storage': 'Keys and storage',
+  'migrate-seed': 'Migrations and defaults',
+  domain: 'Domain',
+  admin: 'First admin',
+  'build-profile': 'App build profile',
+  'store-checklist': 'Store checklist',
+};
 export type StepKey = z.infer<typeof StepKey>;
 
 export const BlueprintStep = z.object({
@@ -71,7 +69,7 @@ export function stepOrderProblem(steps: { key: StepKey; enabled?: boolean }[]): 
     last = at;
   }
   const keys = steps.map((s) => s.key);
-  for (const required of ['database', 'migrate', 'entitlements', 'admin-user', 'activate'] as StepKey[]) {
+  for (const required of ['database', 'migrate-seed', 'admin'] as StepKey[]) {
     const s = steps.find((x) => x.key === required);
     if (!s || !keys.includes(required)) return `The “${required}” step is required.`;
     if (s.enabled === false) return `The “${required}” step cannot be switched off.`;
@@ -225,7 +223,7 @@ export interface SchoolDetail extends SchoolRow {
     version: number;
   };
   usage: { students: number; storageGb: number; sms: number; staff: number };
-  checklist: { key: string; label: string; done: boolean; hint: string }[];
+  checklist: { key: string; label: string; state: 'done' | 'waiting' | 'todo' }[];
   runs: ProvisionRunRow[];
   builds: BuildRow[];
 }
@@ -241,18 +239,7 @@ export interface BuildRow {
   createdAt: string;
 }
 
-export const ACTIONS = [
-  'school.create',
-  'school.suspend',
-  'school.resume',
-  'school.erase',
-  'entitlements.push',
-  'release.wave',
-  'migration.run',
-  'domain.set',
-  'build.app',
-  'backup.take',
-] as const;
+export const ACTIONS = ['school.suspend', 'school.resume', 'school.erase', 'entitlements.push', 'migration.run', 'domain.set', 'build.app', 'backup.take'] as const;
 export const ActionKey = z.enum(ACTIONS);
 export type ActionKey = z.infer<typeof ActionKey>;
 
@@ -293,13 +280,13 @@ export interface ReleaseRow {
   id: string;
   version: string;
   notes: string;
-  status: 'draft' | 'rolling' | 'halted' | 'done' | 'rolled_back';
+  status: 'draft' | 'rolling' | 'paused' | 'halted' | 'done' | 'rolled_back';
   createdBy: string;
   createdAt: string;
   waves: {
     name: string;
     status: 'pending' | 'rolling' | 'done' | 'halted';
-    schools: { id: string; name: string; state: 'pending' | 'rolling' | 'done' | 'failed' }[];
+    schools: { id: string; name: string; state: 'pending' | 'rolling' | 'done' | 'failed' | 'rolled_back'; prev?: string }[];
   }[];
   haltReason: string | null;
 }
@@ -316,9 +303,12 @@ export interface FleetSummary {
   onboarding: number;
   healthy: number;
   degraded: number;
-  requests24h: { at: string; value: number; previous: number }[];
+  /** Average requests per minute in each hour of the day, today and the day before. */
+  requests24h: { hour: number; value: number; previous: number }[];
+  p95Ms: number;
   cells: { key: string; target: DeployTarget; schools: number; max: number; region: string }[];
-  incident: { id: string; title: string; state: 'open' | 'resolved'; startedAt: string } | null;
+  incident: { id: string; title: string; body: string; state: 'open' | 'resolved'; startedAt: string; schoolName: string | null } | null;
+  upcoming: { name: string; id: string }[];
   release: ReleaseRow | null;
 }
 
@@ -376,4 +366,41 @@ export interface InvoiceRowC {
   period: string;
   amount: number;
   status: 'draft' | 'sent' | 'paid' | 'overdue';
+}
+
+/** What each console role may do. The console hides what a role cannot use and the API refuses it. */
+export const CONSOLE_PERMISSIONS = [
+  'schools.read', 'schools.write', 'schools.danger', 'blueprints.write', 'releases.write', 'builds.write', 'flags.write',
+  'support.access', 'billing.read', 'billing.write', 'team.write', 'audit.read', 'policy.write', 'sandbox.read',
+] as const;
+export type ConsolePermission = (typeof CONSOLE_PERMISSIONS)[number];
+
+export const CONSOLE_ROLE_PERMISSIONS: Record<ConsoleRole, readonly ConsolePermission[]> = {
+  super_admin: CONSOLE_PERMISSIONS,
+  support: ['schools.read', 'support.access', 'sandbox.read', 'audit.read'],
+  release_manager: ['schools.read', 'releases.write', 'builds.write', 'flags.write', 'sandbox.read'],
+  finance: ['schools.read', 'billing.read', 'billing.write'],
+  compliance: ['schools.read', 'audit.read', 'billing.read'],
+  auditor: ['schools.read', 'audit.read', 'billing.read', 'sandbox.read'],
+};
+
+export function consolePermissions(roles: readonly ConsoleRole[]): ConsolePermission[] {
+  return [...new Set(roles.flatMap((r) => CONSOLE_ROLE_PERMISSIONS[r]))];
+}
+
+export interface ConsoleTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresInSeconds: number;
+  user: ConsoleSession & { permissions: ConsolePermission[] };
+}
+
+export type ConsoleLoginResponse =
+  | { step: 'otp'; challenge: { challengeId: string; channel: 'email'; maskedTo: string; expiresInSeconds: number; demoCode?: string } }
+  | { step: 'done'; tokens: ConsoleTokens };
+
+export interface SupportToken {
+  token: string;
+  adminUrl: string;
+  expiresAt: string;
 }

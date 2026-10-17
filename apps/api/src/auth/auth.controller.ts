@@ -1,8 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post, Req } from '@nestjs/common';
 import { LoginRequest, RefreshRequest, VerifyRequest, type EffectiveConfig, type LoginResponse, type SessionUser, type TokenPair } from '@edunest/contracts';
 import type { FastifyRequest } from 'fastify';
-import { ApiError } from '../common/errors.js';
-import { ZodPipe } from '../common/zod.pipe.js';
+import { ApiError, ZodPipe } from '@edunest/nest-kit';
 import { SettingsService } from '../school/support.js';
 import { Tenant, type AuthedUser, type TenantCtx } from '../tenancy/tenant.js';
 import { AuthService } from './auth.service.js';
@@ -62,7 +61,9 @@ export class MeController {
   ) {}
 
   @Get('me')
-  me(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<SessionUser> {
+  async me(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<SessionUser> {
+    // A console support session has no account in the school: describe it as what it is.
+    if (u.id.startsWith('support:')) return { id: u.id, name: u.name, email: null, phone: null, initials: 'ES', roles: ['support'], roleNames: ['EduNest support'], permissions: u.permissions as SessionUser['permissions'] };
     return this.auth.me(t, u.id);
   }
 

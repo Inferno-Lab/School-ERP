@@ -3,7 +3,7 @@ import { newId } from '@edunest/db';
 import { resolveConfig, validateSettingsChanges } from '@edunest/config-engine';
 import type { AuditRow, EffectiveConfig, SettingsDoc, SettingsPatch } from '@edunest/contracts';
 import type { Registry } from '@edunest/tenancy';
-import { ApiError } from '../common/errors.js';
+import { ApiError } from '@edunest/nest-kit';
 import { REGISTRY, type TenantCtx } from '../tenancy/tenant.js';
 
 /** Sends messages. Only the sandbox exists today: it files them in the console's inbox instead of sending them. */
