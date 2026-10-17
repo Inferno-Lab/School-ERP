@@ -27,8 +27,8 @@ export class AuthGuard implements CanActivate {
 
   canActivate(ctx: ExecutionContext): boolean {
     const targets = [ctx.getHandler(), ctx.getClass()];
-    if (this.reflector.getAllAndOverride<boolean>('public', targets) || this.reflector.getAllAndOverride<boolean>('noTenant', targets)) return true;
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+    if (req.url.startsWith('/console/') || this.reflector.getAllAndOverride<boolean>('public', targets) || this.reflector.getAllAndOverride<boolean>('noTenant', targets)) return true;
     const header = req.headers.authorization;
     const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) throw new ApiError('unauthenticated', 'Sign in to continue.');
@@ -52,6 +52,7 @@ export class PermissionsGuard implements CanActivate {
     const needed = this.reflector.getAllAndOverride<Permission[] | undefined>('perms', targets);
     const mod = this.reflector.getAllAndOverride<string | undefined>('module', targets);
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+    if (req.url.startsWith('/console/')) return true;
     if (mod) {
       if (!KNOWN_MODULES.has(mod)) throw new Error(`Unknown module ${mod}`);
       const entitled = closeModules(req.tenant!.info.entitlement.modules);

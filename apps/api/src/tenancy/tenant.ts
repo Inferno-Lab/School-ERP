@@ -73,8 +73,8 @@ export class TenantGuard implements CanActivate {
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
-    if (this.reflector.getAllAndOverride<boolean>('noTenant', [ctx.getHandler(), ctx.getClass()])) return true;
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+    if (req.url.startsWith('/console/') || this.reflector.getAllAndOverride<boolean>('noTenant', [ctx.getHandler(), ctx.getClass()])) return true;
     const raw = req.headers['x-school'];
     const slug = (Array.isArray(raw) ? raw[0] : raw)?.trim().toLowerCase();
     if (!slug) throw new ApiError('validation', 'Say which school this is for, with the X-School header.');

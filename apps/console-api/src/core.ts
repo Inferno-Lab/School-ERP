@@ -69,8 +69,8 @@ export class ConsoleAuthGuard implements CanActivate {
 
   canActivate(ctx: ExecutionContext): boolean {
     const targets = [ctx.getHandler(), ctx.getClass()];
-    if (this.reflector.getAllAndOverride<boolean>('public', targets)) return true;
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+    if (!req.url.startsWith('/console/') || this.reflector.getAllAndOverride<boolean>('public', targets)) return true;
     const header = req.headers.authorization;
     const token = header?.startsWith('Bearer ') ? header.slice(7) : (req.query as { access_token?: string } | undefined)?.access_token;
     if (!token) throw new ApiError('unauthenticated', 'Sign in to continue.');

@@ -9,6 +9,7 @@ export interface SeedInput {
     name: string;
     shortName: string;
     tagline: string;
+    place?: string;
     phone: string;
     email: string;
     address: string;
@@ -139,7 +140,7 @@ async function run(db: PoolClient, input: SeedInput): Promise<Omit<SeedReport, '
   const examsStart = addDays(last, 6);
   const s = input.school;
   const settings: [string, unknown][] = [
-    ['school.name', s.name], ['school.shortName', s.shortName], ['school.tagline', s.tagline], ['school.phone', s.phone],
+    ['school.name', s.name], ['school.shortName', s.shortName], ['school.tagline', s.tagline], ['school.place', s.place ?? ''], ['school.phone', s.phone],
     ['school.email', s.email], ['school.address', s.address], ['school.language', s.language], ['brand.color', s.color],
     ['brand.logoText', s.logoText], ['modules.enabled', input.modules], ['approvals.feeWaiver', 'principal'],
     ['approvals.notice', 'required'], ['attendance.notifyParents', true], ['attendance.lockAfterDays', 2],

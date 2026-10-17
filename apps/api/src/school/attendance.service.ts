@@ -75,10 +75,10 @@ export class AttendanceService {
   }
 
   /** Percentage present for each of the last six school days, with the same weekday a week earlier for comparison. */
-  async week(t: TenantCtx): Promise<AttendanceWeekPoint[]> {
+  async week(t: TenantCtx, count = 6): Promise<AttendanceWeekPoint[]> {
     const today = istToday();
     const last = latestSchoolDay(today, OFF_DAYS);
-    const days = schoolDaysEnding(last, 6, OFF_DAYS);
+    const days = schoolDaysEnding(last, count, OFF_DAYS);
     const before = days.map((d) => addDays(d, -7));
     const { rows } = await t.pool.query<{ d: string; present: string; total: string }>(
       `select to_char(s.date,'YYYY-MM-DD') d, count(*) filter (where m.status in ('present','late')) present, count(*) total

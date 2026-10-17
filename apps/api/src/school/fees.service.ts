@@ -20,7 +20,7 @@ export class FeesService {
   ) {}
 
   /** Money for the month of the latest school day: what fell due, what came in, and what is late. */
-  async summary(t: TenantCtx): Promise<FeeSummary> {
+  async summary(t: TenantCtx, count = 6): Promise<FeeSummary> {
     const today = istToday();
     const last = latestSchoolDay(today, OFF_DAYS);
     const monthStart = `${last.slice(0, 7)}-01`;
@@ -39,11 +39,11 @@ export class FeesService {
            coalesce(sum(greatest(i.amount - i.waived_amount - coalesce(paid.p,0),0)) filter (where i.due_on >= $1 and i.due_on < $2),0) pending
          from fee_invoices i left join paid on paid.invoice_id = i.id`, [monthStart, nextMonth, today]),
       t.pool.query<{ d: string; amount: string }>(
-        `select to_char(paid_on,'YYYY-MM-DD') d, sum(amount) amount from payments where paid_on = any($1::date[]) group by 1`, [schoolDaysEnding(last, 6, OFF_DAYS)]),
+        `select to_char(paid_on,'YYYY-MM-DD') d, sum(amount) amount from payments where paid_on = any($1::date[]) group by 1`, [schoolDaysEnding(last, count, OFF_DAYS)]),
       t.pool.query<{ collected: string }>('select coalesce(sum(amount),0) collected from payments where paid_on >= $1 and paid_on < $2', [prevStart, monthStart]),
       this.settings.value<number>(t, 'fees.dailyTarget', 150000),
     ]);
-    const days = schoolDaysEnding(last, 6, OFF_DAYS);
+    const days = schoolDaysEnding(last, count, OFF_DAYS);
     const amounts = new Map(daily.rows.map((r) => [r.d, Number(r.amount)]));
     const heads = HEADS.map(([key, label]) => {
       const r = byHead.rows.find((x) => x.head === key);

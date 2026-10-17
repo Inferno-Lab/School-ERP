@@ -1,0 +1,17 @@
+/* Shell additions that are not part of the canvas boards: the console workspace block, and the phone layout. */
+.nest .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--r);box-shadow:0 0 0 4px color-mix(in srgb,var(--r) 25%,transparent);animation:pdot 2s infinite}
+.nest .pdot.stage{background:var(--a);box-shadow:0 0 0 4px color-mix(in srgb,var(--a) 25%,transparent)}
+.nest .pdot.local{background:var(--g);box-shadow:0 0 0 4px color-mix(in srgb,var(--g) 25%,transparent)}
+@keyframes pdot{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--r) 0%,transparent)}}
+.nest .wsw{display:flex;align-items:center;gap:12px;padding:8px;border-radius:18px;background:var(--card);border:1px solid var(--line);margin-bottom:6px;white-space:nowrap;overflow:hidden}
+.nest .wsw b{display:block;font:700 14.5px var(--fb);line-height:1.2}
+.nest .wsw small{display:flex;align-items:center;gap:7px;font:700 12px var(--fb);color:var(--ink3)}
+/* On a phone the menu gives way to the floating dock. */
+@media (max-width:900px){
+  .nest .app>.sb{display:none}
+  .nest{padding:0!important}
+  .nest>.fr{border-radius:0;border:0;box-shadow:none;min-height:100dvh!important}
+  .nest .app{min-height:100dvh!important}
+  .nest .mn{padding-bottom:120px}
+}
+@media (min-width:901px){.nest .phone-only{display:none}}

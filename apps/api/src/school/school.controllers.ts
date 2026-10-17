@@ -2,7 +2,7 @@ import { Body, Controller, Get, Header, HttpCode, Param, Patch, Post, Put, Query
 import {
   ApprovalDecision, AssignFee, AttendanceDayPut, CoverRequest, IsoDate, MessageRequest, NoticeCreate, PaymentCreate, SettingsPatch, SlotPatch, StudentCreate, StudentImport, StudentQuery,
   type ApprovalRow, type AttendanceDay, type AttendanceWeekPoint, type AuditRow, type ClassInfo, type ContactReveal, type DashboardData, type FeeSummary, type ImportResult, type InvoiceRow,
-  type NoticeRow, type SearchHit, type SettingsDoc, type StudentDetail, type StudentRow, type StudentSummary, type StudentViews, type TeacherLoad, type TimetableView, type Paged,
+  type NoticeRow, type SearchHit, type SettingsDoc, type ShellData, type StudentDetail, type StudentRow, type StudentSummary, type StudentViews, type TeacherLoad, type TimetableView, type Paged,
 } from '@edunest/contracts';
 import { MODULES, closeModules } from '@edunest/config-engine';
 import { z } from 'zod';
@@ -21,6 +21,7 @@ const DayQuery = z.object({ classId: z.string().min(1), date: IsoDate });
 const InvoiceQuery = z.object({ studentId: z.string().min(1) });
 const ListApprovals = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'all']).default('pending'), kind: z.enum(['leave', 'fee_waiver', 'admission', 'notice']).optional() });
 const ClassQuery = z.object({ classId: z.string().min(1) });
+const DashQuery = z.object({ days: z.coerce.number().int().min(1).max(30).default(6) });
 const SearchQuery = z.object({ q: z.string().max(80).default('') });
 const IdsQuery = z.object({ ids: z.string().optional() });
 const Summ = StudentQuery.pick({ classId: true, house: true });
@@ -211,8 +212,14 @@ export class DashboardController {
   ) {}
 
   @Get('dashboard')
-  get(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<DashboardData> {
-    return this.dash.get(t, u);
+  get(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Query(new ZodPipe(DashQuery)) q: z.infer<typeof DashQuery>): Promise<DashboardData> {
+    return this.dash.get(t, u, q.days);
+  }
+
+  @Get('shell')
+  async shell(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<ShellData> {
+    const cfg = await this.settings.effective(t, u.permissions);
+    return this.dash.shell(t, cfg.modules);
   }
 
   @Get('search')

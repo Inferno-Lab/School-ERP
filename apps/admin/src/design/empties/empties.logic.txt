@@ -1,0 +1,22 @@
+
+var C = [
+  ['Students', '0', 'v', 'empty', 'No students yet', 'Add your first student, or bring the whole school in from an Excel sheet in about a minute.', 'pri', 'M12 20V9M7 14l5-5 5 5M5 4h14', 'Import from Excel', 'Add one student'],
+  ['Notices', '0 sent', 'c', 'notice', 'Nothing sent yet', 'Notices you post reach every family in the app within a minute. Start with a welcome.', 'v', 'M12 5v14M5 12h14', 'Write the first notice', ''],
+  ['Payments today', '₹0', 'a', 'coin', 'No payments yet today', 'The moment a family pays online, or the counter records a payment, it lands here.', 'pri', 'M12 5v14M5 12h14', 'Collect a fee', 'See last week'],
+  ['Homework', '0 set', 'g', 'book', 'No homework set', 'Teachers can set homework from the app. You can also set it for a whole class from here.', 'pri', 'M12 5v14M5 12h14', 'Set homework', ''],
+  ['Students', '0 found', 'r', 'lost', '', '', 'pri', '', 'Clear search', ''],
+  ['Needs you', 'Clear', 'g', 'party', 'All caught up', 'No leave to approve, no fees to chase and every class has marked attendance. Take a breath.', 'v', 'M5 12.5l4.5 4.5L19 7.5', 'See what changed today', '']
+];
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { q: 'Aarvi', retrying: false }; }
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() {
+    var self = this; var s = this.state; var p = this.props;
+    return {
+      themeCls: p.theme === 'dark' ? 'dark' : '', rmCls: p.reduceMotion ? 'rm' : '',
+      cards: C.map(function (c, i) { var search = c[3] === 'lost'; return { title: c[0], count: c[1], chip: c[2], scene: c[3], h: search ? 'No one matches “' + s.q + '”' : c[4], p: search ? 'Check the spelling, or try an admission number like 2019/0412.' : c[5], b1: c[6], ic1: c[7], a1: c[8], a2: c[9], has2: !!c[9], isSearch: search, d: (i * 0.07).toFixed(2), cls: '' }; }),
+      q: s.q, onQ: function (e) { self.setState({ q: e.target.value }); }, sugOn: s.q.trim().toLowerCase().indexOf('aar') === 0 && s.q.toLowerCase() !== 'aarav sharma', useSug: function () { self.setState({ q: 'Aarav Sharma' }); },
+      retrying: s.retrying, notRetrying: !s.retrying, retry: function () { self.setState({ retrying: true }); clearTimeout(self.t); self.t = setTimeout(function () { self.setState({ retrying: false }); }, 1400); }
+    };
+  }
+}

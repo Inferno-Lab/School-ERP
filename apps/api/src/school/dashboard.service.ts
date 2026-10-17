@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   addDays, dayLabel, dayMonth, dayName, istMinutes, istNow, istToday, latestSchoolDay, schoolDaysEnding,
-  type DashboardData, type SearchHit,
+  type DashboardData, type SearchHit, type ShellData,
 } from '@edunest/contracts';
 import type { TenantCtx } from '../tenancy/tenant.js';
 import { ApprovalsService } from './approvals.service.js';
@@ -22,7 +22,7 @@ export class DashboardService {
     private readonly fees: FeesService,
   ) {}
 
-  async get(t: TenantCtx, user: { id: string; name: string }): Promise<DashboardData> {
+  async get(t: TenantCtx, user: { id: string; name: string }, count = 6): Promise<DashboardData> {
     const today = istToday();
     const last = latestSchoolDay(today, OFF_DAYS);
     const doc = await this.settings.doc(t);
@@ -30,14 +30,14 @@ export class DashboardService {
     const rollIds = ((v['dashboard.rollClasses'] as string[] | undefined) ?? []).slice(0, 6);
     const [me, week, feeSummary, needs, counts, unmarked, present, prevPresent, hw, rolls, events, classCount, studentTotal] = await Promise.all([
       t.pool.query<{ name: string; role_name: string | null }>("select u.name, (select string_agg(r.name, ', ') from user_roles ur join roles r on r.id = ur.role_id where ur.user_id = u.id) role_name from users u where u.id = $1", [user.id]),
-      this.attendance.week(t),
-      this.fees.summary(t),
+      this.attendance.week(t, count),
+      this.fees.summary(t, count),
       this.approvals.needsYou(t),
       this.approvals.counts(t),
       this.attendance.unmarked(t),
       t.pool.query<{ present: string }>("select count(*) filter (where m.status in ('present','late')) present from attendance_sessions s join attendance_marks m on m.session_id = s.id where s.date = $1", [last]),
       t.pool.query<{ pct: number | null }>("select avg(case when m.status in ('present','late') then 1.0 else 0.0 end) pct from attendance_sessions s join attendance_marks m on m.session_id = s.id where s.date = $1", [addDays(last, -7)]),
-      this.homeworkWeek(t, last),
+      this.homeworkWeek(t, last, count),
       this.classRolls(t, last, rollIds),
       t.pool.query<{ id: string; at: Date; title: string; note: string }>("select id, starts_at at, title, note from events where (starts_at at time zone 'Asia/Kolkata')::date = $1 order by starts_at", [last]),
       t.pool.query<{ n: string }>('select count(*) n from classes'),
@@ -64,7 +64,7 @@ export class DashboardService {
     const progress = !isToday ? 100 : Math.max(0, Math.min(100, Math.round(((mins - first) / Math.max(1, lastM - first)) * 100)));
     const goalA = Number(v['attendance.goalPct'] ?? 95);
     const goalH = Number(v['homework.goalPct'] ?? 85);
-    const days = schoolDaysEnding(last, 6, OFF_DAYS);
+    const days = schoolDaysEnding(last, count, OFF_DAYS);
     return {
       greetingName: me.rows[0]?.name ?? user.name, roleLabel: me.rows[0]?.role_name ?? (user.id.startsWith('support:') ? 'EduNest support' : ''), schoolName: String(v['school.name'] ?? t.info.name),
       day: { date: last, label: dayLabel(last), isToday, clock },
@@ -90,8 +90,8 @@ export class DashboardService {
     };
   }
 
-  private async homeworkWeek(t: TenantCtx, last: string): Promise<number[]> {
-    const days = schoolDaysEnding(last, 6, OFF_DAYS);
+  private async homeworkWeek(t: TenantCtx, last: string, count: number): Promise<number[]> {
+    const days = schoolDaysEnding(last, count, OFF_DAYS);
     const { rows } = await t.pool.query<{ d: string; pct: number | null }>(
       `select to_char(h.assigned_on,'YYYY-MM-DD') d, avg(case when hs.on_time then 100.0 else 0.0 end) pct from homework h join homework_submissions hs on hs.homework_id = h.id where h.assigned_on = any($1::date[]) group by 1`, [days]);
     const m = new Map(rows.map((r) => [r.d, Math.round(Number(r.pct ?? 0))]));
@@ -110,6 +110,20 @@ export class DashboardService {
       const marked = Number(r.marked);
       return { classId: r.id, name: r.name, size, present: Number(r.present), late: Number(r.late), absent: Number(r.absent), unmarked: Math.max(0, size - marked), pct: marked ? Math.round(((Number(r.present) + Number(r.late)) / marked) * 100) : 0 };
     });
+  }
+
+  /** The small slice every page needs for the menu. */
+  async shell(t: TenantCtx, modules: string[]): Promise<ShellData> {
+    const last = latestSchoolDay(istToday(), OFF_DAYS);
+    const v = (await this.settings.doc(t)).values;
+    const [unmarked, counts] = await Promise.all([this.attendance.unmarked(t), this.approvals.counts(t)]);
+    const examsStart = (v['term.examsStart'] as string | undefined) ?? addDays(last, 30);
+    const daysToGo = Math.max(0, Math.round((new Date(examsStart).getTime() - new Date(istToday()).getTime()) / 86_400_000));
+    return {
+      school: { name: String(v['school.name'] ?? t.info.name), shortName: String(v['school.shortName'] ?? t.info.shortName), logoText: String(v['brand.logoText'] ?? '') || String(v['school.shortName'] ?? t.info.shortName).slice(0, 1).toUpperCase(), place: String(v['school.place'] ?? '') },
+      term: { name: String(v['term.name'] ?? 'Term 1'), examsLabel: `Exams start ${dayMonth(examsStart)}`, daysToGo, progress: Math.max(0, Math.min(100, Math.round(100 * (1 - daysToGo / REVISION_WINDOW_DAYS)))) },
+      badges: { attendance: unmarked.length, admissions: counts.admissions }, modules,
+    };
   }
 
   async search(t: TenantCtx, q: string, perms: string[], modules: string[]): Promise<SearchHit[]> {

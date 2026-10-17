@@ -320,6 +320,14 @@ export interface DashboardData {
   badges: { attendance: number; admissions: number };
 }
 
+/** What the menu needs on every page: who the school is, the term card, and the counts beside menu items. */
+export interface ShellData {
+  school: { name: string; shortName: string; logoText: string; place: string };
+  term: DashboardData['term'];
+  badges: DashboardData['badges'];
+  modules: string[];
+}
+
 // Search (command palette)
 export interface SearchHit {
   group: 'People' | 'Go to' | 'Actions';

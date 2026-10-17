@@ -1,0 +1,38 @@
+
+var AUDS = [['Everyone', 'Families and staff', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18'], ['Parents', '2,310 guardians', 'M5.5 8a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0-7 0M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5'], ['Staff only', '96 people', 'M6 10.5h12v9H6zM8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5']];
+var NEWS = [['Add student', 'M8 8a4 4 0 1 0 8 0a4 4 0 1 0-8 0M4.5 20c.9-3.8 3.9-6 7.5-6s6.6 2.2 7.5 6', 'N S'], ['Collect a fee', 'M3 8.5A2.5 2.5 0 0 1 5.5 6H17V3.5M3 8.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7.5a2 2 0 0 0-2-2H3', 'N F'], ['Post a notice', 'M3.5 10v4a1 1 0 0 0 1 1h3l7 4V5l-7 4h-3a1 1 0 0 0-1 1z', 'N N'], ['Mark attendance', 'M4 5h16v15H4zM4 9h16M8.5 14l2 2 4-4', 'N A']];
+var FN = [['Students', 'M8 8a4 4 0 1 0 8 0a4 4 0 1 0-8 0M4.5 20c.9-3.8 3.9-6 7.5-6s6.6 2.2 7.5 6'], ['Attendance', 'M4 5h16v15H4zM4 9h16M8.5 14l2 2 4-4'], ['Fees', 'M3 8.5A2.5 2.5 0 0 1 5.5 6H17V3.5M3 8.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7.5a2 2 0 0 0-2-2H3'], ['Reports', 'M4 20V10M10 20V4M16 20v-7M21 20H3']];
+var TS = [['Notice sent', 'Reached 118 families', 'M5 12.5l4.5 4.5L19 7.5', '#17A673', '#fff', 'Undo'], ['12 SMS failed', 'The operator rejected the template', 'M7 7l10 10M17 7 7 17', '#E5484D', '#fff', 'Retry'], ['Rahul Verma joined', 'Editing the 8 B timetable', 'M12 8h.01M12 11v6', '#6A4CF5', '#fff', 'View']];
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { busy: false, adm: '2019/41', admState: 'idle', shake: 0, otp: 2, aud: 1, audOpen: false, newOpen: false, sw: true, cb: false, vis: 0, seg: 1, fn: false, tl: [0, 1, 2], fan: false, newT: -1, skel: true }; }
+  componentDidMount() { var self = this; this.sk = setTimeout(function () { self.setState({ skel: false }); }, 1600); }
+  componentWillUnmount() { clearTimeout(this.sk); clearTimeout(this.b); }
+  renderVals() {
+    var self = this; var s = this.state; var p = this.props;
+    var VIS = [['Private', 'M6 10.5h12v9H6zM8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5', 112], ['Class 8 A', 'M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z', 128], ['Public', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18', 112]];
+    var vx = 4; for (var i = 0; i < s.vis; i++) vx += VIS[i][2];
+    var SEG = [['Day', 74], ['Week', 82], ['Term', 78]]; var sx = 4; for (var j = 0; j < s.seg; j++) sx += SEG[j][1];
+    var dots = []; for (var k = 0; k < 36; k++) dots.push({ c: k === 33 || k === 18 ? 'a' : (k === 27 ? 'l' : ''), d: (k * 0.025).toFixed(3) });
+    var ticks = []; for (var t = 0; t < 14; t++) ticks.push({ c: t < 9 ? 'var(--v)' : 'var(--line2)' });
+    var n = s.tl.length;
+    return {
+      themeCls: p.theme === 'dark' ? 'dark' : '', rmCls: p.reduceMotion ? 'rm' : '', shk: s.shake ? 'shk' + s.shake : '', yes: true,
+      busy: s.busy, notBusy: !s.busy, load: function () { self.setState({ busy: true }); clearTimeout(self.b); self.b = setTimeout(function () { self.setState({ busy: false }); }, 1300); },
+      adm: s.adm, onAdm: function (e) { self.setState({ adm: e.target.value, admState: 'idle' }); }, admCls: s.admState === 'bad' ? 'err shake' : '', admInv: s.admState === 'bad' ? 'true' : 'false', admBad: s.admState === 'bad', admGood: s.admState === 'good', admIdle: s.admState === 'idle',
+      check: function () { var ok = /^\d{4}\/\d{4}$/.test(s.adm); self.setState({ admState: ok ? 'good' : 'bad', shake: ok ? s.shake : (s.shake === 1 ? 2 : 1) }); },
+      otp: [0, 1, 2, 3, 4, 5].map(function (i) { var d = '482917'; return { v: i < s.otp ? d[i] : '', c: (i === s.otp ? 'cur ' : '') + (i === s.otp - 1 ? 'f' : '') }; }), typeOtp: function () { self.setState({ otp: s.otp >= 6 ? 0 : s.otp + 1 }); },
+      audOpen: s.audOpen ? 'open' : '', audExp: s.audOpen ? 'true' : 'false', audLabel: AUDS[s.aud][0], audIc: AUDS[s.aud][2], toggleAud: function () { self.setState({ audOpen: !s.audOpen, newOpen: false }); },
+      auds: AUDS.map(function (a, i) { return { n: a[0], s: a[1], ic: a[2], on: i === s.aud, d: 50 + i * 45, pick: function () { self.setState({ aud: i, audOpen: false }); } }; }),
+      newOpen: s.newOpen ? 'open' : '', newExp: s.newOpen ? 'true' : 'false', toggleNew: function () { self.setState({ newOpen: !s.newOpen, audOpen: false }); }, news: NEWS.map(function (x, i) { return { t: x[0], ic: x[1], k: x[2], d: 50 + i * 45 }; }),
+      swOn: s.sw ? 'on' : '', swS: s.sw ? 'true' : 'false', flipSw: function () { self.setState({ sw: !s.sw }); }, cbOn: s.cb ? 'on' : '', cbS: s.cb ? 'true' : 'false', flipCb: function () { self.setState({ cb: !s.cb }); },
+      vis: VIS.map(function (v, i) { return { n: v[0], ic: v[1], on: i === s.vis ? 'on' : '', sel: i === s.vis ? 'true' : 'false', pick: function () { self.setState({ vis: i }); } }; }), vw: VIS[s.vis][2], vx: vx,
+      segs: SEG.map(function (g, i) { return { n: g[0], on: i === s.seg ? 'on' : '', pick: function () { self.setState({ seg: i }); } }; }), sw: SEG[s.seg][1], sx: sx,
+      dots: dots, ticks: ticks,
+      fnOpen: s.fn ? 'open' : '', fnExp: s.fn ? 'true' : 'false', toggleFn: function () { self.setState({ fn: !s.fn }); }, fn: FN.map(function (f, i) { return { n: f[0], ic: f[1], d: 40 + (3 - i) * 45 }; }),
+      toasts: s.tl.map(function (ti, j) { var t2 = TS[ti]; var depth = n - 1 - j; var tf = s.fan ? 'translateY(-' + depth * 76 + 'px)' : 'translateY(-' + depth * 12 + 'px) scale(' + (1 - depth * .05) + ')'; return { t: t2[0], s: t2[1], ic: t2[2], bg: t2[3], fg: t2[4], b: t2[5], tf: tf, op: depth > 2 ? 0 : 1, z: 10 + j, new: j === n - 1 && s.newT >= 0 ? 'new' : '' }; }),
+      fan: function () { self.setState({ fan: true }); }, unfan: function () { self.setState({ fan: false }); },
+      addToast: function () { var next = (s.tl[s.tl.length - 1] + 1) % 3; self.setState({ tl: s.tl.concat([next]).slice(-3), newT: s.newT + 1 }); },
+      skel: s.skel, notSkel: !s.skel, three: [1, 2, 3], reload: function () { self.setState({ skel: true }); clearTimeout(self.sk); self.sk = setTimeout(function () { self.setState({ skel: false }); }, 1400); }
+    };
+  }
+}

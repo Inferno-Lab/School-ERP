@@ -1,0 +1,39 @@
+/* Scoped from design/canvas/Language.dc.html. Selectors are prefixed with .pg-language. */
+
+
+.pg-language .lg6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:20px}
+.pg-language .t2{grid-column:span 2}.pg-language .t3{grid-column:span 3}.pg-language .t4{grid-column:span 4}.pg-language .t6{grid-column:span 6}
+.pg-language .tl{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:26px;box-shadow:var(--sh1);display:flex;flex-direction:column;gap:14px;animation:nRise .8s var(--e) both;animation-delay:var(--d,0s)}
+.pg-language .tl h2{margin:0;font:700 12.5px var(--fb);letter-spacing:.02em;color:var(--ink3)}
+.pg-language .tl h3{margin:0;font:700 22px/1.15 var(--fd);letter-spacing:-.025em}
+.pg-language .tl p{margin:0;font:500 14.5px/1.55 var(--fb);color:var(--ink2)}
+.pg-language .tl.ink{background:var(--ci);color:#fff;border-color:transparent}
+.pg-language .tl.ink p,.pg-language .tl.ink h2{color:#B4AFCB}
+.pg-language .cs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pg-language .cs div{border-radius:18px;padding:14px 12px;display:flex;flex-direction:column;gap:2px;min-height:92px;justify-content:flex-end;transition:transform .4s var(--sp)}
+.pg-language .cs div:hover{transform:translateY(-4px) rotate(-1.5deg)}
+.pg-language .cs b{font:800 14px var(--fb)}.pg-language .cs small{font:600 11.5px var(--fb);opacity:.75}
+.pg-language .ty{display:flex;flex-direction:column;gap:2px}
+.pg-language .ty small{font:700 11.5px var(--fb);color:var(--ink3);letter-spacing:.04em}
+.pg-language .rad{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.pg-language .rad div{background:var(--vS);border:1.5px solid var(--v2);display:grid;place-items:center;font:800 12px var(--fb);color:var(--vD)}
+.pg-language .ease{position:relative;height:52px;border-radius:999px;background:var(--sunk);overflow:hidden;cursor:pointer}
+.pg-language .ease i{position:absolute;left:6px;top:6px;width:40px;height:40px;border-radius:50%;background:var(--v);transition:transform 1.1s var(--c1)}
+.pg-language .ease.go i{transform:translateX(var(--dist))}
+.pg-language .ease span{position:absolute;right:16px;top:50%;transform:translateY(-50%);font:700 12.5px var(--fb);color:var(--ink3)}
+.pg-language .rules{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 28px;margin:0;padding:0;list-style:none}
+.pg-language .rules li{display:flex;gap:12px;font:600 14.5px/1.5 var(--fb);color:var(--ink2)}
+.pg-language .rules li b{color:var(--ink);font-weight:800}
+.pg-language .rules li i{flex:none;width:26px;height:26px;border-radius:9px;background:var(--vS);color:var(--vD);display:grid;place-items:center;font:800 12px var(--fb);font-style:normal}
+.pg-language .ic{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pg-language .ic div{aspect-ratio:1;border-radius:16px;background:var(--sunk);display:grid;place-items:center;color:var(--ink);transition:background .25s,color .25s,transform .4s var(--sp)}
+.pg-language .ic div:hover{background:var(--v);color:#fff;transform:scale(1.1)}
+.pg-language .ic svg{width:22px;height:22px}
+.pg-language .mini-pen{display:flex;align-items:flex-end;gap:7px;height:96px}
+.pg-language .mini-pen i{flex:1;border-radius:7px 7px 3px 3px;background:var(--v);transform-origin:bottom;animation:nGrow 1s var(--e) both}
+.pg-language .mini-pen i:nth-child(odd){background:var(--v2)}
+@keyframes nGrow{from{transform:scaleY(0)}}
+.pg-language .dots{display:flex;gap:5px;flex-wrap:wrap}
+.pg-language .dots i{width:12px;height:12px;border-radius:50%;background:var(--g)}
+.pg-language .dots i.o{background:var(--line2)}.pg-language .dots i.a{background:var(--r)}
+

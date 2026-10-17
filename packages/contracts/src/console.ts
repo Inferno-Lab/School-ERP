@@ -89,7 +89,7 @@ export const WizardBasics = z.object({
   name: z.string().trim().min(3, 'Enter the school’s full name').max(80),
   shortName: z.string().trim().min(2, 'Enter a short name').max(20),
   slug: Slug,
-  board: z.enum(['CBSE', 'ICSE', 'State', 'IB', 'Other']).default('CBSE'),
+  board: z.enum(['CBSE', 'ICSE', 'State', 'IB', 'International', 'Other']).default('CBSE'),
   address: z.string().trim().max(240).default(''),
   city: z.string().trim().max(60).default(''),
   contactName: z.string().trim().min(2).max(80),

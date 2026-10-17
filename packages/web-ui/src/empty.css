@@ -1,0 +1,26 @@
+/* Empty, error and not-found states, from the Empties board. */
+.nest .eg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.nest .es{position:relative;background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:var(--sh1);overflow:hidden;display:flex;flex-direction:column;transition:transform .5s var(--e),box-shadow .5s;animation:nRise .9s var(--e) both;animation-delay:var(--d)}
+.nest .es:hover{transform:translateY(-5px);box-shadow:var(--sh2)}
+.nest .eh{display:flex;align-items:center;gap:10px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.nest .eh b{font:700 16px var(--fd);letter-spacing:-.02em;flex:1}
+.nest .ghost{height:30px;width:90px;border-radius:999px;background:var(--sunk)}
+.nest .eb{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 28px 28px;gap:8px;background:radial-gradient(240px 160px at 50% 28%,color-mix(in srgb,var(--v) 9%,transparent),transparent)}
+.nest .eb .art{width:230px;margin-bottom:6px}
+.nest .eb h3{margin:0;font:700 24px/1.15 var(--fd);letter-spacing:-.03em}
+.nest .eb p{margin:0;font:500 14.5px/1.55 var(--fb);color:var(--ink2);max-width:310px}
+.nest .es-act{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.nest .sug{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;background:var(--vS);color:var(--vD);font:800 13px var(--fb);border:0;cursor:pointer;transition:transform .35s var(--sp)}
+.nest .sug:hover{transform:scale(1.06)}
+.nest .es-nf{grid-column:span 2;display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:center;gap:10px;padding:34px 40px;background:var(--ci);color:#fff;border-radius:28px;overflow:hidden;position:relative}
+.nest .es-nf .n{font:800 190px/.9 var(--fd);letter-spacing:-.07em;background:none;color:#fff}
+.nest .es-nf .n span{color:var(--v)}
+.nest .es-nf h3{margin:6px 0 8px;font:700 30px/1.1 var(--fd);letter-spacing:-.03em}
+.nest .es-nf p{margin:0;font:500 15.5px/1.55 var(--fb);color:#B4AFCB;max-width:400px}
+.nest .es-nf .orb{position:absolute;right:-60px;top:-80px;width:360px;height:360px;border-radius:50%;background:radial-gradient(closest-side,rgba(142,120,255,.5),transparent);pointer-events:none}
+.nest .es-err{border-color:color-mix(in srgb,var(--r) 35%,var(--line))}
+.nest .es-err .eb{background:radial-gradient(240px 160px at 50% 28%,color-mix(in srgb,var(--r) 8%,transparent),transparent)}
+.nest .in3{display:flex;align-items:center;gap:10px;height:46px;padding:0 16px;border-radius:999px;border:1.5px solid var(--line2);background:var(--card);width:300px;transition:border-color .2s,box-shadow .3s var(--e)}
+.nest .in3:focus-within{border-color:var(--v);box-shadow:0 0 0 5px color-mix(in srgb,var(--v) 16%,transparent)}
+.nest .in3 input{flex:1;min-width:0;border:0;outline:0;background:none;font:700 14.5px var(--fb);color:var(--ink)}
+.nest .in3 svg{width:18px;height:18px;color:var(--ink3);flex:none}

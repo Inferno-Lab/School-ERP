@@ -7,6 +7,7 @@ export const SchoolSettingsSchema = z.object({
   'school.name': z.string().min(2).max(80),
   'school.shortName': z.string().min(2).max(20),
   'school.tagline': z.string().max(120).default(''),
+  'school.place': z.string().max(60).default(''),
   'school.phone': z.string().max(24).default(''),
   'school.email': z.string().max(120).default(''),
   'school.address': z.string().max(240).default(''),

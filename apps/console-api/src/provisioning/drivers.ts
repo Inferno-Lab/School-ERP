@@ -163,7 +163,7 @@ const migrateSeed: Driver = {
         demoHash ??= hashPassword('nest2026');
         const p = c.payload;
         const report = await seedSchool(pool, {
-          school: { name: p.basics.name, shortName: p.basics.shortName, tagline: p.branding.tagline, phone: p.basics.contactPhone, email: p.basics.contactEmail, address: [p.basics.address, p.basics.city].filter(Boolean).join(', '), color: p.branding.color, logoText: p.branding.logoText, language: p.basics.language },
+          school: { name: p.basics.name, shortName: p.basics.shortName, tagline: p.branding.tagline, place: [p.basics.board, p.basics.city].filter(Boolean).join(' · '), phone: p.basics.contactPhone, email: p.basics.contactEmail, address: [p.basics.address, p.basics.city].filter(Boolean).join(', '), color: p.branding.color, logoText: p.branding.logoText, language: p.basics.language },
           admin: { name: p.admin.name, email: p.admin.email, phone: p.admin.phone, passwordHash: '!' },
           modules: closeModules(p.plan.modules), demoMode: p.data.start === 'demo', data: p.data.start === 'demo' ? 'demo' : 'empty', demoPasswordHash: await demoHash,
         });
