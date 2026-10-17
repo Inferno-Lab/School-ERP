@@ -4,3 +4,4 @@ export * from './auth.js';
 export * from './school.js';
 export * from './config.js';
 export * from './console.js';
+export * from './dates.js';
