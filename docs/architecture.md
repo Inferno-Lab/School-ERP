@@ -42,4 +42,4 @@ GetX named routes (`AppRoutes`). Tab switching from inside a screen: `ShellContr
 
 ## Where the platform is going
 
-The long-term plan (admin console, backend, per-school builds, configurable modules) is in `docs/superpowers/specs/2026-10-10-edunest-platform-monorepo-design.md`. The app side already follows it: repositories are interfaces, flags are central, copy is keyed, and per-school values are constants in `AppConfig`.
+The platform plan (backend, admin panel, console, per-school builds, configurable modules) is in `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`. The app side already follows it: repositories are interfaces, flags are central, copy is keyed, and per-school values are constants in `AppConfig`.
