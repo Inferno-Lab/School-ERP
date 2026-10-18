@@ -79,7 +79,7 @@ export function SchoolView({ v }: { v: any }) {
         </div>
         {v.tab !== 0 && v.extra}
         {v.tab === 0 && (
-          <section className="grid">
+          <section className="grid" data-even="">
             <div className="card s7 rise" style={{ "--d": ".15s" } as CSSProperties} aria-labelledby="prov">
               <div className="ch">
                 <h2 id="prov">{v.provTitle}</h2>
@@ -124,7 +124,7 @@ export function SchoolView({ v }: { v: any }) {
                   </Fragment>
                 ))}
               </div>
-              <div className="log" aria-live="polite" aria-label="Setup log">
+              <div className="log" data-even-scroll="" aria-live="polite" aria-label="Setup log">
                 {v.log.map((l: any, $i: number) => (
                   <Fragment key={$i}>
                     <div className="ll">

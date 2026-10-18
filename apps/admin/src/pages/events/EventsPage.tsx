@@ -54,7 +54,7 @@ export function EventsPage() {
       {all.length === 0 ? (
         <div><EmptyCard title="Events" chip={{ text: '0 events', tone: 'v' }} scene="calendar" heading="The calendar is empty" body="Add sports day, parent meetings, holidays and exam weeks. Families see them in the app and tell you if they are coming." actions={canWrite ? <AddBtn onClick={() => setEditing('new')}>Add event</AddBtn> : undefined} /></div>
       ) : (
-        <section className="evg">
+        <section className="evg" data-even="">
           <div className="evcol">
           <div className="card rise evc">
             <div className="ch"><h2>{month.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</h2>
@@ -85,7 +85,7 @@ export function EventsPage() {
           </div>
           <div className="card rise evl" style={{ '--d': '.06s' } as React.CSSProperties}>
             <div className="ch"><h2>{day ? new Date(`${day}T00:00:00`).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }) : 'Coming up'}</h2>{day && <button className="btn sm" onClick={() => setDay(null)}>Show all</button>}</div>
-            <div className="lscroll" style={{ maxHeight: 'min(62dvh,620px)', marginTop: 8 }}>
+            <div className="lscroll" data-even-scroll="" style={{ maxHeight: 'min(62dvh,620px)', marginTop: 8 }}>
               {shown.length === 0 && <div className="help" style={{ padding: '12px 0' }}>{day ? 'Nothing on this day.' : 'Nothing coming up. Add an event to get started.'}</div>}
               {shown.map((e) => <EventItem key={e.id} e={e} canWrite={canWrite} onOpen={() => setEditing(e)} />)}
               {past.length > 0 && <><div className="lbl" style={{ padding: '16px 0 6px' }}>Earlier</div>{past.map((e) => <EventItem key={e.id} e={e} canWrite={canWrite} onOpen={() => setEditing(e)} dim />)}</>}

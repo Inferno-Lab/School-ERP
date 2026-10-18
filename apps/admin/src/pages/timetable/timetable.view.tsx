@@ -94,7 +94,7 @@ export function TimetableView({ v }: { v: any }) {
             ))}
           </span>
         </div>
-        <div className="bd">
+        <div className="bd" data-even="">
           <section className="tg rise" style={{ "--d": ".1s", ...v.tgStyle } as CSSProperties} aria-label="Week grid">
             <div className="trow">
               <span></span>
@@ -274,7 +274,7 @@ export function TimetableView({ v }: { v: any }) {
                   </div>
                 </div>
               </div>
-              <div className="lscroll" style={{ maxHeight: "232px" } as CSSProperties}>
+              <div className="lscroll" data-even-scroll="" style={{ maxHeight: "232px" } as CSSProperties}>
               {v.loads.map((l: any, $i: number) => (
                 <Fragment key={$i}>
                   <div className="lr" data-tip={`${l.n}\n${l.v} periods this week`}>
@@ -303,14 +303,14 @@ export function TimetableView({ v }: { v: any }) {
                 </h2>
                 {v.unplaced.length > 0 && <span className="chip a">{v.unplaced.length}</span>}
               </div>
-              <div className="lscroll" style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px", maxHeight: "176px" } as CSSProperties}>
+              <div className="lscroll" data-even-scroll="" style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px", maxHeight: "176px" } as CSSProperties}>
                 {v.unplaced.length === 0 && <div className="help">Every period this class needs has a place.</div>}
                 {v.unplaced.map((u: any, $i: number) => (
                   <div className="un" key={$i}>
                     <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" style={{ color: "var(--ink3)" } as CSSProperties}>
                       <path className="i" d="M9 5h.01M9 12h.01M9 19h.01M15 5h.01M15 12h.01M15 19h.01" style={{ strokeWidth: "3" } as CSSProperties}></path>
                     </svg>
-                    {u.n} · {u.missing} {u.missing === 1 ? "period" : "periods"}
+                    {u.name} · {u.missing} {u.missing === 1 ? "period" : "periods"}
                   </div>
                 ))}
               </div>

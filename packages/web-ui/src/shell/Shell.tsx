@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { EvenRows } from '../EvenRows';
+import { SegFit } from '../SegFit';
 import { Tooltips } from '../Tip';
 
 export interface ShellProps {
@@ -26,6 +28,8 @@ export function Shell({ page, theme, aside, frClass, overlays, children }: Shell
         {overlays}
       </div>
       <Tooltips />
+      <SegFit />
+      <EvenRows />
     </div>
   );
 }

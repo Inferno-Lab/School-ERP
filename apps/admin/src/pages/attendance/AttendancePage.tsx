@@ -65,7 +65,7 @@ export function AttendancePage() {
             {day.isLoading && <div className="skc" style={{ height: 320, margin: '0 22px 22px', borderRadius: 20 }} />}
             {!day.isLoading && marks.length === 0 && <div style={{ padding: '0 22px 22px' }}><EmptyCard title={`Class ${cls?.name ?? ''}`} chip={{ text: '0 students', tone: 'v' }} scene="register" heading="No students in this class" body="Students appear here once they are added to the class." /></div>}
             {marks.length > 0 && (
-              <div className="scroll-x">
+              <div className="scroll-x" data-fill="">
                 {marks.map((m) => {
                   const t = tintFor(m.name);
                   const s = statusOf(m.studentId, m.status);
@@ -87,8 +87,9 @@ export function AttendancePage() {
               </div>
             )}
           </div>
-          <div className="s12" style={{ order: -1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 18, alignItems: 'start', minWidth: 0 }}>
-            <div className="tile t-v rise" style={{ '--d': '.08s' } as React.CSSProperties}>
+          {/* The count and the save button share one tile, so the row above the roll call is one even block. */}
+          <div className="tile t-v s12 rise" style={{ '--d': '.08s', order: -1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(280px,100%),1fr))', gap: '18px 36px', alignItems: 'center' } as React.CSSProperties}>
+            <div style={{ minWidth: 0 }}>
               <span className="lbl" style={{ color: 'rgba(255,255,255,.7)' }}>Present or late</span>
               <div className="big" style={{ marginTop: 8 }}>{counts.present + counts.late}<small style={{ fontSize: 18, opacity: .6 }}> / {marks.length}</small></div>
               <div className="meter" aria-hidden="true">
@@ -102,13 +103,15 @@ export function AttendancePage() {
               </div>
             </div>
             {canMark ? (
-              <div className="card rise" style={{ '--d': '.14s' } as React.CSSProperties}>
-                <div className="help" style={{ marginBottom: 12 }}>{changed ? `${changed} ${changed === 1 ? 'change' : 'changes'} not saved yet.` : 'Tap a name’s status to change it, then save.'}</div>
-                <button className="btn pri" style={{ width: '100%' }} disabled={!changed || save.isPending} onClick={() => save.mutate()}>{save.isPending ? 'Saving…' : 'Save roll call'}</button>
-                {changed > 0 && <button className="btn ghost" style={{ width: '100%', marginTop: 8 }} onClick={() => setDraft({})}>Discard changes</button>}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ font: '600 14px var(--fb)', opacity: .85, marginBottom: 12 }}>{changed ? `${changed} ${changed === 1 ? 'change' : 'changes'} not saved yet.` : 'Tap a name’s status to change it, then save.'}</div>
+                <div className="tgrow">
+                  <button className="btn wht" disabled={!changed || save.isPending} onClick={() => save.mutate()}>{save.isPending ? 'Saving…' : 'Save roll call'}</button>
+                  {changed > 0 && <button className="btn" style={{ background: 'rgba(255,255,255,.16)', color: '#fff', borderColor: 'transparent' }} onClick={() => setDraft({})}>Discard changes</button>}
+                </div>
               </div>
             ) : (
-              <div className="card rise"><div className="help">You can look at attendance but not change it. Ask the school office for the roll-call permission.</div></div>
+              <div style={{ font: '600 14px/1.5 var(--fb)', opacity: .85 }}>You can look at attendance but not change it. Ask the school office for the roll-call permission.</div>
             )}
           </div>
         </section>

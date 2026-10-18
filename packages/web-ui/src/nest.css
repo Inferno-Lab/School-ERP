@@ -100,7 +100,7 @@ font-family:var(--fb);color:var(--ink);background:var(--bd);-webkit-font-smoothi
 .nest .chip.r{background:var(--rS);color:var(--r)}
 .nest .chip.b{background:var(--bS);color:var(--b)}
 .nest .chip.k{background:var(--ci);color:#fff}
-.nest .tr{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 8px;border-radius:999px;font:800 11.5px var(--fb)}
+.nest .tr{white-space:nowrap;flex:none;display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 8px;border-radius:999px;font:800 11.5px var(--fb)}
 .nest .tr svg{width:11px;height:11px}
 .nest .tr.up{background:var(--gS);color:var(--gD)}
 .nest .tr.dn{background:var(--rS);color:var(--r)}
@@ -260,5 +260,6 @@ font-family:var(--fb);color:var(--ink);background:var(--bd);-webkit-font-smoothi
 @keyframes mNopeA{0%,100%{transform:translateX(0) rotate(0)}12%{transform:translateX(-9px) rotate(-5deg)}27%{transform:translateX(9px) rotate(5deg)}42%{transform:translateX(-7px) rotate(-4deg)}57%{transform:translateX(6px) rotate(3deg)}72%{transform:translateX(-3px)}86%{transform:translateX(2px)}}
 @keyframes mNopeB{0%,100%{transform:translateX(0) rotate(0)}12%{transform:translateX(-9px) rotate(-5deg)}27%{transform:translateX(9px) rotate(5deg)}42%{transform:translateX(-7px) rotate(-4deg)}57%{transform:translateX(6px) rotate(3deg)}72%{transform:translateX(-3px)}86%{transform:translateX(2px)}}
 /* reduce motion */
-.nest.rm *,.nest.rm *::before,.nest.rm *::after{animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:1ms!important;transition-delay:0s!important}
-@media (prefers-reduced-motion:reduce){.nest *,.nest *::before,.nest *::after{animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:1ms!important;transition-delay:0s!important}}
+.nest.rm *,.nest.rm *::before,.nest.rm *::after{animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important}
+/* transition: none, not a 1 ms duration: a duration on its own turns on `transition: all` for every element. */
+@media (prefers-reduced-motion:reduce){.nest *,.nest *::before,.nest *::after{animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important}}

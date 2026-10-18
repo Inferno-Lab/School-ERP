@@ -275,7 +275,7 @@ export function DashboardView({ v }: { v: any }) {
             </div>
           </div>
         </section>
-        <section className="grid" style={{ alignItems: "start" } as CSSProperties}>
+        <section className="grid" data-even="" style={{ alignItems: "start" } as CSSProperties}>
           <div className="tile t-l s8 rise" style={{ "--d": ".25s" } as CSSProperties} aria-labelledby="chtt">
             <div className="ch" style={{ marginBottom: "8px" } as CSSProperties}>
               <h2 id="chtt" style={{ fontSize: "22px" } as CSSProperties}>
@@ -335,6 +335,7 @@ export function DashboardView({ v }: { v: any }) {
               </h2>
               <span className="chip c">{v.leftLabel}</span>
             </div>
+            <div className="needl" data-even-scroll="">
             {v.needs.map((n: any, $i: number) => (
               <Fragment key={$i}>
                 <div className={`need ${n.done ?? ""}`}>
@@ -368,6 +369,7 @@ export function DashboardView({ v }: { v: any }) {
                 </div>
               </>
             )}
+            </div>
           </div>
         </section>
         <section className="grid">

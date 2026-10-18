@@ -149,7 +149,7 @@ export function FleetView({ v }: { v: any }) {
           </div>
         </section>
         <section className="grid" style={{ alignItems: "stretch" } as CSSProperties}>
-          <div className="card s8 rise" style={{ "--d": ".2s" } as CSSProperties} aria-labelledby="req">
+          <div className="card s12 rise" style={{ "--d": ".2s" } as CSSProperties} aria-labelledby="req">
             <div className="ch">
               <h2 id="req">Requests per minute</h2>
               <span className="lgd">
@@ -178,7 +178,7 @@ export function FleetView({ v }: { v: any }) {
               </svg>
               <span className="vl" style={{ left: `${v.cx ?? ""}%` } as CSSProperties}></span>
               <span className="cd" style={{ left: `${v.cx ?? ""}%`, top: `${v.cy ?? ""}px` } as CSSProperties}></span>
-              <span className="ctp" style={{ left: `${v.cx ?? ""}%`, top: `${v.ty ?? ""}px` } as CSSProperties}>
+              <span className="ctp" style={{ left: `${v.tx ?? ""}%`, top: `${v.ty ?? ""}px` } as CSSProperties}>
                 <b>{v.cv} per minute</b>
                 {v.ct}
               </span>
@@ -191,14 +191,14 @@ export function FleetView({ v }: { v: any }) {
               </div>
             </div>
           </div>
-          <div className="card s4 rise" style={{ "--d": ".25s" } as CSSProperties} aria-labelledby="cells">
+          <div className="card s12 rise" style={{ "--d": ".25s" } as CSSProperties} aria-labelledby="cells">
             <div className="ch">
               <h2 id="cells">Cells</h2>
               <button className="btn sm" onClick={v.openCells}>
                 Manage
               </button>
             </div>
-            <div style={{ marginTop: "10px" } as CSSProperties}>
+            <div className="cellg" style={{ marginTop: "10px" } as CSSProperties}>
               {v.cells.length === 0 && <div className="help">No cells yet. Cells appear when the first school is placed.</div>}
               {v.cells.map((c: any, $i: number) => (
                 <Fragment key={$i}>
@@ -224,7 +224,7 @@ export function FleetView({ v }: { v: any }) {
           </div>
         </section>
         <section className="grid">
-          <div className="card tbl s8 rise" style={{ "--d": ".3s", padding: "0" } as CSSProperties} aria-labelledby="sch">
+          <div className="card tbl s12 rise" style={{ "--d": ".3s", padding: "0" } as CSSProperties} aria-labelledby="sch">
             <div className="ch" style={{ padding: "22px 22px 14px" } as CSSProperties}>
               <h2 id="sch">Schools</h2>
               <span className="chip">{v.rows.length} · newest first</span>
@@ -291,7 +291,7 @@ export function FleetView({ v }: { v: any }) {
             )}
             {v.loading && <div className="skc" style={{ height: "260px", margin: "0 22px 22px", borderRadius: "20px" } as CSSProperties}></div>}
           </div>
-          <div className="s4" style={{ display: "flex", flexDirection: "column", gap: "14px" } as CSSProperties}>
+          <div className="s12" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(320px,100%),1fr))", gap: "14px", alignItems: "start" } as CSSProperties}>
             {v.inc && (
               <div className={`inc ${v.inc.cls ?? ""} rise`} style={{ "--d": ".35s" } as CSSProperties} role="status">
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" } as CSSProperties}>

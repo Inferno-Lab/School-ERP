@@ -116,7 +116,7 @@ export function SettingsView({ v }: { v: any }) {
                     <b>Brand colour</b>
                     <small>Used for the app’s header and buttons. Contrast is checked for you.</small>
                   </div>
-                  <div style={{ display: "flex", gap: "22px", flexWrap: "wrap", alignItems: "flex-start" } as CSSProperties}>
+                  <div style={{ display: "flex", gap: "22px", flexWrap: "wrap", alignItems: "center" } as CSSProperties}>
                     <div style={{ flex: "1", minWidth: "200px", display: "flex", flexDirection: "column", gap: "14px" } as CSSProperties}>
                       <div className="sw5" role="radiogroup" aria-label="Brand colour">
                         {v.swatches.map((w: any, $i: number) => (
