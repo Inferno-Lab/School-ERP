@@ -25,6 +25,7 @@ export interface StudentRow {
   classId: string;
   className: string;
   rollNo: string;
+  house: string | null;
   guardianName: string;
   feeStatus: FeeStatus;
   amountDue: number;
@@ -293,6 +294,16 @@ export interface TeacherLoad {
   periodsPerWeek: number;
   max: number;
   subjects: string[];
+}
+
+export interface TeacherOption {
+  id: string;
+  name: string;
+  subjects: string[];
+  load: number;
+  max: number;
+  /** Not teaching another class in the period being changed. */
+  free: boolean;
 }
 
 // Dashboard

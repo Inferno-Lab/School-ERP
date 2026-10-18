@@ -1,7 +1,7 @@
 import type {
   ApprovalDecision, ApprovalRow, AssignFee, AttendanceDay, AuditRow, ClassInfo, ContactReveal, CoverRequest, DashboardData, EffectiveConfig, FeeSummary, ImportResult, InvoiceRow,
-  LoginRequest, LoginResponse, MessageRequest, NoticeCreate, NoticeRow, Paged, PaymentCreate, SearchHit, SessionUser, SettingsDoc, SettingsPatch, ShellData, SlotPatch, StudentCreate, StudentDetail,
-  StudentRow, StudentSummary, StudentViews, TeacherLoad, TimetableView, TokenPair, VerifyRequest,
+  LoginRequest, LoginResponse, MessageRequest, NoticeCreate, NoticeRow, Paged, PaymentCreate, SearchHit, SessionUser, SettingsDoc, SettingsPatch, SettingsResponse, ShellData, SlotPatch, StudentCreate, StudentDetail,
+  StudentRow, StudentSummary, StudentViews, TeacherLoad, TeacherOption, TimetableView, TokenPair, VerifyRequest,
 } from '@edunest/contracts';
 import type { Http, Query } from './http';
 
@@ -13,10 +13,6 @@ export interface BrandInfo {
   tagline: string;
   demoMode: boolean;
   language: string;
-}
-
-export interface SettingsResponse extends SettingsDoc {
-  modules: { key: string; name: string; blurb: string; requires: string[]; core: boolean; backend: boolean; entitled: boolean }[];
 }
 
 export type StudentListQuery = {
@@ -70,6 +66,7 @@ export function schoolApi(h: Http) {
     timetable: {
       view: (classId: string) => h.get<TimetableView>('/v1/timetable', { classId }),
       loads: (classId: string) => h.get<TeacherLoad[]>('/v1/timetable/loads', { classId }),
+      teachers: (slotId: string) => h.get<TeacherOption[]>('/v1/timetable/teachers', { slotId }),
       patch: (id: string, b: SlotPatch) => h.patch<void>(`/v1/timetable/slots/${id}`, b),
       cover: (b: CoverRequest) => h.post<void>('/v1/timetable/cover', b),
       publish: () => h.post<{ families: number; teachers: number; version: number }>('/v1/timetable/publish'),

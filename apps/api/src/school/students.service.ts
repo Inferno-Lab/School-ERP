@@ -15,7 +15,7 @@ const FEE_HORIZON_DAYS = 30;
 const LOW_ATTENDANCE = 0.88;
 
 interface ListRow {
-  id: string; admission_no: string; name: string; class_id: string; class_name: string; roll_no: string; status: string;
+  id: string; admission_no: string; name: string; class_id: string; class_name: string; roll_no: string; house: string | null; status: string;
   guardian_name: string | null; overdue: string; due: string; pct: number | null; total: string;
 }
 
@@ -46,7 +46,7 @@ export class StudentsService {
       att as (
         select m.student_id, avg(case when m.status in ('present','late') then 1.0 else 0.0 end) pct
         from attendance_marks m join attendance_sessions s on s.id = m.session_id group by m.student_id)
-      select s.id, s.admission_no, s.name, s.class_id, c.name class_name, s.roll_no, s.status, g.name guardian_name,
+      select s.id, s.admission_no, s.name, s.class_id, c.name class_name, s.roll_no, s.house, s.status, g.name guardian_name,
         coalesce(fee.overdue, 0) overdue, coalesce(fee.due, 0) due, att.pct, count(*) over() total
       from students s join classes c on c.id = s.class_id
         left join student_guardians sg on sg.student_id = s.id and sg.is_primary left join guardians g on g.id = sg.guardian_id
@@ -91,7 +91,7 @@ export class StudentsService {
     const feeStatus: FeeStatus = overdue > 0 ? 'overdue' : due > 0 ? 'due' : 'paid';
     return {
       id: r.id, admissionNo: r.admission_no, name: r.name, initials: initials(r.name), classId: r.class_id, className: r.class_name,
-      rollNo: r.roll_no, guardianName: r.guardian_name ?? '', feeStatus, amountDue: overdue + due, attendance10,
+      rollNo: r.roll_no, house: r.house, guardianName: r.guardian_name ?? '', feeStatus, amountDue: overdue + due, attendance10,
       attendancePct: Math.round((r.pct ?? 1) * 1000) / 10, status: r.status === 'active' ? 'active' : 'inactive',
     };
   }
@@ -164,7 +164,7 @@ export class StudentsService {
     const { today, last, days } = this.days();
     const params = [today, addDays(today, FEE_HORIZON_DAYS)];
     const { rows } = await t.pool.query<ListRow & { dob: string; blood_group: string | null; house: string | null; address: string | null; admitted_on: string | null; g_phone: string | null; g_email: string | null }>(
-      `${this.baseSql().replace('s.status, g.name guardian_name,', "s.status, to_char(s.dob,'YYYY-MM-DD') dob, s.blood_group, s.house, s.address, to_char(s.admitted_on,'YYYY-MM-DD') admitted_on, g.phone g_phone, g.email g_email, g.name guardian_name,")} where s.id = $3`, [...params, id]);
+      `${this.baseSql().replace('s.status, g.name guardian_name,', "s.status, to_char(s.dob,'YYYY-MM-DD') dob, s.blood_group, s.address, to_char(s.admitted_on,'YYYY-MM-DD') admitted_on, g.phone g_phone, g.email g_email, g.name guardian_name,")} where s.id = $3`, [...params, id]);
     const r = rows[0];
     if (!r) throw notFound('That student');
     const roll24 = await this.rollWindow(t, id, schoolDaysEnding(last, 24, OFF_DAYS));

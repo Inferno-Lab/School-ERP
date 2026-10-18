@@ -235,6 +235,8 @@ describe('timetable', () => {
 describe('settings', () => {
   it('saves changes, bumps the version and refuses a stale write', async () => {
     const before = (await h.call('GET', '/v1/settings', { token })).json;
+    expect(before.usage.students).toBeGreaterThan(0);
+    expect(before.usage.studentLimit).toBeGreaterThanOrEqual(before.usage.students);
     const ok = await h.call('PATCH', '/v1/settings', { token, body: { expectedVersion: before.version, changes: { 'fees.lateFeePct': 2, 'brand.color': '#0EA5E9' } } });
     expect(ok.status).toBe(200);
     expect(ok.json.version).toBe(before.version + 1);

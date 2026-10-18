@@ -2,7 +2,7 @@ import { Body, Controller, Get, Header, HttpCode, Param, Patch, Post, Put, Query
 import {
   ApprovalDecision, AssignFee, AttendanceDayPut, CoverRequest, IsoDate, MessageRequest, NoticeCreate, PaymentCreate, SettingsPatch, SlotPatch, StudentCreate, StudentImport, StudentQuery,
   type ApprovalRow, type AttendanceDay, type AttendanceWeekPoint, type AuditRow, type ClassInfo, type ContactReveal, type DashboardData, type FeeSummary, type ImportResult, type InvoiceRow,
-  type NoticeRow, type SearchHit, type SettingsDoc, type ShellData, type StudentDetail, type StudentRow, type StudentSummary, type StudentViews, type TeacherLoad, type TimetableView, type Paged,
+  type NoticeRow, type SearchHit, type SettingsDoc, type SettingsResponse, type ShellData, type StudentDetail, type StudentRow, type StudentSummary, type StudentViews, type TeacherLoad, type TeacherOption, type TimetableView, type Paged,
 } from '@edunest/contracts';
 import { MODULES, closeModules } from '@edunest/config-engine';
 import { z } from 'zod';
@@ -14,7 +14,7 @@ import { AttendanceService } from './attendance.service.js';
 import { DashboardService } from './dashboard.service.js';
 import { FeesService } from './fees.service.js';
 import { StudentsService } from './students.service.js';
-import { AuditService, SettingsService } from './support.js';
+import { AuditService, Messenger, SettingsService } from './support.js';
 import { TimetableService } from './timetable.service.js';
 
 const DayQuery = z.object({ classId: z.string().min(1), date: IsoDate });
@@ -188,6 +188,11 @@ export class TimetableController {
     return this.tt.loads(t, q.classId);
   }
 
+  @Get('teachers') @Require('timetable.read')
+  teachers(@Tenant() t: TenantCtx, @Query(new ZodPipe(z.object({ slotId: z.string().min(1) }))) q: { slotId: string }): Promise<TeacherOption[]> {
+    return this.tt.teachers(t, q.slotId);
+  }
+
   @Patch('slots/:id') @HttpCode(204) @Require('timetable.edit')
   async patch(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Param('id') id: string, @Body(new ZodPipe(SlotPatch)) body: SlotPatch): Promise<void> {
     await this.tt.patchSlot(t, u, id, body);
@@ -234,13 +239,20 @@ export class SettingsController {
   constructor(
     private readonly settings: SettingsService,
     private readonly audit: AuditService,
+    private readonly messenger: Messenger,
   ) {}
 
   @Get() @Require('settings.read')
-  async get(@Tenant() t: TenantCtx): Promise<SettingsDoc & { modules: { key: string; name: string; blurb: string; requires: string[]; core: boolean; backend: boolean; entitled: boolean }[] }> {
-    const doc = await this.settings.doc(t);
+  async get(@Tenant() t: TenantCtx): Promise<SettingsResponse> {
+    const [doc, counts, smsUsed] = await Promise.all([
+      this.settings.doc(t),
+      t.pool.query<{ students: string; staff: string }>("select (select count(*) from students where status = 'active') students, (select count(*) from staff) staff"),
+      this.messenger.smsThisMonth(t.info.slug),
+    ]);
     const entitled = closeModules(t.info.entitlement.modules);
-    return { ...doc, modules: MODULES.map((m) => ({ key: m.key, name: m.name, blurb: m.blurb, requires: m.requires, core: !!m.core, backend: m.backend, entitled: entitled.includes(m.key) })) };
+    const { limits, plan } = t.info.entitlement;
+    const usage = { plan, students: Number(counts.rows[0]!.students), staff: Number(counts.rows[0]!.staff), studentLimit: limits.students, smsUsed, smsLimit: limits.smsPerMonth };
+    return { ...doc, usage, modules: MODULES.map((m) => ({ key: m.key, name: m.name, blurb: m.blurb, requires: m.requires, core: !!m.core, backend: m.backend, entitled: entitled.includes(m.key) })) };
   }
 
   @Patch() @Require('settings.write')

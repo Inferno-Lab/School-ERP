@@ -18,6 +18,13 @@ export class Messenger {
     );
   }
 
+  /** Texts sent by one school since the start of this month, for the plan card. */
+  async smsThisMonth(slug: string): Promise<number> {
+    const { rows } = await this.registry.pool.query<{ n: string }>(
+      "select count(*) n from sandbox_messages where school_slug = $1 and channel = 'sms' and created_at >= date_trunc('month', now())", [slug]);
+    return Number(rows[0]?.n ?? 0);
+  }
+
   async sendMany(t: TenantCtx, list: { channel: 'sms' | 'email' | 'whatsapp' | 'push'; to: string; subject?: string; body: string }[]): Promise<void> {
     for (const m of list) await this.send(t, m);
   }

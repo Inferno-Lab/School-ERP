@@ -50,6 +50,12 @@ export interface SettingsDoc {
   updatedAt: string | null;
 }
 
+export interface SettingsResponse extends SettingsDoc {
+  modules: { key: string; name: string; blurb: string; requires: string[]; core: boolean; backend: boolean; entitled: boolean }[];
+  /** What the plan card shows: how much of the plan the school is using this month. */
+  usage: { plan: string; students: number; staff: number; studentLimit: number; smsUsed: number; smsLimit: number };
+}
+
 export interface EntitlementDoc {
   plan: string;
   modules: string[];

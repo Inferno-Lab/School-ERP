@@ -270,7 +270,7 @@ async function seedStudents(ctx: Ctx, classes: ClassRow[]): Promise<StudentRow[]
       const gid = newId('gdn');
       const dobYear = Number(ctx.last.slice(0, 4)) - (c.grade + 5);
       const dob = `${dobYear}-${String(r.int(1, 12)).padStart(2, '0')}-${String(r.int(1, 28)).padStart(2, '0')}`;
-      const rate = nm?.rate ?? Math.min(0.995, Math.max(0.78, 0.94 + (r.next() - 0.5) * 0.14));
+      const rate = nm?.rate ?? Math.min(0.995, Math.max(0.76, 0.925 + (r.next() - 0.5) * 0.16));
       stuRows.push([id, adm, name, c.id, nm?.roll ?? rolls[i - named.length] ?? String(i + 1), dob, r.pick(BLOOD), nm?.house ?? r.pick(HOUSES),
         `${r.int(1, 60)}, ${r.pick(['Ivory Towers', 'Palms', 'Lake Homes', 'Green Park', 'Sunrise Apts', 'Orchid'])}, ${r.pick(AREAS)}, Pune`, addDays(`${admYear(c.grade)}-06-10`, r.int(0, 10))]);
       guardRows.push([gid, gname, '', null, 'Parent']);
@@ -297,7 +297,7 @@ async function seedAttendance(ctx: Ctx, classes: ClassRow[], students: StudentRo
   const byClass = new Map<string, StudentRow[]>();
   students.forEach((s) => byClass.set(s.classId, [...(byClass.get(s.classId) ?? []), s]));
   // School-wide mood per day: mostly steady, with one bad day (the dip in the design) four school days back.
-  const mood = days24.map((_, i) => (i === days24.length - 4 ? -0.12 : (r.next() - 0.45) * 0.04));
+  const mood = days24.map((_, i) => (i === days24.length - 4 ? -0.14 : i === days24.length - 2 ? -0.05 : (r.next() - 0.5) * 0.07));
   const staffByClass = new Map(classes.map((c) => [c.id, c.teacherId]));
   for (const c of classes) {
     for (let di = 0; di < days24.length; di++) {

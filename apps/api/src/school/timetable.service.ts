@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Clash, CoverRequest, PeriodDef, SlotPatch, SlotRow, TeacherLoad, TimetableView } from '@edunest/contracts';
+import type { Clash, CoverRequest, PeriodDef, SlotPatch, SlotRow, TeacherLoad, TeacherOption, TimetableView } from '@edunest/contracts';
 import { ApiError, notFound } from '@edunest/nest-kit';
 import type { TenantCtx } from '../tenancy/tenant.js';
 import { AuditService, Messenger } from './support.js';
@@ -131,6 +131,16 @@ export class TimetableService {
     }
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'timetable.published', entity: 'timetable', detail: { classes: classes.length, teachers: teachers.length } });
     return { families: Number(fam?.rows[0]?.n ?? 0), teachers: teachers.length, version: Number(v.rows[0]!.value) };
+  }
+
+  /** Everyone who could take a period, the free ones first. */
+  async teachers(t: TenantCtx, slotId: string): Promise<TeacherOption[]> {
+    const { rows } = await t.pool.query<{ id: string; name: string; subjects: string[]; load: string; max: number; free: boolean }>(
+      `select u.id, u.name, array(select s.name from staff_subjects ss join subjects s on s.id = ss.subject_id where ss.user_id = u.id order by s.name) subjects,
+         (select count(*) from timetable_slots x where coalesce(x.cover_teacher_id, x.teacher_id) = u.id) load, st.max_periods_per_week max,
+         not exists (select 1 from timetable_slots x join timetable_slots me on me.id = $1 where x.day = me.day and x.period = me.period and x.id <> me.id and coalesce(x.cover_teacher_id, x.teacher_id) = u.id) free
+       from users u join staff st on st.user_id = u.id where u.kind = 'staff' and u.status = 'active' and st.designation = 'Teacher' order by free desc, load, u.name`, [slotId]);
+    return rows.map((r) => ({ id: r.id, name: r.name, subjects: r.subjects, load: Number(r.load), max: r.max, free: r.free }));
   }
 
   async loads(t: TenantCtx, classId: string): Promise<TeacherLoad[]> {
