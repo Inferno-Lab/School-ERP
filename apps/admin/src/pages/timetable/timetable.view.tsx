@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Markup converted from design/canvas/AdminTimetable.dc.html. Keep the markup and class names as designed.
 import { Fragment, type CSSProperties } from "react";
-import { Shell } from "@edunest/web-ui";
+import { Select, Shell } from "@edunest/web-ui";
 import "./timetable.css";
 
 export function TimetableView({ v }: { v: any }) {
@@ -42,35 +42,7 @@ export function TimetableView({ v }: { v: any }) {
             </p>
           </div>
           <span className="grow"></span>
-          <div className="anc" style={{ width: "150px", height: "42px" } as CSSProperties}>
-            <div className={`morph ${v.clsOpen ?? ""}`} style={{ "--w0": "150px", "--w1": "210px", "--h1": "232px" } as CSSProperties}>
-              <button className="mh" onClick={v.toggleCls} aria-expanded={v.clsExp}>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path className="i" d="M4 5.5C4 4.7 4.7 4 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5c0-.8-.7-1.5-1.5-1.5H13v16h5.5c.8 0 1.5-.7 1.5-1.5z"></path>
-                </svg>
-                {v.clsLabel}
-                <svg className="cv" viewBox="0 0 24 24" aria-hidden="true">
-                  <path className="i" d="M6 9l6 6 6-6"></path>
-                </svg>
-              </button>
-              <div className="ml" role="listbox">
-                {v.classes.map((c: any, $i: number) => (
-                  <Fragment key={$i}>
-                    <button className="mo" role="option" aria-selected={c.sel} onClick={c.pick} style={{ transitionDelay: `${c.d ?? ""}ms` } as CSSProperties}>
-                      {c.n}
-                      {c.on && (
-                        <>
-                          <svg className="ck" viewBox="0 0 24 24" aria-hidden="true">
-                            <path className="i" d="M5 12.5l4.5 4.5L19 7.5"></path>
-                          </svg>
-                        </>
-                      )}
-                    </button>
-                  </Fragment>
-                ))}
-              </div>
-            </div>
-          </div>
+          <Select compact aria-label="Class" value={String(Math.max(0, v.classes.findIndex((c: any) => c.on)))} onChange={(i) => v.classes[Number(i)]?.pick()} options={v.classes.map((c: any, i: number) => ({ value: String(i), label: c.n }))} />
           <div className="seg" role="tablist">
             <span className="kn" style={{ width: `${v.vw ?? ""}px`, transform: `translateX(${v.vx ?? ""}px)` } as CSSProperties}></span>
             {v.views.map((v: any, $i: number) => (
@@ -302,9 +274,10 @@ export function TimetableView({ v }: { v: any }) {
                   </div>
                 </div>
               </div>
+              <div className="lscroll" style={{ maxHeight: "232px" } as CSSProperties}>
               {v.loads.map((l: any, $i: number) => (
                 <Fragment key={$i}>
-                  <div className="lr">
+                  <div className="lr" data-tip={`${l.n}\n${l.v} periods this week`}>
                     <span className="av" style={{ width: "32px", height: "32px", fontSize: "11px", background: l.bg, color: l.fg, boxShadow: "none" } as CSSProperties}>
                       {l.ini}
                     </span>
@@ -321,6 +294,7 @@ export function TimetableView({ v }: { v: any }) {
                   </div>
                 </Fragment>
               ))}
+              </div>
             </section>
             <section className="card" aria-labelledby="unp">
               <div className="ch">
@@ -329,7 +303,7 @@ export function TimetableView({ v }: { v: any }) {
                 </h2>
                 {v.unplaced.length > 0 && <span className="chip a">{v.unplaced.length}</span>}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px" } as CSSProperties}>
+              <div className="lscroll" style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "12px", maxHeight: "176px" } as CSSProperties}>
                 {v.unplaced.length === 0 && <div className="help">Every period this class needs has a place.</div>}
                 {v.unplaced.map((u: any, $i: number) => (
                   <div className="un" key={$i}>

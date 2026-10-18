@@ -62,3 +62,4 @@ packages/*/dist/
 .edunest-data/
 playwright-report/
 test-results/
+.shots/

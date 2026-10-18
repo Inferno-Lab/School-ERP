@@ -20,13 +20,13 @@ export function OnboardingPage() {
     <Page active="onb" title="Onboarding" sub="Set a new school up from start to finish: database, address, first admin and app" toast={toast} loading={schools.isLoading} error={schools.isError ? { message: (schools.error as Error).message, retry: () => void schools.refetch() } : null}
       actions={app.can('schools.write') ? <button className="btn pri" onClick={() => app.go('/onboarding/new')}><svg viewBox="0 0 24 24" aria-hidden="true"><path className="i" d="M12 5v14M5 12h14"></path></svg>Onboard a school</button> : undefined}>
       {none && (
-        <div style={{ maxWidth: 560 }}>
+        <div>
           <EmptyCard title="Onboarding" chip={{ text: 'Nothing in progress', tone: 'v' }} scene="register" heading="No school is being set up" body="Start the wizard to add one. It asks about the school, its plan, its look and where it runs, then creates everything and tells you how it went." actions={app.can('schools.write') ? <button className="btn pri" onClick={() => app.go('/onboarding/new')}>Onboard a school</button> : undefined} />
         </div>
       )}
       <section className="grid">
         {setting.length > 0 && (
-          <Card title="Being set up" chip={<span className="chip b">{setting.length}</span>} span="s7">
+          <Card title="Being set up" chip={<span className="chip b">{setting.length}</span>} span="s12">
             {setting.map((s) => {
               const t = tintFor(s.name);
               return (
@@ -42,7 +42,7 @@ export function OnboardingPage() {
           </Card>
         )}
         {list.length > 0 && (
-          <Card title="Saved drafts" chip={<span className="chip">{list.length}</span>} span={setting.length ? 's5' : 's7'}>
+          <Card title="Saved drafts" chip={<span className="chip">{list.length}</span>} span="s12">
             {list.map((d) => (
               <div key={d.id} className="kv" style={{ alignItems: 'center' }}>
                 <span>{d.name || 'Untitled school'}<br /><small style={{ color: 'var(--ink3)' }}>Step {d.step + 1} of 7 · {ago(d.updatedAt)} · {d.updatedBy}</small></span>
@@ -52,7 +52,7 @@ export function OnboardingPage() {
           </Card>
         )}
         {recent.length > 0 && (
-          <Card title="Went live recently" span="s5">
+          <Card title="Went live recently" span="s12">
             {recent.map((s) => { const st = statusOf(s); return <a key={s.id} className="kv" href={url(`/schools/${s.id}`)} onClick={(e) => { e.preventDefault(); app.go(`/schools/${s.id}`); }} style={{ color: 'inherit', textDecoration: 'none' }}>{s.name}<b><span className={`st ${st.tone}`}><i></i>{st.text}</span></b></a>; })}
           </Card>
         )}

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Tooltips } from '../Tip';
 
 export interface ShellProps {
   /** The page's own class, so its CSS stays inside it. */
@@ -24,6 +25,7 @@ export function Shell({ page, theme, aside, frClass, overlays, children }: Shell
         </div>
         {overlays}
       </div>
+      <Tooltips />
     </div>
   );
 }

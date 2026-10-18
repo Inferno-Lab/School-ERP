@@ -14,7 +14,7 @@ export function MigrationsPage() {
   return (
     <Page active="mig" title="Migrations" sub="Database changes, and which schools have them. Each school’s database is changed on its own." loading={q.isLoading} error={q.isError ? { message: (q.error as Error).message, retry: () => void q.refetch() } : null}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Migrations" chip={{ text: 'None', tone: 'v' }} scene="notebooks" heading="No migrations recorded" body="Once a school’s database is created, the changes applied to it are listed here, newest first." /></div>
+        <div><EmptyCard title="Migrations" chip={{ text: 'None', tone: 'v' }} scene="notebooks" heading="No migrations recorded" body="Once a school’s database is created, the changes applied to it are listed here, newest first." /></div>
       ) : rows.map((m) => {
         const applied = m.schools.filter((s) => s.state === 'applied').length;
         const bad = m.schools.filter((s) => s.state === 'failed');

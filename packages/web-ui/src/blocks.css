@@ -6,7 +6,7 @@
 .nest .st i{width:7px;height:7px;border-radius:50%;background:currentColor}
 .nest .st.g{background:var(--gS);color:var(--gD)}.nest .st.a{background:var(--aS);color:var(--aD)}.nest .st.b{background:var(--bS);color:var(--b)}.nest .st.r{background:var(--rS);color:var(--r)}.nest .st.n{background:var(--sunk);color:var(--ink3)}
 .nest .bar{height:14px;border-radius:7px;background:var(--sunk);overflow:hidden}
-.nest .bar i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--v),var(--c));transition:width 1.4s var(--e)}
+.nest .bar i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--v),var(--c));transition:width .7s var(--e)}
 .nest .bar.warn i{background:linear-gradient(90deg,var(--a),var(--r))}
 .nest .us{display:flex;flex-direction:column;gap:7px}
 .nest .us .r{display:flex;justify-content:space-between;font:600 13.5px var(--fb);color:var(--ink2)}
@@ -31,6 +31,9 @@
 .nest .kv:first-child{border-top:0}
 .nest .kv b{color:var(--ink);font-weight:700;text-align:right;min-width:0;overflow-wrap:anywhere}
 .nest .mono{font:600 12.5px/1.6 ui-monospace,Consolas,monospace}
+.nest .tile.t-v .lbl,.nest .tile.t-i .lbl{color:rgba(255,255,255,.7)}
+.nest .tile.t-g .lbl{color:var(--gD)}
+.nest .tile.t-a .lbl{color:rgba(20,17,31,.6)}
 .nest .tgrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .nest .opt{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:20px;border:1.5px solid var(--line2);background:var(--card);cursor:pointer;text-align:left;width:100%;transition:border-color .2s,background .25s,transform .4s var(--e)}
 .nest .opt:hover{transform:translateY(-2px)}
@@ -60,11 +63,11 @@
 .nest .card>.ch{flex-wrap:wrap;row-gap:10px}
 .nest .card>.ch h2{min-width:min(100%,max-content)}
 /* The red frame and pill that say a support person is looking inside a school, read-only. */
-.nest .sbar{left:50%;top:18px;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:999px;background:var(--r);color:#fff;font:700 13.5px var(--fb);box-shadow:0 20px 40px -14px var(--r);animation:sbIn .7s var(--e);max-width:calc(100vw - 24px)}
+.nest .sbar{left:50%;top:18px;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:999px;background:var(--r);color:#fff;font:700 13.5px var(--fb);box-shadow:none;animation:sbIn .7s var(--e);max-width:calc(100vw - 24px)}
 @keyframes sbIn{from{opacity:0;transform:translate(-50%,-24px)}to{opacity:1;transform:translateX(-50%)}}
 .nest .sbar .c{font:800 13px var(--fb);padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.22);white-space:nowrap}
 .nest .sbar button{height:32px;padding:0 14px;border:0;border-radius:999px;background:#fff;color:var(--r);font:800 12.5px var(--fb);cursor:pointer;white-space:nowrap}
-.nest .glow{inset:0;z-index:55;pointer-events:none;box-shadow:inset 0 0 0 3px var(--r),inset 0 0 80px color-mix(in srgb,var(--r) 30%,transparent);animation:nFade .6s}
+.nest .glow{inset:0;z-index:55;pointer-events:none;box-shadow:inset 0 0 0 3px var(--r);animation:nFade .6s}
 @media (max-width:560px){.nest .sbar{flex-wrap:wrap;justify-content:center;border-radius:22px;padding:10px 12px;gap:8px}}
 
 /* Small controls the admin pages share: a roll number, a tick with a label, a number box, a filter pill. */
@@ -72,7 +75,7 @@
 .nest .hwc{display:inline-flex;align-items:center;gap:8px;font:700 13px var(--fb);color:var(--ink2);cursor:pointer;white-space:nowrap}
 .nest .hwc input[type=checkbox]{width:18px;height:18px;accent-color:var(--v);cursor:pointer;flex:none}
 .nest .hws{width:64px;height:36px;border-radius:12px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink);font:700 14px var(--fb);text-align:center;padding:0 6px;min-width:0}
-.nest .hws:focus{outline:0;border-color:var(--v);box-shadow:0 0 0 4px color-mix(in srgb,var(--v) 16%,transparent)}
+.nest .hws:focus{outline:0;border-color:var(--v);box-shadow:0 0 0 1px var(--v)}
 .nest .hws:disabled{background:var(--sunk);border-color:transparent;cursor:not-allowed}
 .nest .hws.bad{border-color:var(--r);background:var(--rS)}
 .nest .hws.wide{width:150px}

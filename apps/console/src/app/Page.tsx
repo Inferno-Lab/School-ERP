@@ -38,7 +38,7 @@ export function Page({ active, title, sub, actions, children, overlays, toast, e
           {actions}
         </header>
         {error ? (
-          <div style={{ maxWidth: 520 }}>
+          <div>
             <EmptyCard error title={title} chip={{ text: 'Couldn’t load', tone: 'r' }} scene="plug" heading="That didn’t load" body={error.message} actions={<button className="btn pri" onClick={error.retry}>Try again</button>} />
           </div>
         ) : loading ? <div className="skc" style={{ height: 320, borderRadius: 28 }} /> : children}
@@ -54,6 +54,21 @@ export function Card({ title, chip, children, span, style, id }: { title?: strin
       {title && <div className="ch"><h2 id={id}>{title}</h2>{chip}</div>}
       <div style={{ marginTop: title ? 12 : 0 }}>{children}</div>
     </div>
+  );
+}
+
+/** A row of three numbers at the top of a page, in the design's coloured tiles. */
+export function Tiles({ items }: { items: { label: string; value: ReactNode; note: string; tone: 'v' | 'a' | 'i' | 'g' }[] }) {
+  return (
+    <section className="grid">
+      {items.map((t, i) => (
+        <div key={t.label} className={`tile t-${t.tone} s4 rise`} style={{ '--d': `${i * 0.05}s` } as React.CSSProperties}>
+          <span className="lbl">{t.label}</span>
+          <div className="fd" style={{ fontSize: 34, letterSpacing: '-.04em', marginTop: 8 }}>{t.value}</div>
+          <div style={{ opacity: 0.75, font: '600 13px var(--fb)' }}>{t.note}</div>
+        </div>
+      ))}
+    </section>
   );
 }
 

@@ -1,8 +1,8 @@
 /* Shell additions that are not part of the canvas boards: the console workspace block, and the phone layout. */
-.nest .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--r);box-shadow:0 0 0 4px color-mix(in srgb,var(--r) 25%,transparent);animation:pdot 2s infinite}
-.nest .pdot.stage{background:var(--a);box-shadow:0 0 0 4px color-mix(in srgb,var(--a) 25%,transparent)}
-.nest .pdot.local{background:var(--g);box-shadow:0 0 0 4px color-mix(in srgb,var(--g) 25%,transparent)}
-@keyframes pdot{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--r) 0%,transparent)}}
+.nest .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--r);box-shadow:none;animation:none}
+.nest .pdot.stage{background:var(--a);box-shadow:none}
+.nest .pdot.local{background:var(--g);box-shadow:none}
+
 .nest .wsw{display:flex;align-items:center;gap:12px;padding:8px;border-radius:18px;background:var(--card);border:1px solid var(--line);margin-bottom:6px;white-space:nowrap;overflow:hidden}
 .nest .wsw b{display:block;font:700 14.5px var(--fb);line-height:1.2}
 .nest .wsw small{display:flex;align-items:center;gap:7px;font:700 12px var(--fb);color:var(--ink3)}
@@ -29,7 +29,7 @@
 /* The dock and its "more" sheet exist only on a phone. */
 .nest .dock{display:none}
 @media (max-width:900px){
-  .nest .dock{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--ci);box-shadow:0 20px 40px -12px rgba(30,15,90,.55)}
+  .nest .dock{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:50;display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--ci);box-shadow:none}
   .nest .dock button{position:relative;width:56px;height:52px;border-radius:999px;border:0;background:none;color:#B4AFCB;display:grid;place-items:center;cursor:pointer;transition:color .3s,width .5s var(--e),background .3s}
   .nest .dock button.on{width:112px;background:var(--v);color:#fff}
   .nest .dock button svg{width:22px;height:22px;grid-area:1/1}

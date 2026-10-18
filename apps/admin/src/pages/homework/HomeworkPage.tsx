@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addDays, istToday, type HomeworkDetail, type HomeworkRow } from '@edunest/contracts';
-import { Dialog, EmptyCard, Field, SelectField, useShake } from '@edunest/web-ui';
+import { Dialog, EmptyCard, Field, Select, SelectField, useShake } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
 import { Page, useToast } from '../../app/Page';
 import { AddBtn, AreaField, Avatar, dateLabel, problem } from '../../app/kit';
@@ -28,10 +28,7 @@ export function HomeworkPage() {
     <Page active="hw" title="Homework" sub={classId ? `Class ${classes.data?.find((c) => c.id === classId)?.name ?? ''}` : 'What has been set, and what has come back'} toast={toast} loading={list.isLoading && !list.data}
       error={list.isError && !list.data ? { message: (list.error as Error).message, retry: () => void list.refetch() } : null}
       actions={<>
-        <select className="sel" aria-label="Class" value={classId} onChange={(e) => setClassId(e.target.value)}>
-          <option value="">All classes</option>
-          {(classes.data ?? []).map((c) => <option key={c.id} value={c.id}>Class {c.name}</option>)}
-        </select>
+        <Select compact aria-label="Class" value={classId} onChange={setClassId} options={[{ value: '', label: 'All classes' }, ...(classes.data ?? []).map((c) => ({ value: c.id, label: `Class ${c.name}` }))]} />
         {canWrite && <AddBtn onClick={() => setSetting(true)}>Set homework</AddBtn>}
       </>}
       overlays={<>
@@ -39,7 +36,7 @@ export function HomeworkPage() {
         {open && <HomeworkSheet id={open} canWrite={canWrite} onClose={() => setOpen(null)} onSaved={(m) => { refresh(qc); say(m); }} onRemoved={() => { setOpen(null); refresh(qc); say('Homework removed.'); }} />}
       </>}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Homework" chip={{ text: '0 set', tone: 'v' }} scene="notebooks" heading="No homework yet" body="Set homework for a class and it goes to every family in the app. You then tick who has handed it in." actions={canWrite ? <AddBtn onClick={() => setSetting(true)}>Set homework</AddBtn> : undefined} /></div>
+        <div><EmptyCard title="Homework" chip={{ text: '0 set', tone: 'v' }} scene="notebooks" heading="No homework yet" body="Set homework for a class and it goes to every family in the app. You then tick who has handed it in." actions={canWrite ? <AddBtn onClick={() => setSetting(true)}>Set homework</AddBtn> : undefined} /></div>
       ) : (
         <section className="grid">
           <div className="tile t-v s4 rise"><span className="lbl" style={{ color: 'rgba(255,255,255,.7)' }}>Handed in</span><div className="big" style={{ marginTop: 8 }}>{pct(handed)}%</div><div style={{ font: '600 13px var(--fb)', opacity: 0.8 }}>{handed} of {total} pieces of work</div></div>

@@ -36,7 +36,7 @@ export function MessagesPage() {
       actions={canWrite ? <AddBtn onClick={() => setStarting(true)}>New message</AddBtn> : undefined}
       overlays={starting && <Start onClose={() => setStarting(false)} onDone={(t) => { setStarting(false); refresh(qc); setFilter('open'); setSel(t.id); say('Message sent. The family gets a notification.'); }} />}>
       {all.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Messages" chip={{ text: '0 conversations', tone: 'v' }} scene="envelope" heading="No messages yet" body="When a family writes to the school it appears here, and your reply goes to their app. You can also start a conversation with any student’s family." actions={canWrite ? <AddBtn onClick={() => setStarting(true)}>New message</AddBtn> : undefined} /></div>
+        <div><EmptyCard title="Messages" chip={{ text: '0 conversations', tone: 'v' }} scene="envelope" heading="No messages yet" body="When a family writes to the school it appears here, and your reply goes to their app. You can also start a conversation with any student’s family." actions={canWrite ? <AddBtn onClick={() => setStarting(true)}>New message</AddBtn> : undefined} /></div>
       ) : (
         <section className={`msg ${sel ? 'has' : ''}`}>
           <div className="card msl rise" style={{ padding: 0 }}>

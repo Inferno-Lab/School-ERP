@@ -27,7 +27,7 @@ export function SupportPage() {
   if (!app.can('support.access')) {
     return (
       <Page active="sup" title="Support" sub="Look inside a school to help its staff">
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Support" chip={{ text: 'Not for your role', tone: 'a' }} scene="padlock" heading="Support sessions are for the support team" body="Ask a super admin to add the Support role to your account if you need to look inside a school." /></div>
+        <div><EmptyCard title="Support" chip={{ text: 'Not for your role', tone: 'a' }} scene="padlock" heading="Support sessions are for the support team" body="Ask a super admin to add the Support role to your account if you need to look inside a school." /></div>
       </Page>
     );
   }
@@ -40,10 +40,10 @@ export function SupportPage() {
   return (
     <Page active="sup" title="Support" sub="Read-only sessions inside a school. Every one needs a reason and ends by itself after an hour." toast={toast} loading={sessions.isLoading} error={sessions.isError ? { message: (sessions.error as Error).message, retry: () => void sessions.refetch() } : null}>
       <section className="grid">
-        <Card title="Start a session" span="s5">
-          <div className={shake.cls}>
+        <Card title="Start a session" span="s12">
+          <div className={shake.cls} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16, alignItems: 'start' }}>
             <SelectField label="School" value={schoolId || schools.data?.[0]?.id || ''} onChange={setSchoolId} options={(schools.data ?? []).map((s) => ({ value: s.id, label: s.name }))} />
-            <div className="fld" style={{ marginTop: 14 }}>
+            <div className="fld" style={{ marginTop: 0, gridColumn: 'span 2' }}>
               <label htmlFor="sup-reason">Why do you need to look?</label>
               <div className={`inp ${err ? 'err shake' : ''}`} style={{ height: 'auto' }}>
                 <textarea id="sup-reason" value={reason} onChange={(e) => { setReason(e.target.value); setErr(''); }} rows={3} placeholder="For example: fees page shows the wrong total" style={{ flex: 1, border: 0, outline: 0, background: 'none', font: '600 15px var(--fb)', color: 'var(--ink)', padding: '12px 0', resize: 'none' }} aria-invalid={!!err} />
@@ -53,7 +53,7 @@ export function SupportPage() {
           </div>
           <button className="btn pri" style={{ marginTop: 16 }} onClick={go} disabled={start.isPending}>{start.isPending ? 'Opening…' : 'Start session'}</button>
         </Card>
-        <Card title="Sessions" chip={<span className="chip">{rows.length}</span>} span="s7">
+        <Card title="Sessions" chip={<span className="chip">{rows.length}</span>} span="s12">
           {rows.length === 0 && <EmptyCard title="Sessions" chip={{ text: '0 so far', tone: 'v' }} scene="envelope" heading="No support sessions yet" body="When you look inside a school, the session, the reason and who started it are listed here." />}
           {rows.map((r) => (
             <div key={r.id} className="kv" style={{ alignItems: 'flex-start' }}>

@@ -275,8 +275,8 @@ export function DashboardView({ v }: { v: any }) {
             </div>
           </div>
         </section>
-        <section className="grid">
-          <div className="tile t-l s8 rise" style={{ "--d": ".25s", minHeight: "470px" } as CSSProperties} aria-labelledby="chtt">
+        <section className="grid" style={{ alignItems: "start" } as CSSProperties}>
+          <div className="tile t-l s8 rise" style={{ "--d": ".25s" } as CSSProperties} aria-labelledby="chtt">
             <div className="ch" style={{ marginBottom: "8px" } as CSSProperties}>
               <h2 id="chtt" style={{ fontSize: "22px" } as CSSProperties}>
                 {v.chartTitle}
@@ -306,7 +306,7 @@ export function DashboardView({ v }: { v: any }) {
               <div className="pcols">
                 {v.cols.map((p: any, $i: number) => (
                   <Fragment key={$i}>
-                    <div className={`col2 ${p.today ?? ""}`} onMouseEnter={p.hover} onFocus={p.hover} tabIndex={0} aria-label={`${p.full}: ${p.v}`}>
+                    <div className={`col2 ${p.today ?? ""}`} data-tip={`${p.full}\n${p.v}${p.prev ? ` · was ${p.prev}` : ""}`} onMouseEnter={p.hover} onFocus={p.hover} tabIndex={0} aria-label={`${p.full}: ${p.v}`}>
                       {p.gh > 0 && <i className="gh" style={{ height: `${p.gh}px` } as CSSProperties}></i>}
                       <i className="fl" style={{ height: `${p.h}px`, "--pc": p.c } as CSSProperties}></i>
                       <div className="bub">
@@ -394,7 +394,7 @@ export function DashboardView({ v }: { v: any }) {
                     <b>{r.n}</b>
                     <div className="sg" role="img" aria-label={r.aria}>
                       {r.segs.map((g: any, $j: number) => (
-                        <i key={$j} className={g.k} style={{ flex: g.n } as CSSProperties}></i>
+                        <i key={$j} className={g.k} data-tip={`Class ${r.n}\n${g.k === "p" ? "Present" : g.k === "l" ? "Late" : g.k === "a" ? "Absent" : "Not marked"}: ${g.n}`} style={{ flex: g.n } as CSSProperties}></i>
                       ))}
                     </div>
                     <em>{r.pct}</em>
@@ -414,7 +414,7 @@ export function DashboardView({ v }: { v: any }) {
               {v.heads.map((h: any, $i: number) => (
                 <Fragment key={$i}>
                   <div className="fbar">
-                    <div className="trk" role="img" aria-label={`${h.n}: ${h.pct} percent collected`}>
+                    <div className="trk" role="img" aria-label={`${h.n}: ${h.pct} percent collected`} data-tip={`${h.n}\n${h.pct}% collected · ${h.amt}`}>
                       <i className="fill" style={{ height: `${h.fill}%`, background: h.c } as CSSProperties}>
                         {h.pct >= 24 && <em>{h.pct}%</em>}
                       </i>

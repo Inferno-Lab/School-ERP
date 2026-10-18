@@ -34,7 +34,7 @@ export function ReportsPage() {
       error={list.isError && !list.data ? { message: (list.error as Error).message, retry: () => void list.refetch() } : null}
       actions={d ? <button className="btn" disabled={busy} onClick={() => void download()}><Ico d={DOWNLOAD} />{busy ? 'Preparing…' : 'Download CSV'}</button> : undefined}>
       {(list.data?.length ?? 0) === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Reports" chip={{ text: '0 reports', tone: 'v' }} scene="checklist" heading="No reports are available" body="Reports appear here once the modules they read from are switched on for your school." /></div>
+        <div><EmptyCard title="Reports" chip={{ text: '0 reports', tone: 'v' }} scene="checklist" heading="No reports are available" body="Reports appear here once the modules they read from are switched on for your school." /></div>
       ) : (
         <section className="rpg">
           <nav className="card rpl rise" aria-label="Reports">

@@ -34,7 +34,6 @@ export function EmptyCard({ title, chip, scene, heading, body, actions, error, c
 export function NotFoundTile({ home, onHome, onSearch }: { home: string; onHome: () => void; onSearch: () => void }) {
   return (
     <article className="es-nf" aria-label="Page not found">
-      <i className="orb"></i>
       <div style={{ position: 'relative' }}>
         <div className="n">4<span>0</span>4</div>
         <h3>This page skipped class.</h3>

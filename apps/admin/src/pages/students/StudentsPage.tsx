@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { dayLabel, inr, istToday, type StudentRow } from '@edunest/contracts';
-import { EmptyCard, Shell, rollDigits, tintFor } from '@edunest/web-ui';
+import { EmptyCard, Pop, Shell, rollDigits, tintFor } from '@edunest/web-ui';
 import type { StudentListQuery } from '@edunest/api-client';
 import { useApp } from '../../app/context';
 import { useChrome } from '../../app/useChrome';
@@ -26,13 +26,14 @@ const tickClass = (st: string | null) => (st === 'late' ? 'l' : st === 'present'
 type Dialog = null | { kind: 'add' } | { kind: 'import' } | { kind: 'message'; ids: string[]; label: string } | { kind: 'fee'; ids: string[]; label: string } | { kind: 'collect' };
 
 function Pill({ id, open, setOpen, on, icon, children, menu }: { id: string; open: string; setOpen: (v: string) => void; on?: boolean; icon: string; children: ReactNode; menu: ReactNode }) {
+  const btn = useRef<HTMLButtonElement>(null);
   return (
     <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-      <button className={`fp ${on ? 'on' : ''} ${id === 'add' ? 'add' : ''}`} aria-haspopup="menu" aria-expanded={open === id} onClick={() => setOpen(open === id ? '' : id)}>
+      <button ref={btn} className={`fp ${on ? 'on' : ''} ${id === 'add' ? 'add' : ''}`} aria-haspopup="menu" aria-expanded={open === id} onClick={() => setOpen(open === id ? '' : id)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path className="i" d={icon}></path></svg>
         {children}
       </button>
-      {open === id && <div className="popm" role="menu">{menu}</div>}
+      {open === id && <Pop anchor={btn} onClose={() => setOpen('')}>{menu}</Pop>}
     </div>
   );
 }
@@ -215,7 +216,7 @@ export function StudentsPage() {
     return (
       <Shell page="students" theme={chrome.themeCls} aside={chrome.aside} overlays={<>{chrome.palette}</>}>
         <main className="mn"><header className="hd"><div><h1>Students</h1></div></header>
-          <div style={{ maxWidth: 520 }}><EmptyCard error title="Students" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="plug" heading="That didn’t load" body={(list.error as Error).message} actions={<button className="btn pri" onClick={() => void list.refetch()}>Try again</button>} /></div>
+          <div><EmptyCard error title="Students" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="plug" heading="That didn’t load" body={(list.error as Error).message} actions={<button className="btn pri" onClick={() => void list.refetch()}>Try again</button>} /></div>
         </main>
       </Shell>
     );

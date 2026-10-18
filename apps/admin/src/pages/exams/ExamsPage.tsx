@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addDays, istToday, type ExamRow } from '@edunest/contracts';
-import { Dialog, EmptyCard, Field, Segmented, SelectField, useShake } from '@edunest/web-ui';
+import { Dialog, EmptyCard, Field, Segmented, Select, SelectField, useShake } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
 import { Page, useToast } from '../../app/Page';
 import { AddBtn, Avatar, dateLabel, problem } from '../../app/kit';
@@ -26,10 +26,7 @@ export function ExamsPage() {
     <Page active="ex" title="Exams" sub="Schedules, marks and results" toast={toast} loading={list.isLoading && !list.data}
       error={list.isError && !list.data ? { message: (list.error as Error).message, retry: () => void list.refetch() } : null}
       actions={<>
-        <select className="sel" aria-label="Class" value={classId} onChange={(e) => setClassId(e.target.value)}>
-          <option value="">All classes</option>
-          {(classes.data ?? []).map((c) => <option key={c.id} value={c.id}>Class {c.name}</option>)}
-        </select>
+        <Select compact aria-label="Class" value={classId} onChange={setClassId} options={[{ value: '', label: 'All classes' }, ...(classes.data ?? []).map((c) => ({ value: c.id, label: `Class ${c.name}` }))]} />
         {canWrite && <AddBtn onClick={() => setCreating(true)}>New exam</AddBtn>}
       </>}
       overlays={<>
@@ -37,11 +34,11 @@ export function ExamsPage() {
         {open && <ExamSheet id={open} onClose={() => setOpen(null)} onChanged={(m) => { refresh(qc); if (m) say(m); }} onRemoved={() => { setOpen(null); refresh(qc); say('Exam removed.'); }} />}
       </>}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Exams" chip={{ text: '0 exams', tone: 'v' }} scene="checklist" heading="No exams yet" body="Add an exam for a class with its subjects and dates. Teachers enter marks here, and you publish the results to families." actions={canWrite ? <AddBtn onClick={() => setCreating(true)}>New exam</AddBtn> : undefined} /></div>
+        <div><EmptyCard title="Exams" chip={{ text: '0 exams', tone: 'v' }} scene="checklist" heading="No exams yet" body="Add an exam for a class with its subjects and dates. Teachers enter marks here, and you publish the results to families." actions={canWrite ? <AddBtn onClick={() => setCreating(true)}>New exam</AddBtn> : undefined} /></div>
       ) : (
-        <div className="stack" style={{ display: 'grid', gap: 18 }}>
+        <div className="exb">
           {groups.map((g) => (
-            <section className="card rise" key={g.s}>
+            <section className="exbs rise" key={g.s}>
               <div className="ch"><h2>{LABEL[g.s]}</h2><span className={`chip ${g.s === 'published' ? 'g' : g.s === 'marking' ? 'a' : ''}`}>{g.items.length}</span></div>
               <div className="exg">
                 {g.items.map((e) => <ExamCard key={e.id} e={e} onOpen={() => setOpen(e.id)} />)}

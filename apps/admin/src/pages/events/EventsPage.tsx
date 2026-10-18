@@ -52,9 +52,10 @@ export function EventsPage() {
       actions={canWrite ? <AddBtn onClick={() => setEditing('new')}>Add event</AddBtn> : undefined}
       overlays={editing && <EventDialog event={editing === 'new' ? null : editing} defaultDay={day} onClose={() => setEditing(null)} onDone={(m) => { setEditing(null); refresh(qc); say(m); }} />}>
       {all.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Events" chip={{ text: '0 events', tone: 'v' }} scene="calendar" heading="The calendar is empty" body="Add sports day, parent meetings, holidays and exam weeks. Families see them in the app and tell you if they are coming." actions={canWrite ? <AddBtn onClick={() => setEditing('new')}>Add event</AddBtn> : undefined} /></div>
+        <div><EmptyCard title="Events" chip={{ text: '0 events', tone: 'v' }} scene="calendar" heading="The calendar is empty" body="Add sports day, parent meetings, holidays and exam weeks. Families see them in the app and tell you if they are coming." actions={canWrite ? <AddBtn onClick={() => setEditing('new')}>Add event</AddBtn> : undefined} /></div>
       ) : (
         <section className="evg">
+          <div className="evcol">
           <div className="card rise evc">
             <div className="ch"><h2>{month.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</h2>
               <button className="btn sm" aria-label="Previous month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><Ico d={PREV} /></button>
@@ -70,6 +71,17 @@ export function EventsPage() {
               ) : <span key={`b${i}`}></span>)}
             </div>
             <div className="tgrow" style={{ marginTop: 14, gap: 12 }}>{(['event', 'ptm', 'exam', 'holiday'] as EventKind[]).map((k) => <span key={k} className="lgd"><i className={`k-${k}`} style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', marginRight: 6 }}></i>{KIND[k].label}</span>)}</div>
+          </div>
+          <div className="card rise" style={{ '--d': '.04s' } as React.CSSProperties}>
+            <div className="ch"><h2>{month.toLocaleDateString('en-IN', { month: 'long' })} at a glance</h2></div>
+            <div className="tgrow" style={{ marginTop: 12 }}>
+              {(['event', 'ptm', 'exam', 'holiday'] as EventKind[]).map((k) => {
+                const n = all.filter((e) => { const d = new Date(e.startsAt); return d.getFullYear() === month.getFullYear() && d.getMonth() === month.getMonth() && e.kind === k; }).length;
+                return <span key={k} className={`chip ${KIND[k].tone}`}>{n} {KIND[k].label.toLowerCase()}</span>;
+              })}
+            </div>
+            <div className="help" style={{ marginTop: 12 }}>{(() => { const next = all.find((e) => dayOf(e.endsAt ?? e.startsAt) >= today); return next ? `Next: ${next.title}, ${when(next)}` : 'Nothing is coming up.'; })()}</div>
+          </div>
           </div>
           <div className="card rise evl" style={{ '--d': '.06s' } as React.CSSProperties}>
             <div className="ch"><h2>{day ? new Date(`${day}T00:00:00`).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }) : 'Coming up'}</h2>{day && <button className="btn sm" onClick={() => setDay(null)}>Show all</button>}</div>

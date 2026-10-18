@@ -4,19 +4,19 @@
 --v:#6A4CF5;--vS:#EEEAFF;--vD:#4A31C9;--v2:#CDC4FF;--vL:#F1EEFF;
 --a:#FFC23D;--aS:#FFF3D1;--aD:#8A5A00;--c:#FF7A59;--cS:#FFE9E2;--cD:#B8381A;
 --g:#17A673;--gS:#DFF6EC;--gD:#0B7A53;--b:#3B82F6;--bS:#E3EEFF;--r:#E5484D;--rS:#FDECEC;
---ci:#17141F;--sh1:0 1px 2px rgba(20,17,31,.05);--sh2:0 12px 32px -14px rgba(70,45,170,.28);--sh3:0 40px 90px -28px rgba(40,25,110,.45);--scrim:rgba(20,16,38,.42);
+--ci:#17141F;--sh1:0 1px 2px rgba(20,17,31,.05);--sh2:0 8px 20px -12px rgba(20,17,31,.22);--sh3:0 18px 44px -20px rgba(20,17,31,.34);--scrim:rgba(20,16,38,.42);
 --m-body:#D9D1FF;--m-belly:#FFF5DA;--m-wing:#B9ACFF;--m-off:#FFD36B;--m-cap:#2A2150;--m-box:#FFFFFF;--m-box2:#EFEAFF;
 --fb:'Manrope',system-ui,sans-serif;--fd:'Bricolage Grotesque','Manrope',sans-serif;--e:cubic-bezier(.22,1,.36,1);--sp:cubic-bezier(.34,1.56,.64,1);
-font-family:var(--fb);color:var(--ink);background:radial-gradient(1100px 600px at 12% -12%,rgba(130,100,255,.30),transparent 70%),radial-gradient(900px 500px at 100% 100%,rgba(255,170,120,.18),transparent 70%),var(--bd);-webkit-font-smoothing:antialiased;letter-spacing:-.005em;position:relative;box-sizing:border-box}
+font-family:var(--fb);color:var(--ink);background:var(--bd);-webkit-font-smoothing:antialiased;letter-spacing:-.005em;position:relative;box-sizing:border-box}
 .nest *,.nest *::before,.nest *::after{box-sizing:border-box}
 .nest.dark{--bd:#07060B;--frame:#0E0C15;--card:#161320;--sunk:#1D192B;--line:#241F35;--line2:#332D4D;--sbg:#0B0910;
 --ink:#F4F2FB;--ink2:#B4AFCB;--ink3:#7C7796;--pri:#F4F2FB;--priT:#14111F;
 --v:#8E78FF;--vS:#241D4D;--vD:#C4B8FF;--v2:#3F3580;--vL:#1A1630;
 --a:#FFCB52;--aS:#2E2410;--aD:#FFD98A;--c:#FF8A6B;--cS:#33190F;--cD:#FFB39C;
 --g:#3DD6A0;--gS:#0E2A21;--gD:#7DEBC3;--b:#6AA3FF;--bS:#14233F;--r:#FF6369;--rS:#2D1318;
---ci:#26213A;--sh1:none;--sh2:0 12px 32px -14px rgba(0,0,0,.7);--sh3:0 40px 90px -28px rgba(0,0,0,.9);--scrim:rgba(0,0,0,.62);
+--ci:#26213A;--sh1:none;--sh2:0 8px 20px -12px rgba(0,0,0,.6);--sh3:0 18px 44px -20px rgba(0,0,0,.75);--scrim:rgba(0,0,0,.62);
 --m-body:#4A3E96;--m-belly:#6A5BC4;--m-wing:#3A2F7D;--m-off:#9A6A12;--m-cap:#120D1F;--m-box:#241F38;--m-box2:#1C1830;
-background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transparent 70%),radial-gradient(900px 500px at 100% 100%,rgba(255,130,90,.08),transparent 70%),var(--bd)}
+}
 .nest ::selection{background:color-mix(in srgb,var(--v) 30%,transparent)}
 .nest :focus-visible{outline:2.5px solid var(--v);outline-offset:3px;border-radius:12px}
 .nest button{font-family:var(--fb)}
@@ -27,10 +27,10 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 .nest .fr{background:var(--frame);border-radius:28px;box-shadow:var(--sh3);overflow:hidden;position:relative;border:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
 .nest .app{display:grid;grid-template-columns:auto minmax(0,1fr)}
 @media (max-width:900px){.nest .app{grid-template-columns:minmax(0,1fr)}}
-.nest .sb{width:272px;transition:width .6s var(--e);background:var(--sbg);border-right:1px solid var(--line);padding:18px 14px 16px;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.nest .sb{width:272px;transition:width .3s var(--e);background:var(--sbg);border-right:1px solid var(--line);padding:18px 14px 16px;display:flex;flex-direction:column;gap:3px;overflow:hidden}
 .nest .sb.col{width:88px}
 .nest .ws{display:flex;align-items:center;gap:12px;height:52px;padding:0 6px;white-space:nowrap}
-.nest .lg{width:40px;height:40px;border-radius:14px;background:var(--v);color:#fff;display:grid;place-items:center;font:800 18px var(--fd);flex:none;box-shadow:0 8px 20px -8px var(--v)}
+.nest .lg{width:40px;height:40px;border-radius:14px;background:var(--v);color:#fff;display:grid;place-items:center;font:800 18px var(--fd);flex:none;box-shadow:none}
 .nest .ws b{display:block;font:700 15px var(--fb);line-height:1.2}
 .nest .ws small{font:500 12.5px var(--fb);color:var(--ink3)}
 .nest .colb{margin-left:auto;width:32px;height:32px;border-radius:10px;border:0;background:none;color:var(--ink3);display:grid;place-items:center;cursor:pointer;flex:none;transition:background .2s,color .2s}
@@ -48,12 +48,8 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 .nest .nv .ct{margin-left:auto;font:800 11.5px var(--fb);background:var(--v);color:#fff;border-radius:999px;padding:2px 8px}
 .nest .nv .kb{margin-left:auto;font:700 11px var(--fb);color:var(--ink3);opacity:0;transform:translateX(4px);transition:opacity .2s,transform .3s var(--e)}
 .nest .nv:hover .kb{opacity:1;transform:none}
-.nest .nv .tp{position:absolute;left:calc(100% + 10px);top:50%;z-index:30;transform:translate(-6px,-50%) scale(.95);opacity:0;pointer-events:none;background:var(--pri);color:var(--priT);font:700 13px var(--fb);padding:7px 11px;border-radius:12px;display:none;gap:8px;transition:opacity .2s,transform .35s var(--e)}
-.nest .col .nv .tp{display:flex}
-.nest .col .nv:hover .tp{opacity:1;transform:translate(0,-50%) scale(1)}
 .nest .col .nv .kb{display:none}
 .nest .sbc{margin-top:auto;border-radius:20px;background:var(--ci);color:#fff;padding:16px;display:flex;flex-direction:column;gap:10px;white-space:nowrap;overflow:hidden;position:relative}
-.nest .sbc::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(closest-side,rgba(130,100,255,.55),transparent)}
 .nest .col .sbc{display:none}
 .nest .me{display:flex;align-items:center;gap:12px;padding:12px 6px 0;white-space:nowrap}
 .nest .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:800 13px var(--fb);flex:none;box-shadow:0 0 0 2.5px var(--card)}
@@ -68,9 +64,9 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 .nest .btn:active{transform:scale(.96)}
 .nest .btn svg{width:17px;height:17px;flex:none}
 .nest .btn.pri{background:var(--pri);color:var(--priT);border-color:transparent}
-.nest .btn.pri:hover{box-shadow:0 14px 28px -12px rgba(20,17,31,.55);background:var(--pri)}
+.nest .btn.pri:hover{box-shadow:none;background:var(--pri)}
 .nest .btn.v{background:var(--v);color:#fff;border-color:transparent}
-.nest .btn.v:hover{background:var(--v);box-shadow:0 14px 28px -10px var(--v)}
+.nest .btn.v:hover{background:var(--v);box-shadow:none}
 .nest .btn.wht{background:#fff;color:#14111F;border-color:transparent}
 .nest .btn.sm{height:34px;padding:0 15px;font-size:13px}
 .nest .btn.ghost{border-color:transparent;background:transparent}
@@ -87,7 +83,7 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 @keyframes nSpin{to{transform:rotate(360deg)}}
 /* search, segmented, chips */
 .nest .srch{display:flex;align-items:center;gap:10px;height:42px;padding:0 8px 0 16px;min-width:280px;border-radius:999px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink3);font:600 14px var(--fb);cursor:text;transition:border-color .2s,box-shadow .3s var(--e)}
-.nest .srch:hover{border-color:var(--v);box-shadow:0 0 0 5px color-mix(in srgb,var(--v) 12%,transparent)}
+.nest .srch:hover{border-color:var(--v);box-shadow:0 0 0 1px var(--v)}
 .nest .srch svg{width:18px;height:18px;flex:none}
 .nest .kbd{margin-left:auto;font:800 11.5px var(--fb);border-radius:999px;padding:5px 10px;background:var(--sunk);color:var(--ink3)}
 .nest .seg{position:relative;display:inline-flex;padding:4px;border-radius:999px;background:var(--sunk)}
@@ -110,7 +106,7 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 .nest .tr.dn{background:var(--rS);color:var(--r)}
 /* cards and tiles */
 .nest .card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--sh1);min-width:0}
-.nest .tile{border-radius:24px;padding:22px;min-width:0;position:relative;overflow:hidden;transition:transform .45s var(--e),box-shadow .45s}
+.nest .tile{border-radius:24px;padding:22px;min-width:0;position:relative;overflow:hidden;transition:transform .25s var(--e)}
 .nest .tile.lift:hover{transform:translateY(-4px);box-shadow:var(--sh2)}
 .nest .t-v{background:var(--v);color:#fff}
 .nest .t-a{background:var(--a);color:#14111F}
@@ -131,12 +127,12 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 .nest .fld>label{font:700 13.5px var(--fb)}
 .nest .inp{display:flex;align-items:center;gap:10px;height:50px;padding:0 16px;border-radius:16px;border:1.5px solid var(--line2);background:var(--card);transition:border-color .2s,box-shadow .35s var(--e),background .25s}
 .nest .inp:hover{border-color:var(--ink3)}
-.nest .inp:focus-within{border-color:var(--v);box-shadow:0 0 0 5px color-mix(in srgb,var(--v) 16%,transparent)}
+.nest .inp:focus-within{border-color:var(--v);box-shadow:0 0 0 1px var(--v)}
 .nest .inp input,.nest .inp textarea{flex:1;min-width:0;border:0;outline:0;background:none;font:600 15px var(--fb);color:var(--ink)}
 .nest .inp input::placeholder{color:var(--ink3);font-weight:500}
 .nest .inp>svg{width:19px;height:19px;color:var(--ink3);flex:none;transition:color .25s}
 .nest .inp:focus-within>svg{color:var(--v)}
-.nest .inp.err{border-color:var(--r);background:color-mix(in srgb,var(--rS) 45%,var(--card));box-shadow:0 0 0 5px color-mix(in srgb,var(--r) 14%,transparent)}
+.nest .inp.err{border-color:var(--r);background:color-mix(in srgb,var(--rS) 45%,var(--card));box-shadow:0 0 0 1px var(--r)}
 .nest .emsg{display:flex;align-items:center;gap:7px;font:700 13px var(--fb);color:var(--r);animation:nEm .45s var(--e)}
 .nest .emsg svg{width:15px;height:15px;flex:none}
 @keyframes nEm{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
@@ -147,12 +143,6 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 @keyframes nShkA{0%,100%{transform:translateX(0)}8%{transform:translateX(-9px)}16%{transform:translateX(9px)}24%{transform:translateX(-8px)}32%{transform:translateX(8px)}40%{transform:translateX(-6px)}48%{transform:translateX(6px)}58%{transform:translateX(-4px)}68%{transform:translateX(3px)}80%{transform:translateX(-1.5px)}90%{transform:translateX(1px)}}
 @keyframes nShkB{0%,100%{transform:translateX(0)}8%{transform:translateX(-9px)}16%{transform:translateX(9px)}24%{transform:translateX(-8px)}32%{transform:translateX(8px)}40%{transform:translateX(-6px)}48%{transform:translateX(6px)}58%{transform:translateX(-4px)}68%{transform:translateX(3px)}80%{transform:translateX(-1.5px)}90%{transform:translateX(1px)}}
 /* switch, checkbox */
-.nest .sw{width:48px;height:28px;border-radius:999px;border:0;background:var(--line2);position:relative;cursor:pointer;flex:none;transition:background .3s}
-.nest .sw::after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .5s var(--sp),width .2s}
-.nest .sw:active::after{width:28px}
-.nest .sw.on{background:var(--v)}
-.nest .sw.on::after{transform:translateX(20px)}
-.nest .sw.on:active::after{transform:translateX(14px)}
 .nest .cb{width:22px;height:22px;border-radius:7px;border:1.8px solid var(--line2);background:var(--card);display:grid;place-items:center;color:#fff;cursor:pointer;padding:0;flex:none;transition:background .2s,border-color .2s,transform .15s}
 .nest .cb:active{transform:scale(.84)}
 .nest .cb.on{background:var(--v);border-color:var(--v)}
@@ -170,11 +160,11 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 /* rolling digits */
 .nest .roll{display:inline-flex;height:1.1em;overflow:hidden;line-height:1.1}
 .nest .dg{display:inline-block;height:1.1em;width:.62em;overflow:hidden;text-align:center}
-.nest .strip{display:flex;flex-direction:column;transition:transform .9s var(--e)}
+.nest .strip{display:flex;flex-direction:column;transition:transform .5s var(--e)}
 .nest .strip span{display:block;height:1.1em;text-align:center}
 /* motion helpers */
-.nest .rise{animation:nRise .9s var(--e) both;animation-delay:var(--d,0s)}
-@keyframes nRise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.nest .rise{animation:nRise .45s var(--e) both;animation-delay:calc(var(--d,0s) * .4)}
+@keyframes nRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .nest .pop{animation:nPop .7s var(--sp) both;animation-delay:var(--d,0s)}
 @keyframes nPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
 .nest .fadein{animation:nFade .4s ease-out both}
@@ -272,4 +262,3 @@ background:radial-gradient(1100px 600px at 12% -12%,rgba(110,80,255,.20),transpa
 /* reduce motion */
 .nest.rm *,.nest.rm *::before,.nest.rm *::after{animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:1ms!important;transition-delay:0s!important}
 @media (prefers-reduced-motion:reduce){.nest *,.nest *::before,.nest *::after{animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:1ms!important;transition-delay:0s!important}}
-@keyframes nPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--v) 50%,transparent)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}

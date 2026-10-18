@@ -1,6 +1,7 @@
 import './nest.css';
 import './shell/shell.css';
 import './blocks.css';
+import './controls.css';
 import './polish.css';
 
 export * from './theme';
@@ -19,5 +20,7 @@ export * from './forms';
 export * from './Dialog';
 export * from './Toast';
 export * from './Segmented';
+export * from './Select';
+export * from './Tip';
 export * from './shell/Dock';
 export * from './useMedia';

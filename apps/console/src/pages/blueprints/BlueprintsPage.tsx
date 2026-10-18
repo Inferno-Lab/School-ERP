@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HttpError } from '@edunest/api-client';
 import { STEP_LABELS, type BlueprintRow, type PolicyDoc, type StepKey } from '@edunest/contracts';
-import { Dialog, EmptyCard, Field, SelectField, useShake } from '@edunest/web-ui';
+import { Dialog, EmptyCard, Field, Select, SelectField, useShake } from '@edunest/web-ui';
 import { Card, Page, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
 import { ago } from '../../app/format';
@@ -53,7 +53,7 @@ export function BlueprintsPage() {
           onSave={(v) => { const bp = rows.find((b) => b.id === params.bp)!; setDraft({ ...draft, [bp.id]: (draft[bp.id] ?? bp.steps).map((x) => (x.key === params.key ? { ...x, params: v } : x)) }); setParams(null); }} />}
       </>}>
       <section className="grid">
-        <div className="s7" style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
+        <div className="s12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 18, alignItems: 'start', minWidth: 0 }}>
           {rows.length === 0 && <EmptyCard title="Blueprints" chip={{ text: 'None', tone: 'v' }} scene="checklist" heading="No blueprint is active" body="The platform creates one for each place schools can run when it first starts." />}
           {rows.map((bp) => {
             const steps = draft[bp.id] ?? bp.steps;
@@ -82,10 +82,11 @@ export function BlueprintsPage() {
             );
           })}
         </div>
-        <Card title="Rules for risky changes" span="s5">
+        <Card title="Rules for risky changes" span="s12">
           {pol && (
             <>
               <div className="lbl" style={{ marginBottom: 4 }}>Needs a second person</div>
+              <div className="rolh2">
               {Object.keys(ACTION).map((a) => (
                 <div key={a} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '10px 0', borderTop: '1px solid var(--line)' }}>
                   <span style={{ flex: 1, font: '600 14px var(--fb)' }}>{ACTION[a]}</span>
@@ -95,6 +96,7 @@ export function BlueprintsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 0', borderTop: '1px solid var(--line)' }}>
                 <span style={{ flex: 1 }}><b style={{ font: '700 14px var(--fb)', display: 'block' }}>Freeze changes</b><small style={{ color: 'var(--ink3)', font: '500 12.5px var(--fb)' }}>Blocks everything except suspending a school</small></span>
                 <button className={`sw ${pol.freeze ? 'on' : ''}`} role="switch" aria-checked={pol.freeze} aria-label="Freeze changes" disabled={!canPol} onClick={() => setPol({ ...pol, freeze: !pol.freeze })}></button>
+              </div>
               </div>
               <div className="two" style={{ marginTop: 6 }}>
                 <label className="fld"><span className="lbl">Stop a rollout above (error %)</span><span className="inp"><input type="number" min={0} max={100} value={pol.halt.errorRatePct} disabled={!canPol} onChange={(e) => setPol({ ...pol, halt: { ...pol.halt, errorRatePct: Number(e.target.value) } })} /></span></label>
@@ -112,9 +114,7 @@ export function BlueprintsPage() {
                 <div key={i} className="wvr">
                   <span className="av" style={{ width: 28, height: 28, fontSize: 12, background: 'var(--sunk)', color: 'var(--ink3)', boxShadow: 'none' }}>{i + 1}</span>
                   <input className="hws wide" style={{ width: 'auto', textAlign: 'left', padding: '0 12px', flex: '1 1 160px' }} aria-label={`Name of wave ${i + 1}`} value={w.name} disabled={!canPol} onChange={(e) => setPol({ ...pol, waves: pol.waves.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)) })} />
-                  <select className="sel" style={{ height: 38, minWidth: 150 }} aria-label={`Who is in wave ${i + 1}`} value={w.matches} disabled={!canPol} onChange={(e) => setPol({ ...pol, waves: pol.waves.map((x, j) => (j === i ? { ...x, matches: e.target.value as 'rest' } : x)) })}>
-                    {WAVE_KINDS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                  </select>
+                  <Select compact aria-label={`Who is in wave ${i + 1}`} value={w.matches} disabled={!canPol} onChange={(v) => setPol({ ...pol, waves: pol.waves.map((x, j) => (j === i ? { ...x, matches: v as 'rest' } : x)) })} options={WAVE_KINDS.map(([value, label]) => ({ value, label }))} />
                   <label className="hwc" style={{ whiteSpace: 'nowrap' }}>Schools at a time<input className="hws" type="number" min={1} max={100} value={w.batch} disabled={!canPol} onChange={(e) => setPol({ ...pol, waves: pol.waves.map((x, j) => (j === i ? { ...x, batch: Math.max(1, Number(e.target.value) || 1) } : x)) })} /></label>
                   {canPol && <button className="btn sm dng" disabled={pol.waves.length < 2} aria-label={`Remove wave ${i + 1}`} onClick={() => setPol({ ...pol, waves: pol.waves.filter((_, j) => j !== i) })}>Remove</button>}
                 </div>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { inr, lakhs, type InvoiceListQuery, type ReceiptRow, type StudentDetail } from '@edunest/contracts';
-import { Dialog, EmptyCard, Segmented } from '@edunest/web-ui';
+import { Dialog, EmptyCard, Segmented, Select } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
 import { Page, useToast } from '../../app/Page';
 import { Avatar, Ico, dateLabel } from '../../app/kit';
@@ -55,9 +55,7 @@ export function InvoicesPage() {
           {view === 'invoices' && (
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', padding: '8px 22px 14px', alignItems: 'center' }}>
               <Segmented value={status} onChange={(v) => { setStatus(v); setPage(1); }} label="Status" options={[{ value: 'all', label: 'All' }, { value: 'overdue', label: 'Overdue' }, { value: 'due', label: 'Due' }, { value: 'partial', label: 'Part paid' }, { value: 'paid', label: 'Paid' }]} />
-              <select className="sel" aria-label="Kind of fee" value={head} onChange={(e) => { setHead(e.target.value); setPage(1); }} style={{ height: 40, minWidth: 150 }}>
-                <option value="">All fees</option><option value="tuition">Tuition</option><option value="transport">Transport</option><option value="activities">Activities</option><option value="lab">Lab</option>
-              </select>
+              <Select compact aria-label="Kind of fee" value={head} onChange={(v) => { setHead(v); setPage(1); }} options={[{ value: '', label: 'All fees' }, { value: 'tuition', label: 'Tuition' }, { value: 'transport', label: 'Transport' }, { value: 'activities', label: 'Activities' }, { value: 'lab', label: 'Lab' }]} />
             </div>
           )}
           {view === 'invoices' ? (

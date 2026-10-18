@@ -58,7 +58,7 @@ export function TimetablePage() {
     return (
       <Shell page="timetable" theme={chrome.themeCls} aside={chrome.aside}>
         <main className="mn"><header className="hd"><div><h1>Timetable</h1></div></header>
-          <div style={{ maxWidth: 520 }}><EmptyCard error title="Timetable" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="plug" heading="That didn’t load" body={(tt.error as Error).message} actions={<button className="btn pri" onClick={() => void tt.refetch()}>Try again</button>} /></div>
+          <div><EmptyCard error title="Timetable" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="plug" heading="That didn’t load" body={(tt.error as Error).message} actions={<button className="btn pri" onClick={() => void tt.refetch()}>Try again</button>} /></div>
         </main>
       </Shell>
     );
@@ -67,7 +67,7 @@ export function TimetablePage() {
     return (
       <Shell page="timetable" theme={chrome.themeCls} aside={chrome.aside} overlays={<>{chrome.palette}</>}>
         <main className="mn"><header className="hd"><div><h1>Timetable</h1><p>No classes yet</p></div></header>
-          <div style={{ maxWidth: 520 }}><EmptyCard title="Timetable" chip={{ text: '0 classes', tone: 'v' }} scene="calendar" heading="Nothing to schedule yet" body="Once your classes and teachers are added, build each week here and publish it to families." actions={<button className="btn pri" onClick={() => app.go('/students')}>Add students first</button>} /></div>
+          <div><EmptyCard title="Timetable" chip={{ text: '0 classes', tone: 'v' }} scene="calendar" heading="Nothing to schedule yet" body="Once your classes and teachers are added, build each week here and publish it to families." actions={<button className="btn pri" onClick={() => app.go('/students')}>Add students first</button>} /></div>
         </main>
       </Shell>
     );

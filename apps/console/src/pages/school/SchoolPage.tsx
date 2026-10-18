@@ -77,7 +77,7 @@ export function SchoolPage() {
     return (
       <Shell page="school" theme={chrome.themeCls} aside={chrome.aside}>
         <main className="mn"><header className="hd"><div><h1>School</h1></div></header>
-          <div style={{ maxWidth: 520 }}><EmptyCard error title="School" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="search-paper" heading="That school isn’t here" body={(school.error as Error).message} actions={<button className="btn pri" onClick={() => app.go('/')}>Back to the fleet</button>} /></div>
+          <div><EmptyCard error title="School" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="search-paper" heading="That school isn’t here" body={(school.error as Error).message} actions={<button className="btn pri" onClick={() => app.go('/')}>Back to the fleet</button>} /></div>
         </main>
       </Shell>
     );
@@ -163,16 +163,18 @@ function Entitlements({ d, planName, onPush, busy }: { d: SchoolDetail; planName
   const lim = d.entitlement.limits;
   return (
     <section className="grid">
-      <Card title="Modules" chip={<span className="chip">{d.entitlement.modules.length} on</span>} span="s7">
+      <Card title="Modules" chip={<span className="chip">{d.entitlement.modules.length} on</span>} span="s12">
         <div className="tgrow">{d.entitlement.modules.map((m) => <span key={m} className="chip v">{name(m)}</span>)}</div>
         <div className="help" style={{ marginTop: 14 }}>Modules come from the {planName} plan plus anything added at onboarding. The school can switch these on or off itself under Settings.</div>
       </Card>
-      <Card title="Limits" span="s5">
-        <div className="kv">Students<b>{count(lim.students)}</b></div>
-        <div className="kv">File storage<b>{lim.storageGb} GB</b></div>
-        <div className="kv">SMS a month<b>{count(lim.smsPerMonth)}</b></div>
-        <div className="kv">Settings locked<b>{d.entitlement.locks.length ? d.entitlement.locks.join(', ') : 'None'}</b></div>
-        <div className="kv">Version<b>{d.entitlement.version}</b></div>
+      <Card title="Limits" span="s12">
+        <div className="rolh2">
+          <div className="kv">Students<b>{count(lim.students)}</b></div>
+          <div className="kv">File storage<b>{lim.storageGb} GB</b></div>
+          <div className="kv">SMS a month<b>{count(lim.smsPerMonth)}</b></div>
+          <div className="kv">Settings locked<b>{d.entitlement.locks.length ? d.entitlement.locks.join(', ') : 'None'}</b></div>
+          <div className="kv">Version<b>{d.entitlement.version}</b></div>
+        </div>
       </Card>
       <Card title="Send to the school" span="s12">
         <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -188,14 +190,16 @@ function Versions({ d, onAct, busy }: { d: SchoolDetail; onAct: (a: ActionKey, p
   const app = useApp();
   return (
     <section className="grid">
-      <Card title="Running versions" span="s5">
-        <div className="kv">School API<b>{d.versions.api}</b></div>
-        <div className="kv">Admin panel<b>{d.versions.admin}</b></div>
-        <div className="kv">Mobile app<b>{d.versions.app}</b></div>
-        <div className="kv">Configuration<b>{d.configVersion}</b></div>
-        <div className="kv">Placed on<b>{d.target} · cell {d.cell} · {d.region}</b></div>
+      <Card title="Running versions" span="s12">
+        <div className="rolh2">
+          <div className="kv">School API<b>{d.versions.api}</b></div>
+          <div className="kv">Admin panel<b>{d.versions.admin}</b></div>
+          <div className="kv">Mobile app<b>{d.versions.app}</b></div>
+          <div className="kv">Configuration<b>{d.configVersion}</b></div>
+          <div className="kv">Placed on<b>{d.target} · cell {d.cell} · {d.region}</b></div>
+        </div>
       </Card>
-      <Card title="Database" chip={<span className="chip">Migrations</span>} span="s7">
+      <Card title="Database" chip={<span className="chip">Migrations</span>} span="s12">
         <div className="help">Applies any schema changes this school has not seen yet. A rehearsal reports what would run and changes nothing.</div>
         <div className="tgrow" style={{ marginTop: 14 }}>
           <button className="btn" onClick={() => onAct('migration.run', {}, true)} disabled={busy || !app.can('schools.write')}>Rehearse</button>
@@ -222,13 +226,13 @@ function Health({ d }: { d: SchoolDetail }) {
   const st = statusOf(d);
   return (
     <section className="grid">
-      <Card title="Right now" chip={<span className={`st ${st.tone}`}><i></i>{st.text}</span>} span="s6">
+      <Card title="Right now" chip={<span className={`st ${st.tone}`}><i></i>{st.text}</span>} span="s12">
         <div className="kv">Answer time<b>{d.healthMs != null ? `${d.healthMs} ms` : 'Not measured yet'}</b></div>
         <div className="kv">Last problem<b>{d.lastIncident ? ago(d.lastIncident) : 'None recorded'}</b></div>
         <div className="kv">Address<b>{d.adminUrl}</b></div>
         <div style={{ marginTop: 14 }}><button className="btn" onClick={() => probe.mutate()} disabled={probe.isPending}>{probe.isPending ? 'Checking…' : 'Check now'}</button></div>
       </Card>
-      <Card title="How it is checked" span="s6">
+      <Card title="How it is checked" span="s12">
         <div className="help">The console asks each school’s API for a heartbeat every minute and keeps the answer time. Two failures in a row open an incident on the Fleet page; a clean check closes it.</div>
       </Card>
     </section>
