@@ -60,3 +60,15 @@
 .pg-students .ev small{display:block;font:600 12px var(--fb);color:var(--ink3)}
 .pg-students .empt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:34px 20px 44px;text-align:center}
 
+
+.pg-students .scroll-x{overflow-x:auto}
+.pg-students .gmin{min-width:860px}
+@media (max-width:760px){
+  .pg-students .strip4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pg-students .strip4>.sm{padding:16px 18px}
+  .pg-students .strip4>.sm:nth-child(odd){border-left:0}
+  .pg-students .strip4>.sm:nth-child(n+3){border-top:1px solid var(--line)}
+  .pg-students .strip4>.sm .v{font-size:26px}
+  .pg-students .tcap{flex-wrap:wrap}
+  .pg-students .tcap .srch{order:3;flex:1 1 100%;min-width:0!important}
+}

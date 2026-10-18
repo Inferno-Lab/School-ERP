@@ -24,3 +24,9 @@
 .nest .in3:focus-within{border-color:var(--v);box-shadow:0 0 0 5px color-mix(in srgb,var(--v) 16%,transparent)}
 .nest .in3 input{flex:1;min-width:0;border:0;outline:0;background:none;font:700 14.5px var(--fb);color:var(--ink)}
 .nest .in3 svg{width:18px;height:18px;color:var(--ink3);flex:none}
+@media (max-width:760px){
+  .nest .es-nf{grid-template-columns:minmax(0,1fr);padding:26px 22px}
+  .nest .es-nf .n{font-size:120px}
+  .nest .es-nf h3{font-size:24px}
+  .nest .es-nf>div:last-child{max-width:220px;margin:0 auto}
+}

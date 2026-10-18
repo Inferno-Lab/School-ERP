@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { inr, lakhs, type ApprovalRow, type DashboardData } from '@edunest/contracts';
-import { EmptyCard, IC, Shell, TONES, rollDigits, tintFor } from '@edunest/web-ui';
+import { EmptyCard, IC, Shell, TONES, rollDigits, tintFor, useIsPhone } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
 import { useChrome } from '../../app/useChrome';
 import { DashboardView } from './dashboard.view';
 import { DashboardSkeleton } from './DashboardSkeleton';
+import { PhoneDashboard } from '../phone/PhoneDashboard';
 
 const RANGES: [string, number][] = [['Today', 1], ['This week', 6], ['This term', 24], ['This year', 24]];
 const TABS: [string, 'attendance' | 'fees' | 'homework', number][] = [['Attendance', 'attendance', 104], ['Fees', 'fees', 72], ['Homework', 'homework', 104]];
@@ -27,7 +28,12 @@ function niceMax(v: number): number {
 const trend = (pct: number) => ({ cls: pct >= 0 ? 'up' : 'dn', icon: pct >= 0 ? UP : DOWN, text: `${Math.abs(pct)}%` });
 const greeting = () => { const h = (new Date().getUTCHours() * 60 + new Date().getUTCMinutes() + 330) / 60 % 24; return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
 
+/** A phone gets its own home screen; everything wider gets the dashboard. */
 export function DashboardPage() {
+  return useIsPhone() ? <PhoneDashboard /> : <DashboardDesktop />;
+}
+
+function DashboardDesktop() {
   const app = useApp();
   const chrome = useChrome('dash');
   const qc = useQueryClient();
@@ -119,6 +125,8 @@ export function DashboardPage() {
       tabs: TABS.map((x, i) => ({ n: x[0], on: i === tab ? 'on' : '', sel: i === tab ? 'true' : 'false', pick: () => setTab(i) })), kw: T[2],
       kx: TABS.slice(0, tab).reduce((a, x) => a + x[2], 4),
       grid, goalB: 30 + (goal / max) * H, goalL: kind === 'fees' ? `Daily target ${money(goal)}` : `Goal ${goal}%`, cols,
+      chartEmpty: values.every((x) => x === 0),
+      chartEmptyText: kind === 'attendance' ? 'Attendance appears here after the first roll call is marked.' : kind === 'fees' ? 'Payments appear here as fees are collected.' : 'Homework appears here once teachers set it and students hand it in.',
       needs, leftLabel: left ? `${left} open` : 'Clear', allDone: left === 0,
       toastOn: !!toast, toastText: toast?.text ?? '', canUndo: !!toast && toast.id !== 'att_reminder',
       undo: () => {

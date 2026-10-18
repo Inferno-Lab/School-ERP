@@ -62,3 +62,14 @@
 .pg-settings .in2.err{border-color:var(--r);background:color-mix(in srgb,var(--rS) 45%,var(--card));box-shadow:0 0 0 5px color-mix(in srgb,var(--r) 14%,transparent)}
 .pg-settings .sw:disabled,.pg-settings .sw5 button:disabled{opacity:.5;cursor:not-allowed}
 .pg-settings .set .es{max-width:none}
+
+@media (max-width:760px){
+  .pg-settings .rw2{grid-template-columns:minmax(0,1fr);gap:12px;padding:18px 0}
+  .pg-settings .grp{padding:4px 18px}
+  .pg-settings .tkt{grid-template-columns:minmax(0,1fr);-webkit-mask:none;mask:none}
+  .pg-settings .tkt .l{border-right:0;border-bottom:2px dashed rgba(255,255,255,.28);padding:0 0 16px}
+  .pg-settings .tkt .r{padding:16px 0 0}
+  .pg-settings .snav{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px}
+  .pg-settings .sn{flex:none;white-space:nowrap}
+  .pg-settings .pv{width:100%;max-width:260px}
+}

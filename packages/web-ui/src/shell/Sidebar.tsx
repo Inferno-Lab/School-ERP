@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from 'react';
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
 
 export interface NavItem {
   id: string;
@@ -29,12 +29,23 @@ export interface SidebarProps {
   me: { initials: string; name: string; role: string; bg: string; fg: string };
   /** Pushes the person block to the bottom when there is no promo card. */
   pushDown?: boolean;
+  /** Actions under the person's name, like signing out. */
+  meMenu?: { label: string; onPress: () => void }[];
 }
 
 const HAS_MODIFIER = (e: MouseEvent) => e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0;
 
 /** The collapsible menu. Markup and class names are the design's; every item is a link so it works with the keyboard and a new tab. */
-export function Sidebar({ label, collapsed, groups, active, onNavigate, header, promo, me, pushDown }: SidebarProps) {
+export function Sidebar({ label, collapsed, groups, active, onNavigate, header, promo, me, pushDown, meMenu }: SidebarProps) {
+  const [menu, setMenu] = useState(false);
+  useEffect(() => {
+    if (!menu) return;
+    const off = () => setMenu(false);
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(false); };
+    document.addEventListener('click', off);
+    document.addEventListener('keydown', key);
+    return () => { document.removeEventListener('click', off); document.removeEventListener('keydown', key); };
+  }, [menu]);
   return (
     <aside className={`sb ${collapsed ? 'col' : ''}`} aria-label={label}>
       {header}
@@ -62,12 +73,23 @@ export function Sidebar({ label, collapsed, groups, active, onNavigate, header, 
         </div>
       ))}
       {promo}
-      <div className="me" style={pushDown ? { marginTop: 'auto' } : undefined}>
-        <span className="av" style={{ background: me.bg, color: me.fg }}>{me.initials}</span>
-        <div className="fade">
-          <div style={{ font: '700 14px var(--fb)' }}>{me.name}</div>
-          <div style={{ font: '600 12.5px var(--fb)', color: 'var(--ink3)' }}>{me.role}</div>
-        </div>
+      <div className="me" style={{ ...(pushDown ? { marginTop: 'auto' } : {}), position: 'relative' }}>
+        {meMenu && menu && (
+          <div className="popm" role="menu" style={{ top: 'auto', bottom: 'calc(100% + 6px)', left: 0, right: 0, minWidth: 0 }} onClick={(e) => e.stopPropagation()}>
+            {meMenu.map((m) => <button key={m.label} role="menuitem" onClick={() => { setMenu(false); m.onPress(); }}>{m.label}</button>)}
+          </div>
+        )}
+        {meMenu ? (
+          <button className="mebtn" aria-haspopup="menu" aria-expanded={menu} onClick={(e) => { e.stopPropagation(); setMenu((o) => !o); }}>
+            <span className="av" style={{ background: me.bg, color: me.fg }}>{me.initials}</span>
+            <div className="fade"><div style={{ font: '700 14px var(--fb)' }}>{me.name}</div><div style={{ font: '600 12.5px var(--fb)', color: 'var(--ink3)' }}>{me.role}</div></div>
+          </button>
+        ) : (
+          <>
+            <span className="av" style={{ background: me.bg, color: me.fg }}>{me.initials}</span>
+            <div className="fade"><div style={{ font: '700 14px var(--fb)' }}>{me.name}</div><div style={{ font: '600 12.5px var(--fb)', color: 'var(--ink3)' }}>{me.role}</div></div>
+          </>
+        )}
       </div>
     </aside>
   );

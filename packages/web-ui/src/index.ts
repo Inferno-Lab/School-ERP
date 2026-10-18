@@ -16,3 +16,5 @@ export * from './Roll';
 export * from './forms';
 export * from './Dialog';
 export * from './Toast';
+export * from './shell/Dock';
+export * from './useMedia';

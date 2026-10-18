@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Palette, SchoolHeader, Sidebar, tintFor, useTheme, type PaletteHit } from '@edunest/web-ui';
+import { Dock, IC, MoreSheet, Palette, SchoolHeader, Sidebar, tintFor, useTheme, type DockTab, type PaletteHit } from '@edunest/web-ui';
 import { adminNav, shortcutTargets } from './nav';
 import { useApp } from './context';
 
@@ -8,11 +8,12 @@ const COLLAPSE_KEY = 'edunest.admin.menu.collapsed';
 
 /** What every page shares: the theme, the menu, the shortcuts and the search box. Merge it into the page's values. */
 export function useChrome(active: string) {
-  const { api, base, user, go } = useApp();
+  const { api, base, user, go, signOut } = useApp();
   const theme = useTheme();
   const shell = useQuery({ queryKey: ['shell'], queryFn: api.shell, staleTime: 30_000 });
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(COLLAPSE_KEY) === '1'; } catch { return false; } });
   const [open, setOpen] = useState(false);
+  const [more, setMore] = useState(false);
   const [q, setQ] = useState('');
   const [dq, setDq] = useState('');
   useEffect(() => { const t = setTimeout(() => setDq(q), 140); return () => clearTimeout(t); }, [q]);
@@ -51,7 +52,40 @@ export function useChrome(active: string) {
   };
 
   const t = tintFor(user.name);
+  const has = (id: string) => groups.some((g) => g.items.some((i) => i.id === id));
+  const hrefOf = (id: string) => groups.flatMap((g) => g.items).find((i) => i.id === id)?.href ?? '/';
+  const home = ['dash'], people = ['stu', 'staff', 'adm'], money = ['fee', 'inv', 'rep'];
+  const dockTabs: DockTab[] = [
+    { id: 'home', label: 'Home', icon: 'M4 11l8-7 8 7v9H4zM9 20v-6h6v6', onPress: () => goRef.current('/') },
+    ...(has('stu') ? [{ id: 'people', label: 'People', icon: IC.stu, onPress: () => goRef.current(hrefOf('stu').replace(base, '') || '/') }] : []),
+    ...(has('fee') ? [{ id: 'money', label: 'Money', icon: IC.fee, onPress: () => goRef.current(hrefOf('fee').replace(base, '') || '/') }] : []),
+    { id: 'more', label: 'More', icon: 'M5 12h.01M12 12h.01M19 12h.01', onPress: () => setMore(true) },
+  ];
+  const dockActive = home.includes(active) ? 'home' : people.includes(active) ? 'people' : money.includes(active) ? 'money' : 'more';
+
+  const dock: ReactNode = (
+    <>
+    <Dock tabs={dockTabs} active={dockActive} />
+    {more && (
+      <MoreSheet title="Menu" onClose={() => setMore(false)}>
+        {groups.map((g) => (
+          <div key={g.name}>
+            <div className="sl">{g.name}</div>
+            {g.items.map((n) => (
+              <a key={n.id} className={`nvm ${n.id === active ? 'on' : ''}`} href={n.href} onClick={(e) => { e.preventDefault(); setMore(false); goRef.current(base && n.href.startsWith(base) ? n.href.slice(base.length) || '/' : n.href); }}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path className="i" d={n.icon}></path></svg>{n.label}
+              </a>
+            ))}
+          </div>
+        ))}
+        <button className="btn" style={{ width: '100%', marginTop: 14 }} onClick={() => { setMore(false); signOut(); }}>Sign out</button>
+      </MoreSheet>
+    )}
+    </>
+  );
+
   const aside: ReactNode = (
+    <>
     <Sidebar
       label="Main menu" collapsed={collapsed} groups={groups} active={active}
       onNavigate={(href) => goRef.current(base && href.startsWith(base) ? href.slice(base.length) || '/' : href)}
@@ -65,7 +99,10 @@ export function useChrome(active: string) {
         </div>
       )}
       me={{ initials: user.initials, name: user.name, role: user.roleNames[0] ?? 'Staff', bg: t.bg, fg: t.fg }}
+      meMenu={[{ label: theme.theme === 'dark' ? 'Switch to light' : 'Switch to dark', onPress: theme.toggle }, { label: 'Sign out', onPress: signOut }]}
     />
+    {dock}
+    </>
   );
 
   const palette: ReactNode = open && (
@@ -77,5 +114,5 @@ export function useChrome(active: string) {
     </>
   );
 
-  return { themeCls: theme.cls, rmCls: '', aside, palette, openSearch: () => setOpen(true), shell: data };
+  return { themeCls: theme.cls, rmCls: '', aside, dock, palette, openSearch: () => setOpen(true), shell: data };
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Takes a screenshot of a page in headless Chromium, signed in to a school or the console.
-// Usage: node tools/shot.mjs <url> <out.png> [width] [height] [--dark] [--school slug] [--console] [--full] [--do '[{"click":"text=Modules"},{"fill":["sel","text"]},{"wait":300}]']
+// Usage: node tools/shot.mjs <url> <out.png> [width] [height] [--dark] [--school slug] [--console] [--full] [--audit] [--do '[{"click":"text=Modules"},{"fill":["sel","text"]},{"wait":300}]']
 import { chromium } from '@playwright/test';
+import { auditPage } from './lib/audit.mjs';
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
@@ -41,6 +42,8 @@ for (const a of JSON.parse(val('--do') ?? '[]')) {
   await page.waitForTimeout(a.wait ?? 400);
 }
 const overflow = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+let audit = [];
+if (flag('--audit')) audit = await auditPage(page);
 await page.screenshot({ path: out, fullPage: flag('--full') });
-console.log(JSON.stringify({ out, overflowX: overflow.sw > overflow.cw + 1 ? overflow : false, errors }));
+console.log(JSON.stringify({ out, overflowX: overflow.sw > overflow.cw + 1 ? overflow : false, errors, ...(audit.length ? { audit } : {}) }));
 await browser.close();

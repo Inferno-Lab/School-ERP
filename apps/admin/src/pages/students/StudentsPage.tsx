@@ -152,7 +152,7 @@ export function StudentsPage() {
       return {
         inView: s ? inr(s.inView) : '–', total: inr(s?.total ?? 0), marked: s?.markedToday ?? 0, since: s?.presentSince ?? 0, presD: rollDigits(String(s?.presentToday ?? 0)),
         dayWord: s && s.dayLabel !== dayLabel(istToday()) ? `on ${s.dayLabel}` : 'today', overdue: inr(s?.overdueAmount ?? 0),
-        families: `${s?.overdueFamilies ?? 0} ${s?.overdueFamilies === 1 ? 'family' : 'families'}`, avg: s?.avgAttendance ?? 0,
+        families: `${s?.overdueFamilies ?? 0} ${s?.overdueFamilies === 1 ? 'family' : 'families'}`, avg: s?.avgAttendance ?? 0, avgNone: !s || s.total === 0,
         delta: `${(s?.avgDelta ?? 0) >= 0 ? '+' : ''}${s?.avgDelta ?? 0}%`, deltaCls: (s?.avgDelta ?? 0) >= 0 ? 'up' : 'dn',
       };
     })(),

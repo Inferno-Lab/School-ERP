@@ -296,7 +296,7 @@ export function DashboardView({ v }: { v: any }) {
                 ))}
               </div>
             </div>
-            <div className="plot" role="img" aria-label={v.chartAlt}>
+            <div className={`plot ${v.chartEmpty ? "empty" : ""}`} role="img" aria-label={v.chartAlt}>
               {v.grid.map((g: any, $i: number) => (
                 <Fragment key={$i}>
                   <div className="gl" style={{ bottom: `${g.b ?? ""}px` } as CSSProperties}>
@@ -322,6 +322,7 @@ export function DashboardView({ v }: { v: any }) {
                   </Fragment>
                 ))}
               </div>
+              {v.chartEmpty && <div className="plot-empty">{v.chartEmptyText}</div>}
               <div className="plab">
                 {v.cols.map((p: any, $i: number) => (
                   <Fragment key={$i}>

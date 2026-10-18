@@ -79,8 +79,8 @@ export function StudentsView({ v }: { v: any }) {
           <div className="sm">
             <span className="l">Average attendance</span>
             <div className="v">
-              {v.sum.avg}
-              <em>%</em>
+              {v.sum.avgNone ? "–" : v.sum.avg}
+              {!v.sum.avgNone && <em>%</em>}
             </div>
             <div className="s">
               <span className={`tr ${v.sum.deltaCls}`}>{v.sum.delta}</span>vs the 12 days before
@@ -121,6 +121,8 @@ export function StudentsView({ v }: { v: any }) {
           </div>
           {v.hasRows && (
             <>
+              <div className="scroll-x">
+              <div className="gmin">
               <div className="grd th" style={{ "--cols": "44px minmax(0,1.5fr) 84px minmax(0,1.1fr) 150px 150px 40px" } as CSSProperties} role="row">
                 <button className={`cb ${v.allOn ?? ""}`} role="checkbox" aria-checked={v.allSel} aria-label="Select all" onClick={v.toggleAll}>
                   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -190,6 +192,8 @@ export function StudentsView({ v }: { v: any }) {
                   </div>
                 </Fragment>
               ))}
+              </div>
+              </div>
               <div className="tfoot">
                 <span>Showing {v.range}</span>
                 <span style={{ display: "flex", gap: "8px" } as CSSProperties}>

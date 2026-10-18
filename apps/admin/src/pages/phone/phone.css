@@ -1,11 +1,11 @@
 /* Scoped from design/canvas/AdminPhone.dc.html. Selectors are prefixed with .pg-phone. */
 
 
-.pg-phone .ph{position:relative;width:100%;height:844px;overflow:hidden;display:flex;flex-direction:column}
+.pg-phone .ph{position:relative;width:100%;min-height:100dvh;display:flex;flex-direction:column}
 .pg-phone .ph .top{display:flex;align-items:center;gap:12px;padding:20px 20px 8px}
 .pg-phone .ph .top h1{margin:0;font:700 26px/1.05 var(--fd);letter-spacing:-.03em}
 .pg-phone .ph .top small{display:block;font:600 13px var(--fb);color:var(--ink3);margin-bottom:2px}
-.pg-phone .ph .sc{flex:1;overflow:auto;padding:8px 16px 120px;display:flex;flex-direction:column;gap:12px;scrollbar-width:none}
+.pg-phone .ph .sc{flex:1;padding:8px 16px 130px;display:flex;flex-direction:column;gap:12px}
 .pg-phone .ph .sc::-webkit-scrollbar{display:none}
 .pg-phone .bt{border-radius:26px;padding:18px;position:relative;overflow:hidden;animation:nRise .7s var(--e) both;animation-delay:var(--d,0s)}
 .pg-phone .bt.a{background:var(--a);color:#3A2600}
@@ -21,13 +21,12 @@
 .pg-phone .ap.gone b{text-decoration:line-through}
 .pg-phone .ap b{display:block;font:700 14.5px var(--fb)}
 .pg-phone .ap small{font:500 12.5px var(--fb);color:var(--ink3)}
-.pg-phone .dock{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--ci);box-shadow:0 20px 40px -12px rgba(30,15,90,.55)}
-.pg-phone .dock button{position:relative;width:56px;height:52px;border-radius:999px;border:0;background:none;color:#B4AFCB;display:grid;place-items:center;cursor:pointer;transition:color .3s,width .5s var(--e),background .3s}
-.pg-phone .dock button.on{width:104px;background:var(--v);color:#fff}
-.pg-phone .dock button svg{width:22px;height:22px;grid-area:1/1}
-.pg-phone .dock button span{grid-area:1/1;font:800 13px var(--fb);margin-left:30px;opacity:0;max-width:0;overflow:hidden;white-space:nowrap;transition:opacity .3s}
-.pg-phone .dock button.on span{opacity:1;max-width:60px}
-.pg-phone .dock button.on svg{margin-right:44px}
 .pg-phone .bell{position:relative}
 .pg-phone .bell i{position:absolute;right:8px;top:8px;width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px var(--frame)}
 
+
+.pg-phone .bars{display:flex;align-items:flex-end;gap:8px;height:128px;margin-top:14px}
+.pg-phone .bars span{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;align-items:stretch;min-width:0}
+.pg-phone .bars i{display:block;border-radius:10px 10px 5px 5px;min-height:10px}
+.pg-phone .bars em{font:700 11px var(--fb);font-style:normal;text-align:center;opacity:.7}
+.pg-phone .phtoast{position:fixed;left:16px;right:16px;bottom:96px;z-index:60;padding:14px 18px;border-radius:22px;background:#1B1826;color:#fff;font:600 14px var(--fb);box-shadow:var(--sh3);animation:nToast .6s var(--e)}
