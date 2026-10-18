@@ -267,6 +267,21 @@ await flow('console: support needs a reason; erase needs the school code', { sto
   }
 });
 
+await flow('support: a session shows the banner and cannot change anything', {}, async (p) => {
+  const r = await (await fetch(`${API}/console/v1/support`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${ct.accessToken}` }, body: JSON.stringify({ schoolId: school.id, reason: 'End to end check of the support banner' }) })).json();
+  if (!r.token) throw new Error(`no token: ${JSON.stringify(r)}`);
+  await p.goto(`${ADMIN}/s/${slug}/settings#support=${r.token}`, { waitUntil: 'networkidle' });
+  await expectVisible(p.getByText(/read-only/), 'the support banner');
+  await expectVisible(p.getByLabel('School name'), 'the name field');
+  if (!(await p.getByLabel('School name').evaluate((el) => el.readOnly))) throw new Error('the name field should be read-only');
+  if (!(await p.getByRole('button', { name: 'Save changes' }).isDisabled())) throw new Error('Save should be disabled');
+  const refused = await fetch(`${API}/v1/settings`, { method: 'PATCH', headers: { 'content-type': 'application/json', 'x-school': slug, authorization: `Bearer ${r.token}` }, body: JSON.stringify({ changes: { 'school.name': 'Hacked' } }) });
+  if (refused.status !== 403) throw new Error(`the API should refuse support writes, got ${refused.status}`);
+  await p.getByRole('button', { name: 'End session' }).click();
+  await p.waitForURL(/\/login/);
+  await fetch(`${API}/console/v1/support/${r.session.id}`, { method: 'DELETE', headers: { authorization: `Bearer ${ct.accessToken}` } });
+});
+
 await flow('console: billing generates invoices once', { storage: consoleStore }, async (p) => {
   await p.goto(`${CONSOLE}/billing`, { waitUntil: 'networkidle' });
   await p.getByRole('button', { name: 'Create invoices' }).click();

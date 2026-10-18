@@ -56,3 +56,13 @@
 .nest .stp .tm{font:700 12px var(--fb);color:var(--ink3);padding-top:8px;display:flex;gap:8px;align-items:center}
 .nest .fld + .fld,.nest .fld + .two,.nest .two + .fld,.nest .two + .two,.nest .stack > * + *{margin-top:16px}
 .nest .two .fld{margin-top:0}
+/* A card's title row wraps on a narrow screen instead of pushing its buttons out of the card. */
+.nest .card>.ch{flex-wrap:wrap;row-gap:10px}
+.nest .card>.ch h2{min-width:0}
+/* The red frame and pill that say a support person is looking inside a school, read-only. */
+.nest .sbar{left:50%;top:18px;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;border-radius:999px;background:var(--r);color:#fff;font:700 13.5px var(--fb);box-shadow:0 20px 40px -14px var(--r);animation:sbIn .7s var(--e);max-width:calc(100vw - 24px)}
+@keyframes sbIn{from{opacity:0;transform:translate(-50%,-24px)}to{opacity:1;transform:translateX(-50%)}}
+.nest .sbar .c{font:800 13px var(--fb);padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.22);white-space:nowrap}
+.nest .sbar button{height:32px;padding:0 14px;border:0;border-radius:999px;background:#fff;color:var(--r);font:800 12.5px var(--fb);cursor:pointer;white-space:nowrap}
+.nest .glow{inset:0;z-index:55;pointer-events:none;box-shadow:inset 0 0 0 3px var(--r),inset 0 0 80px color-mix(in srgb,var(--r) 30%,transparent);animation:nFade .6s}
+@media (max-width:560px){.nest .sbar{flex-wrap:wrap;justify-content:center;border-radius:22px;padding:10px 12px;gap:8px}}

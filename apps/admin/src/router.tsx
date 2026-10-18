@@ -3,6 +3,7 @@ import { Outlet, createRootRouteWithContext, createRoute, createRouter, redirect
 import { useMemo } from 'react';
 import { AppContext, type AppCtx } from './app/context';
 import { makeClient, session, type Client } from './app/client';
+import { SupportBanner } from './app/SupportBanner';
 import { LoginRoute } from './pages/login/LoginRoute';
 import { NotFoundPage } from './pages/status/StatusPages';
 
@@ -33,7 +34,13 @@ const authed = createRoute({
       go: (path) => void router.navigate({ to: path as never }),
     } : null, [slug, client, user, router, qc]);
     if (!ctx) return null;
-    return <AppContext.Provider value={ctx}><Outlet /></AppContext.Provider>;
+    const support = session.read(slug)?.support;
+    return (
+      <AppContext.Provider value={ctx}>
+        <Outlet />
+        {support && <SupportBanner school={slug} until={support.until} onEnd={() => { session.write(slug, null); qc.clear(); window.close(); void router.navigate({ to: '/login' }); }} />}
+      </AppContext.Provider>
+    );
   },
 });
 
