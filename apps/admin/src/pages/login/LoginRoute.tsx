@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useRouteContext } from '@tanstack/react-router';
-import { LoginPage } from '@edunest/web-ui';
+import { EmptyCard, LoginPage } from '@edunest/web-ui';
 import { session } from '../../app/client';
 
 /** Signs in to the school named in the address: password first, then the code. */
@@ -34,5 +34,11 @@ export function LoginRoute() {
 }
 
 function NoSchool({ message }: { message: string }) {
-  return <div style={{ font: '600 16px var(--fb, system-ui)', padding: 40, textAlign: 'center' }}>{message}</div>;
+  return (
+    <div className="nest" style={{ minHeight: '100dvh', padding: 12, display: 'grid', placeItems: 'center' }}>
+      <div style={{ maxWidth: 440, width: '100%' }}>
+        <EmptyCard error title="Sign in" chip={{ text: 'Not found', tone: 'r' }} scene="search-paper" heading="We couldn’t find that school" body={message} actions={<a className="btn pri" href="/">Try another address</a>} />
+      </div>
+    </div>
+  );
 }
