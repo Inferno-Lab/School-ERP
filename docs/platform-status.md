@@ -1,4 +1,4 @@
-# Platform build status (2026-10-18, after the second session)
+# Platform build status (2026-10-19, after the UI fix sessions)
 
 Merged to `main` (work branch `feat/platform`). The plan is `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`; this file says what of it exists.
 Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (decisions, how to continue, what is left) is `docs/HANDOFF.md`; the design concept is `docs/DESIGN.md`. Live test deployment: `https://edunest-0c6x.onrender.com` (admin `/`, console `/console/`).
@@ -8,9 +8,9 @@ Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (de
 | Part | Where | Checks |
 | --- | --- | --- |
 | Workspace (pnpm + Turborepo), CI, Render blueprint | root, `.github/workflows`, `render.yaml` | `pnpm build`, `typecheck`, `test` all green |
-| Contracts, config engine, security, db (schemas, migrations, migrator, Greenfield seed), tenancy, api-client, web-ui | `packages/*` | 9 + 4 + 4 + 13 + 1 + 6 + 3 unit tests |
-| School API (sign-in with code, lockout, refresh rotation, students, attendance, fees, approvals, timetable, dashboard, settings and plan usage, search, audit, support-session read-only tokens) | `apps/api` | 27 tests on a real PostgreSQL |
-| Console API (blueprints, wizard, provisioning drivers, approvals, releases in waves, migrations, health, support, flags, billing, team, sandbox inbox, build callback, demo seed on first start) | `apps/console-api` | 19 tests; schools are really created and signed in to |
+| Contracts, config engine, security, db (schemas, migrations, migrator, Greenfield seed), tenancy, api-client, web-ui | `packages/*` | 4 + 9 + 4 + 13 + 1 + 6 + 9 unit tests |
+| School API (sign-in with code, lockout, refresh rotation, students, attendance, fees, invoices, approvals, timetable, homework, exams, staff, admissions, reports, messages, events, dashboard, settings and plan usage, search, audit, support-session read-only tokens, the family API) | `apps/api` | 57 tests on a real PostgreSQL |
+| Console API (blueprints, wizard, provisioning drivers, approvals, releases in waves, migrations, cells, health, support, flags and kill switches, billing, compliance, team, sandbox inbox, build callback, demo seed on first start) | `apps/console-api` | 29 tests; schools are really created and signed in to |
 | One process: both APIs, the admin at `/`, the console at `/console/` | `apps/server` | production build run locally and audited |
 | School admin: sign-in, dashboard, students, timetable, attendance, fees, invoices, homework, exams, staff, admissions, reports, messages, events, notices, settings (General, Modules, App layout, Roles and access, Notifications, Message templates, Privacy and consent, Audit log), phone home and dock, public status page, design-system page | `apps/admin` | see below |
 | Console: sign-in, fleet, school (overview, entitlements, versions, health, audit), onboarding wizard, releases (editable waves), migrations, cells (add, manage, move a school), builds, flags (with kill switches), blueprints and rules, health, approvals, support, test inbox, billing, compliance, team | `apps/console` | see below |
@@ -19,7 +19,8 @@ Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (de
 UI checks, all repeatable:
 
 - `node tools/audit-ui.mjs`: every page of both apps at 360, 390, 768 and 1440 wide, light and dark. Fails on console errors, failed calls, sideways scroll and anything clipped or outside the window.
-- `node tools/e2e-flows.mjs` (21 flows): sign-in errors, add student, dashboard approval, timetable clash fix and publish, settings save, search and shortcuts, phone dock, console release, flags, team, support and erase guards, billing.
+- `node tools/e2e-flows.mjs` (38 flows): sign-in errors, add student, dashboard approval, timetable clash fix and publish, roll call, settings and its tabs, search and shortcuts, phone dock, homework, exams, staff, admissions, invoices, reports, messages, events, console release, flags, cells, compliance, team, support and erase guards, billing, the dropdown, the collapsed menu.
+- `node tools/scan-gaps.mjs`, `scan-fit.mjs`, `scan-scroll.mjs`, `scan-cutoff.mjs`: uneven columns and blank cards; tabs and pills that do not fit; slow scroll areas and headings that scroll away; text cut off.
 - `node tools/e2e-onboard.mjs`: onboards a new empty school through the console wizard, signs in to it with the code from the test inbox, and screenshots every admin page (the brand-new-school states).
 - `node tools/shot.mjs <url> out.png [w] [h] [--dark] [--console] [--audit] [--do '[...]']`: one screenshot, signed in.
 
@@ -29,7 +30,7 @@ UI checks, all repeatable:
 - **Admin**: none of the new pages has had the owner's design review (no canvas boards exist for them); no Hindi or Marathi for admin text; quiet hours only mark sandbox messages as held.
 - **Console**: a data-copying move between servers (aws-cell), catalog update offers, real backups beyond Neon, release deployment that does more than record versions, Razorpay and GST invoices.
 - **Hosting and security**: only the free test track; tokens are still in `localStorage` (plan section 17 asks for cookies, CSP, passkeys, TOTP, rate limits per IP, a password reset flow); AWS, Razorpay and SMS providers need the owner's accounts.
-- **Not verified**: the deployed environment after this session's push (needs a Render deploy), a real phone, iOS.
+- **Not verified**: a real phone, iOS, the live console (its sign-in is the owner's). The live admin was audited after the last deploy.
 - Visual match with the canvas was checked by eye against the boards, not by pixel diff, because the pages show real data and the boards show sample data.
 
 ## Rules worth remembering

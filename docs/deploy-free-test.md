@@ -38,6 +38,7 @@ If `edunest` is already taken as a name, Render proposes another one. That is fi
 | --- | --- | --- |
 | Console | `https://<service>.onrender.com/console/` | `kaushal@edunest.app`, the password from Render → your service → **Environment** → `BOOTSTRAP_PASSWORD`, then your `DEMO_CODE` |
 | Demo school admin | `https://<service>.onrender.com/s/greenfield` | `neha.menon@greenfield.edu.in`, password `nest2026`, then press *Type the demo code* |
+| Phone app (a build for `greenfield`) | the app | parent `priya.sharma@example.com`, student `aarav.sharma@edunest.app`, teacher `kavita.iyer@greenfield.edu.in`; password `nest2026`, code `424242` |
 
 The demo school Greenfield is created by the first start (a minute or two; watch it appear on the console's Fleet page). Anyone with the address can open the demo school, so keep real data out of this environment.
 
@@ -53,7 +54,7 @@ The console's **Build Android app** starts a GitHub Actions workflow (`.github/w
 
 ### What the app does against the test track
 
-A build made with `SCHOOL` and `API_BASE_URL` (the workflow passes both) reads the school's own name and tagline from its API at start-up, so changing them in the admin's Settings shows up in the app. The rest of the app still runs on the demo content: connecting each screen to the school's data is the next step of the plan (section 19).
+A build made with `SCHOOL` and `API_BASE_URL` (the workflow passes both) signs in with the school's real accounts (password, then the code; the demo school hands out `424242`) and reads every screen from the family API (`/v1/f/*`). What a teacher marks in the app shows up in the admin. Not yet: hiding tabs for switched-off modules, library catalogue, gallery, live transport, push.
 
 ## Updating
 
