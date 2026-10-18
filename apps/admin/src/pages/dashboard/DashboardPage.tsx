@@ -11,8 +11,8 @@ import { PhoneDashboard } from '../phone/PhoneDashboard';
 const RANGES: [string, number][] = [['Today', 1], ['This week', 6], ['This term', 24], ['This year', 24]];
 const TABS: [string, 'attendance' | 'fees' | 'homework', number][] = [['Attendance', 'attendance', 104], ['Fees', 'fees', 72], ['Homework', 'homework', 104]];
 const NEWS: [string, string, string, string][] = [
-  ['Add student', 'stu', 'N S', '/students?add=1'], ['Collect a fee', 'fee', 'N F', '/students?pay=1'], ['Post a notice', 'notice', 'N N', '/p/notices'],
-  ['Mark attendance', 'att', 'N A', '/p/attendance'], ['Schedule an exam', 'ex', 'N E', '/p/exams'],
+  ['Add student', 'stu', 'N S', '/students?add=1'], ['Collect a fee', 'fee', 'N F', '/students?pay=1'], ['Post a notice', 'notice', 'N N', '/notices'],
+  ['Mark attendance', 'att', 'N A', '/attendance'], ['Schedule an exam', 'ex', 'N E', '/p/exams'],
 ];
 const HEAD_COLOUR: Record<string, string> = { tuition: 'var(--v)', transport: 'var(--b)', activities: 'var(--c)', lab: 'var(--a)' };
 const H = 236;

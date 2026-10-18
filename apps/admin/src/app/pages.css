@@ -1,0 +1,21 @@
+/* Admin pages without a canvas board of their own: attendance, fees, notices. Built from the shared blocks and these few rules. */
+.pg-p .mk{display:inline-flex;gap:6px;padding:4px;border-radius:999px;background:var(--sunk)}
+.pg-p .mk button{height:40px;min-width:92px;padding:0 16px;border:0;border-radius:999px;background:none;color:var(--ink3);font:800 13px var(--fb);cursor:pointer;transition:background .25s,color .25s,transform .35s var(--sp)}
+.pg-p .mk button:hover:not(:disabled){color:var(--ink)}
+.pg-p .mk button[aria-pressed=true].p{background:var(--g);color:#fff}
+.pg-p .mk button[aria-pressed=true].l{background:var(--a);color:#14111F}
+.pg-p .mk button[aria-pressed=true].a{background:var(--r);color:#fff}
+.pg-p .mk button:disabled{cursor:not-allowed;opacity:.6}
+.pg-p .mk button:active:not(:disabled){transform:scale(.94)}
+.pg-p .rcall .grd.rw{min-height:60px}
+.pg-p .rcall .rn{font:800 13px var(--fb);color:var(--ink3)}
+.pg-p .sel{height:48px;min-width:170px;padding:0 16px;border-radius:16px;border:1.5px solid var(--line2);background:var(--card);color:var(--ink);font:700 14.5px var(--fb)}
+.pg-p .big{font:700 40px/1 var(--fd);letter-spacing:-.04em}
+.pg-p .meter{display:flex;gap:4px;height:22px;margin-top:14px}
+.pg-p .meter i{border-radius:6px;transition:flex .6s var(--e)}
+.pg-p .ntc{display:flex;flex-direction:column;gap:6px;padding:18px 0;border-top:1px solid var(--line)}
+.pg-p .ntc:first-child{border-top:0}
+.pg-p .ntc b{font:700 16px var(--fd);letter-spacing:-.01em}
+.pg-p .ntc p{margin:0;font:500 14px/1.5 var(--fb);color:var(--ink2)}
+.pg-p textarea.ta{width:100%;min-height:120px;resize:vertical;border:0;outline:0;background:none;font:500 15px/1.55 var(--fb);color:var(--ink);padding:12px 0}
+@media (max-width:760px){.pg-p .mk button{min-width:0;flex:1;padding:0 8px}.pg-p .rcall .grd{grid-template-columns:36px minmax(0,1fr)!important;row-gap:8px;padding-top:10px;padding-bottom:10px}.pg-p .rcall .grd .mk{grid-column:1/-1}}

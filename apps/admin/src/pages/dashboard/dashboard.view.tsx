@@ -208,7 +208,7 @@ export function DashboardView({ v }: { v: any }) {
                 </svg>
                 Fees
               </span>
-              <button className="arrow" aria-label="Open fees" onClick={() => v.goto("/p/fees")}>
+              <button className="arrow" aria-label="Open fees" onClick={() => v.goto("/fees")}>
                 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
                   <path className="i" d="M7 17L17 7M9 7h8v8"></path>
                 </svg>

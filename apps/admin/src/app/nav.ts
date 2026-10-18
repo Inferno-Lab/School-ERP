@@ -14,7 +14,7 @@ interface Def {
 const DEFS: { name: string; items: Def[] }[] = [
   { name: 'Teach', items: [
     { id: 'dash', label: 'Dashboard', icon: 'dash', keys: 'G D', to: '/', module: 'core' },
-    { id: 'att', label: 'Attendance', icon: 'att', keys: 'G A', to: '/p/attendance', module: 'attendance' },
+    { id: 'att', label: 'Attendance', icon: 'att', keys: 'G A', to: '/attendance', module: 'attendance' },
     { id: 'tt', label: 'Timetable', icon: 'tt', keys: 'G T', to: '/timetable', module: 'timetable' },
     { id: 'hw', label: 'Homework', icon: 'hw', keys: 'G H', to: '/p/homework', module: 'homework' },
     { id: 'ex', label: 'Exams', icon: 'ex', keys: 'G X', to: '/p/exams', module: 'exams' },
@@ -25,12 +25,12 @@ const DEFS: { name: string; items: Def[] }[] = [
     { id: 'adm', label: 'Admissions', icon: 'adm', keys: 'G M', to: '/p/admissions', module: 'people' },
   ] },
   { name: 'Money', items: [
-    { id: 'fee', label: 'Fees', icon: 'fee', keys: 'G E', to: '/p/fees', module: 'fees' },
+    { id: 'fee', label: 'Fees', icon: 'fee', keys: 'G E', to: '/fees', module: 'fees' },
     { id: 'inv', label: 'Invoices', icon: 'inv', keys: 'G I', to: '/p/invoices', module: 'fees' },
     { id: 'rep', label: 'Reports', icon: 'rep', keys: 'G R', to: '/p/reports', module: 'fees' },
   ] },
   { name: 'Reach', items: [
-    { id: 'notice', label: 'Notices', icon: 'notice', keys: 'G N', to: '/p/notices', module: 'notices' },
+    { id: 'notice', label: 'Notices', icon: 'notice', keys: 'G N', to: '/notices', module: 'notices' },
     { id: 'msg', label: 'Messages', icon: 'msg', keys: 'G G', to: '/p/messages', module: 'chat' },
     { id: 'evt', label: 'Events', icon: 'evt', keys: 'G V', to: '/p/events', module: 'events' },
   ] },

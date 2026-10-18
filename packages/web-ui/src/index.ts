@@ -1,5 +1,6 @@
 import './nest.css';
 import './shell/shell.css';
+import './blocks.css';
 
 export * from './theme';
 export * from './icons';

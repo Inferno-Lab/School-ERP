@@ -45,6 +45,9 @@ const routeTree = root.addChildren([
   authed.addChildren([
     page('/', () => import('./pages/dashboard/DashboardPage'), 'DashboardPage'),
     page('/students', () => import('./pages/students/StudentsPage'), 'StudentsPage'),
+    page('/attendance', () => import('./pages/attendance/AttendancePage'), 'AttendancePage'),
+    page('/fees', () => import('./pages/fees/FeesPage'), 'FeesPage'),
+    page('/notices', () => import('./pages/notices/NoticesPage'), 'NoticesPage'),
     page('/timetable', () => import('./pages/timetable/TimetablePage'), 'TimetablePage'),
     page('/settings', () => import('./pages/settings/SettingsPage'), 'SettingsPage'),
     page('/p/$name', () => import('./pages/status/StatusPages'), 'ComingSoonPage'),

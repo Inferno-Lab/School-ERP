@@ -1,5 +1,5 @@
 import type {
-  ApprovalDecision, ApprovalRow, AssignFee, AttendanceDay, AuditRow, ClassInfo, ContactReveal, CoverRequest, DashboardData, EffectiveConfig, FeeSummary, ImportResult, InvoiceRow,
+  AttendanceDayPut, ApprovalDecision, ApprovalRow, AssignFee, AttendanceDay, AuditRow, ClassInfo, ContactReveal, CoverRequest, DashboardData, EffectiveConfig, FeeSummary, ImportResult, InvoiceRow,
   LoginRequest, LoginResponse, MessageRequest, NoticeCreate, NoticeRow, Paged, PaymentCreate, SearchHit, SessionUser, SettingsDoc, SettingsPatch, SettingsResponse, ShellData, SlotPatch, StudentCreate, StudentDetail,
   StudentRow, StudentSummary, StudentViews, TeacherLoad, TeacherOption, TimetableView, TokenPair, VerifyRequest,
 } from '@edunest/contracts';
@@ -47,6 +47,7 @@ export function schoolApi(h: Http) {
     },
     attendance: {
       day: (classId: string, date: string) => h.get<AttendanceDay>('/v1/attendance/day', { classId, date }),
+      save: (b: AttendanceDayPut) => h.put<AttendanceDay>('/v1/attendance/day', b),
       remind: () => h.post<{ sent: number; classes: string[] }>('/v1/attendance/remind'),
     },
     fees: {

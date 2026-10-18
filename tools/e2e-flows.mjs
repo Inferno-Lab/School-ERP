@@ -107,6 +107,34 @@ await flow('admin: timetable clash can be fixed and published', { storage: admin
   await expectVisible(p.getByRole('status'), 'the published toast');
 });
 
+await flow('admin: roll call can be changed and saved', { storage: adminStore }, async (p) => {
+  await p.goto(`${ADMIN}/s/${slug}/attendance`, { waitUntil: 'networkidle' });
+  await expectVisible(p.getByText('Roll call'), 'the roll call');
+  await p.getByRole('group', { name: /^Attendance for/ }).first().getByRole('button', { name: 'Absent' }).click();
+  await expectVisible(p.getByText(/1 change/), 'the unsaved count');
+  await p.getByRole('button', { name: 'Save roll call' }).click();
+  await expectVisible(p.getByRole('status'), 'the saved toast');
+});
+
+await flow('admin: a notice is written and goes for approval or out', { storage: adminStore }, async (p) => {
+  await p.goto(`${ADMIN}/s/${slug}/notices`, { waitUntil: 'networkidle' });
+  await p.getByRole('button', { name: 'New notice' }).click();
+  await p.getByRole('button', { name: /Save as draft/ }).click();
+  await expectVisible(p.getByText('Give the notice a title.'), 'the title error');
+  await p.getByLabel('Title').fill('Sports day on Friday');
+  await p.locator('#ntc-body').fill('Children come in sports uniform. School ends at noon.');
+  await p.getByRole('button', { name: /Send now|Send for approval/ }).click();
+  await expectVisible(p.getByText('Sports day on Friday'), 'the notice in the list');
+});
+
+await flow('admin: fees page lists overdue families and opens a payment', { storage: adminStore }, async (p) => {
+  await p.goto(`${ADMIN}/s/${slug}/fees`, { waitUntil: 'networkidle' });
+  await expectVisible(p.getByText('Overdue families'), 'the overdue list');
+  await p.getByRole('button', { name: 'Collect' }).first().click();
+  await expectVisible(p.getByText(/Collect a fee from/), 'the payment dialog');
+  await p.keyboard.press('Escape');
+});
+
 await flow('admin: settings change saves, shakes on a bad value', { storage: adminStore }, async (p) => {
   await p.goto(`${ADMIN}/s/${slug}/settings`, { waitUntil: 'networkidle' });
   const name = p.getByLabel('School name');

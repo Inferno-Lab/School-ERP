@@ -31,7 +31,7 @@ async function consoleSession() {
   return { key: ['edunest.console', JSON.stringify({ accessToken: t.accessToken, refreshToken: t.refreshToken, user: t.user })], school: list.find((s) => s.slug === slug)?.id };
 }
 
-const adminPaths = ['', '/students', '/timetable', '/settings', '/p/fees', '/nope'];
+const adminPaths = ['', '/students', '/timetable', '/settings', '/attendance', '/fees', '/notices', '/p/exams', '/design', '/nope'];
 const jobs = [];
 if (only !== 'console') {
   const key = await adminSession();
