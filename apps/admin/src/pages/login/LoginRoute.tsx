@@ -18,7 +18,7 @@ export function LoginRoute() {
         submitCredentials: async (email, password) => {
           const res = await client.api.login({ identifier: email, password });
           try { localStorage.setItem(`edunest.admin.${slug}.email`, email); } catch { /* ignore */ }
-          if (res.step === 'otp') return { challengeId: res.challenge.challengeId, demoCode: res.challenge.demoCode };
+          if (res.step === 'otp') return res.challenge;
           session.write(slug, { accessToken: res.tokens.accessToken, refreshToken: res.tokens.refreshToken, user: res.tokens.user });
           return null;
         },

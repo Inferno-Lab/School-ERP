@@ -1,7 +1,8 @@
+import { useContext } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { EmptyCard, NotFoundTile, Shell } from '@edunest/web-ui';
 import { PAGE_TITLES } from '../../app/nav';
-import { useApp } from '../../app/context';
+import { AppContext, useApp } from '../../app/context';
 import { useChrome } from '../../app/useChrome';
 
 function Frame({ active, title, sub, children }: { active: string; title: string; sub: string; children: React.ReactNode }) {
@@ -33,7 +34,7 @@ export function ComingSoonPage() {
 }
 
 export function NotFoundPage() {
-  const app = (() => { try { return useApp(); } catch { return null; } })();
+  const app = useContext(AppContext);
   return (
     <div className="nest" style={{ minHeight: '100dvh', padding: 12, display: 'grid', placeItems: 'center' }}>
       <div style={{ maxWidth: 880, width: '100%' }}>

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Injectable, Logger, Param, Post, Put, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Inject, Injectable, Logger, Param, Post, Put, Query, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
 import { POOLS } from './tokens.js';
 import { MODULES } from '@edunest/config-engine';
 import { CONSOLE_ROLES, ROLE_TEMPLATES, type AuditRow, type ConsoleRole, type FleetSummary, type ConsoleUserRow, type FlagRow, type InvoiceRowC, type SupportSessionRow, type SupportToken } from '@edunest/contracts';
@@ -185,8 +185,9 @@ export class Admin {
     await this.db.audit(user, 'team.changed', 'user', id, { roles, status });
   }
 
-  async audit(limit = 100): Promise<AuditRow[]> {
-    const { rows } = await this.db.pool.query<{ id: string; at: Date; actor: string; action: string; entity: string; detail: Record<string, unknown> }>('select id, at, actor, action, entity, detail from console_audit order by at desc limit $1', [limit]);
+  async audit(limit = 100, entityId?: string): Promise<AuditRow[]> {
+    const { rows } = await this.db.pool.query<{ id: string; at: Date; actor: string; action: string; entity: string; detail: Record<string, unknown> }>(
+      'select id, at, actor, action, entity, detail from console_audit where ($2::text is null or entity_id = $2) order by at desc limit $1', [limit, entityId ?? null]);
     return rows.map((r) => ({ id: r.id, at: r.at.toISOString(), actor: r.actor, action: r.action, entity: r.entity, detail: Object.entries(r.detail).map(([k, v]) => `${k}: ${String(v)}`).join(' · ') }));
   }
 
@@ -314,8 +315,8 @@ export class OpsController {
   }
 
   @Get('audit') @Needs('audit.read')
-  audit(): Promise<AuditRow[]> {
-    return this.admin.audit();
+  audit(@Query('school') school?: string): Promise<AuditRow[]> {
+    return this.admin.audit(100, school);
   }
 
   @Get('catalog') @Needs('schools.read')

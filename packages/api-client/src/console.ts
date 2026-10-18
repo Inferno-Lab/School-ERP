@@ -75,7 +75,7 @@ export function consoleApi(h: Http) {
       add: (b: { name: string; email: string; roles: string[]; password: string }) => h.post<void>(`${base}/team`, b),
       change: (id: string, b: { roles?: string[]; status?: string }) => h.put<void>(`${base}/team/${id}`, b),
     },
-    audit: () => h.get<AuditRow[]>(`${base}/audit`),
+    audit: (school?: string) => h.get<AuditRow[]>(`${base}/audit`, { school }),
   };
 }
 

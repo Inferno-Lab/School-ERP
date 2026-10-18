@@ -13,6 +13,7 @@ const ICON: Record<string, string> = {
   People: 'M8 8a4 4 0 1 0 8 0a4 4 0 1 0-8 0M4.5 20c.9-3.8 3.9-6 7.5-6s6.6 2.2 7.5 6',
   'Go to': 'M3 6h18M3 12h18M3 18h18M9 3v18M15 3v18',
   Actions: 'M13 3 5 13h6l-1 8 8-10h-6z',
+  Schools: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
 };
 
 export interface PaletteProps {

@@ -13,6 +13,9 @@ export interface LoginFailure {
   attemptsLeft?: number;
 }
 
+/** Where the code went: shown on the code step so the person knows which phone or inbox to check. */
+export interface Challenge { challengeId: string; demoCode?: string; channel?: 'sms' | 'email'; maskedTo?: string; expiresInSeconds?: number }
+
 export interface LoginController {
   product: 'admin' | 'console';
   /** The school's own name for the panel and the heading. */
@@ -20,7 +23,7 @@ export interface LoginController {
   shortName: string;
   demoMode: boolean;
   /** Step one. Resolves to the code challenge, or to nothing when the school has two-step sign-in off. */
-  submitCredentials: (email: string, password: string) => Promise<{ challengeId: string; demoCode?: string } | null>;
+  submitCredentials: (email: string, password: string) => Promise<Challenge | null>;
   /** Step two. Resolves to the signed-in person's name. */
   submitCode: (challengeId: string, code: string) => Promise<string>;
   /** Called when the person presses the button on the last step. */
@@ -50,11 +53,15 @@ export function useLogin(c: LoginController, themeCls: string) {
   const [lang, setLang] = useState(() => {
     try { const i = LANGS.findIndex((l) => l[1] === localStorage.getItem('edunest.lang')); return i < 0 ? 0 : i; } catch { return 0; }
   });
-  const [challenge, setChallenge] = useState<{ challengeId: string; demoCode?: string } | null>(null);
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [name, setName] = useState('');
   const [forgotNote, setForgotNote] = useState('');
   const fill = useRef<ReturnType<typeof setInterval>>(undefined);
   useEffect(() => () => clearInterval(fill.current), []);
+  const enterRef = useRef(c.enter);
+  enterRef.current = c.enter;
+  // The last step says "Opening…", so it does; the button stays for anyone who wants to skip the wait.
+  useEffect(() => { if (step !== 'ok') return; const t = setTimeout(() => enterRef.current(), 1400); return () => clearTimeout(t); }, [step]);
 
   const bad = (fn: () => void) => { fn(); setShake((s) => (s === 1 ? 2 : 1)); setBusy(false); };
 
@@ -112,7 +119,7 @@ export function useLogin(c: LoginController, themeCls: string) {
     forgot: () => setForgotNote('Ask your principal to reset it in Settings, or contact EduNest support at support@edunest.app.'), forgotNote,
     busy, notBusy: !busy,
     next: () => void next(),
-    emailShort: email, back: () => { setStep('cred'); setCode(''); setOtpErr(false); },
+    sentTo: challenge?.maskedTo ?? email, sentBy: challenge?.channel === 'sms' ? 'text message' : 'email', validFor: Math.max(1, Math.round((challenge?.expiresInSeconds ?? 600) / 60)), back: () => { setStep('cred'); setCode(''); setOtpErr(false); },
     boxes, code, otpBad: otpErr ? 'bad shake' : '', otpErr, otpMsg, tries,
     onCode: (e: { target: { value: string } }) => {
       const v = e.target.value.replace(/\D/g, '').slice(0, 6);

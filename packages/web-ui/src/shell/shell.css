@@ -24,3 +24,5 @@
 .nest .popm button.on{background:var(--vS);color:var(--vD)}
 .nest .popm button small{margin-left:auto;font:700 12px var(--fb);opacity:.6}
 .nest .popm hr{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}
+.nest .cs-toast{left:50%;bottom:28px;z-index:80;transform:translateX(-50%);animation:nToastC .7s var(--e);max-width:calc(100% - 32px)}
+@keyframes nToastC{from{opacity:0;transform:translate(-50%,28px) scale(.94)}to{opacity:1;transform:translateX(-50%)}}
