@@ -17,6 +17,7 @@ export function FleetPage() {
   const [ci, setCi] = useState(-1);
   const [dismissed, setDismissed] = useState('');
   const [confirm, setConfirm] = useState(false);
+  const [alerts, setAlerts] = useState(false);
   const [error, setError] = useState('');
   const fleet = useQuery({ queryKey: ['fleet'], queryFn: app.api.fleet, refetchInterval: (q) => (q.state.data?.release?.status === 'rolling' ? 4000 : 30_000) });
   const schools = chrome.schools;
@@ -101,7 +102,7 @@ export function FleetPage() {
   const v = {
     ...chrome, pending: chrome.pending,
     subtitle: `${f.schools} ${f.schools === 1 ? 'school' : 'schools'} in ${f.cells.length} ${f.cells.length === 1 ? 'cell' : 'cells'} · updated ${fleet.isFetching ? 'now' : 'just now'}`,
-    openApprovals: () => app.go('/approvals'), onboard: () => app.go('/onboarding/new'), openReleases: () => app.go('/releases'), openCells: () => app.go('/cells'),
+    openApprovals: () => setAlerts(true), onboard: () => app.go('/onboarding/new'), openReleases: () => app.go('/releases'), openCells: () => app.go('/cells'),
     pausedCls: paused ? 'paused' : '', relState: rel ? STATE[rel.status] : 'No release yet', relVersion: rel?.version ?? '–',
     relLine: rel ? `${rel.waves.length ? `Wave ${wave} of ${rel.waves.length} · ` : ''}${done} of ${total} schools` : 'Create a release to update every school in waves.',
     hasRelease: !!rel, done, total, ticks: Array.from({ length: TICKS }, (_, k) => ({ c: k < on - 1 ? 'on' : k === on - 1 && rolling ? 'now' : k < on ? 'on' : '' })),
@@ -126,6 +127,17 @@ export function FleetPage() {
     up: upcoming.length
       ? { title: `${upcoming.length} ${upcoming.length === 1 ? 'school starts' : 'schools start'} soon`, body: `${upcoming.map((u) => u.name).slice(0, 2).join(' and ')} ${upcoming.length === 1 ? 'is' : 'are'} being set up for the first admin.` }
       : { title: 'No schools waiting', body: 'Onboard a school and it shows up here while it is being set up.' },
+    alertsDialog: alerts && (
+      <Dialog title="Alerts" tag={{ text: chrome.pending || (f.degraded && f.degraded > 0) || incident?.state === 'open' ? 'Needs you' : 'All clear', tone: chrome.pending || incident?.state === 'open' ? 'a' : 'g' }} onClose={() => setAlerts(false)} width={460}>
+        <div className="stack">
+          {incident?.state === 'open' && <div className="kv" style={{ alignItems: 'flex-start' }}><span><b style={{ color: 'var(--ink)' }}>{incident.title}</b><br /><small style={{ color: 'var(--ink3)' }}>{incident.body}</small></span><b><span className="st r"><i></i>Open</span></b></div>}
+          {chrome.pending > 0 && <div className="kv"><span>{chrome.pending} {chrome.pending === 1 ? 'request is' : 'requests are'} waiting for a second person</span><b><button className="btn sm" onClick={() => { setAlerts(false); app.go('/approvals'); }}>Review</button></b></div>}
+          {f.degraded > 0 && <div className="kv"><span>{f.degraded} {f.degraded === 1 ? 'school is' : 'schools are'} answering slowly</span><b><button className="btn sm" onClick={() => { setAlerts(false); app.go('/health'); }}>Open health</button></b></div>}
+          {!chrome.pending && !f.degraded && incident?.state !== 'open' && <div className="help">Nothing needs you right now. Approvals, incidents and slow schools appear here.</div>}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}><button className="btn pri" onClick={() => setAlerts(false)}>Done</button></div>
+      </Dialog>
+    ),
     dialog: confirm && rel ? (
       <Dialog title={`Roll back ${rel.version}?`} tag={{ text: 'Goes back one version', tone: 'a' }} onClose={() => setConfirm(false)} width={460}>
         <p>Every school already on {rel.version} returns to the version it had before. Schools not reached yet stay as they are.</p>

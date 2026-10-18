@@ -3,6 +3,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ApiExceptionFilter } from '@edunest/nest-kit';
 import { PoolManager, Registry } from '@edunest/tenancy';
 import { Actions, ActionsController, Builds } from './actions.js';
+import { Compliance, ComplianceController } from './compliance.js';
 import { AuthController, ConsoleAuth } from './auth.js';
 import { ConsoleAuthGuard, Db } from './core.js';
 import { ENV, type Env } from './env.js';
@@ -40,10 +41,10 @@ export class ConsoleModule {
     const pools = shared?.pools ?? new PoolManager();
     return {
       module: ConsoleModule,
-      controllers: [AuthController, SandboxController, SchoolsController, WizardController, ActionsController, ReleasesController, PolicyController, OpsController],
+      controllers: [AuthController, SandboxController, SchoolsController, WizardController, ActionsController, ReleasesController, PolicyController, OpsController, ComplianceController],
       providers: [
         { provide: ENV, useValue: env }, { provide: REGISTRY, useValue: registry }, { provide: POOLS, useValue: pools }, { provide: OWNS, useValue: !shared }, Shutdown,
-        Db, Sandbox, ConsoleAuth, Policy, Blueprints, Provisioner, Schools, Wizard, Builds, Actions, Releases, Health, Support, Admin, Bootstrap,
+        Db, Sandbox, ConsoleAuth, Policy, Blueprints, Provisioner, Schools, Wizard, Builds, Actions, Releases, Health, Support, Admin, Bootstrap, Compliance,
         { provide: APP_GUARD, useClass: ConsoleAuthGuard },
         { provide: APP_FILTER, useClass: ApiExceptionFilter },
       ],

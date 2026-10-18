@@ -7,6 +7,7 @@ import { EmptyCard, Shell } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
 import { useChrome } from '../../app/useChrome';
 import { SettingsView } from './settings.view';
+import { AppLayoutPanel, NotificationsPanel, PrivacyPanel, RolesPanel, TemplatesPanel } from './panels';
 
 const TABS: [string, string, boolean?][] = [
   ['General', 'M4 4h16v16H4zM4 9h16M9 9v11'],
@@ -76,7 +77,15 @@ export function SettingsPage() {
   const later = (fn: () => void, ms: number) => { timers.current.push(setTimeout(fn, ms)); };
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   useEffect(() => { const off = () => setApOpen(false); document.addEventListener('click', off); return () => document.removeEventListener('click', off); }, []);
-  useEffect(() => { if (data) { setDraft(draftOf(data)); setErr({}); } }, [data]);
+  // A refresh (for instance after a panel saved its own keys) keeps unsaved General edits.
+  const base = useRef<Draft | null>(null);
+  useEffect(() => {
+    if (!data) return;
+    const next = draftOf(data);
+    setDraft((cur) => (!cur || !base.current || JSON.stringify(cur) === JSON.stringify(base.current) ? next : cur));
+    base.current = next;
+    setErr({});
+  }, [data]);
 
   const save = useMutation({
     mutationFn: (b: { expectedVersion: number; changes: Record<string, unknown> }) => app.api.settings.patch(b),
@@ -141,10 +150,15 @@ export function SettingsPage() {
     smsLeft: Math.max(0, (usage?.smsLimit ?? 0) - (usage?.smsUsed ?? 0)).toLocaleString('en-IN'),
   };
 
+  const say = (text: string) => { setToast(text); later(() => setToast(''), 3600); };
   const extra: ReactNode = tab === 1 ? <ModulesPanel doc={data} draft={draft} locked={lock('modules.enabled')} onChange={(m) => set({ modules: m })} />
-    : tab === 7 ? <AuditPanel />
-      : tab === 0 ? null
-        : <Soon name={TABS[tab]![0]} />;
+    : tab === 2 ? <AppLayoutPanel doc={data} say={say} />
+      : tab === 3 ? <RolesPanel say={say} />
+        : tab === 4 ? <NotificationsPanel doc={data} say={say} />
+          : tab === 5 ? <TemplatesPanel doc={data} say={say} />
+            : tab === 6 ? <PrivacyPanel doc={data} say={say} />
+              : tab === 7 ? <AuditPanel />
+                : null;
 
   const v = {
     ...chrome, tab, extra, shk: shk ? `shk${(shk % 2) + 1}` : '', err, shortName, plan, used,
@@ -169,13 +183,6 @@ export function SettingsPage() {
     discard: () => { setDraft(saved); setErr({}); }, save: doSave, toast: !!toast, toastText: toast,
   };
   return <SettingsView v={v} />;
-}
-
-function Soon({ name }: { name: string }) {
-  return (
-    <EmptyCard title={name} chip={{ text: 'Coming soon', tone: 'v' }} scene="noticeboard" heading={`${name} isn’t ready yet`}
-      body="This section is being built. Nothing here is switched off or missing from your school; the rest of Settings works as normal." />
-  );
 }
 
 function ModulesPanel({ doc, draft, locked, onChange }: { doc: SettingsResponse; draft: Draft; locked: boolean; onChange: (m: string[]) => void }) {

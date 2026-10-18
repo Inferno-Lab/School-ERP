@@ -80,7 +80,8 @@ const code = /(\d{6})/.exec(codeMsg?.body ?? '')?.[1] ?? '424242';
 await ap.getByLabel('6-digit code').fill(code);
 await ap.waitForURL(`${ADMIN}/s/${slug}`, { timeout: 15000 }).catch(() => undefined);
 await ap.waitForTimeout(2500);
-for (const [name, path] of [['dashboard', ''], ['students', '/students'], ['timetable', '/timetable'], ['settings', '/settings']]) {
+ap.on('pageerror', (e) => errors.push(`pageerror ${e.message}`));
+for (const [name, path] of [['dashboard', ''], ['students', '/students'], ['timetable', '/timetable'], ['settings', '/settings'], ['attendance', '/attendance'], ['fees', '/fees'], ['notices', '/notices'], ['homework', '/homework'], ['exams', '/exams'], ['staff', '/staff'], ['admissions', '/admissions'], ['invoices', '/invoices'], ['reports', '/reports'], ['messages', '/messages'], ['events', '/events']]) {
   await ap.goto(`${ADMIN}/s/${slug}${path}`, { waitUntil: 'networkidle' });
   await ap.waitForTimeout(1200);
   const o = await ap.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));

@@ -55,9 +55,10 @@ Texts and emails are never sent for real: they land in the console's **Test inbo
 ## Check that nothing is broken
 
 ```bash
-pnpm typecheck && pnpm test         # types and 100+ unit and API tests (the API tests start a real PostgreSQL)
+pnpm typecheck && pnpm test         # types and 150+ unit and API tests (the API tests start a real PostgreSQL)
 node tools/audit-ui.mjs             # every page, 4 widths, light and dark: errors, overflow, clipped text
-node tools/e2e-flows.mjs            # 21 click-through flows in a real browser (run after dev-reset; it changes demo data)
+node tools/e2e-flows.mjs            # 36 click-through flows in a real browser (run after dev-reset; it changes demo data)
+node tools/scan-cutoff.mjs          # text cut by an ellipsis, hidden scrollbars, clipped boxes (the audit does not see these)
 node tools/e2e-onboard.mjs          # onboards a new empty school through the wizard and screenshots every page
 tool/verify.sh                      # Flutter analyzer and tests
 ```

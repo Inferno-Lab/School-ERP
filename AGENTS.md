@@ -1,6 +1,6 @@
 # EduNest — guide for coding agents and new developers
 
-EduNest is a school platform: a TypeScript backend, a school admin, a console and the original Flutter school app (students, parents, teachers) in the **Chalk & Glass** design. The Flutter app still runs on local JSON mock data (it only reads its school's name and tagline from the real backend when built with `SCHOOL` and `API_BASE_URL`); pointing it fully at the backend is a swap of adapters plus new family endpoints (see `docs/HANDOFF.md` section 9.3). Read this file first. It is the single source of truth: `CLAUDE.md` and `AGENT.md` only point here.
+EduNest is a school platform: a TypeScript backend, a school admin, a console and the original Flutter school app (students, parents, teachers) in the **Chalk & Glass** design. The Flutter app runs on local JSON mock data by default; built with `SCHOOL` and `API_BASE_URL` it signs in and reads the school's real data through the family API (`/v1/f/*`, see `docs/HANDOFF.md` section 9.3 and `docs/API_CONTRACT.md`). Read this file first. It is the single source of truth: `CLAUDE.md` and `AGENT.md` only point here.
 
 Branch work happens on feature branches off `main`; the Render test deployment builds from `main`, so a change reaches `https://edunest-0c6x.onrender.com` only after it is merged (or pushed) to `main`. The Chalk & Glass redesign of the app was merged to `main`; `redesign/chalk-glass` and `apple_glass` remain on GitHub as history.
 
@@ -20,7 +20,7 @@ node tools/audit-ui.mjs             # every page, 4 widths, light/dark: errors, 
 node tools/e2e-flows.mjs            # 21 browser flows (re-run dev-reset first; it changes data)
 ```
 
-Platform rules that have bitten us: never edit an applied SQL migration (add a new file); declare build-time env in `turbo.json`; `apps/server` imports the API packages from `dist/` (rebuild after changing them); a page's `useMemo` values must depend on shared chrome state; check new CSS class names against `nest.css`; do not re-run `tools/dc-to-tsx.mjs` over edited views; keep `tools/audit-ui.mjs` and `tools/e2e-flows.mjs` green before every push; the owner reviews design, so pages without a canvas board must be built only from `packages/web-ui` pieces.
+Platform rules that have bitten us: never edit an applied SQL migration (add a new file); declare build-time env in `turbo.json`; `apps/server` imports the API packages from `dist/` (rebuild after changing them); a page's `useMemo` values must depend on shared chrome state; check new CSS class names against `nest.css`; do not re-run `tools/dc-to-tsx.mjs` over edited views; keep `tools/audit-ui.mjs` and `tools/e2e-flows.mjs` green before every push and run `node tools/scan-cutoff.mjs` for text that is cut off; a table row (`.rw`) has a fixed height, so a wrapping row needs `height:auto`; shared controls belong in `packages/web-ui/src/blocks.css` (`pages.css` only loads on pages built with `Page`); the owner reviews design, so pages without a canvas board must be built only from `packages/web-ui` pieces.
 
 ## Commands
 

@@ -1,4 +1,4 @@
-# Platform build status (2026-10-18)
+# Platform build status (2026-10-18, after the second session)
 
 Merged to `main` (work branch `feat/platform`). The plan is `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`; this file says what of it exists.
 Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (decisions, how to continue, what is left) is `docs/HANDOFF.md`; the design concept is `docs/DESIGN.md`. Live test deployment: `https://edunest-0c6x.onrender.com` (admin `/`, console `/console/`).
@@ -12,9 +12,9 @@ Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (de
 | School API (sign-in with code, lockout, refresh rotation, students, attendance, fees, approvals, timetable, dashboard, settings and plan usage, search, audit, support-session read-only tokens) | `apps/api` | 27 tests on a real PostgreSQL |
 | Console API (blueprints, wizard, provisioning drivers, approvals, releases in waves, migrations, health, support, flags, billing, team, sandbox inbox, build callback, demo seed on first start) | `apps/console-api` | 19 tests; schools are really created and signed in to |
 | One process: both APIs, the admin at `/`, the console at `/console/` | `apps/server` | production build run locally and audited |
-| School admin: sign-in, dashboard, students, timetable, settings (general, modules, audit log), phone home and dock, design-system page | `apps/admin` | see below |
-| Console: sign-in, fleet, school (overview, entitlements, versions, health, audit), onboarding wizard, releases, migrations, cells, builds, flags, blueprints and rules, health, approvals, support, test inbox, billing, team | `apps/console` | see below |
-| App: reads its school's name and tagline from the API (`SCHOOL`, `API_BASE_URL` build profile); the rest is still demo content | `lib/` | `flutter test` 32 pass |
+| School admin: sign-in, dashboard, students, timetable, attendance, fees, invoices, homework, exams, staff, admissions, reports, messages, events, notices, settings (General, Modules, App layout, Roles and access, Notifications, Message templates, Privacy and consent, Audit log), phone home and dock, public status page, design-system page | `apps/admin` | see below |
+| Console: sign-in, fleet, school (overview, entitlements, versions, health, audit), onboarding wizard, releases (editable waves), migrations, cells (add, manage, move a school), builds, flags (with kill switches), blueprints and rules, health, approvals, support, test inbox, billing, compliance, team | `apps/console` | see below |
+| App: with the `SCHOOL` and `API_BASE_URL` build profile it signs in for real and reads the family API (`/v1/f/*`); without it, demo content | `lib/` + `apps/api/src/school/family.*` | `flutter test` 43 pass, 12 family API tests, a live probe against a running school |
 
 UI checks, all repeatable:
 
@@ -25,11 +25,12 @@ UI checks, all repeatable:
 
 ## Not done, on purpose or not yet
 
-- **Admin pages without a canvas board** (attendance, homework, exams, staff, admissions, fees, invoices, reports, notices, messages, events) say "opens in a coming release". Settings tabs App layout, Roles and access, Notifications, Message templates, Privacy and consent say "coming soon". The backend modules for most of these are not written.
-- **Mobile**: the app does not use the school's data yet (only its name and tagline). Moving `lib/` to `apps/mobile`, real repositories, the EduNest picker app, store pipelines and code push (plan section 19, phase 9) are not started.
-- **Hosting**: only the free test track (one Render service plus Neon). The AWS cell blueprint exists as a driver that needs a database admin URL per cell; no cloud account was touched.
-- **Not verified**: the deployed environment (needs the owner's Neon and Render accounts), a real phone, liquid glass on a device, iOS.
-- Visual match with the canvas was checked by eye against the boards (dashboard, students, timetable, settings, fleet, school), not by pixel diff, because the pages show real data and the boards show sample data.
+- **Mobile**: the shell does not yet hide tabs for modules a school switched off (needs `/v1/config`), library catalogue and reservations, gallery, transport stops and live position, assistant, push registration, offline store, deep links; moving `lib/` to `apps/mobile`, the EduNest picker app, store pipelines and code push (plan section 19). A real phone and the liquid glass shader were not checked.
+- **Admin**: none of the new pages has had the owner's design review (no canvas boards exist for them); no Hindi or Marathi for admin text; quiet hours only mark sandbox messages as held.
+- **Console**: a data-copying move between servers (aws-cell), catalog update offers, real backups beyond Neon, release deployment that does more than record versions, Razorpay and GST invoices.
+- **Hosting and security**: only the free test track; tokens are still in `localStorage` (plan section 17 asks for cookies, CSP, passkeys, TOTP, rate limits per IP, a password reset flow); AWS, Razorpay and SMS providers need the owner's accounts.
+- **Not verified**: the deployed environment after this session's push (needs a Render deploy), a real phone, iOS.
+- Visual match with the canvas was checked by eye against the boards, not by pixel diff, because the pages show real data and the boards show sample data.
 
 ## Rules worth remembering
 

@@ -5,7 +5,7 @@ import {
   type Permission,
   type SettingsDoc,
 } from '@edunest/contracts';
-import { closeModules, moduleByKey } from './modules.js';
+import { APP_CATALOG, closeModules, moduleByKey } from './modules.js';
 
 /** Layer 1: platform defaults, taken from the schema so there is one source. */
 export function platformDefaults(): Record<string, unknown> {
@@ -24,10 +24,12 @@ export interface ResolveInput {
   entitlement: EntitlementDoc;
   /** Layer 5: who is asking. Leave out for the unfiltered document. */
   audience?: { permissions: readonly string[] };
+  /** Console flags for this school: a school's own value already wins over a fleet-wide one. */
+  flags?: Record<string, boolean>;
 }
 
 /** Layers 1 to 5 in order. A higher layer changes a value only where the lower layer allows it (locks). */
-export function resolveConfig({ settings, entitlement, audience }: ResolveInput): EffectiveConfig {
+export function resolveConfig({ settings, entitlement, audience, flags }: ResolveInput): EffectiveConfig {
   const locked = new Set([...entitlement.locks, ...settings.locked]);
   const merged: Record<string, unknown> = { ...platformDefaults() };
   for (const [k, v] of Object.entries(settings.values)) if (!entitlement.locks.includes(k)) merged[k] = v;
@@ -38,7 +40,8 @@ export function resolveConfig({ settings, entitlement, audience }: ResolveInput)
   const chosen = Array.isArray(merged['modules.enabled']) && (merged['modules.enabled'] as string[]).length
     ? (merged['modules.enabled'] as string[])
     : entitled;
-  const enabled = closeModules(chosen).filter((k) => entitled.includes(k));
+  // A console kill switch (`kill.<module>`) takes a module away from every app until it is lifted.
+  const enabled = closeModules(chosen).filter((k) => entitled.includes(k) && flags?.[`kill.${k}`] !== true);
 
   const perms = audience ? new Set(audience.permissions as string[]) : null;
   const nav: EffectiveConfig['nav'] = [];
@@ -49,6 +52,11 @@ export function resolveConfig({ settings, entitlement, audience }: ResolveInput)
     }
   }
 
+  const pick = (key: 'dock' | 'home' | 'quick', setting: string): string[] => {
+    const allowed = new Set<string>(APP_CATALOG[key].filter((c) => enabled.includes(c.module)).map((c) => c.key));
+    const chosen = Array.isArray(merged[setting]) ? (merged[setting] as string[]) : [];
+    return chosen.filter((k) => allowed.has(k));
+  };
   const str = (k: string, fallback = '') => (typeof merged[k] === 'string' ? (merged[k] as string) : fallback);
   return {
     version: settings.version * 1000 + entitlement.version,
@@ -65,6 +73,8 @@ export function resolveConfig({ settings, entitlement, audience }: ResolveInput)
     settings: merged,
     vocabulary: { student: str('vocab.student', 'Student'), class: str('vocab.class', 'Class') },
     limits: entitlement.limits,
+    app: { dock: pick('dock', 'app.dock'), home: pick('home', 'app.home'), quick: pick('quick', 'app.quick') },
+    flags: flags ?? {},
   };
 }
 

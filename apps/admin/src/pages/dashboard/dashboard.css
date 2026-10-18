@@ -111,3 +111,7 @@
 
 .pg-dashboard .plot.empty .fl,.pg-dashboard .plot.empty .gh{display:none}
 .pg-dashboard .plot-empty{position:absolute;left:44px;right:0;top:0;bottom:30px;display:grid;place-items:center;text-align:center;padding:0 24px;pointer-events:none;font:600 14.5px/1.5 var(--fb);color:var(--ink3)}
+/* The goal label sits above the 100% line so it never covers the tallest column. */
+.pg-dashboard .goal b{top:-34px}
+@container (max-width:230px){.nest .tile .big{font-size:34px}}
+.pg-dashboard .grid{align-items:stretch}

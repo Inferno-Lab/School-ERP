@@ -66,9 +66,7 @@ export class AttendanceService {
         const g = await t.pool.query<{ phone: string | null; name: string; student_id: string }>(
           'select g.phone, s.name, s.id student_id from students s join student_guardians sg on sg.student_id = s.id and sg.is_primary join guardians g on g.id = sg.guardian_id where s.id = any($1)', [away.map((a) => a.studentId)]);
         const status = new Map(away.map((a) => [a.studentId, a.status]));
-        await this.messenger.sendMany(t, g.rows.filter((r) => r.phone).map((r) => ({
-          channel: 'sms' as const, to: r.phone!, body: `${r.name} was marked ${status.get(r.student_id) === 'late' ? 'late' : 'absent'} today at ${t.info.shortName}.`,
-        })));
+        await this.messenger.notify(t, 'attendance.absent', g.rows.filter((r) => r.phone).map((r) => ({ to: r.phone!, vars: { student: r.name, status: status.get(r.student_id) === 'late' ? 'late' : 'absent' } })));
       }
     }
     return this.day(t, body.classId, body.date);
@@ -104,7 +102,7 @@ export class AttendanceService {
     const list = await this.unmarked(t);
     const ids = list.map((c) => c.teacherId).filter((x): x is string => !!x);
     const { rows } = await t.pool.query<{ phone: string | null; name: string }>('select phone, name from users where id = any($1)', [ids]);
-    await this.messenger.sendMany(t, rows.filter((r) => r.phone).map((r) => ({ channel: 'sms' as const, to: r.phone!, body: `Hi ${r.name.split(' ')[0]}, please mark attendance for your class today.` })));
+    await this.messenger.notify(t, 'attendance.reminder', rows.filter((r) => r.phone).map((r) => ({ to: r.phone!, vars: { teacher: r.name.split(' ')[0]! } })));
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'attendance.reminded', entity: 'class', detail: { classes: list.map((c) => c.name).join(', ') } });
     return { sent: rows.length, classes: list.map((c) => c.name) };
   }

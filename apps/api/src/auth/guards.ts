@@ -57,6 +57,7 @@ export class PermissionsGuard implements CanActivate {
       if (!KNOWN_MODULES.has(mod)) throw new Error(`Unknown module ${mod}`);
       const entitled = closeModules(req.tenant!.info.entitlement.modules);
       if (!entitled.includes(mod)) throw new ApiError('locked', 'This feature is not part of your school’s plan.');
+      if (req.tenant!.info.flags[`kill.${mod}`] === true) throw new ApiError('locked', 'EduNest has paused this feature for now. It will be back shortly.');
     }
     if (needed?.length) {
       const have = req.user?.permissions ?? [];

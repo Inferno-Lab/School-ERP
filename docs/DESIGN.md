@@ -129,6 +129,14 @@ Easing: `--e` = `cubic-bezier(.22,1,.36,1)` (smooth out) for movement; `--sp` = 
 
 Animate transform and opacity only; never animate layout properties in lists.
 
+### Scrolling and fitting (rules added 2026-10-18)
+
+- Every scroll area has a visible, themed bar (thin, violet, a pill) and a soft shadow at the edge that still has more behind it (`polish.css`; add `.lscroll` to a list that can grow long, `.scl` to any other box).
+- A list longer than about 12 rows scrolls inside its card (`max-height: min(66dvh, 680px)`); the page never grows with the data.
+- The menu fits a short window: tighter rows under 900 px high, no context card under 780 px, and the account block stays pinned at the bottom.
+- Text that names a person or thing wraps to two lines before it is cut; a one-line ellipsis is for previews only, and the full text is in the `title`.
+- On a phone a list keeps only its main columns (class `hs` hides the rest) or stacks its row; a board scrolls sideways with snap.
+
 ## 6. States (every page must have all of them)
 
 1. **Loading:** skeletons shaped like the final page (`aria-busy`). Spinners only inside buttons.

@@ -15,7 +15,7 @@ const API = process.env.API ?? 'http://localhost:4000';
 const ADMIN = process.env.ADMIN ?? 'http://127.0.0.1:5173';
 const CONSOLE = process.env.CONSOLE ?? 'http://127.0.0.1:5174';
 const slug = process.env.SCHOOL ?? 'greenfield';
-const SIZES = args.includes('--quick') ? [[390, 844], [1440, 900]] : [[360, 740], [390, 844], [768, 1024], [1440, 900]];
+const SIZES = val('--sizes') ? val('--sizes').split(',').map((x) => x.split('x').map(Number)) : args.includes('--quick') ? [[390, 844], [1440, 900]] : [[360, 740], [390, 844], [768, 1024], [1440, 900]];
 
 const post = async (path, body, headers = {}) => (await fetch(`${API}${path}`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body) })).json();
 async function adminSession() {
@@ -31,7 +31,7 @@ async function consoleSession() {
   return { key: ['edunest.console', JSON.stringify({ accessToken: t.accessToken, refreshToken: t.refreshToken, user: t.user })], school: list.find((s) => s.slug === slug)?.id };
 }
 
-const adminPaths = ['', '/students', '/timetable', '/settings', '/attendance', '/fees', '/notices', '/p/exams', '/design', '/nope'];
+const adminPaths = ['', '/students', '/timetable', '/settings', '/attendance', '/fees', '/notices', '/homework', '/exams', '/staff', '/admissions', '/invoices', '/reports', '/messages', '/events', '/design', '/nope'];
 const jobs = [];
 if (only !== 'console') {
   const key = await adminSession();
@@ -39,13 +39,13 @@ if (only !== 'console') {
 }
 if (only !== 'admin') {
   const c = await consoleSession();
-  const paths = ['/', `/schools/${c.school}`, '/onboarding', '/onboarding/new', '/cells', '/releases', '/migrations', '/builds', '/flags', '/blueprints', '/health', '/approvals', '/support', '/inbox', '/billing', '/team', '/nope'];
+  const paths = ['/', `/schools/${c.school}`, '/onboarding', '/onboarding/new', '/cells', '/releases', '/migrations', '/builds', '/flags', '/blueprints', '/health', '/approvals', '/support', '/inbox', '/billing', '/compliance', '/team', '/nope'];
   for (const p of paths) jobs.push({ name: `console${p}`, url: `${CONSOLE}${p}`, key: c.key });
 }
 
 const browser = await chromium.launch();
 let problems = 0;
-for (const dark of [false, true]) {
+for (const dark of args.includes('--light') ? [false] : [false, true]) {
   for (const [w, h] of SIZES) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: dark ? 'dark' : 'light', reducedMotion: 'reduce' });
     const page = await ctx.newPage();
@@ -60,7 +60,7 @@ for (const dark of [false, true]) {
       const over = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
       const found = await auditPage(page).catch(() => []);
       if (over.sw > over.cw + 1) found.unshift(`page scrolls sideways: ${over.sw} > ${over.cw}`);
-      if (shots) await page.screenshot({ path: `${shots}/${j.name.replace(/[\/]/g, '_')}-${w}-${dark ? 'dark' : 'light'}.png` });
+      if (shots) await page.screenshot({ path: `${shots}/${j.name.replace(/[\/]/g, '_')}-${w}-${dark ? 'dark' : 'light'}.png`, fullPage: args.includes('--full') });
       page.removeAllListeners('console'); page.removeAllListeners('response'); page.removeAllListeners('pageerror');
       const all = [...errors.map((e) => `error: ${e.slice(0, 160)}`), ...found];
       if (all.length) { problems++; console.log(`✗ ${j.name} @${w} ${dark ? 'dark' : 'light'}\n   ${all.join('\n   ')}`); }

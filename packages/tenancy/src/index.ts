@@ -18,6 +18,8 @@ export interface TenantInfo {
   entitlement: EntitlementDoc;
   configVersion: number;
   apiVersion: string;
+  /** Console flags that apply to this school (its own value beats the fleet-wide one). */
+  flags: Record<string, boolean>;
 }
 
 export interface RegistryOptions {
@@ -48,6 +50,7 @@ export class Registry {
     const [row] = await this.db.select().from(schools).where(and(eq(schools.slug, slug), isNull(schools.deletedAt))).limit(1);
     let value: TenantInfo | null = null;
     if (row?.dbUrlSealed) {
+      const fl = await this.pool.query<{ key: string; enabled: boolean }>("select key, enabled from flags where school_id in ('*', $1) order by (school_id = '*') desc", [row.id]).catch(() => ({ rows: [] as { key: string; enabled: boolean }[] }));
       value = {
         id: row.id,
         slug: row.slug,
@@ -61,6 +64,7 @@ export class Registry {
         entitlement: { plan: row.plan, ...row.entitlement },
         configVersion: row.configVersion,
         apiVersion: row.apiVersion,
+        flags: Object.fromEntries(fl.rows.map((f) => [f.key, f.enabled])),
       };
     }
     this.cache.set(slug, { at: now, value });

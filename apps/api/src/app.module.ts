@@ -14,6 +14,12 @@ import { FeesService } from './school/fees.service.js';
 import {
   ApprovalsController, AttendanceController, ClassesController, DashboardController, FeesController, HealthController, SettingsController, StudentsController, TimetableController,
 } from './school/school.controllers.js';
+import { FamilyController } from './school/family.controller.js';
+import { FamilyService } from './school/family.service.js';
+import { LearningService } from './school/learning.service.js';
+import { LearningController, OfficeController, PeopleController } from './school/modules.controllers.js';
+import { OfficeService } from './school/office.service.js';
+import { PeopleService } from './school/people.service.js';
 import { StudentsService } from './school/students.service.js';
 import { AuditService, Messenger, SettingsService } from './school/support.js';
 import { TimetableService } from './school/timetable.service.js';
@@ -46,7 +52,7 @@ export class AppModule {
       module: AppModule,
       controllers: [
         AuthController, MeController, ClassesController, StudentsController, AttendanceController, FeesController, ApprovalsController,
-        TimetableController, DashboardController, SettingsController, HealthController,
+        TimetableController, DashboardController, SettingsController, HealthController, LearningController, PeopleController, OfficeController, FamilyController,
       ],
       providers: [
         { provide: ENV, useValue: env },
@@ -54,7 +60,7 @@ export class AppModule {
         { provide: POOLS, useValue: pools },
         { provide: OWNS, useValue: !shared },
         Shutdown,
-        TenantService, AuthService, AuditService, Messenger, SettingsService, StudentsService, AttendanceService, FeesService, ApprovalsService, TimetableService, DashboardService, MetricsService,
+        TenantService, AuthService, AuditService, Messenger, SettingsService, StudentsService, AttendanceService, FeesService, ApprovalsService, TimetableService, DashboardService, MetricsService, LearningService, PeopleService, OfficeService, FamilyService,
         // Order matters: find the school, then the person, then what they may do.
         { provide: APP_GUARD, useClass: TenantGuard },
         { provide: APP_GUARD, useClass: AuthGuard },

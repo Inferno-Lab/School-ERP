@@ -66,10 +66,10 @@ export class ApprovalsService {
     return Promise.all(rows.map(async (r) => this.toRow(r, await this.doneText(t, r))));
   }
 
-  async counts(t: TenantCtx): Promise<{ admissions: number; approvals: number }> {
-    const { rows } = await t.pool.query<{ admissions: string; approvals: string }>(
-      "select count(*) filter (where kind = 'admission') admissions, count(*) filter (where kind <> 'admission') approvals from approvals where status = 'pending'");
-    return { admissions: Number(rows[0]!.admissions), approvals: Number(rows[0]!.approvals) };
+  async counts(t: TenantCtx): Promise<{ admissions: number; approvals: number; messages: number }> {
+    const { rows } = await t.pool.query<{ admissions: string; approvals: string; messages: string }>(
+      "select (select count(*) from enquiries where stage in ('applied','test','offer')) admissions, (select count(*) from approvals where status = 'pending') approvals, (select count(distinct m.thread_id) from thread_messages m join threads x on x.id = m.thread_id where x.status = 'open' and m.from_kind = 'guardian' and m.read_at is null) messages");
+    return { admissions: Number(rows[0]!.admissions), approvals: Number(rows[0]!.approvals), messages: Number(rows[0]!.messages) };
   }
 
   async decide(t: TenantCtx, user: { id: string; name: string; permissions: string[] }, id: string, body: ApprovalDecision): Promise<ApprovalRow> {

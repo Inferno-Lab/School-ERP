@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Injectable, Logger, Param, Post, Put, Query, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
 import { POOLS } from './tokens.js';
 import { MODULES } from '@edunest/config-engine';
-import { CONSOLE_PERMISSIONS, CONSOLE_ROLES, ROLE_TEMPLATES, WizardPayload, type AuditRow, type DeployTarget, type ConsoleRole, type FleetSummary, type ConsoleUserRow, type FlagRow, type InvoiceRowC, type SupportSessionRow, type SupportToken } from '@edunest/contracts';
-import { newId } from '@edunest/db';
-import { ApiError, notFound } from '@edunest/nest-kit';
+import { CellCreate, CellPatch, CONSOLE_PERMISSIONS, CONSOLE_ROLES, ROLE_TEMPLATES, WizardPayload, type AuditRow, type DeployTarget, type ConsoleRole, type FleetSummary, type ConsoleUserRow, type FlagRow, type InvoiceRowC, type SupportSessionRow, type SupportToken } from '@edunest/contracts';
+import { migrate, newId, pg } from '@edunest/db';
+import { topUpDemo } from '@edunest/db/seed';
+import { ApiError, ZodPipe, notFound } from '@edunest/nest-kit';
 import { hashPassword, signJwt, unseal } from '@edunest/security';
 import type { PoolManager } from '@edunest/tenancy';
 import { Db, Me, Needs, type ConsoleUser, type reg } from './core.js';
@@ -228,7 +229,24 @@ export class Bootstrap implements OnApplicationBootstrap {
       this.log.log(`created the first super admin ${this.env.BOOTSTRAP_EMAIL}`);
     }
     await this.policy.get();
-    if (this.env.SEED_DEMO === 'true') void this.seedDemo().catch((err) => this.log.error(`could not create the demo school: ${(err as Error).message}`));
+    if (this.env.SEED_DEMO === 'true') {
+      void this.seedDemo().catch((err) => this.log.error(`could not create the demo school: ${(err as Error).message}`));
+      void this.upgradeDemo().catch((err) => this.log.error(`could not bring the demo school up to date: ${(err as Error).message}`));
+    }
+  }
+
+  /** The demo school lives on every redeploy, so it takes new migrations and the sample content of new modules by itself. Real schools wait for a release. */
+  async upgradeDemo(): Promise<void> {
+    const row = (await this.db.pool.query<{ db_url_sealed: string | null }>("select db_url_sealed from schools where slug = 'greenfield' and status = 'live' and deleted_at is null")).rows[0];
+    if (!row?.db_url_sealed) return;
+    const pool = new pg.Pool({ connectionString: unseal(row.db_url_sealed, this.env.SECRETS_KEY), max: 2, connectionTimeoutMillis: 20_000 });
+    try {
+      const applied = await migrate(pool, 'school');
+      const filled = await topUpDemo(pool);
+      if (applied.length || filled.length) this.log.log(`demo school: ${applied.length} migrations applied, sample content added for ${filled.join(', ') || 'nothing'}`);
+    } finally {
+      await pool.end();
+    }
   }
 
   /** Test tracks start with the Greenfield demo school already live, so the admin and the app have something to show. Runs in the background. */
@@ -268,10 +286,30 @@ export class OpsController {
   }
 
   @Get('cells') @Needs('schools.read')
-  async cells(): Promise<{ key: string; target: string; region: string; maxSchools: number; schools: number }[]> {
-    const { rows } = await this.db.pool.query<{ key: string; target: string; region: string; max_schools: number; n: string }>(
-      'select c.key, c.target, c.region, c.max_schools, (select count(*) from schools s where s.cell = c.key and s.deleted_at is null) n from cells c order by c.key');
-    return rows.map((r) => ({ key: r.key, target: r.target, region: r.region, maxSchools: r.max_schools, schools: Number(r.n) }));
+  async cells(): Promise<{ key: string; target: string; region: string; maxSchools: number; schools: number; accepting: boolean }[]> {
+    const { rows } = await this.db.pool.query<{ key: string; target: string; region: string; max_schools: number; accepting: boolean; n: string }>(
+      'select c.key, c.target, c.region, c.max_schools, c.accepting, (select count(*) from schools s where s.cell = c.key and s.deleted_at is null) n from cells c order by c.key');
+    return rows.map((r) => ({ key: r.key, target: r.target, region: r.region, maxSchools: r.max_schools, schools: Number(r.n), accepting: r.accepting }));
+  }
+
+  /** A new cell. On the test track it is a name and a limit; on aws-cell the database server it points at must be configured first. */
+  @Post('cells') @HttpCode(200) @Needs('policy.write')
+  async createCell(@Me() me: ConsoleUser, @Body(new ZodPipe(CellCreate)) body: CellCreate): Promise<{ key: string; note: string }> {
+    if ((await this.db.pool.query('select 1 from cells where key = $1', [body.key])).rowCount) throw new ApiError('validation', 'There is already a cell with that name.', { fields: { key: 'There is already a cell with that name.' } });
+    await this.db.pool.query('insert into cells (key, target, region, max_schools) values ($1,$2,$3,$4)', [body.key, body.target, body.region, body.maxSchools]);
+    await this.db.audit(me.email, 'cell.created', 'cell', body.key, { target: body.target });
+    const env = `CELL_${body.key.toUpperCase().replace(/-/g, '_')}_ADMIN_URL`;
+    return { key: body.key, note: body.target === 'aws-cell' ? `Schools placed here need ${env} on the console server (the database server this cell runs on).` : 'Ready. New schools can be placed here.' };
+  }
+
+  @Put('cells/:key') @HttpCode(200) @Needs('policy.write')
+  async patchCell(@Me() me: ConsoleUser, @Param('key') key: string, @Body(new ZodPipe(CellPatch)) body: CellPatch): Promise<{ ok: true }> {
+    const cur = (await this.db.pool.query<{ n: string }>('select (select count(*) from schools s where s.cell = c.key and s.deleted_at is null) n from cells c where c.key = $1', [key])).rows[0];
+    if (!cur) throw notFound('That cell');
+    if (body.maxSchools !== undefined && body.maxSchools < Number(cur.n)) throw new ApiError('validation', `${cur.n} schools already run here, so the limit cannot go below that.`, { fields: { maxSchools: `At least ${cur.n}.` } });
+    await this.db.pool.query('update cells set region = coalesce($2, region), max_schools = coalesce($3, max_schools), accepting = coalesce($4, accepting) where key = $1', [key, body.region ?? null, body.maxSchools ?? null, body.accepting ?? null]);
+    await this.db.audit(me.email, 'cell.changed', 'cell', key, { ...body });
+    return { ok: true };
   }
 
   @Post('health/probe') @HttpCode(200) @Needs('schools.read')

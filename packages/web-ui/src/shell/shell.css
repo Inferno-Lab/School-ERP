@@ -44,8 +44,7 @@
   .nest .sheet .sl{margin:10px 6px 2px}
 }
 @media (max-width:900px){
-  .nest .seg{max-width:100%;overflow-x:auto;scrollbar-width:none}
-  .nest .seg::-webkit-scrollbar{display:none}
+  .nest .seg{max-width:100%;overflow-x:auto;scrollbar-width:thin}
   .nest .seg button{white-space:nowrap;flex:none}
   .nest .bulk{left:12px;right:12px;bottom:calc(88px + env(safe-area-inset-bottom));width:auto;overflow-x:auto;border-radius:28px;transform:translateY(160%) scale(.96)}
   .nest .bulk.on{transform:none}
@@ -59,7 +58,6 @@
 /* The menu stays in view while a long page scrolls, and scrolls itself on a short window. `clip` keeps the rounded frame without making it a scroll container. */
 .nest .fr{overflow:clip}
 @media (min-width:901px){
-  .nest .app>.sb{position:sticky;top:12px;align-self:start;height:calc(100dvh - 24px);overflow-x:hidden;overflow-y:auto;scrollbar-width:none}
-  .nest .app>.sb::-webkit-scrollbar{display:none}
+  .nest .app>.sb{position:sticky;top:12px;align-self:start;height:calc(100dvh - 24px);overflow-x:hidden;overflow-y:auto}
 }
 @media (min-width:901px){.nest .app>.sb .nv,.nest .app>.sb .sl,.nest .app>.sb .sbc,.nest .app>.sb .me,.nest .app>.sb .ws,.nest .app>.sb .wsw{flex-shrink:0}}

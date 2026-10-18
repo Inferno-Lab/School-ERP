@@ -17,6 +17,8 @@ export const cells = pgTable('cells', {
   target: text('target').notNull(), // local | free-test | aws-cell
   region: text('region').notNull(),
   maxSchools: integer('max_schools').notNull().default(50),
+  /** false closes the cell to new schools and moves into it. */
+  accepting: boolean('accepting').notNull().default(true),
   createdAt: at('created_at'),
 });
 
@@ -302,3 +304,16 @@ export const consoleAudit = pgTable(
   },
   (t) => [index('console_audit_at_idx').on(t.at)],
 );
+
+export const complianceItems = pgTable('compliance_items', {
+  id: text('id').primaryKey(),
+  schoolId: text('school_id').notNull(),
+  kind: text('kind').notNull(), // dpa | breach
+  title: text('title').notNull(),
+  status: text('status').notNull().default('open'), // open | signed | notified | closed
+  note: text('note').notNull().default(''),
+  createdBy: text('created_by').notNull(),
+  createdAt: at('created_at'),
+  deadlineAt: timestamp('deadline_at', { withTimezone: true }),
+  closedAt: timestamp('closed_at', { withTimezone: true }),
+});

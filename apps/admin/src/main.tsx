@@ -6,13 +6,16 @@ import { readSupportHash } from './app/client';
 import { resolveSchool } from './app/school';
 import { makeRouter } from './router';
 import { SchoolPicker } from './pages/status/SchoolPicker';
+import { StatusBoard } from './pages/status/StatusBoard';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 15_000, retry: 1, refetchOnWindowFocus: false } } });
 const { slug, basepath } = resolveSchool();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {slug ? (
+    {window.location.pathname.replace(/\/$/, '') === '/status' ? (
+      <QueryClientProvider client={queryClient}><StatusBoard /></QueryClientProvider>
+    ) : slug ? (
       <QueryClientProvider client={queryClient}>
         <Boot slug={slug} basepath={basepath} />
       </QueryClientProvider>

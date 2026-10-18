@@ -53,6 +53,7 @@ const routeTree = root.addChildren([
     page('/support', () => import('./pages/support/SupportPage'), 'SupportPage'),
     page('/inbox', () => import('./pages/support/InboxPage'), 'InboxPage'),
     page('/billing', () => import('./pages/billing/BillingPage'), 'BillingPage'),
+    page('/compliance', () => import('./pages/compliance/CompliancePage'), 'CompliancePage'),
     page('/team', () => import('./pages/team/TeamPage'), 'TeamPage'),
   ]),
 ]);

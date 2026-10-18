@@ -16,23 +16,23 @@ const DEFS: { name: string; items: Def[] }[] = [
     { id: 'dash', label: 'Dashboard', icon: 'dash', keys: 'G D', to: '/', module: 'core' },
     { id: 'att', label: 'Attendance', icon: 'att', keys: 'G A', to: '/attendance', module: 'attendance' },
     { id: 'tt', label: 'Timetable', icon: 'tt', keys: 'G T', to: '/timetable', module: 'timetable' },
-    { id: 'hw', label: 'Homework', icon: 'hw', keys: 'G H', to: '/p/homework', module: 'homework' },
-    { id: 'ex', label: 'Exams', icon: 'ex', keys: 'G X', to: '/p/exams', module: 'exams' },
+    { id: 'hw', label: 'Homework', icon: 'hw', keys: 'G H', to: '/homework', module: 'homework' },
+    { id: 'ex', label: 'Exams', icon: 'ex', keys: 'G X', to: '/exams', module: 'exams' },
   ] },
   { name: 'People', items: [
     { id: 'stu', label: 'Students', icon: 'stu', keys: 'G S', to: '/students', module: 'people' },
-    { id: 'staff', label: 'Staff', icon: 'staff', keys: 'G F', to: '/p/staff', module: 'people' },
-    { id: 'adm', label: 'Admissions', icon: 'adm', keys: 'G M', to: '/p/admissions', module: 'people' },
+    { id: 'staff', label: 'Staff', icon: 'staff', keys: 'G F', to: '/staff', module: 'people' },
+    { id: 'adm', label: 'Admissions', icon: 'adm', keys: 'G M', to: '/admissions', module: 'people' },
   ] },
   { name: 'Money', items: [
     { id: 'fee', label: 'Fees', icon: 'fee', keys: 'G E', to: '/fees', module: 'fees' },
-    { id: 'inv', label: 'Invoices', icon: 'inv', keys: 'G I', to: '/p/invoices', module: 'fees' },
-    { id: 'rep', label: 'Reports', icon: 'rep', keys: 'G R', to: '/p/reports', module: 'fees' },
+    { id: 'inv', label: 'Invoices', icon: 'inv', keys: 'G I', to: '/invoices', module: 'fees' },
+    { id: 'rep', label: 'Reports', icon: 'rep', keys: 'G R', to: '/reports', module: 'core' },
   ] },
   { name: 'Reach', items: [
     { id: 'notice', label: 'Notices', icon: 'notice', keys: 'G N', to: '/notices', module: 'notices' },
-    { id: 'msg', label: 'Messages', icon: 'msg', keys: 'G G', to: '/p/messages', module: 'chat' },
-    { id: 'evt', label: 'Events', icon: 'evt', keys: 'G V', to: '/p/events', module: 'events' },
+    { id: 'msg', label: 'Messages', icon: 'msg', keys: 'G G', to: '/messages', module: 'chat' },
+    { id: 'evt', label: 'Events', icon: 'evt', keys: 'G V', to: '/events', module: 'events' },
   ] },
   { name: 'School', items: [{ id: 'set', label: 'Settings', icon: 'set', keys: 'G ,', to: '/settings', module: 'core' }] },
 ];
@@ -40,7 +40,7 @@ const DEFS: { name: string; items: Def[] }[] = [
 export const PAGE_TITLES: Record<string, string> = Object.fromEntries(DEFS.flatMap((g) => g.items.map((i) => [i.to.replace('/p/', ''), i.label])));
 
 /** The menu for a school: only the modules it has on, with counts where the data has them. */
-export function adminNav(modules: string[], base: string, badges?: { attendance: number; admissions: number }): NavGroup[] {
+export function adminNav(modules: string[], base: string, badges?: { attendance: number; admissions: number; messages?: number }): NavGroup[] {
   const on = new Set(['core', ...modules]);
   return DEFS.map((g) => ({
     name: g.name,
@@ -48,7 +48,7 @@ export function adminNav(modules: string[], base: string, badges?: { attendance:
       .filter((i) => on.has(i.module))
       .map((i) => ({
         id: i.id, label: i.label, icon: IC[i.icon], keys: i.keys, href: `${base}${i.to === '/' ? '' : i.to}` || '/',
-        count: i.id === 'att' && badges?.attendance ? String(badges.attendance) : i.id === 'adm' && badges?.admissions ? String(badges.admissions) : undefined,
+        count: i.id === 'att' && badges?.attendance ? String(badges.attendance) : i.id === 'adm' && badges?.admissions ? String(badges.admissions) : i.id === 'msg' && badges?.messages ? String(badges.messages) : undefined,
       })),
   })).filter((g) => g.items.length);
 }

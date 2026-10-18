@@ -126,7 +126,7 @@ export class Actions {
   private describe(action: ActionRequest['action'], school: string): string {
     return ({
       'school.suspend': `Pause ${school}`, 'school.resume': `Resume ${school}`, 'school.erase': `Erase ${school}`, 'entitlements.push': `Push the plan and locks to ${school}`,
-      'migration.run': `Run pending migrations for ${school}`, 'domain.set': `Change the address of ${school}`, 'build.app': `Build the app for ${school}`, 'backup.take': `Back up ${school}`,
+      'migration.run': `Run pending migrations for ${school}`, 'domain.set': `Change the address of ${school}`, 'build.app': `Build the app for ${school}`, 'backup.take': `Back up ${school}`, 'school.move': `Move ${school} to another cell`,
     } as const)[action];
   }
 
@@ -192,6 +192,20 @@ export class Actions {
         } finally {
           await pool.end();
         }
+      }
+      case 'school.move': {
+        const to = String(params.cell ?? '');
+        const target = (await this.db.pool.query<{ key: string; target: string; accepting: boolean; max_schools: number; n: string }>(
+          'select c.key, c.target, c.accepting, c.max_schools, (select count(*) from schools s where s.cell = c.key and s.deleted_at is null) n from cells c where c.key = $1', [to])).rows[0];
+        if (!target) throw new Error(`Cell “${to}” does not exist.`);
+        if (to === school.cell) throw new Error(`${school.name} already runs in ${to}.`);
+        if (!target.accepting) throw new Error(`Cell ${to} is closed to new schools.`);
+        if (Number(target.n) >= target.max_schools) throw new Error(`Cell ${to} is full.`);
+        if (target.target !== school.target) throw new Error(`Cell ${to} runs on ${target.target}, but ${school.name} runs on ${school.target}. Moving between kinds of cell needs a database copy, which only the aws-cell target performs.`);
+        await this.db.pool.query('update schools set cell = $2, region = (select region from cells where key = $2), config_version = config_version + 1 where id = $1', [school.id, to]);
+        done();
+        // shortcut: cells of one kind share a database server on the test track, so a move is a change of record, not a copy. On aws-cell this step becomes replicate, freeze, switch and verify.
+        return `${school.name} now runs in ${to}. On the test track its database stays where it is.`;
       }
       case 'build.app': {
         const b = await this.builds.request(school.id, school.slug, params.platform === 'ios' ? 'ios' : 'android', a.requestedBy);

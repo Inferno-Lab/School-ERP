@@ -328,7 +328,7 @@ export interface DashboardData {
   needsYou: ApprovalRow[];
   timeline: { id: string; time: string; title: string; subtitle: string; state: 'done' | 'now' | 'next' }[];
   timelineProgress: number;
-  badges: { attendance: number; admissions: number };
+  badges: { attendance: number; admissions: number; messages: number };
 }
 
 /** What the menu needs on every page: who the school is, the term card, and the counts beside menu items. */

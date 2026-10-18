@@ -1,34 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { newId } from '@edunest/db';
 import { resolveConfig, validateSettingsChanges } from '@edunest/config-engine';
-import type { AuditRow, EffectiveConfig, SettingsDoc, SettingsPatch } from '@edunest/contracts';
+import { MESSAGE_EVENTS, istMinutes, type AuditRow, type EffectiveConfig, type SettingsDoc, type SettingsPatch } from '@edunest/contracts';
 import type { Registry } from '@edunest/tenancy';
 import { ApiError } from '@edunest/nest-kit';
 import { REGISTRY, type TenantCtx } from '../tenancy/tenant.js';
-
-/** Sends messages. Only the sandbox exists today: it files them in the console's inbox instead of sending them. */
-@Injectable()
-export class Messenger {
-  constructor(@Inject(REGISTRY) private readonly registry: Registry) {}
-
-  async send(t: TenantCtx, m: { channel: 'sms' | 'email' | 'whatsapp' | 'push'; to: string; subject?: string; body: string }): Promise<void> {
-    await this.registry.pool.query(
-      'insert into sandbox_messages (id, school_slug, channel, to_addr, subject, body) values ($1,$2,$3,$4,$5,$6)',
-      [newId('msg'), t.info.slug, m.channel, m.to, m.subject ?? null, m.body],
-    );
-  }
-
-  /** Texts sent by one school since the start of this month, for the plan card. */
-  async smsThisMonth(slug: string): Promise<number> {
-    const { rows } = await this.registry.pool.query<{ n: string }>(
-      "select count(*) n from sandbox_messages where school_slug = $1 and channel = 'sms' and created_at >= date_trunc('month', now())", [slug]);
-    return Number(rows[0]?.n ?? 0);
-  }
-
-  async sendMany(t: TenantCtx, list: { channel: 'sms' | 'email' | 'whatsapp' | 'push'; to: string; subject?: string; body: string }[]): Promise<void> {
-    for (const m of list) await this.send(t, m);
-  }
-}
 
 @Injectable()
 export class AuditService {
@@ -108,6 +84,63 @@ export class SettingsService {
   }
 
   async effective(t: TenantCtx, permissions?: string[]): Promise<EffectiveConfig> {
-    return resolveConfig({ settings: await this.doc(t), entitlement: t.info.entitlement, audience: permissions ? { permissions } : undefined });
+    return resolveConfig({ settings: await this.doc(t), entitlement: t.info.entitlement, audience: permissions ? { permissions } : undefined, flags: t.info.flags });
+  }
+}
+
+/** Sends messages. Only the sandbox exists today: it files them in the console's inbox instead of sending them. */
+@Injectable()
+export class Messenger {
+  constructor(
+    @Inject(REGISTRY) private readonly registry: Registry,
+    private readonly settings: SettingsService,
+  ) {}
+
+  async send(t: TenantCtx, m: { channel: 'sms' | 'email' | 'whatsapp' | 'push'; to: string; subject?: string; body: string }): Promise<void> {
+    await this.registry.pool.query(
+      'insert into sandbox_messages (id, school_slug, channel, to_addr, subject, body) values ($1,$2,$3,$4,$5,$6)',
+      [newId('msg'), t.info.slug, m.channel, m.to, m.subject ?? null, m.body],
+    );
+  }
+
+  /** Texts sent by one school since the start of this month, for the plan card. */
+  async smsThisMonth(slug: string): Promise<number> {
+    const { rows } = await this.registry.pool.query<{ n: string }>(
+      "select count(*) n from sandbox_messages where school_slug = $1 and channel = 'sms' and created_at >= date_trunc('month', now())", [slug]);
+    return Number(rows[0]?.n ?? 0);
+  }
+
+  async sendMany(t: TenantCtx, list: { channel: 'sms' | 'email' | 'whatsapp' | 'push'; to: string; subject?: string; body: string }[]): Promise<void> {
+    for (const m of list) await this.send(t, m);
+  }
+
+  /**
+   * Sends one of the school's own messages: the wording comes from Message templates, the channels from Notifications, and outside
+   * quiet hours only. Messages sent in quiet hours are filed as held until morning (the sandbox has no real queue).
+   * Returns how many recipients were reached on at least one channel.
+   */
+  async notify(t: TenantCtx, key: string, who: { to: string; email?: string | null; vars: Record<string, string | number> }[]): Promise<number> {
+    const ev = MESSAGE_EVENTS.find((e) => e.key === key);
+    if (!ev) throw new Error(`Unknown message ${key}`);
+    const doc = (await this.settings.doc(t)).values;
+    const rule = ((doc['notify.rules'] as Record<string, { push: boolean; sms: boolean; email: boolean }> | undefined) ?? {})[key] ?? ev.defaults;
+    const custom = ((doc['templates.messages'] as Record<string, string> | undefined) ?? {})[key];
+    const text = custom?.trim() ? custom : ev.text;
+    const [qf, qt] = [String(doc['notify.quietFrom'] ?? '21:00'), String(doc['notify.quietTo'] ?? '07:00')];
+    const mins = (hm: string) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5));
+    const now = istMinutes();
+    const quiet = !ev.urgent && (mins(qf) > mins(qt) ? now >= mins(qf) || now < mins(qt) : now >= mins(qf) && now < mins(qt));
+    const school = String(doc['school.shortName'] ?? t.info.shortName);
+    let reached = 0;
+    for (const w of who) {
+      const body = text.replace(/\{(\w+)\}/g, (_, k: string) => String((k === 'school' ? w.vars.school ?? school : w.vars[k]) ?? ''));
+      const subject = quiet ? `Held until ${qt}` : undefined;
+      let any = false;
+      if (rule.push) { await this.send(t, { channel: 'push', to: w.to, subject, body }); any = true; }
+      if (rule.sms) { await this.send(t, { channel: 'sms', to: w.to, subject, body }); any = true; }
+      if (rule.email && w.email) { await this.send(t, { channel: 'email', to: w.email, subject: subject ?? ev.label, body }); any = true; }
+      if (any) reached++;
+    }
+    return reached;
   }
 }

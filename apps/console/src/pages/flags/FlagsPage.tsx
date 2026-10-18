@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { EmptyCard, Field, useShake } from '@edunest/web-ui';
+import { MODULES } from '@edunest/config-engine';
+import { EmptyCard, Field, SelectField, useShake } from '@edunest/web-ui';
 import { Card, Page, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
 import { ago } from '../../app/format';
@@ -12,6 +13,7 @@ export function FlagsPage() {
   const [key, setKey] = useState('');
   const [label, setLabel] = useState('');
   const [err, setErr] = useState('');
+  const [kill, setKill] = useState({ module: 'homework', school: '' });
   const shake = useShake();
   const flags = useQuery({ queryKey: ['flags'], queryFn: app.api.flags.list });
   const schools = useQuery({ queryKey: ['schools'], queryFn: () => app.api.schools() });
@@ -21,6 +23,7 @@ export function FlagsPage() {
     onError: (e) => say((e as Error).message, 'bad'),
   });
   const rows = flags.data ?? [];
+  const paused = rows.filter((f) => f.key.startsWith('kill.') && f.enabled);
   const fleet = rows.filter((f) => f.scope === 'fleet');
   const per = rows.filter((f) => f.scope === 'school');
   const canWrite = app.can('flags.write');
@@ -42,6 +45,14 @@ export function FlagsPage() {
           ))}
         </Card>
         <div className="s5" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {canWrite && (
+            <Card title="Pause a feature" chip={<span className={`chip ${paused.length ? 'r' : 'g'}`}>{paused.length} paused</span>}>
+              <div className="help" style={{ marginBottom: 12 }}>A kill switch takes a feature away from the app and refuses its requests within seconds. Lift it by switching the flag off.</div>
+              <SelectField label="Feature" value={kill.module} onChange={(module) => setKill({ ...kill, module })} options={MODULES.filter((m) => !m.core).map((m) => ({ value: m.key, label: m.name }))} />
+              <SelectField label="For" value={kill.school} onChange={(school) => setKill({ ...kill, school })} options={[{ value: '', label: 'Every school' }, ...(schools.data ?? []).map((s) => ({ value: s.id, label: s.name }))]} />
+              <button className="btn dngf" style={{ marginTop: 14 }} disabled={set.isPending} onClick={() => set.mutate({ key: `kill.${kill.module}`, enabled: true, schoolId: kill.school || null, label: `${MODULES.find((m) => m.key === kill.module)?.name ?? kill.module} paused` }, { onSuccess: () => say('Paused. It takes effect within a few seconds.') })}>Pause it</button>
+            </Card>
+          )}
           {canWrite && (
             <Card title="New flag">
               <div className={shake.cls}>
