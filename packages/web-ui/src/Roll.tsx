@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { Digit } from './roll';
+import type { Digit } from './digits';
 
 const STRIP = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 

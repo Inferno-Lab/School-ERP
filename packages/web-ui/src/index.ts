@@ -3,7 +3,7 @@ import './shell/shell.css';
 
 export * from './theme';
 export * from './icons';
-export * from './roll';
+export * from './digits';
 export * from './Import';
 export * from './illustrations/Illustration';
 export * from './shell/Shell';
@@ -12,3 +12,6 @@ export * from './login/LoginPage';
 export * from './tints';
 export * from './Palette';
 export * from './EmptyCard';
+export * from './Roll';
+export * from './forms';
+export * from './Dialog';

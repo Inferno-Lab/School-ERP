@@ -15,3 +15,12 @@
   .nest .mn{padding-bottom:120px}
 }
 @media (min-width:901px){.nest .phone-only{display:none}}
+/* Overlays belong to the window, not to the page, so they stay put while a long page scrolls. */
+.nest .scrim,.nest .mod,.nest .drw,.nest .bulk,.nest .save,.nest .toast,.nest .sbar,.nest .glow{position:fixed!important}
+.nest .glow{border-radius:0!important}
+.nest .popm{position:absolute;z-index:30;top:calc(100% + 8px);left:0;min-width:210px;max-height:340px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh3);padding:8px;display:flex;flex-direction:column;gap:2px;animation:nPop .4s var(--sp)}
+.nest .popm button{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border:0;border-radius:12px;background:none;color:var(--ink);font:700 14px var(--fb);cursor:pointer;text-align:left;transition:background .15s}
+.nest .popm button:hover,.nest .popm button:focus-visible{background:var(--vS);color:var(--vD)}
+.nest .popm button.on{background:var(--vS);color:var(--vD)}
+.nest .popm button small{margin-left:auto;font:700 12px var(--fb);opacity:.6}
+.nest .popm hr{border:0;border-top:1px solid var(--line);margin:4px 0;width:100%}

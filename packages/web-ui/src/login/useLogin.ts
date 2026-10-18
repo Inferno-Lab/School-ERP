@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { rollDigits } from '../roll';
+import { rollDigits } from '../digits';
 
 const EYE_ON = 'M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12zM9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0';
 const EYE_OFF = 'M3 3l18 18M10.6 6.1A9.6 9.6 0 0 1 12 6c6 0 9.5 6 9.5 6a17 17 0 0 1-3 3.6M6.4 7.6A16.5 16.5 0 0 0 2.5 12s3.5 6.5 9.5 6.5a9.3 9.3 0 0 0 4.1-.9M9.9 9.9a3 3 0 0 0 4.2 4.2';
