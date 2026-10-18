@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Injectable, Logger, Param, Post, Put, Query, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
 import { POOLS } from './tokens.js';
 import { MODULES } from '@edunest/config-engine';
-import { CONSOLE_ROLES, ROLE_TEMPLATES, type AuditRow, type ConsoleRole, type FleetSummary, type ConsoleUserRow, type FlagRow, type InvoiceRowC, type SupportSessionRow, type SupportToken } from '@edunest/contracts';
+import { CONSOLE_PERMISSIONS, CONSOLE_ROLES, ROLE_TEMPLATES, WizardPayload, type AuditRow, type DeployTarget, type ConsoleRole, type FleetSummary, type ConsoleUserRow, type FlagRow, type InvoiceRowC, type SupportSessionRow, type SupportToken } from '@edunest/contracts';
 import { newId } from '@edunest/db';
 import { ApiError, notFound } from '@edunest/nest-kit';
 import { hashPassword, signJwt, unseal } from '@edunest/security';
@@ -228,6 +228,26 @@ export class Bootstrap implements OnApplicationBootstrap {
       this.log.log(`created the first super admin ${this.env.BOOTSTRAP_EMAIL}`);
     }
     await this.policy.get();
+    if (this.env.SEED_DEMO === 'true') void this.seedDemo().catch((err) => this.log.error(`could not create the demo school: ${(err as Error).message}`));
+  }
+
+  /** Test tracks start with the Greenfield demo school already live, so the admin and the app have something to show. Runs in the background. */
+  async seedDemo(): Promise<void> {
+    const there = await this.db.pool.query("select 1 from schools where slug = 'greenfield' and deleted_at is null");
+    if (there.rowCount) return;
+    const cell = (await this.db.pool.query<{ key: string; target: DeployTarget }>('select key, target from cells order by key limit 1')).rows[0];
+    if (!cell) return;
+    const payload = WizardPayload.parse({
+      basics: { name: 'Greenfield International School', shortName: 'Greenfield', slug: 'greenfield', board: 'International', address: '42, Baner Road, Baner', city: 'Pune', contactName: 'Neha Menon', contactPhone: '+91 98220 41200', contactEmail: 'neha.menon@greenfield.edu.in', language: 'en' },
+      plan: { plan: 'premium', modules: ['people', 'attendance', 'fees', 'notices', 'timetable', 'homework', 'events', 'exams', 'chat', 'transport', 'library', 'gallery'], students: 1500 },
+      branding: { color: '#6A4CF5', logoText: 'G', appName: 'Greenfield', tagline: 'Curiosity first. Kindness always.' },
+      placement: { target: cell.target, cell: cell.key, addressing: 'path' },
+      admin: { name: 'Neha Menon', email: 'neha.menon@greenfield.edu.in', phone: '+91 98220 41200', invite: 'both', roles: ['principal'] },
+      data: { start: 'demo' },
+    });
+    this.log.log('creating the Greenfield demo school');
+    const system: ConsoleUser = { id: 'system', name: 'EduNest', email: 'system@edunest.app', roles: ['super_admin'], permissions: [...CONSOLE_PERMISSIONS], sid: 'system' };
+    await this.wizard.launch(system, payload, { dryRun: false });
   }
 }
 

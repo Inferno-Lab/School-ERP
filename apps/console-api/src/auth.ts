@@ -48,7 +48,8 @@ export class ConsoleAuth {
     const id = newId('cot');
     await this.db.pool.query('insert into console_otp (id, user_id, code_hash, expires_at) values ($1,$2,$3,$4)', [id, u.id, sha256(`${id}:${code}`), new Date(Date.now() + 10 * 60_000)]);
     await this.sandbox.put({ schoolSlug: 'console', channel: 'email', to: u.email, subject: 'Your EduNest console code', body: `Your sign-in code is ${code}. It expires in 10 minutes.` });
-    return { step: 'otp', challenge: { challengeId: id, channel: 'email', maskedTo: maskEmail(u.email), expiresInSeconds: 600, ...(this.env.DEMO_CODE ? { demoCode: this.env.DEMO_CODE } : {}) } };
+    return { step: 'otp', challenge: { challengeId: id, channel: 'email', maskedTo: maskEmail(u.email), expiresInSeconds: 600, // The code is only handed back in development, so a hosted test track keeps it as a second step the password alone cannot skip.
+      ...(this.env.DEMO_CODE && this.env.NODE_ENV !== 'production' ? { demoCode: this.env.DEMO_CODE } : {}) } };
   }
 
   async verify(body: VerifyRequest): Promise<ConsoleTokens> {

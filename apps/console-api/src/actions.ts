@@ -1,13 +1,13 @@
-import { Body, Controller, Get, HttpCode, Inject, Injectable, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, Inject, Injectable, Param, Post } from '@nestjs/common';
 import { POOLS, REGISTRY } from './tokens.js';
 import { closeModules } from '@edunest/config-engine';
 import { ActionRequest, type ActionRow, type BuildRow, type ConsoleRole } from '@edunest/contracts';
 import { migrate, newId, pg, pendingMigrations } from '@edunest/db';
 import { ApiError, ZodPipe, notFound } from '@edunest/nest-kit';
-import { unseal } from '@edunest/security';
+import { constantTimeEqual, unseal } from '@edunest/security';
 import type { PoolManager, Registry } from '@edunest/tenancy';
 import dns from 'node:dns/promises';
-import { Db, Me, Needs, type ConsoleUser, type reg } from './core.js';
+import { Db, Me, Needs, Public, type ConsoleUser, type reg } from './core.js';
 import { ENV, type Env } from './env.js';
 import { Policy } from './policy.js';
 import { Schools } from './schools.js';
@@ -249,6 +249,7 @@ export class ActionsController {
   constructor(
     private readonly actions: Actions,
     private readonly builds: Builds,
+    @Inject(ENV) private readonly env: Env,
   ) {}
 
   @Get('actions') @Needs('schools.read')
@@ -275,5 +276,13 @@ export class ActionsController {
   @Get('builds') @Needs('schools.read')
   buildsList(): Promise<BuildRow[]> {
     return this.builds.list();
+  }
+
+  /** The build workflow reports back here with the install link. It proves itself with the shared token; without one set, this is closed. */
+  @Public() @Post('builds/:id/finish') @HttpCode(204)
+  async buildFinished(@Param('id') id: string, @Headers('x-build-token') token: string | undefined, @Body() body: { ok?: boolean; url?: string }): Promise<void> {
+    const want = this.env.BUILD_CALLBACK_TOKEN;
+    if (!want || !token || !constantTimeEqual(token, want)) throw new ApiError('unauthenticated', 'That build token is not accepted.');
+    await this.builds.finish(id, body?.ok !== false, typeof body?.url === 'string' ? body.url.slice(0, 500) : null);
   }
 }

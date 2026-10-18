@@ -7,6 +7,7 @@ import cors from '@fastify/cors';
 import { Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { serveFrontends } from './static.js';
 
 /**
  * One process for the test track and small installs: the school API and the console API side by side,
@@ -28,5 +29,7 @@ await app.register(cors as never, {
   exposedHeaders: ['content-disposition', 'retry-after'],
   maxAge: 86400,
 });
+const served = await serveFrontends(app);
 app.enableShutdownHooks();
 await app.listen(apiEnv.PORT, apiEnv.HOST);
+if (served.length) console.log(`Serving the admin and console from this process: ${served.join(' ')}`);
