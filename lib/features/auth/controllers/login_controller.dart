@@ -50,6 +50,12 @@ class LoginController extends GetxController {
       final user = await action();
       await Get.find<AuthService>().setSession(user);
       unawaited(Get.offAllNamed<void>(AppRoutes.shell));
+    } on OtpRequired catch (sent) {
+      // The password was right. The school sent a code; the code screen takes over.
+      otp.clear();
+      useOtp.value = true;
+      final hint = sent.demoCode;
+      ToastHelper.show(sent.message, body: hint == null ? sent.sentTo : '${sent.sentTo} · $hint');
     } on AppException catch (error) {
       ToastHelper.show(error.message, kind: ToastKind.error);
     } finally {

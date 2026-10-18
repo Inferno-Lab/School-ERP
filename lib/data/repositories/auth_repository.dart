@@ -64,18 +64,34 @@ class MockAuthRepository implements AuthRepository {
   }
 }
 
+/// The school sent a sign-in code; the person has to type it. Thrown by the first step of a real sign-in.
+class OtpRequired extends AppException {
+  const OtpRequired(this.sentTo, {this.demoCode}) : super('auth.code_sent');
+
+  final String sentTo;
+
+  /// Only a demo school hands the code to the app, so the demo can be tried without a phone.
+  final String? demoCode;
+}
+
 class RemoteAuthRepository implements AuthRepository {
   RemoteAuthRepository(this._remote);
 
   final RemoteDataSource _remote;
+  String? _challenge;
 
   @override
   Future<AppUser> login({required String email, required String password}) async {
-    final json = await _remote.post('/auth/login', {
-      'email': email,
-      'password': password,
-    });
-    return AppUser.fromJson(Map<String, dynamic>.from(json as Map));
+    final json = Map<String, dynamic>.from(await _remote.post('/v1/auth/login', {'identifier': email.trim(), 'password': password}) as Map);
+    if (json['step'] == 'done') return _enter(Map<String, dynamic>.from(json['tokens'] as Map));
+    final challenge = Map<String, dynamic>.from(json['challenge'] as Map);
+    _challenge = challenge['challengeId'] as String;
+    throw OtpRequired(challenge['maskedTo'] as String? ?? '', demoCode: challenge['demoCode'] as String?);
+  }
+
+  Future<AppUser> _enter(Map<String, dynamic> tokens) async {
+    await _remote.client.saveTokens(tokens);
+    return AppUser.fromJson(Map<String, dynamic>.from(await _remote.get('/me') as Map));
   }
 
   @override
@@ -83,13 +99,27 @@ class RemoteAuthRepository implements AuthRepository {
     required String email,
     required String otp,
   }) async {
-    final json = await _remote.post('/auth/otp', {'email': email, 'otp': otp});
-    return AppUser.fromJson(Map<String, dynamic>.from(json as Map));
+    final challenge = _challenge;
+    if (challenge == null) throw const AppException('errors.code_expired');
+    final json = await _remote.post('/v1/auth/verify', {'challengeId': challenge, 'code': otp});
+    _challenge = null;
+    return _enter(Map<String, dynamic>.from(json as Map));
   }
 
   @override
   Future<AppUser> loginAs(UserRole role) async {
-    final json = await _remote.post('/auth/demo', {'role': role.name});
-    return AppUser.fromJson(Map<String, dynamic>.from(json as Map));
+    const accounts = {
+      UserRole.student: 'aarav.sharma@edunest.app',
+      UserRole.parent: 'priya.sharma@example.com',
+      UserRole.teacher: 'kavita.iyer@greenfield.edu.in',
+    };
+    try {
+      return await login(email: accounts[role]!, password: AppConfig.demoPassword);
+    } on OtpRequired catch (otp) {
+      // A demo school gives the code away so the cards work without a phone; any other school needs the real one.
+      final code = otp.demoCode;
+      if (code == null) rethrow;
+      return loginWithOtp(email: accounts[role]!, otp: code);
+    }
   }
 }

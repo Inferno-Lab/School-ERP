@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/services/storage_service.dart';
 import 'package:edunest/core/theme/tokens.dart';
@@ -21,6 +22,8 @@ class AuthService extends GetxService {
   void restore() {
     final raw = _storage.read<String>(StorageKeys.sessionUser);
     if (raw == null) return;
+    // A saved person without a saved token (an older build, or a token that was dropped) has to sign in again.
+    if (AppConfig.live && _storage.read<String>(StorageKeys.accessToken) == null) return;
     final decoded = jsonDecode(raw);
     if (decoded is! Map<String, dynamic>) return;
     user.value = AppUser.fromJson(decoded);
@@ -56,6 +59,8 @@ class AuthService extends GetxService {
   Future<void> signOut() async {
     await _storage.remove(StorageKeys.sessionUser);
     await _storage.remove(StorageKeys.activeStudent);
+    await _storage.remove(StorageKeys.accessToken);
+    await _storage.remove(StorageKeys.refreshToken);
     if (Get.testMode) {
       _clear();
       return;
