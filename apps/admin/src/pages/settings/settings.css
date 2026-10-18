@@ -59,3 +59,6 @@
 .pg-settings .toast{position:absolute;left:50%;bottom:28px;z-index:40;transform:translateX(-50%);animation:nToastC .7s var(--e)}
 @keyframes nToastC{from{opacity:0;transform:translate(-50%,28px) scale(.94)}to{opacity:1;transform:translateX(-50%)}}
 
+.pg-settings .in2.err{border-color:var(--r);background:color-mix(in srgb,var(--rS) 45%,var(--card));box-shadow:0 0 0 5px color-mix(in srgb,var(--r) 14%,transparent)}
+.pg-settings .sw:disabled,.pg-settings .sw5 button:disabled{opacity:.5;cursor:not-allowed}
+.pg-settings .set .es{max-width:none}

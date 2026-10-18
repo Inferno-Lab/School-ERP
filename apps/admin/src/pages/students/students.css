@@ -9,12 +9,12 @@
 .pg-students .fp.on{background:var(--vS);border-color:transparent;color:var(--vD)}
 .pg-students .fp.add{border-style:dashed;color:var(--ink3)}
 .pg-students .strip4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-radius:24px;border:1px solid var(--line);background:var(--card);box-shadow:var(--sh1)}
-.pg-students .sm{padding:20px 24px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:7px;min-width:0}
-.pg-students .sm:first-child{border-left:0}
-.pg-students .sm span.l{font:700 13px var(--fb);color:var(--ink3)}
-.pg-students .sm .v{font:700 32px/1 var(--fd);letter-spacing:-.035em;display:flex;align-items:baseline}
-.pg-students .sm .v em{font-style:normal;opacity:.4}
-.pg-students .sm .s{font:600 12.5px var(--fb);color:var(--ink3);display:flex;gap:8px;align-items:center}
+.pg-students .strip4>.sm{padding:20px 24px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:7px;min-width:0}
+.pg-students .strip4>.sm:first-child{border-left:0}
+.pg-students .strip4>.sm span.l{font:700 13px var(--fb);color:var(--ink3)}
+.pg-students .strip4>.sm .v{font:700 32px/1 var(--fd);letter-spacing:-.035em;display:flex;align-items:baseline}
+.pg-students .strip4>.sm .v em{font-style:normal;opacity:.4}
+.pg-students .strip4>.sm .s{font:600 12.5px var(--fb);color:var(--ink3);display:flex;gap:8px;align-items:center}
 .pg-students .tcard{background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--sh1);overflow:hidden}
 .pg-students .tcap{display:flex;align-items:center;gap:12px;padding:18px 22px 14px}
 .pg-students .tcap h2{margin:0;font:700 18px var(--fd);letter-spacing:-.02em;flex:1}

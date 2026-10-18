@@ -96,3 +96,15 @@
 .pg-dashboard .plab{gap:2px}
 .pg-dashboard .plab span{flex:1 1 0;max-width:46px;min-width:8px;width:auto;overflow:visible;white-space:nowrap}
 .pg-dashboard .plab span.today{color:var(--ink)}
+/* Bars are chunky, never thin. */
+.pg-dashboard .col2{max-width:64px}
+.pg-dashboard .col2 .fl{width:72%;max-width:44px;border-radius:12px 12px 5px 5px}
+.pg-dashboard .col2 .gh{width:92%;max-width:56px;border-radius:14px 14px 6px 6px}
+.pg-dashboard .col2:hover .fl,.pg-dashboard .col2:focus-visible .fl{width:80%}
+.pg-dashboard .plab span{max-width:64px}
+.pg-dashboard .sg{height:22px;border-radius:11px;gap:3px}
+.pg-dashboard .sg i{border-radius:5px}
+.pg-dashboard .rr:hover .sg{height:26px}
+.pg-dashboard .rr{grid-template-columns:44px minmax(0,1fr) 64px}
+.pg-dashboard .fbar .trk{max-width:112px}
+.pg-dashboard .wl .nst{width:118px;right:-4px;bottom:-8px}

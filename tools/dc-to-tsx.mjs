@@ -100,7 +100,7 @@ function conv(node, scope, pageRoot) {
   if (node.type === 'comment') return '';
   if (node.type !== 'tag' && node.type !== 'script' && node.type !== 'style') return '';
   const name = node.name;
-  if (name === 'aside') {
+  if (name === 'aside' && (node.attribs.class ?? '').split(/\s+/).includes('sb')) {
     const saved = convAside(node, scope);
     asideJsx = saved;
     return '{v.aside}';

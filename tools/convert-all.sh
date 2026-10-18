@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# FIRST IMPORT ONLY. The generated views are edited by hand afterwards (dashboard, login and others already are): do not run this over them.
 # Re-runs the canvas converter for every board. Only for the first import: after that the generated files are edited by hand.
 set -e
 cd "$(dirname "$0")/.."
