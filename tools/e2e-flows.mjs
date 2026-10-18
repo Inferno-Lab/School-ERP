@@ -35,6 +35,12 @@ async function flow(name, ctxOpts, fn) {
   }
   await ctx.close();
 }
+/** Opens one of the page's dropdowns and picks an option by its words (or by its place in the list). */
+const pick = async (page, scope, label, option) => {
+  await scope.getByLabel(label).click();
+  const o = typeof option === 'number' ? page.getByRole('option').nth(option) : page.getByRole('option', { name: option, exact: true });
+  await o.click();
+};
 const expectVisible = async (loc, what, timeout = 8000) => { await loc.first().waitFor({ state: 'visible', timeout }).catch(() => { throw new Error(`expected to see ${what}`); }); };
 
 // ── tokens ───────────────────────────────────────────────────────────────
@@ -300,8 +306,8 @@ await flow('admin: set homework, tick a hand-in and save it', { storage: adminSt
   const d = p.getByRole('dialog');
   await d.getByRole('button', { name: 'Set homework' }).click();
   await expectVisible(d.getByText('Choose a class.'), 'the class error');
-  await d.getByLabel('Class').selectOption({ label: 'Class 8 A' });
-  await d.getByLabel('Subject').selectOption({ label: 'Maths' });
+  await pick(p, d, 'Class', 'Class 8 A');
+  await pick(p, d, 'Subject', 'Maths');
   await d.getByLabel('Title').fill('E2E homework');
   await d.getByRole('button', { name: 'Set homework' }).click();
   await expectVisible(p.getByText(/Homework set\./), 'the set toast');
@@ -464,7 +470,7 @@ await flow('console: a cell is added and managed, a school can be moved', { stor
   await expectVisible(p.getByText(/Use 3 to 24 letters/), 'the name error');
   await p.getByLabel('Name').fill('e2e-cell');
   await p.getByLabel('Region').fill('this computer');
-  await p.getByRole('dialog').getByLabel('Runs on').selectOption('local');
+  await pick(p, p.getByRole('dialog'), 'Runs on', 'This computer');
   await p.getByRole('dialog').getByRole('button', { name: 'Add cell' }).click();
   await expectVisible(p.getByText(/Cell e2e-cell added/), 'the added toast');
   await p.getByRole('button', { name: 'Manage' }).last().click();
@@ -482,7 +488,7 @@ await flow('console: compliance logs an agreement and a breach', { storage: cons
   await p.getByRole('button', { name: 'Log a breach' }).click();
   await p.getByRole('dialog').getByRole('button', { name: 'Log breach' }).click();
   await expectVisible(p.getByText('Choose a school.'), 'the school error');
-  await p.getByRole('dialog').getByLabel('School').selectOption({ index: 1 });
+  await pick(p, p.getByRole('dialog'), 'School', 1);
   await p.getByLabel('What happened').fill('E2E: an export went to the wrong address');
   await p.getByRole('dialog').getByRole('button', { name: 'Log breach' }).click();
   await expectVisible(p.getByText(/within 72 hours/), 'the logged toast');
@@ -517,6 +523,35 @@ await flow('console: every menu page opens', { storage: consoleStore }, async (p
     await p.goto(`${CONSOLE}${path}`, { waitUntil: 'networkidle' });
     await expectVisible(p.locator('main h1'), `a title on ${path}`);
   }
+});
+
+await flow('admin: the menu collapses, can be opened again, and its account menu opens beside it', { storage: adminStore }, async (p) => {
+  await p.goto(A('/fees'), { waitUntil: 'networkidle' });
+  await p.getByRole('button', { name: 'Collapse the menu' }).click();
+  await expectVisible(p.getByRole('button', { name: 'Expand the menu' }), 'the expand button in the collapsed menu');
+  await p.getByRole('link', { name: 'Homework' }).hover();
+  await expectVisible(p.getByRole('tooltip'), 'the name of the menu item');
+  await p.locator('.mebtn').click();
+  const box = await p.getByRole('menu').boundingBox();
+  if (!box || box.x < 80 || box.x + box.width > 1440) throw new Error('the account menu is clipped by the narrow menu');
+  await p.keyboard.press('Escape');
+  await p.getByRole('button', { name: 'Expand the menu' }).click();
+  await expectVisible(p.getByText('Greenfield').first(), 'the school name after expanding');
+});
+
+await flow('admin: a dropdown lists every option above the cards and a bar has a tooltip', { storage: adminStore }, async (p) => {
+  await p.goto(A('/attendance'), { waitUntil: 'networkidle' });
+  await p.getByRole('combobox', { name: 'Class' }).click();
+  const list = p.getByRole('listbox');
+  await expectVisible(list, 'the list of classes');
+  const top = await p.evaluate(() => { const l = document.querySelector('[role=listbox]'); const r = l.getBoundingClientRect(); return document.elementFromPoint(r.left + 20, r.top + 20)?.closest('[role=listbox]') !== null; });
+  if (!top) throw new Error('something paints over the open list');
+  await p.getByRole('searchbox').or(p.getByLabel('Search the list')).fill('3 B');
+  await p.getByRole('option', { name: 'Class 3 B' }).click();
+  await expectVisible(p.getByText(/Class 3 B/).first(), 'the chosen class');
+  await p.goto(A('/fees'), { waitUntil: 'networkidle' });
+  await p.locator('.us').first().hover();
+  await expectVisible(p.getByRole('tooltip').getByText(/collected/), 'the tooltip on a fee bar');
 });
 
 await browser.close();

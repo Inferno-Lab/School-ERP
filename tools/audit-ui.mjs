@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Opens every page of the admin and the console at four widths in light and dark, and reports console errors, failed API calls,
 // horizontal overflow and anything clipped or pushed outside the window. Exits non-zero when it finds something.
-// Usage: node tools/audit-ui.mjs [--only admin|console] [--shots dir] [--quick]
+// Usage: node tools/audit-ui.mjs [--only admin|console] [--shots dir] [--full] [--quick] [--light|--dark] [--sizes 1440x900,390x844]
 import { chromium } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { auditPage } from './lib/audit.mjs';
@@ -45,7 +45,7 @@ if (only !== 'admin') {
 
 const browser = await chromium.launch();
 let problems = 0;
-for (const dark of args.includes('--light') ? [false] : [false, true]) {
+for (const dark of args.includes('--light') ? [false] : args.includes('--dark') ? [true] : [false, true]) {
   for (const [w, h] of SIZES) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: dark ? 'dark' : 'light', reducedMotion: 'reduce' });
     const page = await ctx.newPage();
