@@ -39,9 +39,9 @@
 .pg-school .us{display:flex;flex-direction:column;gap:7px}
 .pg-school .us .r{display:flex;justify-content:space-between;font:600 13.5px var(--fb);color:var(--ink2)}
 .pg-school .us .r b{font:800 13px var(--fb);color:var(--ink)}
-.pg-school .bar{height:10px;border-radius:5px;background:var(--sunk);overflow:hidden}
+.pg-school .bar{height:14px;border-radius:5px;background:var(--sunk);overflow:hidden}
 .pg-school .bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--v),var(--c));transition:width 1.4s var(--e)}
-.pg-school .tk3{display:flex;gap:3px;height:22px}
+.pg-school .tk3{display:flex;gap:3px;height:24px}
 .pg-school .tk3 i{flex:1;border-radius:4px;background:var(--sunk);transition:background .4s}
 .pg-school .tk3 i.on{background:var(--a)}
 .pg-school .ck{display:flex;align-items:center;gap:12px;padding:10px 0;font:600 14px var(--fb)}

@@ -1,0 +1,93 @@
+/* Shared by every console page: the workspace block in the menu, the 12-column grid, status pills, usage bars and setup steps.
+   These are the rules of the Fleet and School boards, kept unscoped so pages composed from the same pieces look the same. */
+.nest .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--r);box-shadow:0 0 0 4px color-mix(in srgb,var(--r) 25%,transparent);animation:pdot 2s infinite}
+.nest .pdot.safe{background:var(--g);box-shadow:0 0 0 4px color-mix(in srgb,var(--g) 25%,transparent)}
+@keyframes pdot{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--r) 0%,transparent)}}
+.nest .wsw{display:flex;align-items:center;gap:12px;padding:8px;border-radius:18px;background:var(--card);border:1px solid var(--line);margin-bottom:6px;white-space:nowrap;overflow:hidden}
+.nest .wsw b{display:block;font:700 14.5px var(--fb);line-height:1.2}
+.nest .wsw small{display:flex;align-items:center;gap:7px;font:700 12px var(--fb);color:var(--ink3)}
+.nest .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:start}
+.nest .s3{grid-column:span 3}.nest .s4{grid-column:span 4}.nest .s5{grid-column:span 5}.nest .s6{grid-column:span 6}.nest .s7{grid-column:span 7}.nest .s8{grid-column:span 8}.nest .s12{grid-column:span 12}
+@media (max-width:1100px){.nest .s3,.nest .s4,.nest .s5,.nest .s6,.nest .s7,.nest .s8{grid-column:span 12}}
+.nest .st{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 12px;border-radius:999px;font:800 12px var(--fb);width:fit-content;white-space:nowrap}
+.nest .st i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.nest .st.g{background:var(--gS);color:var(--gD)}.nest .st.a{background:var(--aS);color:var(--aD)}.nest .st.b{background:var(--bS);color:var(--b)}.nest .st.r{background:var(--rS);color:var(--r)}.nest .st.n{background:var(--sunk);color:var(--ink3)}
+.nest .bar{height:14px;border-radius:7px;background:var(--sunk);overflow:hidden}
+.nest .bar i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,var(--v),var(--c));transition:width 1.4s var(--e)}
+.nest .bar.warn i{background:linear-gradient(90deg,var(--a),var(--r))}
+.nest .us{display:flex;flex-direction:column;gap:7px}
+.nest .us .r{display:flex;justify-content:space-between;font:600 13.5px var(--fb);color:var(--ink2)}
+.nest .us .r b{font:800 13px var(--fb);color:var(--ink)}
+.nest .tk3{display:flex;gap:3px;height:24px}
+.nest .tk3 i{flex:1;border-radius:4px;background:var(--sunk);transition:background .4s}
+.nest .tk3 i.on{background:var(--a)}
+.nest .ck{display:flex;align-items:center;gap:12px;padding:10px 0;font:600 14px var(--fb);text-align:left;width:100%;border:0;background:none;color:inherit;cursor:default}
+.nest button.ck{cursor:pointer;border-radius:12px}
+.nest button.ck:hover{background:var(--sunk)}
+.nest .ck i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;font-style:normal}
+.nest .ck i.d{background:var(--gS);color:var(--gD)}.nest .ck i.w{background:var(--aS);color:var(--aD)}.nest .ck i.n{border:2px dashed var(--line2)}
+.nest .ck i svg{width:13px;height:13px}
+.nest .tbl{overflow:hidden}
+.nest .tbl .grd.rw{min-height:58px;border-top:1px solid var(--line);transition:background .25s}
+.nest .tbl .grd.rw:hover{background:var(--sunk)}
+.nest .tbl .grd.th{height:40px;font:800 11.5px var(--fb);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+.nest .tbl .grd.rw>*{min-width:0}
+.nest .rowbtn{width:100%;border:0;background:none;text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0;display:block}
+.nest .scroll-x{overflow-x:auto}
+.nest .crumb{display:flex;align-items:center;gap:8px;font:700 13px var(--fb);color:var(--ink3)}
+.nest .crumb a{color:var(--ink3);text-decoration:none;cursor:pointer}
+.nest .crumb a:hover{color:var(--ink)}
+.nest .lbl{font:800 11.5px var(--fb);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+.nest .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.nest .two{grid-template-columns:minmax(0,1fr)}}
+.nest .kv{display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-top:1px solid var(--line);font:600 14px var(--fb);color:var(--ink2)}
+.nest .kv:first-child{border-top:0}
+.nest .kv b{color:var(--ink);font-weight:700;text-align:right;min-width:0;overflow-wrap:anywhere}
+.nest .mono{font:600 12.5px/1.6 ui-monospace,Consolas,monospace}
+.nest .tgrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.nest .opt{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:20px;border:1.5px solid var(--line2);background:var(--card);cursor:pointer;text-align:left;width:100%;transition:border-color .2s,background .25s,transform .4s var(--e)}
+.nest .opt:hover{transform:translateY(-2px)}
+.nest .opt.on{border-color:var(--v);background:color-mix(in srgb,var(--v) 8%,var(--card))}
+.nest .opt b{display:block;font:700 15px var(--fb)}
+.nest .opt small{display:block;font:500 13px/1.45 var(--fb);color:var(--ink3);margin-top:3px}
+.nest .opt .rd{width:22px;height:22px;border-radius:50%;border:2px solid var(--line2);flex:none;display:grid;place-items:center;margin-top:1px;transition:border-color .2s,background .2s}
+.nest .opt.on .rd{border-color:var(--v);background:var(--v)}
+.nest .opt .rd svg{width:12px;height:12px;color:#fff;opacity:0;transition:opacity .2s}
+.nest .opt.on .rd svg{opacity:1}
+.nest .wiz{display:grid;grid-template-columns:230px minmax(0,1fr);gap:34px;align-items:start}
+@media (max-width:1100px){.nest .wiz{grid-template-columns:minmax(0,1fr)}}
+.nest .wst{display:flex;flex-direction:column;gap:2px;position:sticky;top:24px}
+@media (max-width:1100px){.nest .wst{flex-direction:row;overflow-x:auto;position:static;padding-bottom:4px}}
+.nest .wst button{display:flex;align-items:center;gap:11px;min-height:42px;padding:0 14px;border-radius:14px;border:0;background:none;color:var(--ink2);font:700 14px var(--fb);cursor:pointer;text-align:left;white-space:nowrap;transition:background .25s,color .25s}
+.nest .wst button:hover{background:var(--sunk);color:var(--ink)}
+.nest .wst button.on{background:var(--ci);color:#fff}
+.nest .wst button i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;font:800 12px var(--fb);font-style:normal;background:var(--sunk);color:var(--ink3)}
+.nest .wst button.on i{background:rgba(255,255,255,.18);color:#fff}
+.nest .wst button.ok i{background:var(--gS);color:var(--gD)}
+.nest .stp{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:14px;align-items:start;padding:10px 0}
+.nest .stp::before{content:"";position:absolute;left:16px;top:44px;bottom:-10px;width:2px;background:var(--line2)}
+.nest .stp:last-child::before{display:none}
+.nest .stp.done::before{background:var(--v)}
+.nest .stp .dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line2);background:var(--card);position:relative;z-index:1;font:800 13px var(--fb);color:var(--ink3);transition:background .4s,border-color .4s}
+.nest .stp.done .dot{background:var(--v);border-color:var(--v);color:#fff;animation:nPop .6s var(--sp)}
+.nest .stp.run .dot{border-color:var(--v);border-top-color:transparent;animation:nSpin .8s linear infinite;color:transparent}
+.nest .stp.fail .dot{background:var(--r);border-color:var(--r);color:#fff;animation:nPop .6s var(--sp)}
+.nest .stp.skip .dot{background:var(--sunk);color:var(--ink3)}
+.nest .stp b{display:block;font:700 15px var(--fb)}
+.nest .stp small{display:block;font:500 13px/1.4 var(--fb);color:var(--ink3);margin-top:2px}
+.nest .stp.fail small{color:var(--r);font-weight:700}
+.nest .stp .tm{font:700 12px var(--fb);color:var(--ink3);padding-top:8px;display:flex;gap:8px;align-items:center}
+.nest .log{margin-top:14px;background:#08070C;color:#B4AFCB;border:1px solid var(--line);border-radius:20px;padding:16px 18px;height:176px;overflow:hidden;font:500 12.5px/1.75 ui-monospace,Consolas,monospace;display:flex;flex-direction:column;justify-content:flex-end}
+.nest .ll{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:ln .4s var(--e) both}
+@keyframes ln{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.nest .ll .t{color:#5C5775}.nest .ll .ok{color:#7DEBC3}.nest .ll .bad{color:#FF8A92}
+.nest .tkt{position:relative;border-radius:24px;padding:22px 26px;color:#fff;background:radial-gradient(130% 150% at 100% 100%,rgba(255,170,90,.5),transparent 55%),radial-gradient(130% 150% at 0% 0%,rgba(120,96,255,.9),transparent 58%),#1B1530;-webkit-mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;display:grid;grid-template-columns:64% 36%;transition:transform .5s var(--e)}
+.nest .tkt:hover{transform:translateY(-4px) rotate(-.3deg)}
+.nest .tkt .l{padding-right:20px;border-right:2px dashed rgba(255,255,255,.28);display:flex;flex-direction:column;gap:10px}
+.nest .tkt .r{padding-left:20px;display:flex;flex-direction:column;gap:10px;font:600 13px var(--fb);color:rgba(255,255,255,.82)}
+.nest .tkt .tl2{display:flex;align-items:center;gap:8px;font:600 13.5px var(--fb);color:rgba(255,255,255,.82)}
+.nest .tkt .tl2 svg{width:16px;height:16px}
+.nest .slogo{width:68px;height:68px;border-radius:22px;color:#fff;display:grid;place-items:center;font:800 30px var(--fd);flex:none}
+.nest .seg2{display:flex;gap:6px;flex-wrap:wrap}
+.nest .fld + .fld,.nest .fld + .two,.nest .two + .fld,.nest .two + .two,.nest .stack > * + *{margin-top:16px}
+.nest .two .fld{margin-top:0}
