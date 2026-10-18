@@ -1,7 +1,7 @@
 # Platform build status (2026-10-18)
 
 Branch `feat/platform`. The plan is `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`; this file says what of it exists.
-Deploying the free test track: `docs/deploy-free-test.md`.
+Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (decisions, how to continue, what is left) is `docs/HANDOFF.md`; the design concept is `docs/DESIGN.md`. Live test deployment: `https://edunest-0c6x.onrender.com` (admin `/`, console `/console/`).
 
 ## What exists and is checked
 

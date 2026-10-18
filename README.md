@@ -1,81 +1,106 @@
 # EduNest
 
-> Developers and coding agents: start with [`AGENTS.md`](AGENTS.md).
+EduNest is a school platform with four parts that work together:
 
-EduNest is a Flutter demo of a school app for students, parents, and teachers. Every screen reads local JSON. The repositories are abstract, so a real backend is a single switch in `AppConfig` plus an `ApiClient` implementation.
+| Part | What it is | Where |
+| --- | --- | --- |
+| **School admin** | The website a school's office and principal use: dashboard, students, attendance, fees, notices, timetable, settings. | `apps/admin` |
+| **Console** | EduNest's own control room: onboard a school, set up its database and address, roll out releases, watch health, give support, bill, manage the team. | `apps/console` |
+| **Backend** | Two NestJS APIs (one for schools, one for the console) in one process, with a PostgreSQL database per school. | `apps/api`, `apps/console-api`, `apps/server`, `packages/*` |
+| **Mobile app** | A Flutter app for students, parents and teachers ("Chalk & Glass" look). Still runs on demo content; it already reads its school's name and tagline from the backend. | `lib/`, `android/`, `ios/` |
 
-The product name is **EduNest**. Change it in one place: `AppConfig.appName` in `lib/core/config/app_config.dart`. The logo asset path is `AppConfig.logoAsset`.
+Start here depending on who you are:
 
-## Requirements
+- **New developer or coding agent:** [`AGENTS.md`](AGENTS.md) (rules and commands), then [`docs/HANDOFF.md`](docs/HANDOFF.md) (what was built, why, what is left and how to do it).
+- **Want to see it running on the internet:** [`docs/deploy-free-test.md`](docs/deploy-free-test.md). The current test deployment is `https://edunest-0c6x.onrender.com` (admin at `/`, console at `/console/`).
+- **The design:** the concept is [`docs/DESIGN.md`](docs/DESIGN.md) and the approved boards are in [`design/`](design/README.md). The long-term plan is [`docs/superpowers/specs/2026-10-14-edunest-platform-design.md`](docs/superpowers/specs/2026-10-14-edunest-platform-design.md).
 
-- Flutter 3.47 or newer (Dart 3.13)
-- Xcode for the iOS simulator, or Android Studio for an Android emulator
+## How it fits together
 
-## Run
+```
+ Browser: school admin (React)  ─┐                          ┌─ one PostgreSQL database per school
+ Browser: console (React)       ─┼─►  apps/server  ─────────┤
+ Phone: Flutter app             ─┘   (NestJS, Fastify)      └─ one registry database (the list of schools)
+                                      ├─ school API   /v1/*          (tenant chosen by the X-School header)
+                                      ├─ console API  /console/v1/*  (EduNest staff only)
+                                      └─ serves the admin at / and the console at /console/
+```
+
+- **One database per school.** The *registry* database lists schools and holds each school's sealed connection string. A request to `/v1/...` names its school in the `X-School` header; the server looks the school up, opens (or reuses) a connection pool to that school's database and answers from it.
+- **Everything configurable lives in data.** A school's modules, plan limits, settings and locks are layered (platform defaults, plan, school settings, platform locks) and resolved by `packages/config-engine`. The admin changes settings; the app and the API read them.
+- **Onboarding is a recipe.** The console's wizard collects the school's details, then a *blueprint* (a versioned list of seven steps: database, keys and storage, migrations and defaults, domain, first admin, app build profile, store checklist) creates the school. Each step is retryable and logged. Where it runs (`local`, `free-test`, `aws-cell`) only changes which driver does the step.
+- **Risky console actions need a second person** (erase, suspend, push plan changes, run migrations...). Support staff can open a school's admin read-only for an hour with a signed token; the school API refuses every write from it.
+
+## Run it on your computer
+
+Needs Node 24 and pnpm 10 (`corepack enable`). No Docker: a throwaway PostgreSQL is started from an npm package.
 
 ```bash
-flutter pub get
-flutter run
+pnpm install
+pnpm build                          # once, builds the shared packages
+bash tools/dev-reset.sh &           # starts PostgreSQL (port 54329), the server (4000) and creates the Greenfield demo school; takes ~1 minute
+pnpm --filter @edunest/admin dev    # http://localhost:5173/s/greenfield
+pnpm --filter @edunest/console dev  # http://localhost:5174
 ```
 
-`tool/verify.sh` runs the analyzer and every test. The tests cover the mock data source, repositories, theme persistence, login, home, fees, settings, teacher attendance, marks entry, and the remote binding switch.
+Sign in:
 
-## Demo accounts
-
-Password `demo123` for every account. OTP `123456`.
-
-| Role | Name | Email |
+| Where | Address | Credentials |
 | --- | --- | --- |
-| Student | Aarav Sharma | aarav.sharma@edunest.app |
-| Parent | Priya Sharma | priya.sharma@edunest.app |
-| Teacher | Kavita Iyer | kavita.iyer@edunest.app |
+| School admin (demo school) | `http://localhost:5173/s/greenfield` | `neha.menon@greenfield.edu.in` / `nest2026`, then press "Type the demo code" (`424242`) |
+| Console | `http://localhost:5174` | `kaushal@edunest.app` / `nest2026`, code `424242` |
 
-The three cards on the login screen sign in as those users. Priya can switch between Aarav (Class 8 A) and Ananya (Class 5 B).
+Texts and emails are never sent for real: they land in the console's **Test inbox**. That is where a new school's invite and sign-in codes appear.
 
-## Client demo script
+## Check that nothing is broken
 
-**Student (Aarav).** Open the app, skip or finish onboarding, and tap the Student card. Home shows a greeting, an attendance ring, today's timetable, homework that is due, the next exam, a fee banner, and a notice carousel. Open Academics, then Attendance (the calendar marks absent and late days), Homework (submit a sample scan), Timetable, and Results (bars, a trend line, and a radar chart). Open Fees, pay the overdue lab fee with UPI, and show the receipt. The home banner updates after you go back. Then Notices, Events (RSVP), Chat (send a message and wait for the office reply), Transport, Library, Gallery, and Leave.
-
-**Parent (Priya).** Sign out from Settings and tap the Parent card. Home is Aarav's. Open the child switcher and pick Ananya. Her fee banner disappears because she has nothing due in the next 21 days. Notifications are grouped into Today and Earlier; swipe one away.
-
-**Teacher (Kavita).** Sign in with the Teacher card. Home shows the next class and today's schedule. Open Classes, then Attendance for 8 A. Tap avatars to cycle Present, Absent, and Late, mark everyone present, and submit. Assign homework, grade a submission, enter marks, and post a notice. Sign back in as Aarav and show the new notice, the graded homework, and today's attendance.
-
-**Polish.** In Settings, switch Light, Dark, AMOLED, and System, pick another accent, turn on dynamic color on Android 12+, change text size and language (English, Hindi, Marathi), and toggle Reduce motion. The developer section can simulate errors. Long-press the version row to open the design system.
-
-## What is included
-
-- Splash, onboarding, and login (password or OTP, plus demo cards)
-- Role shell: floating bar on phones, navigation rail from 840px
-- Student and parent home, academics, attendance, homework, timetable, results, fees
-- Notices, events, chat, transport, library, gallery, leave, notifications, profile
-- Teacher home, classes, attendance, homework, grading, marks, notices
-- Settings: Chalk, Blackboard, AMOLED or Auto theme, text size, language, reduce motion and transparency, reminders
-- Light, dark, and AMOLED themes. Strings go through GetX translations (`en`, with partial `hi` and `mr`)
-
-## Architecture
-
-```
-View  →  GetxController  →  Repository  →  DataSource
+```bash
+pnpm typecheck && pnpm test         # types and 100+ unit and API tests (the API tests start a real PostgreSQL)
+node tools/audit-ui.mjs             # every page, 4 widths, light and dark: errors, overflow, clipped text
+node tools/e2e-flows.mjs            # 21 click-through flows in a real browser (run after dev-reset; it changes demo data)
+node tools/e2e-onboard.mjs          # onboards a new empty school through the wizard and screenshots every page
+tool/verify.sh                      # Flutter analyzer and tests
 ```
 
-`InitialBinding` registers a `Mock*` or `Remote*` repository from `AppConfig.useMockData`. Controllers expose a `ViewState` of loading, success, empty, or error. `SessionBus` bumps after a mock write so open screens reload. `ThemeService`, `AuthService`, and `StorageService` are `GetxService`s.
+`tools/shot.mjs <url> out.png [width] [height] [--dark] [--console] [--audit] [--do '[...]']` takes one screenshot while signed in, which is how pages are looked at without a window.
+
+## Repository map
 
 ```
-lib/
-  core/        config, theme, widgets, routes, services, translations
-  data/        models, mock JSON source, remote stub, repositories
-  features/    one folder per screen group
-assets/mock/   the demo school
+apps/
+  admin/          React school admin (Vite, TanStack Router and Query)
+  console/        React console
+  api/            school API (NestJS 11 on Fastify)
+  console-api/    console API: wizard, provisioning drivers, releases, approvals, health, billing
+  server/         runs both APIs in one process and serves the two web apps
+packages/
+  contracts/      zod schemas and types shared by every app (the API's language)
+  config-engine/  modules, plans, layered settings, locks
+  db/             Drizzle schemas, reviewed SQL migrations, migrator, Greenfield demo seed, dev PostgreSQL
+  security/       scrypt passwords, AES-GCM sealing, JWT
+  tenancy/        registry lookup and bounded pool manager
+  nest-kit/       shared Nest pieces (errors, validation pipe, exception filter)
+  api-client/     typed HTTP client with token refresh
+  web-ui/         the "Nest" design language as React: CSS, shell, sidebar, dialogs, forms, illustrations
+design/canvas/    the approved design boards and nest.css (source of truth for how it must look)
+lib/              Flutter app (see AGENTS.md for its rules)
+tools/            audit, end-to-end, screenshot and one-time conversion scripts
+docs/             architecture, deployment, status and the hand-off guide
+render.yaml       the free test deployment (one Render web service)
+.github/          CI and the mobile build workflow
 ```
 
-## Swap in a real API
+## Deploying
 
-1. Implement `ApiClient.get`, `post`, and `patch` in `lib/core/network/api_client.dart`. Send `Authorization` once login returns a token. Map error JSON `{ "message": "errors.*" }` to `AppException`.
-2. Keep the paths in `Remote*Repository`. They already match [docs/API_CONTRACT.md](docs/API_CONTRACT.md).
-3. Set `AppConfig.useMockData` to `false`.
+The free test track is one Render web service plus a free Neon database: [`docs/deploy-free-test.md`](docs/deploy-free-test.md). `render.yaml` describes it, so connecting the repository is enough. Pushing to the branch redeploys it.
 
-The views and controllers do not change. Push, card payments, and live bus GPS are described as plug-in interfaces in the contract. They are not implemented.
+## The Flutter app
 
-## Design and docs
+The original demo app (students, parents, teachers; Chalk & Glass; mock JSON in `assets/mock`) lives at the repository root. How to run it, the demo accounts, its architecture and rules are in [`AGENTS.md`](AGENTS.md); machine setup is in [`docs/dev-environment.md`](docs/dev-environment.md). In short:
 
-The look is **Chalk & Glass**: tokens, glass rules and empty-state rules are in [docs/design-system.md](docs/design-system.md). Layers and data flow: [docs/architecture.md](docs/architecture.md). Adding screens, repositories and AI features: [docs/adding-a-feature.md](docs/adding-a-feature.md). Machine setup and build notes: [docs/dev-environment.md](docs/dev-environment.md).
+```bash
+flutter pub get && flutter run          # demo content, no backend needed
+flutter run --dart-define=SCHOOL=greenfield --dart-define=API_BASE_URL=https://edunest-0c6x.onrender.com   # name and tagline come from the school's backend
+```
+
+Demo accounts (password `demo123`, OTP `123456`): student Aarav Sharma, parent Priya Sharma, teacher Kavita Iyer.

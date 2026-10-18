@@ -170,7 +170,7 @@ const migrateSeed: Driver = {
         tail = report.students ? `roles, periods and templates, then ${report.students.toLocaleString('en-IN')} sample students in ${report.classes} classes` : 'roles, periods and templates';
         c.log('info', `seeded in ${report.ms} ms`);
       }
-      return { detail: `${applied.length || 'All'} migrations, then ${tail}` };
+      return { detail: `${applied.length ? `${applied.length} ${applied.length === 1 ? "migration" : "migrations"}` : "All migrations"}, then ${tail}` };
     } finally {
       await pool.end();
     }

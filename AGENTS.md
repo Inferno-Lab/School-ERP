@@ -1,8 +1,26 @@
 # EduNest — guide for coding agents and new developers
 
-EduNest is a Flutter school app (students, parents, teachers) in the **Chalk & Glass** design. It runs today on local JSON mock data; a real backend is a swap of adapters, not a rewrite. Read this file first. It is the single source of truth: `CLAUDE.md` and `AGENT.md` only point here.
+EduNest is a school platform. The original part is a Flutter school app (students, parents, teachers) in the **Chalk & Glass** design. It runs today on local JSON mock data; a real backend is a swap of adapters, not a rewrite. Read this file first. It is the single source of truth: `CLAUDE.md` and `AGENT.md` only point here.
 
 Branch work happens on feature branches off `main`. The redesign lives on `redesign/chalk-glass`.
+
+## The platform (admin, console, backend) lives next to the app
+
+This repository is also a TypeScript monorepo: `apps/admin` (school admin), `apps/console` (EduNest control room), `apps/api` + `apps/console-api` + `apps/server` (NestJS backend, one PostgreSQL database per school), `packages/*` (contracts, config engine, db, security, tenancy, api-client, web-ui). **Read [`docs/HANDOFF.md`](docs/HANDOFF.md) first for anything outside `lib/`**: what exists, why it is built that way, how to run and verify it, how it is deployed (`https://edunest-0c6x.onrender.com`), and what is left with step-by-step instructions. The look of admin and console is in [`docs/DESIGN.md`](docs/DESIGN.md) and the approved boards in [`design/`](design/README.md); the Chalk & Glass rules below apply to the Flutter app only.
+
+Platform commands (Node 24, pnpm 10):
+
+```bash
+pnpm install && pnpm build          # once
+pnpm typecheck && pnpm test         # types and tests (API tests start a real PostgreSQL)
+bash tools/dev-reset.sh &           # local PostgreSQL + server + Greenfield demo school (run in the background)
+pnpm --filter @edunest/admin dev    # http://localhost:5173/s/greenfield
+pnpm --filter @edunest/console dev  # http://localhost:5174
+node tools/audit-ui.mjs             # every page, 4 widths, light/dark: errors, overflow, clipping
+node tools/e2e-flows.mjs            # 21 browser flows (re-run dev-reset first; it changes data)
+```
+
+Platform rules that have bitten us: never edit an applied SQL migration (add a new file); declare build-time env in `turbo.json`; `apps/server` imports the API packages from `dist/` (rebuild after changing them); a page's `useMemo` values must depend on shared chrome state; check new CSS class names against `nest.css`; do not re-run `tools/dc-to-tsx.mjs` over edited views; keep `tools/audit-ui.mjs` and `tools/e2e-flows.mjs` green before every push; the owner reviews design, so pages without a canvas board must be built only from `packages/web-ui` pieces.
 
 ## Commands
 
