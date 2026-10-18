@@ -87,3 +87,10 @@ html:has(.nest.dark){color-scheme:dark;scrollbar-color:#4A3E96 transparent}
 .nest .sb.col .nv .ct{opacity:1;transform:none}
 /* The page header sits above the cards that follow it, so a menu that grows out of a header button is never painted under them. */
 .nest .hd{position:relative;z-index:10}
+/* Every box that scrolls on its own scrolls on the compositor, like the page does, instead of repainting its rows on each frame. */
+.nest .lscroll,.nest .scroll-x,.nest .popm,.nest .rpl,.nest .sxl,.nest .sheet,.nest .adm,.nest .wst,.nest .snav,.nest .db,.nest .tg,.nest .dlg,.nest .app>.sb,.nest .tbl{will-change:scroll-position}
+.nest .sxl{background:var(--card)}
+/* A table that scrolls keeps its column titles in view. */
+.nest .scroll-x .grd.th,.nest .lscroll .grd.th{position:sticky;top:0;z-index:3;background:var(--card)}
+/* On a phone, where a table scrolls sideways, its first column (the name) stays put so a row can still be read. */
+@media (max-width:700px){.nest .tbl .grd>:first-child{position:sticky;left:0;z-index:1;background:var(--card)}.nest .tbl .grd.th>:first-child{z-index:4}}

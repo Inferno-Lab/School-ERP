@@ -36,7 +36,7 @@ export function StaffPage() {
             <div className="srch" style={{ minWidth: 260, height: 38 }}><Ico d={SEARCH} /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Name, subject or role" aria-label="Search staff" style={{ border: 0, outline: 0, background: 'none', font: '600 13.5px var(--fb)', color: 'var(--ink)', flex: 1, minWidth: 0 }} /></div>
           </div>
           {rows.length === 0 ? <div className="help" style={{ padding: '0 22px 22px' }}>No one matches “{q}”.</div> : (
-            <div className="scroll-x lscroll">
+            <div className="scroll-x lscroll" data-fill="">
               <div className="stfw" style={{ minWidth: 760 }}>
                 <div className="grd th stf" style={{ '--cols': 'minmax(0,1.7fr) minmax(0,1.3fr) 140px 120px 90px' } as React.CSSProperties}><span>Person</span><span className="hs">Teaches</span><span>Role</span><span className="hs">Periods a week</span><span className="hs">Status</span></div>
                 {rows.map((r) => (

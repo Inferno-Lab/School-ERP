@@ -36,8 +36,8 @@ export function ReportsPage() {
       {(list.data?.length ?? 0) === 0 ? (
         <div><EmptyCard title="Reports" chip={{ text: '0 reports', tone: 'v' }} scene="checklist" heading="No reports are available" body="Reports appear here once the modules they read from are switched on for your school." /></div>
       ) : (
-        <section className="rpg">
-          <nav className="card rpl rise" aria-label="Reports">
+        <section className="rpg" data-even="fill">
+          <nav className="card rpl rise" data-even-scroll="" aria-label="Reports">
             {areas.map((a) => (
               <div key={a}>
                 <div className="lbl" style={{ padding: '4px 10px 8px' }}>{a}</div>
@@ -53,7 +53,7 @@ export function ReportsPage() {
                 <div className="ch" style={{ padding: '22px 22px 6px' }}><h2>{d.title}</h2><span className="chip v">{d.rows.length} {d.rows.length === 1 ? 'row' : 'rows'}</span></div>
                 <div className="tgrow" style={{ padding: '10px 22px 14px', gap: 8 }}>{d.summary.map((s) => <span className="chip" key={s.label}>{s.label}: <b style={{ color: 'var(--ink)' }}>{s.value}</b></span>)}</div>
                 {d.rows.length === 0 ? <div style={{ padding: '0 22px 22px' }}><div className="help">Nothing to report yet. This fills in as the school uses EduNest.</div></div> : (
-                  <div className="scroll-x lscroll">
+                  <div className="scroll-x lscroll" data-even-scroll="">
                     <div style={{ minWidth: Math.max(480, d.columns.length * 96) }}>
                       <div className="grd th" style={{ '--cols': `minmax(0,1.5fr) ${d.columns.slice(1).map(() => 'minmax(64px,1fr)').join(' ')}` } as React.CSSProperties}>{d.columns.map((c) => <span key={c.key} style={{ textAlign: c.align }}>{c.label}</span>)}</div>
                       {d.rows.map((r, i) => (

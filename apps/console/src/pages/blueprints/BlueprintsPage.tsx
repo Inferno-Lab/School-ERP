@@ -53,7 +53,7 @@ export function BlueprintsPage() {
           onSave={(v) => { const bp = rows.find((b) => b.id === params.bp)!; setDraft({ ...draft, [bp.id]: (draft[bp.id] ?? bp.steps).map((x) => (x.key === params.key ? { ...x, params: v } : x)) }); setParams(null); }} />}
       </>}>
       <section className="grid">
-        <div className="s12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 18, alignItems: 'start', minWidth: 0 }}>
+        <div className="s12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(320px,100%),1fr))', gap: 18, alignItems: 'start', minWidth: 0 }}>
           {rows.length === 0 && <EmptyCard title="Blueprints" chip={{ text: 'None', tone: 'v' }} scene="checklist" heading="No blueprint is active" body="The platform creates one for each place schools can run when it first starts." />}
           {rows.map((bp) => {
             const steps = draft[bp.id] ?? bp.steps;

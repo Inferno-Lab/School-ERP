@@ -3,11 +3,11 @@
 
 .pg-timetable .bd{display:grid;grid-template-columns:minmax(0,1fr) 308px;gap:20px;align-items:start}
 @media (max-width:1150px){.pg-timetable .bd{grid-template-columns:minmax(0,1fr)}}
-.pg-timetable .wk{display:flex;align-items:center;gap:10px}
+.pg-timetable .wk{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .pg-timetable .wkp{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 6px;border-radius:999px;border:1.5px solid var(--line2);background:var(--card)}
 .pg-timetable .wkp button{width:30px;height:30px;border:0;border-radius:50%;background:none;color:var(--ink2);display:grid;place-items:center;cursor:pointer;transition:background .2s,transform .3s var(--sp)}
 .pg-timetable .wkp button:hover{background:var(--sunk);transform:scale(1.1)}
-.pg-timetable .wkp span{font:800 13.5px var(--fb);padding:0 8px;display:flex;align-items:center;gap:8px}
+.pg-timetable .wkp span{font:800 13.5px var(--fb);padding:0 8px;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .pg-timetable .tg{display:grid;grid-template-columns:78px repeat(5,minmax(0,1fr));gap:8px;padding:16px 16px 18px;background:var(--card);border:1px solid var(--line);border-radius:28px;box-shadow:var(--sh1)}
 .pg-timetable .trow{display:contents}
 .pg-timetable .dh{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 10px;font:700 12.5px var(--fb);color:var(--ink3)}

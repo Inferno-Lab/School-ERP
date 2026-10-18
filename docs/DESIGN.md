@@ -140,6 +140,10 @@ Animate transform and opacity only; never animate layout properties in lists.
 - A scroll area keeps a plain background and chains to the page at its ends: painted-in edge shadows and `overscroll-behavior: contain` made scrolling feel stuck and slow.
 - No glow anywhere: no soft coloured shadows, halo gradients, pulsing rings or blurred focus rings. Focus and hover change a border or a fill; the only ring is a crisp 1 px line.
 - Empty space is fixed by arranging content, never by stretching cards: put short and tall things in one full-width column, give a short block siblings of equal weight (a row of tiles, a 2- or 3-column grid), make lists scroll inside a capped card, and add real information (a summary, a guide) before adding height. `tools/scan-gaps.mjs` measures holes, unequal side-by-side cards and blank insides.
+- Columns side by side end on one line. Mark the row `data-even` and the lists in it `data-even-scroll`: `EvenRows` (mounted by `Shell`) trims the taller column's list so it scrolls inside, or shows more of a capped list, and never stretches a card. `data-even="fill"` also lets the last row's lists grow to the bottom of the window, and `data-fill` does that for a single list. `tools/scan-gaps.mjs` reports any row whose columns end more than 16 px apart.
+- A segmented control's knob is measured from the real tab by `SegFit`; never size it from guessed text widths. `tools/scan-fit.mjs` checks knobs, wrapped pill text, text outside its box and missing values shown as `undefined`.
+- A table that scrolls inside its card keeps its column titles (`.grd.th`) pinned at the top, and on a phone its first column stays put while it scrolls sideways.
+- Reduced motion turns transitions off (`transition: none`). A bare 1 ms `transition-duration` turns `transition: all` on for every element and makes scrolling and layout work stutter.
 - The menu collapses to a logo with the expand button under it; names show in the tooltip and the account menu opens beside the menu on the page root.
 - On a phone a list keeps only its main columns (class `hs` hides the rest) or stacks its row; a board scrolls sideways with snap.
 

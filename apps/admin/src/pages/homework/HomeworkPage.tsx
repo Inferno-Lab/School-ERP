@@ -44,7 +44,7 @@ export function HomeworkPage() {
           <div className="tile t-l s4 rise" style={{ '--d': '.1s' } as React.CSSProperties}><span className="lbl">Homework set</span><div className="big" style={{ marginTop: 8 }}>{rows.length}</div><div style={{ font: '600 13px var(--fb)', color: 'var(--ink3)' }}>{rows.filter((r) => r.dueOn >= today).length} still open</div></div>
           <div className="card tbl s12 rise" style={{ '--d': '.14s', padding: 0 } as React.CSSProperties}>
             <div className="ch" style={{ padding: '22px 22px 14px' }}><h2>All homework</h2><span className="chip v">{rows.length}</span></div>
-            <div className="scroll-x lscroll">
+            <div className="scroll-x lscroll" data-fill="">
               <div className="hwlw" style={{ minWidth: 640 }}>
                 {rows.map((r) => <Row key={r.id} r={r} today={today} onOpen={() => setOpen(r.id)} />)}
               </div>

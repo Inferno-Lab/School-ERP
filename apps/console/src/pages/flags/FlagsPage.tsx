@@ -50,7 +50,7 @@ export function FlagsPage() {
             <div className="kv" key={`${f.key}-${f.schoolId}`}><span>{f.label}<br /><small style={{ color: 'var(--ink3)' }}>{school(f.schoolId)}</small></span><b><span className={`st ${f.enabled ? 'g' : 'n'}`}><i></i>{f.enabled ? 'On' : 'Off'}</span></b></div>
           ))}
         </Card>
-        <div className="s12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(340px,1fr))', gap: 18, alignItems: 'start' }}>
+        <div className="s12 fpair" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(340px,100%),1fr))', gap: 18 }}>
           {canWrite && (
             <Card title="Pause a feature" chip={<span className={`chip ${paused.length ? 'r' : 'g'}`}>{paused.length} paused</span>}>
               <div className="help" style={{ marginBottom: 12 }}>A kill switch takes a feature away from the app and refuses its requests within seconds. Lift it by switching the flag off.</div>
@@ -63,7 +63,7 @@ export function FlagsPage() {
             <Card title="New flag">
               <div className={shake.cls}>
                 <Field label="Key" value={key} onChange={(v) => { setKey(v); setErr(''); }} error={err} placeholder="new.report-cards" />
-                <Field label="What it does" value={label} onChange={setLabel} placeholder="Report cards with the new layout" />
+                <Field label="What it does" value={label} onChange={setLabel} placeholder="New report card layout" />
               </div>
               <button className="btn pri" style={{ marginTop: 14 }} onClick={add} disabled={set.isPending}>Add flag</button>
             </Card>

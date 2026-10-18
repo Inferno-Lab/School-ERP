@@ -114,6 +114,8 @@ export function FleetPage() {
     soon: f.onboarding ? `${f.onboarding} ${f.onboarding === 1 ? 'is' : 'are'} still being set up` : 'None waiting to start',
     p95: f.p95Ms ? `p95 ${f.p95Ms} ms` : 'p95 not measured yet', hOk, hWarn, hBad,
     p1: curve(today, max), p2: curve(before, max), pArea: curve(today, max, true),
+    // The bubble stays inside the chart near the ends of the day; the dot and the line still sit on the hour.
+    tx: Math.min(86, Math.max(14, (at / 23) * 100)).toFixed(2),
     cx: ((at / 23) * 100).toFixed(2), cy: cy.toFixed(1), ty: Math.max(84, cy).toFixed(1), cv: today[at]!.toLocaleString('en-IN'),
     ct: `${String(at).padStart(2, '0')}:00 · ${delta >= 0 ? '+' : ''}${delta.toLocaleString('en-IN')} vs yesterday`,
     chartLabel: `Requests per minute across the day, highest around ${String(peak.hour).padStart(2, '0')}:00 at ${peak.value.toLocaleString('en-IN')}`,

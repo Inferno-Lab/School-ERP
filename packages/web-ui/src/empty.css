@@ -37,3 +37,7 @@
   .nest .es-nf h3{font-size:24px}
   .nest .es-nf>div:last-child{max-width:220px;margin:0 auto}
 }
+/* An empty state inside a card is that card's body: no second frame and no second title row. */
+.nest .card .es{border:0;box-shadow:none;background:none;border-radius:0}
+.nest .card .es:hover{transform:none;box-shadow:none}
+.nest .card .es>.eh{display:none}

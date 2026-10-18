@@ -34,6 +34,8 @@
 .nest .tile.t-v .lbl,.nest .tile.t-i .lbl{color:rgba(255,255,255,.7)}
 .nest .tile.t-g .lbl{color:var(--gD)}
 .nest .tile.t-a .lbl{color:rgba(20,17,31,.6)}
+/* Columns that EvenRows lines up keep their own heights; it trims the taller list instead of stretching anything. */
+.nest [data-even]{align-items:start!important}
 .nest .tgrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .nest .opt{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:20px;border:1.5px solid var(--line2);background:var(--card);cursor:pointer;text-align:left;width:100%;transition:border-color .2s,background .25s,transform .4s var(--e)}
 .nest .opt:hover{transform:translateY(-2px)}
@@ -84,3 +86,5 @@
 .nest .fp.on{background:var(--vS);border-color:transparent;color:var(--vD)}
 .nest .fp:disabled{opacity:.45;cursor:not-allowed}
 /* A filter pill: a choice that can be on or off. */
+/* A list that EvenRows may cap keeps room for its scrollbar, so capping it never rewraps the text and moves the line again. */
+.nest [data-even-scroll]{scrollbar-gutter:stable;transition:none}

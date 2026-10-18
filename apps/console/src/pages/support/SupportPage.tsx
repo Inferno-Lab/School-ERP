@@ -41,12 +41,12 @@ export function SupportPage() {
     <Page active="sup" title="Support" sub="Read-only sessions inside a school. Every one needs a reason and ends by itself after an hour." toast={toast} loading={sessions.isLoading} error={sessions.isError ? { message: (sessions.error as Error).message, retry: () => void sessions.refetch() } : null}>
       <section className="grid">
         <Card title="Start a session" span="s12">
-          <div className={shake.cls} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16, alignItems: 'start' }}>
+          <div className={shake.cls} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(260px,100%),1fr))', gap: 16, alignItems: 'start' }}>
             <SelectField label="School" value={schoolId || schools.data?.[0]?.id || ''} onChange={setSchoolId} options={(schools.data ?? []).map((s) => ({ value: s.id, label: s.name }))} />
             <div className="fld" style={{ marginTop: 0, gridColumn: 'span 2' }}>
               <label htmlFor="sup-reason">Why do you need to look?</label>
-              <div className={`inp ${err ? 'err shake' : ''}`} style={{ height: 'auto' }}>
-                <textarea id="sup-reason" value={reason} onChange={(e) => { setReason(e.target.value); setErr(''); }} rows={3} placeholder="For example: fees page shows the wrong total" style={{ flex: 1, border: 0, outline: 0, background: 'none', font: '600 15px var(--fb)', color: 'var(--ink)', padding: '12px 0', resize: 'none' }} aria-invalid={!!err} />
+              <div className={`inp ${err ? 'err shake' : ''}`}>
+                <input id="sup-reason" value={reason} onChange={(e) => { setReason(e.target.value); setErr(''); }} maxLength={300} placeholder="For example: wrong fees total" aria-invalid={!!err} />
               </div>
               {err && <div className="emsg" role="alert">{err}</div>}
             </div>

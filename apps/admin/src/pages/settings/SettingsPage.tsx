@@ -225,7 +225,7 @@ function AuditPanel() {
   return (
     <section className="rise">
       <h2 className="sec">Audit log<small>The latest changes made by people at your school.</small></h2>
-      <div className="grp lscroll" style={{ marginTop: 16 }}>
+      <div className="grp lscroll" data-fill="" style={{ marginTop: 16 }}>
         {rows.map((r) => (
           <div className="tgl" key={r.id}>
             <div><b>{r.actor} · {r.action}</b><small>{r.detail || r.entity}</small></div>

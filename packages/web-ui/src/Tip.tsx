@@ -36,9 +36,12 @@ export function Tooltips() {
       if (el.dataset.tipSide === 'right') setShown({ text, x: r.right + 10, y: r.top + r.height / 2, below: false, side: true, root });
       else setShown({ text, x: r.left + r.width / 2, y: r.top < 80 ? r.bottom : r.top, below: r.top < 80, side: false, root });
     };
-    const hide = () => { cur.current = null; setShown(null); setFit(null); };
+    const hide = () => { if (cur.current) { cur.current = null; setShown(null); setFit(null); } };
+    // Rows sliding under a still mouse while a list scrolls would open and close a tooltip on every frame; wait until scrolling stops.
+    let still = 0;
+    const scrolled = () => { still = performance.now() + 160; hide(); };
     const over = (e: PointerEvent) => {
-      if (e.pointerType === 'touch') return;
+      if (e.pointerType === 'touch' || performance.now() < still) return;
       const el = (e.target as Element).closest?.<HTMLElement>('[data-tip], .us') ?? null;
       if (el === cur.current) return;
       if (el) show(el); else hide();
@@ -49,13 +52,13 @@ export function Tooltips() {
     document.addEventListener('focusin', focus);
     document.addEventListener('focusout', hide);
     document.addEventListener('keydown', key);
-    window.addEventListener('scroll', hide, true);
+    window.addEventListener('scroll', scrolled, { capture: true, passive: true });
     return () => {
       document.removeEventListener('pointerover', over);
       document.removeEventListener('focusin', focus);
       document.removeEventListener('focusout', hide);
       document.removeEventListener('keydown', key);
-      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('scroll', scrolled, true);
     };
   }, []);
 
