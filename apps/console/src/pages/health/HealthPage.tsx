@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { EmptyCard, tintFor } from '@edunest/web-ui';
-import { Card, Page, useToast } from '../../app/Page';
+import { Card, Page, Tiles, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
 import { url } from '../../app/base';
 import { initials, statusOf } from '../../app/format';
@@ -26,8 +26,18 @@ export function HealthPage() {
           <p style={{ margin: '4px 0 0', font: '500 13.5px/1.45 var(--fb)', opacity: .75 }}>{inc.body}</p>
         </div>
       )}
+      {rows.length > 0 && (() => {
+        const timed = rows.filter((s) => s.healthMs != null);
+        const slow = timed.reduce<typeof rows[number] | null>((m, s) => (!m || (s.healthMs ?? 0) > (m.healthMs ?? 0) ? s : m), null);
+        const look = rows.filter((s) => s.health === 'down' || s.health === 'degraded').length;
+        return <Tiles items={[
+          { label: 'Answering normally', value: `${rows.filter((s) => s.health === 'ok').length} of ${rows.length}`, note: rows.length === 1 ? 'school' : 'schools', tone: 'g' },
+          { label: 'Needs a look', value: look, note: look ? 'slow or not answering' : 'nothing slow or silent', tone: look ? 'a' : 'v' },
+          { label: 'Slowest answer', value: slow ? `${slow.healthMs} ms` : '–', note: slow ? slow.name : 'no heartbeat yet', tone: 'i' },
+        ]} />;
+      })()}
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Health" chip={{ text: '0 schools', tone: 'v' }} scene="plug" heading="Nothing to watch yet" body="Once a school is live its heartbeat shows here, with how fast its API answers." /></div>
+        <div><EmptyCard title="Health" chip={{ text: '0 schools', tone: 'v' }} scene="plug" heading="Nothing to watch yet" body="Once a school is live its heartbeat shows here, with how fast its API answers." /></div>
       ) : (
         <Card style={{ padding: 0 }}>
           <div className="tbl scroll-x"><div style={{ minWidth: 620 }}>

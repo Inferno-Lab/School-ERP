@@ -33,7 +33,7 @@ export function FleetView({ v }: { v: any }) {
             Onboard a school
           </button>
         </header>
-        <section className="grid">
+        <section className="grid" style={{ alignItems: "stretch" } as CSSProperties}>
           <div className={`tile t-v s5 rise ${v.pausedCls ?? ""}`} style={{ "--d": ".05s" } as CSSProperties}>
             <div className="tt">
               <span className="chip" style={{ background: "rgba(255,255,255,.2)", color: "#fff" } as CSSProperties}>
@@ -148,7 +148,7 @@ export function FleetView({ v }: { v: any }) {
             </div>
           </div>
         </section>
-        <section className="grid">
+        <section className="grid" style={{ alignItems: "stretch" } as CSSProperties}>
           <div className="card s8 rise" style={{ "--d": ".2s" } as CSSProperties} aria-labelledby="req">
             <div className="ch">
               <h2 id="req">Requests per minute</h2>

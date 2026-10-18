@@ -1,4 +1,5 @@
-import { useId, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
+import { useId, useState, type InputHTMLAttributes, type ReactNode } from 'react';
+import { Select } from './Select';
 
 /** A counter that flips between two classes, so the same error can vibrate again each time it is hit. */
 export function useShake(): { cls: string; hit: () => void } {
@@ -41,24 +42,21 @@ export function Field({ label, value, onChange, error, hint, icon, ...rest }: Fi
   );
 }
 
-interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+interface SelectProps {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
   error?: string;
+  disabled?: boolean;
 }
 
-export function SelectField({ label, value, onChange, options, error, ...rest }: SelectProps) {
+export function SelectField({ label, value, onChange, options, error, disabled }: SelectProps) {
   const id = useId();
   return (
     <div className="fld">
       <label htmlFor={id}>{label}</label>
-      <div className={`inp ${error ? 'err shake' : ''}`}>
-        <select id={id} value={value} onChange={(e) => onChange(e.target.value)} aria-invalid={!!error} style={{ flex: 1, minWidth: 0, border: 0, outline: 0, background: 'none', font: '600 15px var(--fb)', color: 'var(--ink)' }} {...rest}>
-          {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-      </div>
+      <Select id={id} value={value} onChange={onChange} options={options} invalid={!!error} disabled={disabled} className={error ? 'shake' : ''} />
       {error && <ErrorLine>{error}</ErrorLine>}
     </div>
   );

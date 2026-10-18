@@ -11,7 +11,7 @@ function Frame({ active, title, sub, children }: { active: string; title: string
     <Shell page="status" theme={v.themeCls} aside={v.aside} overlays={<>{v.palette}</>}>
       <main className="mn">
         <header className="hd rise"><div><h1>{title}</h1><p>{sub}</p></div></header>
-        <div style={{ maxWidth: 560 }}>{children}</div>
+        <div>{children}</div>
       </main>
     </Shell>
   );

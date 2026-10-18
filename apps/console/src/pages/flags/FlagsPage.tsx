@@ -35,7 +35,7 @@ export function FlagsPage() {
   return (
     <Page active="flag" title="Flags" sub="Switch a feature on for everyone, or for one school, without shipping anything" toast={toast} loading={flags.isLoading} error={flags.isError ? { message: (flags.error as Error).message, retry: () => void flags.refetch() } : null}>
       <section className="grid">
-        <Card title="Everyone" chip={<span className="chip">{fleet.length}</span>} span="s7">
+        <Card title="Everyone" chip={<span className="chip">{fleet.length}</span>} span="s12">
           {fleet.length === 0 && <EmptyCard title="Flags" chip={{ text: '0 flags', tone: 'v' }} scene="checklist" heading="No flags yet" body="Add a flag to ship a feature switched off, then turn it on for one school before the rest." />}
           {fleet.map((f) => (
             <div className="tgl" key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '14px 0', borderTop: '1px solid var(--line)' }}>
@@ -44,7 +44,13 @@ export function FlagsPage() {
             </div>
           ))}
         </Card>
-        <div className="s5" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <Card title="Only some schools" chip={<span className="chip">{per.length}</span>} span="s12">
+          {per.length === 0 && <div className="help">A flag you switch on for a single school shows up here.</div>}
+          {per.map((f) => (
+            <div className="kv" key={`${f.key}-${f.schoolId}`}><span>{f.label}<br /><small style={{ color: 'var(--ink3)' }}>{school(f.schoolId)}</small></span><b><span className={`st ${f.enabled ? 'g' : 'n'}`}><i></i>{f.enabled ? 'On' : 'Off'}</span></b></div>
+          ))}
+        </Card>
+        <div className="s12" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(340px,1fr))', gap: 18, alignItems: 'start' }}>
           {canWrite && (
             <Card title="Pause a feature" chip={<span className={`chip ${paused.length ? 'r' : 'g'}`}>{paused.length} paused</span>}>
               <div className="help" style={{ marginBottom: 12 }}>A kill switch takes a feature away from the app and refuses its requests within seconds. Lift it by switching the flag off.</div>
@@ -62,12 +68,6 @@ export function FlagsPage() {
               <button className="btn pri" style={{ marginTop: 14 }} onClick={add} disabled={set.isPending}>Add flag</button>
             </Card>
           )}
-          <Card title="Only some schools" chip={<span className="chip">{per.length}</span>}>
-            {per.length === 0 && <div className="help">A flag you switch on for a single school shows up here.</div>}
-            {per.map((f) => (
-              <div className="kv" key={`${f.key}-${f.schoolId}`}><span>{f.label}<br /><small style={{ color: 'var(--ink3)' }}>{school(f.schoolId)}</small></span><b><span className={`st ${f.enabled ? 'g' : 'n'}`}><i></i>{f.enabled ? 'On' : 'Off'}</span></b></div>
-            ))}
-          </Card>
         </div>
       </section>
     </Page>

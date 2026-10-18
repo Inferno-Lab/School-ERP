@@ -54,7 +54,7 @@ export function AdmissionsPage() {
         {dlg?.kind === 'view' && <Details row={dlg.row} canWrite={canWrite} onClose={() => setDlg(null)} onDecline={() => move.mutate({ id: dlg.row.id, stage: 'declined' })} onReopen={() => move.mutate({ id: dlg.row.id, stage: 'enquiry' })} onNote={(note) => app.api.admissions.patch(dlg.row.id, { note }).then(() => { refresh(qc); setDlg(null); say('Note saved.'); }).catch((e: Error) => say(e.message, 'bad'))} />}
       </>}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Admissions" chip={{ text: '0 enquiries', tone: 'v' }} scene="calendar" heading="No enquiries yet" body="Add each family that asks about a seat. Move them from enquiry to application, entrance test and offer, then enrol the child in one step." actions={canWrite ? <AddBtn onClick={() => setAdding(true)}>New enquiry</AddBtn> : undefined} /></div>
+        <div><EmptyCard title="Admissions" chip={{ text: '0 enquiries', tone: 'v' }} scene="calendar" heading="No enquiries yet" body="Add each family that asks about a seat. Move them from enquiry to application, entrance test and offer, then enrol the child in one step." actions={canWrite ? <AddBtn onClick={() => setAdding(true)}>New enquiry</AddBtn> : undefined} /></div>
       ) : (
         <>
           <div className="adm" role="list">

@@ -22,7 +22,7 @@ export function BillingPage() {
   if (!app.can('billing.read')) {
     return (
       <Page active="bill" title="Billing" sub="Invoices for every school">
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Billing" chip={{ text: 'Not for your role', tone: 'a' }} scene="padlock" heading="Billing is for the finance team" body="Ask a super admin to add the Finance role if you need to see invoices." /></div>
+        <div><EmptyCard title="Billing" chip={{ text: 'Not for your role', tone: 'a' }} scene="padlock" heading="Billing is for the finance team" body="Ask a super admin to add the Finance role if you need to see invoices." /></div>
       </Page>
     );
   }
@@ -44,7 +44,7 @@ export function BillingPage() {
         <div className="tile t-a s4 rise" style={{ '--d': '.1s' } as React.CSSProperties}><span className="lbl" style={{ color: 'rgba(20,17,31,.6)' }}>Still to collect</span><div className="fd" style={{ fontSize: 34, letterSpacing: '-.04em', marginTop: 8 }}>{rupees(total - paid)}</div><div style={{ opacity: .75, font: '600 13px var(--fb)' }}>{rows.filter((r) => r.status === 'overdue').length} overdue</div></div>
       </section>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Invoices" chip={{ text: '0 invoices', tone: 'v' }} scene="receipt" heading="No invoices yet" body="Create the month’s invoices above once a school is live. Running it twice never double-bills." /></div>
+        <div><EmptyCard title="Invoices" chip={{ text: '0 invoices', tone: 'v' }} scene="receipt" heading="No invoices yet" body="Create the month’s invoices above once a school is live. Running it twice never double-bills." /></div>
       ) : (
         <Card title="Invoices" chip={<span className="chip">{rows.length}</span>} style={{ padding: 0 }}>
           <div className="scroll-x tbl">

@@ -28,7 +28,7 @@ export function StaffPage() {
       actions={canWrite ? <AddBtn onClick={() => setEditing('new')}>Add staff</AddBtn> : undefined}
       overlays={editing && <StaffDialog person={editing === 'new' ? null : editing} onClose={() => setEditing(null)} onDone={(msg) => { setEditing(null); refresh(qc); say(msg); }} />}>
       {all.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Staff" chip={{ text: '0 people', tone: 'v' }} scene="register" heading="Nobody has been added yet" body="Add teachers and office staff. Each gets an invite to sign in, and a role that decides what they can do." actions={canWrite ? <AddBtn onClick={() => setEditing('new')}>Add staff</AddBtn> : undefined} /></div>
+        <div><EmptyCard title="Staff" chip={{ text: '0 people', tone: 'v' }} scene="register" heading="Nobody has been added yet" body="Add teachers and office staff. Each gets an invite to sign in, and a role that decides what they can do." actions={canWrite ? <AddBtn onClick={() => setEditing('new')}>Add staff</AddBtn> : undefined} /></div>
       ) : (
         <section className="card tbl rise" style={{ padding: 0 }}>
           <div className="ch" style={{ padding: '22px 22px 14px' }}>

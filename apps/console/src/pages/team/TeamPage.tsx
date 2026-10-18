@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HttpError } from '@edunest/api-client';
 import { CONSOLE_ROLES, type ConsoleRole, type ConsoleUserRow } from '@edunest/contracts';
 import { Dialog, EmptyCard, Field, tintFor, useShake } from '@edunest/web-ui';
-import { Card, Page, useToast } from '../../app/Page';
+import { Card, Page, Tiles, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
 import { initials, ago } from '../../app/format';
 import { roleLabel } from '../../app/useChrome';
@@ -31,7 +31,12 @@ export function TeamPage() {
         {adding && <AddDialog onClose={() => setAdding(false)} onDone={() => { setAdding(false); refresh(); say('Added. They sign in with the password you set and a code sent to their email.'); }} />}
         {edit && <EditDialog row={edit} self={edit.email === app.user.email} onClose={() => setEdit(null)} onSave={(roles, status) => change.mutate({ id: edit.id, roles, status })} busy={change.isPending} />}
       </>}>
-      {rows.length === 0 ? <div style={{ maxWidth: 560 }}><EmptyCard title="Team" chip={{ text: '0 people', tone: 'v' }} scene="register" heading="Just you so far" body="Add the people who will run releases, support schools and handle billing." /></div> : (
+      {rows.length > 0 && <Tiles items={[
+        { label: 'People', value: rows.length, note: `${rows.filter((r) => r.status === 'active').length} active`, tone: 'v' },
+        { label: 'Super admins', value: rows.filter((r) => r.roles.includes('super_admin')).length, note: 'can change anything', tone: 'a' },
+        { label: 'Never signed in', value: rows.filter((r) => !r.lastSeenAt).length, note: 'invited, not yet joined', tone: 'i' },
+      ]} />}
+      {rows.length === 0 ? <div><EmptyCard title="Team" chip={{ text: '0 people', tone: 'v' }} scene="register" heading="Just you so far" body="Add the people who will run releases, support schools and handle billing." /></div> : (
         <Card style={{ padding: 0 }}>
           <div className="tbl scroll-x"><div style={{ minWidth: 620 }}>
             <div className="grd th" style={{ '--cols': 'minmax(0,2fr) minmax(0,2fr) 120px 110px' } as React.CSSProperties}><span>Person</span><span>Roles</span><span>Last seen</span><span></span></div>
@@ -52,6 +57,11 @@ export function TeamPage() {
           </div></div>
         </Card>
       )}
+      <Card title="What each role can do">
+        <div className="rolh">
+          {CONSOLE_ROLES.map((r) => <div key={r}><b>{roleLabel(r)}</b><small>{ROLE_HELP[r]}</small></div>)}
+        </div>
+      </Card>
     </Page>
   );
 }

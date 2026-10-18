@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HttpError } from '@edunest/api-client';
 import { dayLabel, type AttendanceStatus } from '@edunest/contracts';
-import { EmptyCard, tintFor } from '@edunest/web-ui';
+import { EmptyCard, Select, tintFor } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
 import { Page, useToast } from '../../app/Page';
 
@@ -50,15 +50,13 @@ export function AttendancePage() {
     <Page active="att" title="Attendance" sub={date ? `${dayLabel(date)} · ${cls ? `Class ${cls.name}` : ''}` : 'Roll call'} toast={toast} loading={loading}
       error={err ? { message: (err.error as Error).message, retry: () => void err.refetch() } : null}
       actions={classes.data?.length ? (
-        <select className="sel" aria-label="Class" value={classId} onChange={(e) => setClassId(e.target.value)}>
-          {classes.data.map((c) => <option key={c.id} value={c.id}>Class {c.name}</option>)}
-        </select>
+        <Select compact aria-label="Class" value={classId} onChange={setClassId} options={classes.data.map((c) => ({ value: c.id, label: `Class ${c.name}` }))} />
       ) : undefined}>
       {classes.data?.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Attendance" chip={{ text: '0 classes', tone: 'v' }} scene="calendar" heading="No classes to mark yet" body="Add students to a class first. The roll call for each class appears here every school day." actions={<button className="btn pri" onClick={() => app.go('/students')}>Add students</button>} /></div>
+        <div><EmptyCard title="Attendance" chip={{ text: '0 classes', tone: 'v' }} scene="calendar" heading="No classes to mark yet" body="Add students to a class first. The roll call for each class appears here every school day." actions={<button className="btn pri" onClick={() => app.go('/students')}>Add students</button>} /></div>
       ) : (
         <section className="grid">
-          <div className="card tbl rcall s8 rise" style={{ padding: 0 }}>
+          <div className="card tbl rcall s12 rise" style={{ padding: 0 }}>
             <div className="ch" style={{ padding: '22px 22px 14px' }}>
               <h2>Roll call</h2>
               <span className={`chip ${day.data?.submitted ? 'g' : 'a'}`}>{day.data?.submitted ? 'Submitted' : 'Not submitted yet'}</span>
@@ -89,7 +87,7 @@ export function AttendancePage() {
               </div>
             )}
           </div>
-          <div className="s4" style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
+          <div className="s12" style={{ order: -1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 18, alignItems: 'start', minWidth: 0 }}>
             <div className="tile t-v rise" style={{ '--d': '.08s' } as React.CSSProperties}>
               <span className="lbl" style={{ color: 'rgba(255,255,255,.7)' }}>Present or late</span>
               <div className="big" style={{ marginTop: 8 }}>{counts.present + counts.late}<small style={{ fontSize: 18, opacity: .6 }}> / {marks.length}</small></div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { EmptyCard, SelectField } from '@edunest/web-ui';
+import { EmptyCard, Select } from '@edunest/web-ui';
 import { Card, Page } from '../../app/Page';
 import { useApp } from '../../app/context';
 import { ago } from '../../app/format';
@@ -18,9 +18,9 @@ export function InboxPage() {
   const rows = msgs.data ?? [];
   return (
     <Page active="inbox" title="Test inbox" sub="Every text and email the platform would send, caught here instead of reaching real phones" loading={msgs.isLoading} error={msgs.isError ? { message: (msgs.error as Error).message, retry: () => void msgs.refetch() } : null}
-      actions={<div style={{ width: 240 }}><SelectField label="School" value={school} onChange={setSchool} options={[{ value: '', label: 'All schools' }, ...(schools.data ?? []).map((s) => ({ value: s.slug, label: s.name }))]} /></div>}>
+      actions={<Select compact aria-label="School" value={school} onChange={setSchool} options={[{ value: '', label: 'All schools' }, ...(schools.data ?? []).map((s) => ({ value: s.slug, label: s.name }))]} />}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Test inbox" chip={{ text: 'Empty', tone: 'v' }} scene="envelope" heading="Nothing has been sent yet" body="Sign-in codes, fee receipts and notices land here as they are triggered. Try signing in to a school to see the first one." /></div>
+        <div><EmptyCard title="Test inbox" chip={{ text: 'Empty', tone: 'v' }} scene="envelope" heading="Nothing has been sent yet" body="Sign-in codes, fee receipts and notices land here as they are triggered. Try signing in to a school to see the first one." /></div>
       ) : (
         <Card>
           {rows.map((m) => (

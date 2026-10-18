@@ -1,8 +1,13 @@
 /* Shared by every console page: the workspace block in the menu, the 12-column grid, status pills, usage bars and setup steps.
    These are the rules of the Fleet and School boards, kept unscoped so pages composed from the same pieces look the same. */
-.nest .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--r);box-shadow:0 0 0 4px color-mix(in srgb,var(--r) 25%,transparent);animation:pdot 2s infinite}
-.nest .pdot.safe{background:var(--g);box-shadow:0 0 0 4px color-mix(in srgb,var(--g) 25%,transparent)}
-@keyframes pdot{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--r) 0%,transparent)}}
+.nest .rolh{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 28px}
+.nest .rolh>div{padding:12px 0;border-top:1px solid var(--line)}
+.nest .rolh b{display:block;font:700 14px var(--fb)}
+.nest .rolh small{display:block;font:500 13px/1.45 var(--fb);color:var(--ink3);margin-top:2px}
+.nest .rolh2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));column-gap:44px}
+.nest .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--r);box-shadow:none;animation:none}
+.nest .pdot.safe{background:var(--g);box-shadow:none}
+
 .nest .wsw{display:flex;align-items:center;gap:12px;padding:8px;border-radius:18px;background:var(--card);border:1px solid var(--line);margin-bottom:6px;white-space:nowrap;overflow:hidden}
 .nest .wsw b{display:block;font:700 14.5px var(--fb);line-height:1.2}
 .nest .wsw small{display:flex;align-items:center;gap:7px;font:700 12px var(--fb);color:var(--ink3)}
@@ -26,8 +31,8 @@
 .nest .ll{white-space:pre-wrap;overflow-wrap:anywhere;animation:ln .4s var(--e) both}
 @keyframes ln{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .nest .ll .t{color:#5C5775}.nest .ll .ok{color:#7DEBC3}.nest .ll .bad{color:#FF8A92}
-.nest .tkt{position:relative;border-radius:24px;padding:22px 26px;color:#fff;background:radial-gradient(130% 150% at 100% 100%,rgba(255,170,90,.5),transparent 55%),radial-gradient(130% 150% at 0% 0%,rgba(120,96,255,.9),transparent 58%),#1B1530;-webkit-mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;display:grid;grid-template-columns:64% 36%;transition:transform .5s var(--e)}
-.nest .tkt:hover{transform:translateY(-4px) rotate(-.3deg)}
+.nest .tkt{position:relative;border-radius:24px;padding:22px 26px;color:#fff;background:var(--ci);-webkit-mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;display:grid;grid-template-columns:64% 36%;transition:transform .5s var(--e)}
+.nest .tkt:hover{transform:none}
 .nest .tkt .l{padding-right:20px;border-right:2px dashed rgba(255,255,255,.28);display:flex;flex-direction:column;gap:10px}
 .nest .tkt .r{padding-left:20px;display:flex;flex-direction:column;gap:10px;font:600 13px var(--fb);color:rgba(255,255,255,.82)}
 .nest .tkt .tl2{display:flex;align-items:center;gap:8px;font:600 13.5px var(--fb);color:rgba(255,255,255,.82)}

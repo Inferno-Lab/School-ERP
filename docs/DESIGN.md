@@ -24,7 +24,7 @@ All tokens are CSS variables on `.nest` (light) and `.nest.dark` (dark). **Never
 
 | Role | Variable | Light | Dark | Use |
 | --- | --- | --- | --- | --- |
-| Page background | `--bd` | `#E9E5FB` (+ violet and peach radial glows) | `#07060B` | Behind the frame |
+| Page background | `--bd` | `#E9E5FB` (flat, no gradients) | `#07060B` | Behind the frame |
 | Frame | `--frame` | `#FBFAFE` | `#0E0C15` | The big rounded surface |
 | Card | `--card` | `#FFFFFF` | `#161320` | Cards, inputs, dialogs |
 | Sunk | `--sunk` | `#F4F2FA` | `#1D192B` | Inset areas, tracks, hover fill, chips |
@@ -67,7 +67,7 @@ Colour rules:
 ## 3. Structure of a page
 
 ```
-page background (violet glow, radial gradients)
+page background (flat)
 └─ frame (rounded 28, sh3)                       ← .fr
    ├─ menu (272 px, collapsible to 88 px)         ← .sb  (sticky, scrolls itself on short windows)
    │    workspace/school block · group labels · items (icon, label, shortcut hint or count)
@@ -87,13 +87,15 @@ page background (violet glow, radial gradients)
 
 | Component | Spec |
 | --- | --- |
-| **Button** `.btn` | Pill, 42 px (34 `sm`), 700 14 px, 1.5 px border; hover lifts 1 px, press scales .96. Variants: `pri` (ink), `v` (violet, glows on hover), `wht` (white on dark tiles), `ghost`, `dng` (soft red), `dngf` (solid red, destructive confirm). Disabled 38 % opacity. Busy = spinner + word ("Saving…"). One primary per view. |
+| **Button** `.btn` | Pill, 42 px (34 `sm`), 700 14 px, 1.5 px border; hover lifts 1 px, press scales .96. Variants: `pri` (ink), `v` (violet), `wht` (white on dark tiles), `ghost`, `dng` (soft red), `dngf` (solid red, destructive confirm). Disabled 38 % opacity. Busy = spinner + word ("Saving…"). One primary per view. |
 | **Chip** `.chip` | 26 px pill, 12 px/700; tones plain, `v c a g r b k`. Counts and states ("56", "Not yet", "Draft"). |
 | **Status pill** `.st` | 28 px pill with a dot: `g` Healthy/Paid/Live, `a` Degraded/Waiting, `b` Updating/Setting up, `r` Down/Overdue, `n` neutral. Always includes a word. |
 | **Card** `.card` | White, 1 px line, radius 24, padding 22, `sh1`. Header row `.ch`: title 17–22 px display + chip + optional small button; wraps on phones. |
 | **Tile** `.tile t-*` | Coloured feature card, radius 28, a label chip, a big display number, a one-line explanation, optional corner arrow button. 3–4 per row at the top of a page. |
-| **Inputs** `.inp`/`Field` | 48 px, radius 16, 1.5 px border; focus = violet border + 5 px soft ring; label above (13.5 px/700); hint below in `--ink3`; error: red border, tint, message with a warning icon, and the field **vibrates** (see motion). `SelectField` is a styled native select. |
-| **Switch** `.sw` | 48×28 pill; knob springs. Always paired with a label. |
+| **Inputs** `.inp`/`Field` | 48 px, radius 16, 1.5 px border; focus = violet border plus a crisp 1 px line, no glow; label above (13.5 px/700); hint below in `--ink3`; error: red border, tint, message with a warning icon, and the field **vibrates** (see motion). `SelectField` is a styled native select. |
+| **Switch** `.sw` | 38×22 flat pill, 16 px knob; grey off, violet on, no spring and no shadow. Always paired with a label. |
+| **Dropdown** `Select` / `SelectField` | Replaces the browser's `<select>`. A 50 px field (or `compact` 40 px pill for page headers) with a round chevron chip; the list is drawn in a portal on the page root with fixed coordinates, so no card, table or dialog can clip it; it flips upward near the bottom, scrolls inside, gets a search box above 10 options, and works with the keyboard (arrows, Home/End, Enter, Esc, type-ahead). Never use a bare `<select>`. |
+| **Tooltip** `data-tip` | One shared tooltip (`Tooltips`, mounted by `Shell`). Put `data-tip="Title (newline) more"` on any chart column, bar or segment; every `.us` usage row gets one for free; the collapsed menu uses it for names. |
 | **Segmented** `.seg` | Pill track with a sliding white knob (`kn`); tabs, view switches, ranges. |
 | **Morph menu** `.morph` | A button that grows into its own list (width/height transition) instead of a popover; items stagger in; checkmark on the chosen. |
 | **Table** `.grd` | CSS-grid rows (`--cols`), 58–64 px, hairline separators, hover tint, header row 11.5 px uppercase. Rows are links where they open something. Wrap in `.scroll-x` with a min-width on phones. |
@@ -135,6 +137,10 @@ Animate transform and opacity only; never animate layout properties in lists.
 - A list longer than about 12 rows scrolls inside its card (`max-height: min(66dvh, 680px)`); the page never grows with the data.
 - The menu fits a short window: tighter rows under 900 px high, no context card under 780 px, and the account block stays pinned at the bottom.
 - Text that names a person or thing wraps to two lines before it is cut; a one-line ellipsis is for previews only, and the full text is in the `title`.
+- A scroll area keeps a plain background and chains to the page at its ends: painted-in edge shadows and `overscroll-behavior: contain` made scrolling feel stuck and slow.
+- No glow anywhere: no soft coloured shadows, halo gradients, pulsing rings or blurred focus rings. Focus and hover change a border or a fill; the only ring is a crisp 1 px line.
+- Empty space is fixed by arranging content, never by stretching cards: put short and tall things in one full-width column, give a short block siblings of equal weight (a row of tiles, a 2- or 3-column grid), make lists scroll inside a capped card, and add real information (a summary, a guide) before adding height. `tools/scan-gaps.mjs` measures holes, unequal side-by-side cards and blank insides.
+- The menu collapses to a logo with the expand button under it; names show in the tooltip and the account menu opens beside the menu on the page root.
 - On a phone a list keeps only its main columns (class `hs` hides the rest) or stacks its row; a board scrolls sideways with snap.
 
 ## 6. States (every page must have all of them)

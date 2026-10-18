@@ -36,11 +36,11 @@ export function FeesPage() {
           <div className="tile t-v s4 rise"><span className="lbl" style={{ color: 'rgba(255,255,255,.7)' }}>Collected in {s.monthLabel}</span><div className="big" style={{ marginTop: 8 }}>{money(s.collected)}</div><div style={{ font: '600 13px var(--fb)', opacity: .8 }}>of {money(s.due)} due</div></div>
           <div className="tile t-a s4 rise" style={{ '--d': '.05s' } as React.CSSProperties}><span className="lbl" style={{ color: 'rgba(20,17,31,.6)' }}>Still to come in</span><div className="big" style={{ marginTop: 8 }}>{money(s.pending)}</div><div style={{ font: '600 13px var(--fb)', opacity: .75 }}>not yet due or in part</div></div>
           <div className="tile t-p s4 rise" style={{ '--d': '.1s' } as React.CSSProperties}><span className="lbl">Overdue</span><div className="big" style={{ marginTop: 8, color: 'var(--r)' }}>{money(s.overdue)}</div><div style={{ font: '600 13px var(--fb)', color: 'var(--ink3)' }}>{s.overdueFamilies} {s.overdueFamilies === 1 ? 'family' : 'families'}</div></div>
-          <div className="card s5 rise" style={{ '--d': '.14s' } as React.CSSProperties}>
+          <div className="card s12 rise" style={{ '--d': '.14s' } as React.CSSProperties}>
             <div className="ch"><h2>Collected by type</h2></div>
-            <div style={{ display: 'grid', gap: 18, marginTop: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '18px 28px', marginTop: 16, alignContent: 'start' }}>
               {s.byHead.map((h) => (
-                <div className="us" key={h.head}>
+                <div className="us" key={h.head} data-tip={`${h.label}\n${h.pct}% collected\n${money(h.collected)} of ${money(h.due)}`}>
                   <div className="r">{h.label}<b>{money(h.collected)} of {money(h.due)}</b></div>
                   <div className="bar" style={{ height: 18 }}><i style={{ width: `${h.pct}%`, background: HEAD[h.head] ?? 'var(--v)' }}></i></div>
                 </div>
@@ -48,7 +48,7 @@ export function FeesPage() {
               {s.byHead.length === 0 && <div className="help">Fees by type appear once fees are assigned to students.</div>}
             </div>
           </div>
-          <div className="card tbl s7 rise" style={{ '--d': '.18s', padding: 0 } as React.CSSProperties}>
+          <div className="card tbl s12 rise" style={{ '--d': '.18s', padding: 0 } as React.CSSProperties}>
             <div className="ch" style={{ padding: '22px 22px 14px' }}>
               <h2>Overdue families</h2>
               <span className="chip r">{overdue.data?.total ?? 0}</span>

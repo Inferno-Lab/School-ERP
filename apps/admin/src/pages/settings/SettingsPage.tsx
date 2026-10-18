@@ -109,7 +109,7 @@ export function SettingsPage() {
     return (
       <Shell page="settings" theme={chrome.themeCls} aside={chrome.aside}>
         <main className="mn"><header className="hd"><div><h1>Settings</h1></div></header>
-          <div style={{ maxWidth: 520 }}><EmptyCard error title="Settings" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="plug" heading="That didn’t load" body={(doc.error as Error).message} actions={<button className="btn pri" onClick={() => void doc.refetch()}>Try again</button>} /></div>
+          <div><EmptyCard error title="Settings" chip={{ text: 'Couldn’t load', tone: 'r' }} scene="plug" heading="That didn’t load" body={(doc.error as Error).message} actions={<button className="btn pri" onClick={() => void doc.refetch()}>Try again</button>} /></div>
         </main>
       </Shell>
     );
@@ -176,6 +176,7 @@ export function SettingsPage() {
       toggle('twoFactor', 'Ask for a code at sign-in', 'Staff confirm a one-time code after their password.', 'security.twoFactor'),
     ],
     apOpen: apOpen ? 'open' : '', apExp: apOpen ? 'true' : 'false', apLabel: WAIVERS.find((w) => w[0] === draft.waiver)?.[1] ?? WAIVERS[0]![1],
+    apLocked: lock('approvals.feeWaiver'),
     toggleAp: (e: React.MouseEvent) => { e.stopPropagation(); if (!lock('approvals.feeWaiver')) setApOpen((o) => !o); },
     aps: WAIVERS.map((w, i) => ({ n: w[1], on: w[0] === draft.waiver, d: 50 + i * 45, pick: () => { set({ waiver: w[0] }); setApOpen(false); } })),
     ticks: Array.from({ length: TICKS }, (_, k) => ({ c: k < (used / 100) * TICKS ? 'on' : '' })),
@@ -197,7 +198,7 @@ function ModulesPanel({ doc, draft, locked, onChange }: { doc: SettingsResponse;
     <section className="rise">
       <h2 className="sec">Modules<small>Switch whole areas of the app on or off for everyone at your school.</small></h2>
       {warn && <div className="emsg" role="alert" style={{ marginTop: 12 }}>{warn}</div>}
-      <div className="grp" style={{ marginTop: 16 }}>
+      <div className="grp grp2" style={{ marginTop: 16 }}>
         {doc.modules.map((m) => {
           const on = m.core || draft.modules.includes(m.key);
           return (
@@ -224,7 +225,7 @@ function AuditPanel() {
   return (
     <section className="rise">
       <h2 className="sec">Audit log<small>The latest changes made by people at your school.</small></h2>
-      <div className="grp" style={{ marginTop: 16 }}>
+      <div className="grp lscroll" style={{ marginTop: 16 }}>
         {rows.map((r) => (
           <div className="tgl" key={r.id}>
             <div><b>{r.actor} · {r.action}</b><small>{r.detail || r.entity}</small></div>

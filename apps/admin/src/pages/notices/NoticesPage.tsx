@@ -25,7 +25,7 @@ export function NoticesPage() {
       actions={canWrite ? <button className="btn pri" onClick={() => setComposing(true)}><svg viewBox="0 0 24 24" aria-hidden="true"><path className="i" d="M12 5v14M5 12h14"></path></svg>New notice</button> : undefined}
       overlays={composing && <Compose onClose={() => setComposing(false)} onDone={(msg) => { setComposing(false); void qc.invalidateQueries({ predicate: (q) => ['notices', 'dashboard', 'shell'].includes(String(q.queryKey[0])) }); say(msg); }} />}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Notices" chip={{ text: '0 notices', tone: 'v' }} scene="noticeboard" heading="Nothing has been posted yet" body="Write a notice for everyone, for parents, for staff or for one class. It goes to the app, and to people’s phones." actions={canWrite ? <button className="btn pri" onClick={() => setComposing(true)}>Write the first notice</button> : undefined} /></div>
+        <div><EmptyCard title="Notices" chip={{ text: '0 notices', tone: 'v' }} scene="noticeboard" heading="Nothing has been posted yet" body="Write a notice for everyone, for parents, for staff or for one class. It goes to the app, and to people’s phones." actions={canWrite ? <button className="btn pri" onClick={() => setComposing(true)}>Write the first notice</button> : undefined} /></div>
       ) : (
         <section className="card rise">
           {rows.map((n) => (

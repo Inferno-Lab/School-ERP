@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HttpError } from '@edunest/api-client';
 import { Dialog, EmptyCard, Field, useShake } from '@edunest/web-ui';
 import type { ReleaseRow } from '@edunest/contracts';
-import { Card, Page, useToast } from '../../app/Page';
+import { Card, Page, Tiles, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
 import { ago } from '../../app/format';
 
@@ -37,8 +37,12 @@ export function ReleasesPage() {
         )}
       </>}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Releases" chip={{ text: '0 releases', tone: 'v' }} scene="notebooks" heading="No releases yet" body="A release is a named version. Create one, then start it: schools update in waves and it pauses itself if a wave looks unhealthy." actions={canWrite ? <button className="btn pri" onClick={() => setCreating(true)}>Create the first release</button> : undefined} /></div>
-      ) : rows.map((r) => {
+        <div><EmptyCard title="Releases" chip={{ text: '0 releases', tone: 'v' }} scene="notebooks" heading="No releases yet" body="A release is a named version. Create one, then start it: schools update in waves and it pauses itself if a wave looks unhealthy." actions={canWrite ? <button className="btn pri" onClick={() => setCreating(true)}>Create the first release</button> : undefined} /></div>
+      ) : [<Tiles key="tiles" items={[
+        { label: 'Releases', value: rows.length, note: `${rows.filter((r) => r.status === 'rolling').length} rolling out now`, tone: 'v' },
+        { label: 'Latest', value: rows[0]!.version, note: LABEL[rows[0]!.status], tone: 'a' },
+        { label: 'Schools on it', value: `${rows[0]!.waves.flatMap((w) => w.schools).filter((s) => s.state === 'done').length} of ${rows[0]!.waves.flatMap((w) => w.schools).length}`, note: 'updated so far', tone: 'i' },
+      ]} />, ...rows.map((r) => {
         const all = r.waves.flatMap((w) => w.schools);
         const done = all.filter((s) => s.state === 'done').length;
         const live = ['rolling', 'paused', 'halted', 'done'].includes(r.status);
@@ -69,7 +73,7 @@ export function ReleasesPage() {
             )}
           </Card>
         );
-      })}
+      })]}
     </Page>
   );
 }

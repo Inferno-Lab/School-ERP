@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { EmptyCard, SelectField } from '@edunest/web-ui';
+import { EmptyCard, Select } from '@edunest/web-ui';
 import type { BuildRow } from '@edunest/contracts';
 import { Card, Page, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
@@ -26,13 +26,13 @@ export function BuildsPage() {
   return (
     <Page active="app" title="Mobile builds" sub="Each school gets its own app with its name, colours and address built in" toast={toast} loading={builds.isLoading} error={builds.isError ? { message: (builds.error as Error).message, retry: () => void builds.refetch() } : null}
       actions={app.can('builds.write') && schools.data?.length ? (
-        <span className="tgrow" style={{ alignItems: 'flex-end' }}>
-          <div style={{ width: 240 }}><SelectField label="School" value={schoolId || schools.data[0]!.id} onChange={setSchoolId} options={schools.data.map((s) => ({ value: s.id, label: s.name }))} /></div>
-          <button className="btn pri" style={{ marginBottom: 2 }} onClick={() => request.mutate()} disabled={request.isPending}>Build Android app</button>
+        <span className="tgrow">
+          <Select compact aria-label="School" value={schoolId || schools.data[0]!.id} onChange={setSchoolId} options={schools.data.map((s) => ({ value: s.id, label: s.name }))} />
+          <button className="btn pri" onClick={() => request.mutate()} disabled={request.isPending}>Build Android app</button>
         </span>
       ) : undefined}>
       {rows.length === 0 ? (
-        <div style={{ maxWidth: 560 }}><EmptyCard title="Builds" chip={{ text: '0 builds', tone: 'v' }} scene="notebooks" heading="No apps built yet" body="Pick a school and build its Android app. The install link appears here when GitHub finishes. iPhone builds need the school’s Apple account." /></div>
+        <div><EmptyCard title="Builds" chip={{ text: '0 builds', tone: 'v' }} scene="notebooks" heading="No apps built yet" body="Pick a school and build its Android app. The install link appears here when GitHub finishes. iPhone builds need the school’s Apple account." /></div>
       ) : (
         <Card style={{ padding: 0 }}>
           <div className="tbl scroll-x"><div style={{ minWidth: 640 }}>

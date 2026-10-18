@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { HttpError, type CellRow } from '@edunest/api-client';
 import type { SchoolRow } from '@edunest/contracts';
 import { Dialog, EmptyCard, Field, SelectField, useShake } from '@edunest/web-ui';
-import { Card, Page, useToast } from '../../app/Page';
+import { Card, Page, Tiles, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
 import { url } from '../../app/base';
 import { statusOf } from '../../app/format';
@@ -32,10 +32,16 @@ export function CellsPage() {
         {dlg?.kind === 'move' && <MoveSchool school={dlg.school} cells={list} onClose={() => setDlg(null)} onDone={(m) => { setDlg(null); refresh(); say(m); }} />}
       </>}>
       {list.length === 0 ? (
-        <div style={{ maxWidth: 560 }}>
+        <div>
           <EmptyCard title="Cells" chip={{ text: '0 cells', tone: 'v' }} scene="map-pin" heading="No cells yet" body="The first cell is created when the platform starts. Add another here to place schools in more than one place." actions={canCells ? <button className="btn pri" onClick={() => setDlg({ kind: 'add' })}>Add a cell</button> : undefined} />
         </div>
       ) : (
+        <>
+        <Tiles items={[
+          { label: 'Cells', value: list.length, note: `${list.filter((c) => c.accepting).length} open to new schools`, tone: 'v' },
+          { label: 'Schools placed', value: list.reduce((n, c) => n + c.schools, 0), note: `room for ${list.reduce((n, c) => n + c.maxSchools, 0)}`, tone: 'a' },
+          { label: 'Space used', value: `${Math.round((list.reduce((n, c) => n + c.schools, 0) / Math.max(1, list.reduce((n, c) => n + c.maxSchools, 0))) * 100)}%`, note: 'across every cell', tone: 'i' },
+        ]} />
         <section className="grid">
           {list.map((c) => {
             const here = (schools.data ?? []).filter((s) => s.cell === c.key);
@@ -64,6 +70,7 @@ export function CellsPage() {
             );
           })}
         </section>
+        </>
       )}
     </Page>
   );

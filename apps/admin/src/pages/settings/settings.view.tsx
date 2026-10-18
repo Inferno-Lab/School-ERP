@@ -1,7 +1,7 @@
 /* eslint-disable */
 // Markup converted from design/canvas/AdminSettings.dc.html. Keep the markup and class names as designed.
 import { Fragment, type CSSProperties } from "react";
-import { Shell } from "@edunest/web-ui";
+import { Select, Shell } from "@edunest/web-ui";
 import "./settings.css";
 
 export function SettingsView({ v }: { v: any }) {
@@ -15,7 +15,7 @@ export function SettingsView({ v }: { v: any }) {
           {v.palette}
           <div className={`save ${v.dirtyOn ?? ""}`} role="region" aria-label="Unsaved changes">
             <span
-              style={{ width: "9px", height: "9px", borderRadius: "50%", background: "var(--a)", boxShadow: "0 0 0 4px rgba(255,194,61,.25)" } as CSSProperties}
+              style={{ width: "9px", height: "9px", borderRadius: "50%", background: "var(--a)", boxShadow: "none" } as CSSProperties}
             ></span>
             You have unsaved changes
             <button className="btn sm ghost" style={{ color: "#fff" } as CSSProperties} onClick={v.discard}>
@@ -239,32 +239,7 @@ export function SettingsView({ v }: { v: any }) {
                     <b>Who approves fee waivers</b>
                     <small>Waiving or reducing a fee needs this person to say yes.</small>
                   </div>
-                  <div className="anc" style={{ width: "228px", height: "42px" } as CSSProperties}>
-                    <div className={`morph ${v.apOpen ?? ""}`} style={{ "--w0": "228px", "--w1": "280px", "--h1": "196px" } as CSSProperties}>
-                      <button className="mh" onClick={v.toggleAp} aria-expanded={v.apExp}>
-                        {v.apLabel}
-                        <svg className="cv" viewBox="0 0 24 24" aria-hidden="true">
-                          <path className="i" d="M6 9l6 6 6-6"></path>
-                        </svg>
-                      </button>
-                      <div className="ml">
-                        {v.aps.map((a: any, $i: number) => (
-                          <Fragment key={$i}>
-                            <button className="mo" onClick={a.pick} style={{ transitionDelay: `${a.d ?? ""}ms` } as CSSProperties}>
-                              {a.n}
-                              {a.on && (
-                                <>
-                                  <svg className="ck" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path className="i" d="M5 12.5l4.5 4.5L19 7.5"></path>
-                                  </svg>
-                                </>
-                              )}
-                            </button>
-                          </Fragment>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <Select compact disabled={!!v.apLocked} style={{ minWidth: 228 }} aria-label="Who approves fee waivers" value={String(Math.max(0, v.aps.findIndex((a: any) => a.on)))} onChange={(i) => v.aps[Number(i)]?.pick()} options={v.aps.map((a: any, i: number) => ({ value: String(i), label: a.n }))} />
                 </div>
               </div>
             </section>

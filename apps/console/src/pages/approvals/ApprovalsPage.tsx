@@ -30,7 +30,7 @@ export function ApprovalsPage() {
   return (
     <Page active="appr" title="Approvals" sub={waiting.length ? `${waiting.length} waiting for a second person` : 'Risky changes need a second person to say yes'} toast={toast} loading={list.isLoading} error={list.isError ? { message: (list.error as Error).message, retry: () => void list.refetch() } : null}>
       <section className="grid">
-        <Card title="Waiting" chip={<span className={`chip ${waiting.length ? 'a' : 'g'}`}>{waiting.length}</span>} span="s7">
+        <Card title="Waiting" chip={<span className={`chip ${waiting.length ? 'a' : 'g'}`}>{waiting.length}</span>} span="s12">
           {waiting.length === 0 && (
             <EmptyCard title="Waiting" chip={{ text: 'All clear', tone: 'g' }} scene="checklist" heading="Nothing needs approving" body="Erasing a school, suspending it and other risky changes land here for a second person. You can’t approve your own." />
           )}
@@ -51,7 +51,7 @@ export function ApprovalsPage() {
             );
           })}
         </Card>
-        <Card title="Recent" span="s5">
+        <Card title="Recent" span="s12">
           {past.length === 0 && <div className="help">Finished requests show up here.</div>}
           {past.slice(0, 12).map((r) => (
             <div key={r.id} className="kv">
