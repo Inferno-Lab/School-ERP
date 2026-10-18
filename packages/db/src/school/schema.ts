@@ -1,0 +1,369 @@
+import { sql } from 'drizzle-orm';
+import {
+  boolean,
+  date,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
+
+const at = (name: string) => timestamp(name, { withTimezone: true }).notNull().defaultNow();
+
+export const meta = pgTable('meta', {
+  key: text('key').primaryKey(),
+  value: jsonb('value').notNull(),
+});
+
+export const academicYears = pgTable('academic_years', {
+  id: text('id').primaryKey(),
+  label: text('label').notNull(),
+  startsOn: date('starts_on').notNull(),
+  endsOn: date('ends_on').notNull(),
+  current: boolean('current').notNull().default(false),
+});
+
+export const users = pgTable(
+  'users',
+  {
+    id: text('id').primaryKey(),
+    kind: text('kind').notNull(), // staff | guardian | student
+    name: text('name').notNull(),
+    email: text('email'),
+    phone: text('phone'),
+    passwordHash: text('password_hash'),
+    avatarUrl: text('avatar_url'),
+    status: text('status').notNull().default('active'),
+    failedLogins: integer('failed_logins').notNull().default(0),
+    lockedUntil: timestamp('locked_until', { withTimezone: true }),
+    lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+    createdAt: at('created_at'),
+  },
+  (t) => [
+    uniqueIndex('users_email_uq').on(sql`lower(${t.email})`),
+    uniqueIndex('users_phone_uq').on(t.phone),
+  ],
+);
+
+export const roles = pgTable('roles', {
+  id: text('id').primaryKey(),
+  key: text('key').notNull().unique(),
+  name: text('name').notNull(),
+  description: text('description').notNull().default(''),
+  permissions: jsonb('permissions').$type<string[]>().notNull(),
+  locked: boolean('locked').notNull().default(false),
+});
+
+export const userRoles = pgTable(
+  'user_roles',
+  {
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    roleId: text('role_id').notNull().references(() => roles.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.roleId] })],
+);
+
+export const sessions = pgTable(
+  'sessions',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    refreshHash: text('refresh_hash').notNull(),
+    userAgent: text('user_agent'),
+    createdAt: at('created_at'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  },
+  (t) => [index('sessions_user_idx').on(t.userId)],
+);
+
+export const otpChallenges = pgTable('otp_challenges', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  codeHash: text('code_hash').notNull(),
+  channel: text('channel').notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: at('created_at'),
+});
+
+export const staff = pgTable('staff', {
+  userId: text('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  designation: text('designation').notNull().default('Teacher'),
+  department: text('department'),
+  joinedOn: date('joined_on'),
+  maxPeriodsPerWeek: integer('max_periods_per_week').notNull().default(30),
+});
+
+export const subjects = pgTable('subjects', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  color: text('color').notNull(),
+  perWeek: integer('per_week').notNull().default(5),
+});
+
+export const staffSubjects = pgTable(
+  'staff_subjects',
+  {
+    userId: text('user_id').notNull().references(() => staff.userId, { onDelete: 'cascade' }),
+    subjectId: text('subject_id').notNull().references(() => subjects.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.subjectId] })],
+);
+
+export const classes = pgTable('classes', {
+  id: text('id').primaryKey(),
+  yearId: text('year_id').notNull().references(() => academicYears.id),
+  name: text('name').notNull(),
+  grade: integer('grade').notNull(),
+  section: text('section').notNull(),
+  classTeacherId: text('class_teacher_id').references(() => users.id, { onDelete: 'set null' }),
+});
+
+export const students = pgTable(
+  'students',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    admissionNo: text('admission_no').notNull().unique(),
+    name: text('name').notNull(),
+    classId: text('class_id').notNull().references(() => classes.id),
+    rollNo: text('roll_no').notNull().default(''),
+    dob: date('dob').notNull(),
+    bloodGroup: text('blood_group'),
+    house: text('house'),
+    avatarUrl: text('avatar_url'),
+    address: text('address'),
+    status: text('status').notNull().default('active'),
+    admittedOn: date('admitted_on'),
+    createdAt: at('created_at'),
+  },
+  (t) => [index('students_class_idx').on(t.classId), index('students_name_idx').on(sql`lower(${t.name})`)],
+);
+
+export const guardians = pgTable('guardians', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  relation: text('relation').notNull().default('Parent'),
+});
+
+export const studentGuardians = pgTable(
+  'student_guardians',
+  {
+    studentId: text('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
+    guardianId: text('guardian_id').notNull().references(() => guardians.id, { onDelete: 'cascade' }),
+    isPrimary: boolean('is_primary').notNull().default(true),
+  },
+  (t) => [primaryKey({ columns: [t.studentId, t.guardianId] })],
+);
+
+export const attendanceSessions = pgTable(
+  'attendance_sessions',
+  {
+    id: text('id').primaryKey(),
+    classId: text('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
+    date: date('date').notNull(),
+    markedBy: text('marked_by').references(() => users.id, { onDelete: 'set null' }),
+    submittedAt: timestamp('submitted_at', { withTimezone: true }),
+  },
+  (t) => [uniqueIndex('attendance_sessions_uq').on(t.classId, t.date)],
+);
+
+export const attendanceMarks = pgTable(
+  'attendance_marks',
+  {
+    sessionId: text('session_id').notNull().references(() => attendanceSessions.id, { onDelete: 'cascade' }),
+    studentId: text('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
+    status: text('status').notNull(), // present | absent | late | leave
+  },
+  (t) => [primaryKey({ columns: [t.sessionId, t.studentId] }), index('attendance_marks_student_idx').on(t.studentId)],
+);
+
+export const feeInvoices = pgTable(
+  'fee_invoices',
+  {
+    id: text('id').primaryKey(),
+    studentId: text('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
+    head: text('head').notNull().default('tuition'), // tuition | transport | activities | lab
+    title: text('title').notNull(),
+    amount: integer('amount').notNull(),
+    dueOn: date('due_on').notNull(),
+    waivedAmount: integer('waived_amount').notNull().default(0),
+    createdAt: at('created_at'),
+  },
+  (t) => [index('fee_invoices_student_idx').on(t.studentId)],
+);
+
+export const payments = pgTable(
+  'payments',
+  {
+    id: text('id').primaryKey(),
+    invoiceId: text('invoice_id').notNull().references(() => feeInvoices.id, { onDelete: 'cascade' }),
+    amount: integer('amount').notNull(),
+    method: text('method').notNull(),
+    reference: text('reference'),
+    receiptNo: text('receipt_no').notNull().unique(),
+    paidOn: date('paid_on').notNull(),
+    recordedBy: text('recorded_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: at('created_at'),
+  },
+  (t) => [index('payments_invoice_idx').on(t.invoiceId)],
+);
+
+export const notices = pgTable('notices', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  audience: text('audience').notNull().default('everyone'),
+  classId: text('class_id').references(() => classes.id, { onDelete: 'set null' }),
+  status: text('status').notNull().default('draft'), // draft | pending | published
+  authorId: text('author_id').references(() => users.id, { onDelete: 'set null' }),
+  publishedAt: timestamp('published_at', { withTimezone: true }),
+  createdAt: at('created_at'),
+});
+
+export const approvals = pgTable(
+  'approvals',
+  {
+    id: text('id').primaryKey(),
+    kind: text('kind').notNull(), // leave | fee_waiver | admission | notice
+    title: text('title').notNull(),
+    subtitle: text('subtitle').notNull().default(''),
+    requesterName: text('requester_name').notNull(),
+    subjectRef: text('subject_ref'),
+    payload: jsonb('payload').$type<Record<string, unknown>>().notNull().default({}),
+    status: text('status').notNull().default('pending'),
+    decidedBy: text('decided_by').references(() => users.id, { onDelete: 'set null' }),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    createdAt: at('created_at'),
+  },
+  (t) => [index('approvals_status_idx').on(t.status)],
+);
+
+export const periods = pgTable('periods', {
+  idx: integer('idx').primaryKey(),
+  label: text('label').notNull(),
+  startsAt: text('starts_at').notNull(),
+  endsAt: text('ends_at').notNull(),
+  kind: text('kind').notNull().default('period'),
+});
+
+export const timetableSlots = pgTable(
+  'timetable_slots',
+  {
+    id: text('id').primaryKey(),
+    classId: text('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
+    day: integer('day').notNull(), // 1 Monday .. 7 Sunday
+    period: integer('period').notNull().references(() => periods.idx),
+    subjectId: text('subject_id').notNull().references(() => subjects.id),
+    teacherId: text('teacher_id').notNull().references(() => users.id),
+    room: text('room'),
+    /** Published value, so unpublished edits can be counted and reverted. */
+    publishedTeacherId: text('published_teacher_id'),
+    publishedSubjectId: text('published_subject_id'),
+    /** A standing cover: this teacher takes the period instead of `teacherId` until the timetable changes again. */
+    coverTeacherId: text('cover_teacher_id'),
+    publishedCoverId: text('published_cover_id'),
+  },
+  (t) => [uniqueIndex('timetable_slot_uq').on(t.classId, t.day, t.period), index('timetable_teacher_idx').on(t.teacherId, t.day, t.period)],
+);
+
+export const substitutions = pgTable(
+  'substitutions',
+  {
+    id: text('id').primaryKey(),
+    slotId: text('slot_id').notNull().references(() => timetableSlots.id, { onDelete: 'cascade' }),
+    date: date('date').notNull(),
+    teacherId: text('teacher_id').notNull().references(() => users.id),
+    createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: at('created_at'),
+  },
+  (t) => [uniqueIndex('substitutions_uq').on(t.slotId, t.date)],
+);
+
+export const settings = pgTable('settings', {
+  key: text('key').primaryKey(),
+  value: jsonb('value').notNull(),
+  updatedBy: text('updated_by'),
+  updatedAt: at('updated_at'),
+});
+
+export const events = pgTable('events', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+  endsAt: timestamp('ends_at', { withTimezone: true }),
+  kind: text('kind').notNull().default('event'),
+  note: text('note').notNull().default(''),
+});
+
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: text('id').primaryKey(),
+    at: at('at'),
+    actorId: text('actor_id'),
+    actorName: text('actor_name').notNull().default('System'),
+    action: text('action').notNull(),
+    entity: text('entity').notNull(),
+    entityId: text('entity_id'),
+    detail: jsonb('detail').$type<Record<string, unknown>>().notNull().default({}),
+  },
+  (t) => [index('audit_at_idx').on(t.at)],
+);
+
+export const homework = pgTable('homework', {
+  id: text('id').primaryKey(),
+  classId: text('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
+  subjectId: text('subject_id').notNull().references(() => subjects.id),
+  title: text('title').notNull(),
+  assignedOn: date('assigned_on').notNull(),
+  dueOn: date('due_on').notNull(),
+});
+
+export const homeworkSubmissions = pgTable(
+  'homework_submissions',
+  {
+    homeworkId: text('homework_id').notNull().references(() => homework.id, { onDelete: 'cascade' }),
+    studentId: text('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
+    handedAt: timestamp('handed_at', { withTimezone: true }),
+    onTime: boolean('on_time').notNull().default(false),
+  },
+  (t) => [primaryKey({ columns: [t.homeworkId, t.studentId] }), index('homework_sub_student_idx').on(t.studentId)],
+);
+
+export const examResults = pgTable(
+  'exam_results',
+  {
+    studentId: text('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
+    exam: text('exam').notNull(),
+    grade: text('grade').notNull(),
+    pct: integer('pct').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.studentId, t.exam] })],
+);
+
+export const libraryLoans = pgTable(
+  'library_loans',
+  {
+    id: text('id').primaryKey(),
+    studentId: text('student_id').notNull().references(() => students.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    dueOn: date('due_on').notNull(),
+    returnedOn: date('returned_on'),
+  },
+  (t) => [index('library_student_idx').on(t.studentId)],
+);
+
+export const transportAssignments = pgTable('transport_assignments', {
+  studentId: text('student_id').primaryKey().references(() => students.id, { onDelete: 'cascade' }),
+  route: text('route').notNull(),
+});

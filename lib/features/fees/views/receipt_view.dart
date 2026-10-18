@@ -165,7 +165,7 @@ class _Slip extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Overline(AppConfig.schoolName),
+                  Overline(AppConfig.schoolName),
                   const SizedBox(height: 4),
                   Text('fees.school_address'.tr, style: context.type.cap),
                   const SizedBox(height: 22),

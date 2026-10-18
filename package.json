@@ -1,0 +1,29 @@
+{
+  "name": "edunest",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.34.7",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "dev:db": "pnpm --filter @edunest/db dev:db",
+    "dev": "turbo run dev --parallel",
+    "verify": "pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "htmlparser2": "^12.0.0",
+    "pixelmatch": "^8.0.0",
+    "pngjs": "^7.0.0",
+    "postcss": "^8.5.30",
+    "postcss-prefix-selector": "^2.2.1",
+    "prettier": "^3.9.10",
+    "turbo": "^2.5.0",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.0"
+  }
+}

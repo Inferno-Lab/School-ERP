@@ -1,0 +1,51 @@
+name: Mobile build
+# Started by the console ("Build Android app" on a school) with the school's address name and the build's id.
+on:
+  workflow_dispatch:
+    inputs:
+      school:
+        description: The school's address name, like greenfield
+        required: true
+      build_id:
+        description: The console's id for this build
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      API_BASE_URL: ${{ vars.API_BASE_URL }}
+      BUILD_CALLBACK_TOKEN: ${{ secrets.BUILD_CALLBACK_TOKEN }}
+      TAG: app-${{ inputs.school }}-${{ inputs.build_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build the school's app
+        run: flutter build apk --release --dart-define=SCHOOL=${{ inputs.school }} --dart-define=API_BASE_URL=${API_BASE_URL}
+      - name: Publish the install link
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk "${{ inputs.school }}.apk"
+          gh release create "$TAG" "${{ inputs.school }}.apk" --prerelease --title "App for ${{ inputs.school }}" --notes "Built for the console. Install on an Android phone."
+          echo "url=https://github.com/${{ github.repository }}/releases/download/$TAG/${{ inputs.school }}.apk" >> "$GITHUB_OUTPUT"
+      - name: Tell the console
+        if: always() && env.API_BASE_URL != ''
+        run: |
+          OK=${{ job.status == 'success' }}
+          curl -fsS -X POST "${API_BASE_URL%/}/console/v1/builds/${{ inputs.build_id }}/finish" \
+            -H "x-build-token: ${BUILD_CALLBACK_TOKEN}" -H "content-type: application/json" \
+            -d "{\"ok\": ${OK}, \"url\": \"${{ steps.publish.outputs.url }}\"}"

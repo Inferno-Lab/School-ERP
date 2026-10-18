@@ -6,9 +6,15 @@ class AppConfig {
 
   static const appName = 'EduNest';
 
-  /// Per-school build values; a school's build profile replaces these.
-  static const schoolName = 'Greenfield International School';
-  static const schoolTagline = 'Curiosity first. Kindness always.';
+  /// Which school this build is for, and where its API lives. A school's build profile passes both with
+  /// `--dart-define=SCHOOL=<slug> --dart-define=API_BASE_URL=<address>`; the console's build workflow does.
+  static const schoolSlug = String.fromEnvironment('SCHOOL');
+  static const apiBase = String.fromEnvironment('API_BASE_URL');
+  static bool get live => schoolSlug.isNotEmpty && apiBase.isNotEmpty;
+
+  /// The school's name and tagline. The demo values stand until `SchoolProfileService` has the school's own from the API.
+  static String schoolName = 'Greenfield International School';
+  static String schoolTagline = 'Curiosity first. Kindness always.';
   static const logoAsset = 'assets/images/logo.svg';
   static const version = '2.0.6';
   static const build = 216;

@@ -1,0 +1,31 @@
+import { useNavigate } from '@tanstack/react-router';
+import { LoginPage } from '@edunest/web-ui';
+import { makeClient, session } from '../../app/client';
+
+const client = makeClient(() => undefined);
+
+/** The console's own sign-in: password first, then the code. Team members only. */
+export function LoginRoute() {
+  const navigate = useNavigate();
+  return (
+    <LoginPage
+      controller={{
+        product: 'console', schoolName: 'EduNest Console', shortName: 'console', demoMode: !!import.meta.env.VITE_DEMO_LOGIN, goName: 'the console',
+        initialEmail: (() => { try { return localStorage.getItem('edunest.console.email') ?? ''; } catch { return ''; } })(),
+        submitCredentials: async (email, password) => {
+          const res = await client.api.login({ identifier: email, password });
+          try { localStorage.setItem('edunest.console.email', email); } catch { /* ignore */ }
+          if (res.step === 'otp') return res.challenge;
+          session.write({ accessToken: res.tokens.accessToken, refreshToken: res.tokens.refreshToken, user: res.tokens.user });
+          return null;
+        },
+        submitCode: async (challengeId, code) => {
+          const t = await client.api.verify({ challengeId, code });
+          session.write({ accessToken: t.accessToken, refreshToken: t.refreshToken, user: t.user });
+          return t.user.name;
+        },
+        enter: () => void navigate({ to: '/' }),
+      }}
+    />
+  );
+}

@@ -1,0 +1,286 @@
+import { Body, Controller, Get, Header, HttpCode, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import {
+  ApprovalDecision, AssignFee, AttendanceDayPut, CoverRequest, IsoDate, MessageRequest, NoticeCreate, PaymentCreate, SettingsPatch, SlotPatch, StudentCreate, StudentImport, StudentQuery,
+  type ApprovalRow, type AttendanceDay, type AttendanceWeekPoint, type AuditRow, type ClassInfo, type ContactReveal, type DashboardData, type FeeSummary, type ImportResult, type InvoiceRow,
+  type NoticeRow, type SearchHit, type SettingsDoc, type SettingsResponse, type ShellData, type StudentDetail, type StudentRow, type StudentSummary, type StudentViews, type TeacherLoad, type TeacherOption, type TimetableView, type Paged,
+} from '@edunest/contracts';
+import { MODULES, closeModules } from '@edunest/config-engine';
+import { z } from 'zod';
+import { ZodPipe } from '@edunest/nest-kit';
+import { CurrentUser, Require, RequireModule } from '../auth/guards.js';
+import { NoTenant, Tenant, type AuthedUser, type TenantCtx } from '../tenancy/tenant.js';
+import { ApprovalsService } from './approvals.service.js';
+import { AttendanceService } from './attendance.service.js';
+import { DashboardService } from './dashboard.service.js';
+import { FeesService } from './fees.service.js';
+import { StudentsService } from './students.service.js';
+import { AuditService, Messenger, SettingsService } from './support.js';
+import { TimetableService } from './timetable.service.js';
+
+const DayQuery = z.object({ classId: z.string().min(1), date: IsoDate });
+const InvoiceQuery = z.object({ studentId: z.string().min(1) });
+const ListApprovals = z.object({ status: z.enum(['pending', 'approved', 'rejected', 'all']).default('pending'), kind: z.enum(['leave', 'fee_waiver', 'admission', 'notice']).optional() });
+const ClassQuery = z.object({ classId: z.string().min(1) });
+const DashQuery = z.object({ days: z.coerce.number().int().min(1).max(30).default(6) });
+const SearchQuery = z.object({ q: z.string().max(80).default('') });
+const IdsQuery = z.object({ ids: z.string().optional() });
+const Summ = StudentQuery.pick({ classId: true, house: true });
+
+@Controller('v1/classes')
+export class ClassesController {
+  constructor(private readonly tt: TimetableService) {}
+
+  @Get() @Require('students.read')
+  list(@Tenant() t: TenantCtx): Promise<ClassInfo[]> {
+    return this.tt.classes(t);
+  }
+}
+
+@Controller('v1/students')
+export class StudentsController {
+  constructor(private readonly students: StudentsService) {}
+
+  @Get() @Require('students.read')
+  list(@Tenant() t: TenantCtx, @Query(new ZodPipe(StudentQuery)) q: StudentQuery): Promise<Paged<StudentRow>> {
+    return this.students.list(t, q);
+  }
+
+  @Get('summary') @Require('students.read')
+  summary(@Tenant() t: TenantCtx, @Query(new ZodPipe(Summ)) q: z.infer<typeof Summ>): Promise<StudentSummary> {
+    return this.students.summary(t, q);
+  }
+
+  @Get('views') @Require('students.read')
+  views(@Tenant() t: TenantCtx): Promise<StudentViews> {
+    return this.students.views(t);
+  }
+
+  @Get('export') @Require('students.read') @Header('content-type', 'text/csv; charset=utf-8') @Header('content-disposition', 'attachment; filename="students.csv"')
+  export(@Tenant() t: TenantCtx, @Query(new ZodPipe(IdsQuery)) q: z.infer<typeof IdsQuery>): Promise<string> {
+    return this.students.exportCsv(t, q.ids ? q.ids.split(',').slice(0, 500) : null);
+  }
+
+  @Post() @Require('students.write')
+  create(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(StudentCreate)) body: StudentCreate): Promise<StudentDetail> {
+    return this.students.create(t, body, u);
+  }
+
+  @Post('import') @HttpCode(200) @Require('students.write')
+  import(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(StudentImport)) body: StudentImport): Promise<ImportResult> {
+    return this.students.importCsv(t, body.csv, u);
+  }
+
+  @Post('message') @HttpCode(200) @Require('students.read')
+  message(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(MessageRequest)) body: MessageRequest): Promise<{ sent: number }> {
+    return this.students.message(t, body, u);
+  }
+
+  @Post('assign-fee') @HttpCode(200) @Require('fees.collect') @RequireModule('fees')
+  assignFee(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(AssignFee)) body: AssignFee): Promise<{ created: number }> {
+    return this.students.assignFee(t, body, u);
+  }
+
+  @Get(':id') @Require('students.read')
+  detail(@Tenant() t: TenantCtx, @Param('id') id: string): Promise<StudentDetail> {
+    return this.students.detail(t, id);
+  }
+
+  @Post(':id/reveal') @HttpCode(200) @Require('students.read')
+  reveal(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Param('id') id: string): Promise<ContactReveal> {
+    return this.students.reveal(t, id, u);
+  }
+}
+
+@Controller('v1/attendance')
+@RequireModule('attendance')
+export class AttendanceController {
+  constructor(private readonly attendance: AttendanceService) {}
+
+  @Get('day') @Require('attendance.read')
+  day(@Tenant() t: TenantCtx, @Query(new ZodPipe(DayQuery)) q: z.infer<typeof DayQuery>): Promise<AttendanceDay> {
+    return this.attendance.day(t, q.classId, q.date);
+  }
+
+  @Put('day') @Require('attendance.mark')
+  put(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(AttendanceDayPut)) body: AttendanceDayPut): Promise<AttendanceDay> {
+    return this.attendance.put(t, u, body);
+  }
+
+  @Get('week') @Require('attendance.read')
+  week(@Tenant() t: TenantCtx): Promise<AttendanceWeekPoint[]> {
+    return this.attendance.week(t);
+  }
+
+  @Post('remind') @HttpCode(200) @Require('attendance.read')
+  remind(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<{ sent: number; classes: string[] }> {
+    return this.attendance.remind(t, u);
+  }
+}
+
+@Controller('v1/fees')
+@RequireModule('fees')
+export class FeesController {
+  constructor(private readonly fees: FeesService) {}
+
+  @Get('summary') @Require('fees.read')
+  summary(@Tenant() t: TenantCtx): Promise<FeeSummary> {
+    return this.fees.summary(t);
+  }
+
+  @Get('invoices') @Require('fees.read')
+  invoices(@Tenant() t: TenantCtx, @Query(new ZodPipe(InvoiceQuery)) q: z.infer<typeof InvoiceQuery>): Promise<InvoiceRow[]> {
+    return this.fees.invoices(t, q.studentId);
+  }
+
+  @Post('payments') @HttpCode(200) @Require('fees.collect')
+  pay(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(PaymentCreate)) body: PaymentCreate): Promise<{ receiptNo: string; amount: number; outstanding: number }> {
+    return this.fees.pay(t, u, body);
+  }
+
+  @Post('reminders') @HttpCode(200) @Require('fees.read')
+  remind(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(z.object({ ids: z.array(z.string()).min(1).max(500) }))) body: { ids: string[] }): Promise<{ sent: number }> {
+    return this.fees.remind(t, u, body.ids);
+  }
+}
+
+@Controller('v1')
+export class ApprovalsController {
+  constructor(private readonly approvals: ApprovalsService) {}
+
+  @Get('needs-you') @Require('approvals.read')
+  needsYou(@Tenant() t: TenantCtx): Promise<ApprovalRow[]> {
+    return this.approvals.needsYou(t);
+  }
+
+  @Get('approvals') @Require('approvals.read')
+  list(@Tenant() t: TenantCtx, @Query(new ZodPipe(ListApprovals)) q: z.infer<typeof ListApprovals>): Promise<ApprovalRow[]> {
+    return this.approvals.list(t, q.status, q.kind);
+  }
+
+  @Post('approvals/:id/decision') @HttpCode(200) @Require('approvals.decide')
+  decide(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Param('id') id: string, @Body(new ZodPipe(ApprovalDecision)) body: ApprovalDecision): Promise<ApprovalRow> {
+    return this.approvals.decide(t, u, id, body);
+  }
+
+  @Get('notices') @RequireModule('notices') @Require('notices.read')
+  notices(@Tenant() t: TenantCtx): Promise<NoticeRow[]> {
+    return this.approvals.notices(t);
+  }
+
+  @Post('notices') @RequireModule('notices') @Require('notices.write')
+  createNotice(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(NoticeCreate)) body: NoticeCreate): Promise<NoticeRow> {
+    return this.approvals.createNotice(t, u, body);
+  }
+}
+
+@Controller('v1/timetable')
+@RequireModule('timetable')
+export class TimetableController {
+  constructor(private readonly tt: TimetableService) {}
+
+  @Get() @Require('timetable.read')
+  view(@Tenant() t: TenantCtx, @Query(new ZodPipe(ClassQuery)) q: z.infer<typeof ClassQuery>): Promise<TimetableView> {
+    return this.tt.view(t, q.classId);
+  }
+
+  @Get('loads') @Require('timetable.read')
+  loads(@Tenant() t: TenantCtx, @Query(new ZodPipe(ClassQuery)) q: z.infer<typeof ClassQuery>): Promise<TeacherLoad[]> {
+    return this.tt.loads(t, q.classId);
+  }
+
+  @Get('teachers') @Require('timetable.read')
+  teachers(@Tenant() t: TenantCtx, @Query(new ZodPipe(z.object({ slotId: z.string().min(1) }))) q: { slotId: string }): Promise<TeacherOption[]> {
+    return this.tt.teachers(t, q.slotId);
+  }
+
+  @Patch('slots/:id') @HttpCode(204) @Require('timetable.edit')
+  async patch(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Param('id') id: string, @Body(new ZodPipe(SlotPatch)) body: SlotPatch): Promise<void> {
+    await this.tt.patchSlot(t, u, id, body);
+  }
+
+  @Post('cover') @HttpCode(204) @Require('timetable.edit')
+  async cover(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(CoverRequest)) body: CoverRequest): Promise<void> {
+    await this.tt.cover(t, u, body);
+  }
+
+  @Post('publish') @HttpCode(200) @Require('timetable.publish')
+  publish(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<{ families: number; teachers: number; version: number }> {
+    return this.tt.publish(t, u);
+  }
+}
+
+@Controller('v1')
+export class DashboardController {
+  constructor(
+    private readonly dash: DashboardService,
+    private readonly settings: SettingsService,
+  ) {}
+
+  @Get('dashboard')
+  get(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Query(new ZodPipe(DashQuery)) q: z.infer<typeof DashQuery>): Promise<DashboardData> {
+    return this.dash.get(t, u, q.days);
+  }
+
+  @Get('shell')
+  async shell(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<ShellData> {
+    const cfg = await this.settings.effective(t, u.permissions);
+    return this.dash.shell(t, cfg.modules);
+  }
+
+  @Get('search')
+  async search(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Query(new ZodPipe(SearchQuery)) q: z.infer<typeof SearchQuery>): Promise<SearchHit[]> {
+    const cfg = await this.settings.effective(t, u.permissions);
+    return this.dash.search(t, q.q, u.permissions, cfg.modules);
+  }
+}
+
+@Controller('v1/settings')
+export class SettingsController {
+  constructor(
+    private readonly settings: SettingsService,
+    private readonly audit: AuditService,
+    private readonly messenger: Messenger,
+  ) {}
+
+  @Get() @Require('settings.read')
+  async get(@Tenant() t: TenantCtx): Promise<SettingsResponse> {
+    const [doc, counts, smsUsed] = await Promise.all([
+      this.settings.doc(t),
+      t.pool.query<{ students: string; staff: string }>("select (select count(*) from students where status = 'active') students, (select count(*) from staff) staff"),
+      this.messenger.smsThisMonth(t.info.slug),
+    ]);
+    const entitled = closeModules(t.info.entitlement.modules);
+    const { limits, plan } = t.info.entitlement;
+    const usage = { plan, students: Number(counts.rows[0]!.students), staff: Number(counts.rows[0]!.staff), studentLimit: limits.students, smsUsed, smsLimit: limits.smsPerMonth };
+    return { ...doc, usage, modules: MODULES.map((m) => ({ key: m.key, name: m.name, blurb: m.blurb, requires: m.requires, core: !!m.core, backend: m.backend, entitled: entitled.includes(m.key) })) };
+  }
+
+  @Patch() @Require('settings.write')
+  async patch(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser, @Body(new ZodPipe(SettingsPatch)) body: SettingsPatch): Promise<SettingsDoc> {
+    return this.settings.patch(t, u, body);
+  }
+
+  @Get('audit') @Require('audit.read')
+  auditLog(@Tenant() t: TenantCtx): Promise<AuditRow[]> {
+    return this.audit.list(t);
+  }
+}
+
+@Controller()
+export class HealthController {
+  constructor(private readonly settings: SettingsService) {}
+
+  @NoTenant() @Get('health')
+  health(): { ok: true } {
+    return { ok: true };
+  }
+
+  /** Cheap check the console uses to see a school's database answering, and how fast. */
+  @Get('v1/ping')
+  async ping(@Tenant() t: TenantCtx): Promise<{ ok: true; ms: number; apiVersion: string }> {
+    const started = Date.now();
+    await t.pool.query('select 1');
+    return { ok: true, ms: Date.now() - started, apiVersion: t.info.apiVersion };
+  }
+}
+

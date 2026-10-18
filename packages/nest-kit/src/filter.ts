@@ -1,0 +1,32 @@
+import { Catch, HttpException, Logger, type ArgumentsHost, type ExceptionFilter } from '@nestjs/common';
+import type { ApiErrorBody, ErrorCode } from '@edunest/contracts';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+
+const BY_STATUS: Record<number, ErrorCode> = {
+  400: 'validation', 401: 'unauthenticated', 403: 'forbidden', 404: 'not_found', 409: 'conflict', 423: 'locked', 429: 'rate_limited', 503: 'school_unavailable',
+};
+
+/** Every failure leaves the server in one shape, and nothing internal is ever sent to a client. */
+@Catch()
+export class ApiExceptionFilter implements ExceptionFilter {
+  private readonly log = new Logger('Api');
+
+  catch(err: unknown, host: ArgumentsHost): void {
+    const http = host.switchToHttp();
+    const reply = http.getResponse<FastifyReply>();
+    const req = http.getRequest<FastifyRequest>();
+    let status = 500;
+    let body: ApiErrorBody = { code: 'internal', message: 'Something went wrong on our side. Try again in a moment.' };
+    if (err instanceof HttpException) {
+      status = err.getStatus();
+      const res = err.getResponse();
+      if (typeof res === 'object' && res && 'code' in res && 'message' in res) body = res as ApiErrorBody;
+      else body = { code: BY_STATUS[status] ?? 'internal', message: status === 404 ? 'That was not found.' : typeof res === 'string' ? res : err.message };
+    } else {
+      this.log.error(`${req.method} ${req.url}: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`);
+    }
+    body.requestId = req.id;
+    if (body.retryAfter) void reply.header('retry-after', String(body.retryAfter));
+    void reply.status(status).send(body);
+  }
+}

@@ -44,7 +44,21 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 android/.kotlin/
-dist/
+apps/*/dist/
+packages/*/dist/
 
 # Claude Code personal settings
 .claude/settings.local.json
+
+# Platform (pnpm workspace)
+node_modules/
+apps/*/dist/
+packages/*/dist/
+.turbo/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.edunest-data/
+playwright-report/
+test-results/

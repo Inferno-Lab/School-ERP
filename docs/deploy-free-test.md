@@ -1,0 +1,64 @@
+# Deploy the free test track
+
+One free web service on Render runs everything: the school API, the console API, the school admin (at `/`) and the console (at `/console/`). A free Neon database holds the school list and each school's own database. Nothing here costs money. When Render's free service is idle for 15 minutes it sleeps; the next visit takes about a minute to wake it. That is fine for testing.
+
+You make two accounts (Neon and Render). Everything else is in this repository.
+
+## 1. Neon: the database
+
+1. Go to **neon.tech** and sign up (GitHub or Google works).
+2. Create a project called `edunest`. Region: **Singapore** (closest to India). Postgres version: the newest offered.
+3. On the project page press **Connect**. Under *Connection string*:
+   - switch **Connection pooling** to **off** (the console needs the *direct* connection),
+   - copy the string. It starts with `postgresql://` and ends with `?sslmode=require`.
+4. Keep that string private. You paste it in step 3 below.
+
+Free limits: 0.5 GB storage per project. The demo school with 1,498 students uses well under that.
+
+## 2. GitHub: the code
+
+The repository already exists at `Inferno-Lab/School-ERP`. Render builds from the branch you point it at (`feat/platform` until you merge it into `main`).
+
+## 3. Render: the service
+
+1. Go to **render.com** and sign up with GitHub. Allow it to read `School-ERP`.
+2. **New +** → **Blueprint** → pick `School-ERP` → branch `feat/platform` → **Connect**.
+3. Render reads `render.yaml` and shows one service, `edunest`. It asks for three values:
+   - `REGISTRY_DATABASE_URL`: paste the Neon string.
+   - `SHARED_PG_ADMIN_URL`: paste the **same** Neon string.
+   - `DEMO_CODE`: six digits you choose, for example `482915`. The console asks for it after your password.
+4. Press **Apply**. The first build takes 6 to 10 minutes.
+5. When the service says **Live**, open `https://<your-service>.onrender.com`.
+
+If `edunest` is already taken as a name, Render proposes another one. That is fine: nothing else depends on the name.
+
+## 4. Sign in
+
+| Where | Address | Sign in with |
+| --- | --- | --- |
+| Console | `https://<service>.onrender.com/console/` | `kaushal@edunest.app`, the password from Render → your service → **Environment** → `BOOTSTRAP_PASSWORD`, then your `DEMO_CODE` |
+| Demo school admin | `https://<service>.onrender.com/s/greenfield` | `neha.menon@greenfield.edu.in`, password `nest2026`, then press *Type the demo code* |
+
+The demo school Greenfield is created by the first start (a minute or two; watch it appear on the console's Fleet page). Anyone with the address can open the demo school, so keep real data out of this environment.
+
+Texts and emails are caught in the console under **Test inbox**; nothing is sent to real phones. New schools created from **Onboarding** get their invite and sign-in codes there.
+
+## 5. Optional: Android app builds
+
+The console's **Build Android app** starts a GitHub Actions workflow (`.github/workflows/mobile-build.yml`) that builds the APK and posts the install link back.
+
+1. GitHub → your profile → *Settings* → *Developer settings* → *Personal access tokens* → fine-grained token for `School-ERP` with **Actions: read and write** and **Contents: read and write**.
+2. In Render → **Environment** add `GITHUB_TOKEN` (that token) and `GITHUB_REPO` = `Inferno-Lab/School-ERP`, and `GITHUB_BRANCH` = `feat/platform` while that is the branch.
+3. In GitHub → repository → *Settings* → *Secrets and variables* → *Actions*: add the secret `BUILD_CALLBACK_TOKEN` (copy the value of the same variable from Render) and the variable `API_BASE_URL` = your Render address.
+
+### What the app does against the test track
+
+A build made with `SCHOOL` and `API_BASE_URL` (the workflow passes both) reads the school's own name and tagline from its API at start-up, so changing them in the admin's Settings shows up in the app. The rest of the app still runs on the demo content: connecting each screen to the school's data is the next step of the plan (section 19).
+
+## Updating
+
+Pushing to the branch redeploys automatically. Database changes are applied by the server at start; schools get theirs from the console under **Migrations** and **Releases**.
+
+## Using real infrastructure later
+
+The same steps run on AWS: a cell in the console gets the `aws-cell` target, and the blueprints under **Blueprints** describe what is created for each school. See `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`.
