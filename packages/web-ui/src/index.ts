@@ -1,6 +1,7 @@
 import './nest.css';
 import './shell/shell.css';
 import './blocks.css';
+import './polish.css';
 
 export * from './theme';
 export * from './icons';
@@ -17,5 +18,6 @@ export * from './Roll';
 export * from './forms';
 export * from './Dialog';
 export * from './Toast';
+export * from './Segmented';
 export * from './shell/Dock';
 export * from './useMedia';

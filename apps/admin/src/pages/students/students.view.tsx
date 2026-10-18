@@ -90,14 +90,14 @@ export function StudentsView({ v }: { v: any }) {
         <section className="tcard rise" style={{ "--d": ".15s" } as CSSProperties} aria-label="Students table">
           <div className="tcap">
             <h2>{v.title}</h2>
-            <div className="srch" style={{ minWidth: "240px", height: "38px" } as CSSProperties}>
+            <div className="srch" style={{ minWidth: "280px", height: "38px" } as CSSProperties}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path className="i" d="M4.5 11a6.5 6.5 0 1 0 13 0a6.5 6.5 0 1 0-13 0M20 20l-4.2-4.2"></path>
               </svg>
               <input
                 value={v.q}
                 onChange={v.onQ}
-                placeholder="Search name or admission no."
+                placeholder="Name or admission no."
                 aria-label="Search students"
                 style={
                   {

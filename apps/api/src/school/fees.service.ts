@@ -91,15 +91,15 @@ export class FeesService {
       [newId('pay'), inv.id, body.amount, body.method, body.reference ?? null, receiptNo, istToday(), user.id]);
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'payment.recorded', entity: 'invoice', entityId: inv.id, detail: { amount: body.amount, receipt: receiptNo } });
     const g = await t.pool.query<{ phone: string | null }>('select g.phone from student_guardians sg join guardians g on g.id = sg.guardian_id where sg.student_id = $1 and sg.is_primary', [body.studentId]);
-    if (g.rows[0]?.phone) await this.messenger.send(t, { channel: 'sms', to: g.rows[0].phone, body: `Receipt ${receiptNo}: ₹${body.amount.toLocaleString('en-IN')} received for ${inv.title}. Thank you.` });
+    if (g.rows[0]?.phone) await this.messenger.notify(t, 'fees.receipt', [{ to: g.rows[0].phone, vars: { receipt: receiptNo, amount: `₹${body.amount.toLocaleString('en-IN')}`, title: inv.title } }]);
     return { receiptNo, amount: body.amount, outstanding: outstanding - body.amount };
   }
 
   async remind(t: TenantCtx, user: { id: string; name: string }, ids: string[]): Promise<{ sent: number }> {
     const { rows } = await t.pool.query<{ phone: string | null; name: string }>(
       `select g.phone, s.name from students s join student_guardians sg on sg.student_id = s.id and sg.is_primary join guardians g on g.id = sg.guardian_id where s.id = any($1)`, [ids]);
-    const list = rows.filter((r) => r.phone).map((r) => ({ channel: 'sms' as const, to: r.phone!, body: `Reminder: fees for ${r.name} are due. Pay in the EduNest app to get an instant receipt.` }));
-    await this.messenger.sendMany(t, list);
+    const list = rows.filter((r) => r.phone).map((r) => ({ to: r.phone!, vars: { student: r.name } }));
+    await this.messenger.notify(t, 'fees.reminder', list);
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'fee.reminded', entity: 'student', detail: { count: list.length } });
     return { sent: list.length };
   }

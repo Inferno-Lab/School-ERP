@@ -69,11 +69,12 @@ export class Wizard {
     if (taken.rowCount) problems.push(`The address “${payload.basics.slug}” is already used by another school.`);
     const plan = (await this.plans()).find((p) => p.key === payload.plan.plan);
     if (!plan) problems.push(`Plan “${payload.plan.plan}” does not exist.`);
-    const cell = await this.db.pool.query<{ key: string; target: string; max_schools: number; n: string }>(
-      'select c.key, c.target, c.max_schools, (select count(*) from schools s where s.cell = c.key and s.deleted_at is null) n from cells c where c.key = $1', [payload.placement.cell]);
+    const cell = await this.db.pool.query<{ key: string; target: string; max_schools: number; accepting: boolean; n: string }>(
+      'select c.key, c.target, c.max_schools, c.accepting, (select count(*) from schools s where s.cell = c.key and s.deleted_at is null) n from cells c where c.key = $1', [payload.placement.cell]);
     const c = cell.rows[0];
     if (!c) problems.push(`Cell “${payload.placement.cell}” does not exist.`);
     else if (c.target !== payload.placement.target) problems.push(`Cell ${c.key} runs on ${c.target}, not ${payload.placement.target}.`);
+    if (c && !c.accepting) problems.push(`Cell ${c.key} is closed to new schools. Choose another cell.`);
     if (c && Number(c.n) >= c.max_schools) problems.push(`Cell ${c.key} is full (${c.n} of ${c.max_schools} schools).`);
     if (plan) {
       const extra = closeModules(payload.plan.modules).filter((m) => !closeModules(plan.modules).includes(m));
@@ -117,11 +118,11 @@ export class Wizard {
     const id = newId('sch');
     const entitlement = { modules: closeModules(payload.plan.modules), limits: plan.limits, locks: payload.plan.locks, overrides: {}, version: 1 };
     const school = (await this.db.query<typeof reg.schools.$inferSelect>(
-      `insert into schools (id, slug, name, short_name, color, logo_text, status, plan, cell, target, region, entitlement, contact, gstin, board, address, addressing, custom_domain, app_name, created_by, ring)
-       values ($1,$2,$3,$4,$5,$6,'onboarding',$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,'rest') returning *`,
+      `insert into schools (id, slug, name, short_name, color, logo_text, status, plan, cell, target, region, entitlement, contact, gstin, board, address, addressing, custom_domain, app_name, created_by, ring, api_version, admin_version)
+       values ($1,$2,$3,$4,$5,$6,'onboarding',$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,'rest',$20,$20) returning *`,
       [id, payload.basics.slug, payload.basics.name, payload.basics.shortName, payload.branding.color, payload.branding.logoText, payload.plan.plan, payload.placement.cell, payload.placement.target, cell.region,
         JSON.stringify(entitlement), JSON.stringify({ name: payload.basics.contactName, phone: payload.basics.contactPhone, email: payload.basics.contactEmail }), payload.basics.gstin, payload.basics.board,
-        [payload.basics.address, payload.basics.city].filter(Boolean).join(', '), payload.placement.addressing, payload.placement.customDomain, payload.branding.appName, user.email])).rows[0]!;
+        [payload.basics.address, payload.basics.city].filter(Boolean).join(', '), payload.placement.addressing, payload.placement.customDomain, payload.branding.appName, user.email, this.env.APP_VERSION])).rows[0]!;
     if (opts.dryRun) {
       // A dry run needs a school record to read from; it is removed as soon as the run has finished.
       try {

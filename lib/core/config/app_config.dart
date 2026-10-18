@@ -10,7 +10,7 @@ class AppConfig {
   /// `--dart-define=SCHOOL=<slug> --dart-define=API_BASE_URL=<address>`; the console's build workflow does.
   static const schoolSlug = String.fromEnvironment('SCHOOL');
   static const apiBase = String.fromEnvironment('API_BASE_URL');
-  static bool get live => schoolSlug.isNotEmpty && apiBase.isNotEmpty;
+  static const live = schoolSlug != '' && apiBase != '';
 
   /// The school's name and tagline. The demo values stand until `SchoolProfileService` has the school's own from the API.
   static String schoolName = 'Greenfield International School';
@@ -19,8 +19,8 @@ class AppConfig {
   static const version = '2.0.6';
   static const build = 216;
 
-  /// Flip to false to route every repository through the remote stub.
-  static bool useMockData = true;
+  /// A build with a school profile talks to that school's API; any other build runs on the demo content.
+  static bool useMockData = !live;
 
   /// Mock calls answer almost at once, like a good connection.
   static int mockDelayMinMs = 30;
@@ -40,6 +40,7 @@ class AppConfig {
   /// Toggled from Settings so loading and error states can be demoed.
   static final simulateErrors = false.obs;
 
-  static const demoPassword = 'demo123';
+  /// The demo password: the demo content's own, or the demo school's when the app is built for one.
+  static const demoPassword = live ? 'nest2026' : 'demo123';
   static const demoOtp = '123456';
 }

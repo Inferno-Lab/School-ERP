@@ -370,7 +370,7 @@ class RemoteTransportRepository implements TransportRepository {
   @override
   Future<TransportInfo?> forStudent(String studentId) async {
     final json = await _remote.get('/students/$studentId/transport');
-    return TransportInfo.fromJson(Map<String, dynamic>.from(json as Map));
+    return json is Map ? TransportInfo.fromJson(Map<String, dynamic>.from(json)) : null;
   }
 }
 

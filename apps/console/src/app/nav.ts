@@ -22,6 +22,7 @@ const DEFS: { name: string; items: Def[] }[] = [
     { id: 'sup', label: 'Support', icon: 'sup', keys: 'G S', to: '/support' },
     { id: 'inbox', label: 'Test inbox', icon: 'inbox', keys: 'G X', to: '/inbox' },
     { id: 'bill', label: 'Billing', icon: 'bill', keys: 'G I', to: '/billing' },
+    { id: 'comp', label: 'Compliance', icon: 'sup', keys: 'G Y', to: '/compliance' },
     { id: 'team', label: 'Team', icon: 'team', keys: 'G T', to: '/team' },
   ] },
 ];

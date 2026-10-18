@@ -42,9 +42,9 @@ What "the entire plan" means in practice: the plan's build order (section 24) ha
 | School API | `apps/api` | NestJS 11 on Fastify. Sign-in (password then one-time code; 5 failed tries lock for 5 minutes; demo code only in demo schools), refresh-token rotation with replay detection, students (list/filter/sort/page, summary, views, detail, create, CSV import/export, message, assign fee), attendance (day view, roll call save, reminders), fees (summary, invoices, payments with receipts, reminders), approvals (decide with undo), notices (draft → pending → published, approval rule from settings), timetable (view, loads, teacher options, patch, cover, publish with clash detection), dashboard (+shell data), settings (versioned, locks, audit, plan usage), search, audit log, health, metrics. Permission guard (`@Require`) and module guard (`@RequireModule`). 27 tests on a real PostgreSQL. |
 | Console API | `apps/console-api` | Auth (password + code, sessions), schools, plans, catalog, **wizard** (drafts, review, dry run, launch), **provisioning** (blueprints + drivers `local`, `free-test`, `aws-cell`; runs with per-step logs, retry, skip optional), **actions** (suspend, resume, erase, push entitlements, run migrations, set domain, build app, backup) with **second-person approval** and typed confirmation, **releases** in waves with auto-halt and rollback, migrations view, health prober and incidents, support sessions (read-only signed token for one school), flags, billing (monthly invoices, idempotent), team, audit (filterable per school), policy (approvals, waves, halt thresholds, freeze), sandbox message inbox, build callback, demo seed on first start. 19 tests. |
 | Server | `apps/server` | One process: both APIs, and (if `apps/admin/dist` and `apps/console/dist` exist) serves the admin at `/` and the console at `/console/` with SPA fallback and long caching for hashed files. |
-| School admin | `apps/admin` | Pages: sign-in, dashboard, students (+drawer, add, import, message, assign fee, collect fee), timetable (week/day/list, clash fix, publish), settings (General, Modules, Audit log), attendance roll call, notices, fees, phone home, design-system page, support banner. Others show "opens in a coming release". |
-| Console | `apps/console` | Fleet, school (Overview/Entitlements/Versions/Health/Audit), onboarding (list + 7-step wizard with drafts), cells, releases, migrations, mobile builds, flags, blueprints and rules, health, approvals, support, test inbox, billing, team. |
-| Mobile app | `lib/` | Original demo app, plus `SchoolProfileService`: with `--dart-define=SCHOOL` and `API_BASE_URL` it fetches `/v1/brand` at start and uses the school's name and tagline. Everything else is still mock data. |
+| School admin | `apps/admin` | Sign-in, dashboard (widgets can be hidden), students, timetable, attendance roll call, fees, **invoices and receipts, homework, exams with a marks grid and results, staff, admissions board, reports with CSV, messages inbox, events calendar**, notices, phone home and dock, design-system page, support banner, a public status page at `/status`. Settings: General, Modules, **App layout, Roles and access, Notifications, Message templates, Privacy and consent**, Audit log. |
+| Console | `apps/console` | Fleet, school (Overview/Entitlements/Versions/Health/Audit), onboarding (list + 7-step wizard with drafts), **cells (add, manage, close to new schools, move a school)**, releases (**editable waves**), migrations, mobile builds, flags (**with kill switches**), blueprints (**new blueprint, step parameters, rollout rules, maintenance window**), health, approvals, support, test inbox, billing, **compliance desk (agreements, 72-hour breach clock, sub-processors)**, team, an alerts dialog on the bell. |
+| Mobile app | `lib/` | Original demo app. Built with `--dart-define=SCHOOL=<slug> --dart-define=API_BASE_URL=<address>` it runs on **the school's real data**: `ApiClient` (token, `X-School`, one refresh), real password + code sign-in, and every Remote repository reads the family API (`/v1/f/*`, section 9.3). Without those defines it is the demo app on mock JSON. |
 | Tooling | `tools/` | `audit-ui.mjs`, `e2e-flows.mjs`, `e2e-onboard.mjs`, `shot.mjs`, `dev-reset.sh`, `provision-demo.mjs`, plus one-time conversion scripts (section 5). |
 | Delivery | `render.yaml`, `.github/workflows/ci.yml`, `mobile-build.yml`, `.node-version` | Render blueprint; CI (platform build+types+tests, Flutter analyze+test; green on GitHub); Android build workflow started by the console. |
 
@@ -150,29 +150,26 @@ Status against the plan's build order (section 24): **0** foundations — partia
 
 Why not done: the plan describes a production system for 500 schools over eleven steps; the owner asked for the whole plan, but a free, working, tested slice that all parts share had to come first, and each remaining item is a feature-sized project (a backend module, its admin screens and, for most, the app screens). Items that need the owner's accounts or paid services (AWS, Razorpay, SMS/WhatsApp providers, Apple/Google store accounts) cannot be done without them.
 
-### 9.1 Add an admin page whose backend exists or is small (homework, exams, staff, admissions, invoices, reports, messages, events)
+### 9.1 Add an admin page (the pattern, and what is already built)
 
-1. **Contracts first** (`packages/contracts/src/school.ts`): request/response types; permission keys in `permissions.ts`.
-2. **Migration:** add a new SQL file under `packages/db/migrations/school/` (kind header; never edit applied files) and update `packages/db/src/school/schema.ts`. Extend the seed in `packages/db/src/seed/greenfield.ts` so the demo school has data for every weekday and the page is never empty-by-accident.
-3. **Service + controller** in `apps/api/src/school/` following `approvals.service.ts`/`school.controllers.ts`: `@RequireModule('<module>')`, `@Require('<permission>')`, zod pipe, audit entries for writes. Register in `app.module.ts`. Add API tests in `apps/api/test/api.test.ts`.
-4. **api-client** (`packages/api-client/src/school.ts`), then the page: copy `apps/admin/src/pages/fees/FeesPage.tsx` as the pattern (it uses `Page`, shared blocks, `EmptyCard`, toasts, query invalidation). Change the `to` in `apps/admin/src/app/nav.ts` from `/p/<name>` to the real route and register it in `router.tsx`. Add routes to `tools/audit-ui.mjs` and a flow to `tools/e2e-flows.mjs`.
-5. There is no board for these pages: compose from approved pieces, then ask the owner to review the look (they have **not** reviewed attendance, fees, notices or any console page without a board).
-6. Real-time "left to do" numbers (menu badges) come from `DashboardService.shell`; extend it when a module has a count.
+Built on 2026-10-18: homework, exams (marks grid, ranks, publish), staff, admissions (enquiry → applied → test → offer → enrolled), invoices and receipts, reports (7, with CSV), messages (family inbox), events (calendar and replies), data requests. Backend: `apps/api/src/school/{learning,people,office,family}.service.ts` with controllers in `modules.controllers.ts` and `family.controller.ts`; migrations `0001`–`0003` under `packages/db/migrations/school/`; sample content in `packages/db/src/seed/modules.ts` (also applied to an existing demo school at start, `Bootstrap.upgradeDemo`). To add another page:
 
-### 9.2 Settings tabs (App layout, Roles and access, Notifications, Message templates, Privacy and consent)
+1. **Contracts first** (`packages/contracts/src/modules.ts`, permissions in `permissions.ts`).
+2. **Migration:** a new SQL file (kind header; never edit an applied file), the Drizzle table in `schema.ts`, and demo content in `seed/modules.ts` (guarded so it can run twice).
+3. **Service + controller** with `@RequireModule`, `@Require`, `ZodPipe`, audit entries; tests in `apps/api/test/modules.test.ts`.
+4. **api-client** method, then the page (copy `HomeworkPage.tsx` or `InvoicesPage.tsx`: `Page`, shared blocks, `EmptyCard`, `Dialog`, `Segmented`, kit helpers in `app/kit.tsx`), route in `router.tsx`, menu entry in `app/nav.ts`, module manifest in `config-engine/src/modules.ts`.
+5. Add the route to `tools/audit-ui.mjs` and a flow to `tools/e2e-flows.mjs`. Pages without a canvas board still need the owner's design review (none of the pages above has had one).
+6. Messages sent by the school go through `Messenger.notify(key, …)` so Notifications and Message templates apply; add the message to `MESSAGE_EVENTS` in `contracts/src/modules.ts`.
 
-Each needs data: layouts and templates are config documents (plan section 12.4/13); roles matrix needs `roles`/`user_roles` endpoints (tables exist). Pattern: add keys to `SchoolSettingsSchema` in `packages/contracts/src/config.ts` (defaults there are the platform defaults), expose them in the Settings page's tab switch (`SettingsPage.tsx`, `extra`), keep saving through `settings.patch`. Roles: new `roles` controller listing roles/permissions with a diff before save.
+### 9.2 Settings tabs
 
-### 9.3 Make the mobile app use real data (the biggest gap)
+All built (`apps/admin/src/pages/settings/panels.tsx`). Roles and access edits `roles` (custom roles, a role cannot grant what its author lacks, the principal role is fixed; people get changes at their next sign-in). App layout edits `app.dock/home/quick` (resolved against enabled modules into `config.app`). Notifications edit `notify.rules` and quiet hours; Message templates edit `templates.messages`; Privacy edits `privacy.*` and keeps data requests. What is **not** done: the app does not read `config.app` yet (the Flutter shell has a fixed set of tabs), quiet hours only mark sandbox messages as held (no real queue), and consent capture in the app.
 
-Today only name/tagline are live. Steps:
+### 9.3 The mobile app on real data
 
-1. **Backend family API.** The school API is staff-oriented. Add endpoints for guardians and students (child list, attendance, timetable, homework, fees with payment, notices, events, notifications) under `/v1/me/...`, scoped by the signed-in guardian's children (`student_guardians`) or the student's own record. Sign-in already supports `guardian` and `student` user kinds; the seed creates staff only, so seed guardian and student users for the demo school (password `demo123`-style demo accounts, OTP via sandbox).
-2. **Flutter data layer.** `lib/data/repositories/*` already has `Remote*Repository` classes calling paths from `docs/API_CONTRACT.md`. Either make the new endpoints match that contract, or rewrite the remote repositories against the new endpoints. Implement `lib/core/network/api_client.dart` (token, `X-School`, refresh), keep `AppConfig.useMockData` as the switch, and set `useMockData=false` automatically when `AppConfig.live`.
-3. **Config at start.** Extend `SchoolProfileService` to call `/v1/config` after sign-in (modules, vocabulary) and hide features whose module is off.
-4. **Sign-in.** Replace the demo cards with real password + OTP when live; keep the demo cards for mock mode.
-5. **Then the plan's section 19:** move `lib/` to `apps/mobile` with the TS workspaces (Melos for Dart packages), offline store, deep links, push categories, the EduNest picker app, build-profile injection from the console (the `build-profile` provisioning step currently only records), fastlane per school, Shorebird.
-6. Verify with `tool/verify.sh`, `flutter test`, and an emulator/phone (liquid glass only renders on a device).
+Done: the family API (`apps/api/src/school/family.{service,controller}.ts`, `/v1/f/*`, tested in `apps/api/test/family.test.ts`) answers in the shapes the app's models already parse, scoped to the signed-in parent, student or teacher. `lib/core/network/api_client.dart` is the real client (tests in `test/remote_api_test.dart`); `RemoteAuthRepository` signs in with password then code (`OtpRequired`), and the demo cards work against a demo school because it hands out its code. `test/tool/live_probe_test.dart` reads every screen's data from a running school and parses it with the app's models (run it after `dev-reset.sh`, see its header). Demo family on Greenfield: parent Priya (children Aarav and Ananya), student Aarav (`aarav.sharma@edunest.app`), teacher Kavita; password `nest2026`, code `424242`.
+
+Not done: the Flutter shell does not hide tabs for modules the school switched off (it should read `/v1/config`, `app.dock`); library (only loans, no catalogue or reservations), gallery (empty), transport (route only, no stops or live position), assistant, push registration, offline store, deep links; moving `lib/` to `apps/mobile`, the EduNest picker app, store pipelines and code push (plan section 19). A real phone and the liquid glass shader were not checked.
 
 ### 9.4 Hosting and production (plan sections 5–11, 18–22)
 
@@ -186,7 +183,9 @@ Everything here needs paid or owner-owned services: AWS accounts and OpenTofu fo
 
 ### 9.6 Console gaps
 
-Create a cell (UI + API; today cells appear at first start), move a school between cells, add/clone blueprints and targets (today you can toggle optional steps and save a new version), edit waves in policy, flag evaluation inside the API/app (flags are stored and shown; nothing reads them yet), status pages, compliance desk (erasure requests, DPDP), catalog "update available" offers (plan 12.4), real backups (`backup.take` works only on Neon), release "deployment" that does something beyond recording versions (on AWS it would roll an image), invoices via Razorpay and GST documents.
+Done on 2026-10-18: creating a cell, editing it, closing it to new schools, moving a school (bookkeeping on the test track: cells of one kind share a database server), blueprint creation and step parameters, release waves and maintenance window, kill switches (`kill.<module>` flags stop the module in the school API within 15 seconds and remove it from the config), compliance desk, public status page, alerts dialog, `api_version` set at provisioning.
+
+Still open: a move that copies data between servers (aws-cell), catalog "update available" offers (plan 12.4), real backups (`backup.take` works only on Neon), release "deployment" that does more than record versions, invoices via Razorpay and GST documents, targets as data (they are still the three built-in drivers).
 
 ### 9.7 Quality items
 
@@ -194,7 +193,7 @@ Create a cell (UI + API; today cells appear at first start), move a school betwe
 - A pixel-diff harness against `design/canvas` with matching sample data (Playwright + `pixelmatch`, both installed).
 - Screen-reader pass; keyboard-only pass of the wizard and dialogs; Hindi/Marathi strings for admin and console (the sign-in language switch only stores the choice; admin text is English).
 - Per-surface `PRODUCT.md`/`DESIGN.md` (plan step 0).
-- Small known items: the fleet table shows `0.0.0` as a school's version until a release has run (set `api_version` to the server's version at provisioning); the Greenfield seed's homework "handed in" times can be later than the latest school day; the console's `Alerts` bell only links to Approvals; "Cells → Manage" has nothing to manage yet; `package` unit tests for `apps/admin` and `apps/console` do not exist (the browser scripts cover them).
+- Small known items: the Greenfield seed's homework "handed in" times can be later than the latest school day; `package` unit tests for `apps/admin` and `apps/console` do not exist (the browser scripts cover them).
 
 ## 10. Things that went wrong (so they are not repeated)
 
@@ -210,3 +209,9 @@ Create a cell (UI + API; today cells appear at first start), move a school betwe
 1. `README.md` → run locally.
 2. `node tools/audit-ui.mjs --quick` and `node tools/e2e-flows.mjs` to see the baseline is green.
 3. Pick a section 9.1 page (Attendance shows the shape; Homework is the most valuable next, then Exams and Staff), follow the steps, keep the audit and flows green, push, and check the Render deploy.
+
+## 12. Second session (2026-10-18): what changed and what to know
+
+- **UI bugs fixed across both apps** (`packages/web-ui/src/polish.css`, loaded last): visible themed scrollbars everywhere, scroll shadows on anything that scrolls, the menu fits short windows (account block pinned, hidden scrollbar removed), long lists scroll inside their card (`.lscroll`), tiles size to their own width (container queries), phone tables keep their main columns, names wrap to two lines instead of being cut. `tools/scan-cutoff.mjs` finds text cut by an ellipsis, hidden-scrollbar areas and clipped boxes (audit-ui does not).
+- **Traps found**: `.nest .rw` has a fixed `height:64px` (a table row that wraps needs `height:auto`); `Page` loads `pages.css`, the settings page does not, so shared controls live in `web-ui/blocks.css`; `h2` titles in `.card>.ch` need `min-width:max-content` or they wrap one letter at a time beside chips.
+- **Checks**: `pnpm typecheck && pnpm test` (API 27 + 18 + 12, console API 29), `tools/audit-ui.mjs`, `tools/e2e-flows.mjs` (36 flows), `tool/verify.sh`.

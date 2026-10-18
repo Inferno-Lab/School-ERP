@@ -239,7 +239,7 @@ export interface BuildRow {
   createdAt: string;
 }
 
-export const ACTIONS = ['school.suspend', 'school.resume', 'school.erase', 'entitlements.push', 'migration.run', 'domain.set', 'build.app', 'backup.take'] as const;
+export const ACTIONS = ['school.suspend', 'school.resume', 'school.erase', 'entitlements.push', 'migration.run', 'domain.set', 'build.app', 'backup.take', 'school.move'] as const;
 export const ActionKey = z.enum(ACTIONS);
 export type ActionKey = z.infer<typeof ActionKey>;
 
@@ -371,7 +371,7 @@ export interface InvoiceRowC {
 /** What each console role may do. The console hides what a role cannot use and the API refuses it. */
 export const CONSOLE_PERMISSIONS = [
   'schools.read', 'schools.write', 'schools.danger', 'blueprints.write', 'releases.write', 'builds.write', 'flags.write',
-  'support.access', 'billing.read', 'billing.write', 'team.write', 'audit.read', 'policy.write', 'sandbox.read',
+  'support.access', 'billing.read', 'billing.write', 'team.write', 'audit.read', 'policy.write', 'sandbox.read', 'compliance.write',
 ] as const;
 export type ConsolePermission = (typeof CONSOLE_PERMISSIONS)[number];
 
@@ -380,7 +380,7 @@ export const CONSOLE_ROLE_PERMISSIONS: Record<ConsoleRole, readonly ConsolePermi
   support: ['schools.read', 'support.access', 'sandbox.read', 'audit.read'],
   release_manager: ['schools.read', 'releases.write', 'builds.write', 'flags.write', 'sandbox.read'],
   finance: ['schools.read', 'billing.read', 'billing.write'],
-  compliance: ['schools.read', 'audit.read', 'billing.read'],
+  compliance: ['schools.read', 'audit.read', 'billing.read', 'compliance.write'],
   auditor: ['schools.read', 'audit.read', 'billing.read', 'sandbox.read'],
 };
 
@@ -403,4 +403,62 @@ export interface SupportToken {
   token: string;
   adminUrl: string;
   expiresAt: string;
+}
+
+// Cells
+
+export const CellCreate = z.object({
+  key: z.string().trim().toLowerCase().regex(/^[a-z][a-z0-9-]{1,22}[a-z0-9]$/, 'Use 3 to 24 letters, numbers or dashes, starting with a letter'),
+  target: DeployTarget,
+  region: z.string().trim().min(2, 'Name the region').max(40),
+  maxSchools: z.number().int().min(1, 'At least 1').max(500),
+});
+export type CellCreate = z.infer<typeof CellCreate>;
+
+export const CellPatch = z.object({
+  region: z.string().trim().min(2).max(40).optional(),
+  maxSchools: z.number().int().min(1).max(500).optional(),
+  accepting: z.boolean().optional(),
+});
+export type CellPatch = z.infer<typeof CellPatch>;
+
+// Compliance desk
+
+export const SUBPROCESSORS = [
+  { name: 'Neon', purpose: 'Databases for the registry and every school', region: 'Singapore' },
+  { name: 'Render', purpose: 'Runs the platform and serves the admin and console', region: 'Singapore' },
+  { name: 'GitHub', purpose: 'Source code and Android app builds', region: 'United States' },
+] as const;
+
+export const ComplianceCreate = z.object({
+  schoolId: z.string().min(1, 'Choose a school'),
+  kind: z.enum(['dpa', 'breach']),
+  title: z.string().trim().min(3, 'Say what this is').max(120),
+  note: z.string().trim().max(600).default(''),
+});
+export type ComplianceCreate = z.infer<typeof ComplianceCreate>;
+
+export const ComplianceUpdate = z.object({ status: z.enum(['open', 'signed', 'notified', 'closed']), note: z.string().trim().max(600).default('') });
+export type ComplianceUpdate = z.infer<typeof ComplianceUpdate>;
+
+export interface ComplianceRow {
+  id: string;
+  schoolId: string;
+  schoolName: string;
+  kind: 'dpa' | 'breach';
+  title: string;
+  status: 'open' | 'signed' | 'notified' | 'closed';
+  note: string;
+  createdBy: string;
+  createdAt: string;
+  /** A breach must reach the school within 72 hours of being found. */
+  deadlineAt: string | null;
+  closedAt: string | null;
+}
+
+export interface PublicStatus {
+  updatedAt: string;
+  state: 'ok' | 'degraded' | 'down';
+  schools: { name: string; state: 'ok' | 'degraded' | 'down' }[];
+  incidents: { id: string; title: string; open: boolean; startedAt: string; resolvedAt: string | null }[];
 }

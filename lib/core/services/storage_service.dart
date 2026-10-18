@@ -7,6 +7,8 @@ abstract final class StorageKeys {
   static const onboardingSeen = 'onboardingSeen';
   static const sessionUser = 'sessionUser';
   static const activeStudent = 'activeStudent';
+  static const accessToken = 'accessToken';
+  static const refreshToken = 'refreshToken';
   static const reduceMotion = 'reduceMotion';
   static const reduceTransparency = 'reduceTransparency';
   static const simulateErrors = 'simulateErrors';

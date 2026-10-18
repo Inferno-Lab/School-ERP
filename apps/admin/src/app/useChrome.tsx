@@ -95,7 +95,7 @@ export function useChrome(active: string) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, font: '700 12px var(--fb)', color: '#CFC9E6' }}><span className="chip a">{data.term.name}</span>{data.term.examsLabel}</div>
           <div className="fd" style={{ fontSize: 22, letterSpacing: '-.03em' }}>{data.term.daysToGo === 0 ? 'Exams start today' : `${data.term.daysToGo} ${data.term.daysToGo === 1 ? 'day' : 'days'} to go`}</div>
           <div style={{ height: 10, borderRadius: 5, background: 'rgba(255,255,255,.14)' }}><div style={{ width: `${data.term.progress}%`, height: '100%', borderRadius: 5, background: 'var(--a)', transition: 'width 1.2s var(--e)' }} /></div>
-          <button className="btn wht sm" style={{ alignSelf: 'flex-start' }} onClick={() => goRef.current('/p/exams')}>Plan the rooms<svg viewBox="0 0 24 24" aria-hidden="true"><path className="i" d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+          <button className="btn wht sm" style={{ alignSelf: 'flex-start' }} onClick={() => goRef.current('/exams')}>Plan the rooms<svg viewBox="0 0 24 24" aria-hidden="true"><path className="i" d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
         </div>
       )}
       me={{ initials: user.initials, name: user.name, role: user.roleNames[0] ?? 'Staff', bg: t.bg, fg: t.fg }}

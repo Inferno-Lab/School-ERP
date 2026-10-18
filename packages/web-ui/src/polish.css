@@ -1,0 +1,87 @@
+/* Scrolling and fitting: loaded last, so it can fix what the boards left open. Every scroll area gets a visible, themed bar and a soft shadow at the edge that still has more behind it. */
+html{scrollbar-width:thin;scrollbar-color:#B7AAF7 transparent}
+html:has(.nest.dark){color-scheme:dark;scrollbar-color:#4A3E96 transparent}
+.nest *{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--v) 42%,transparent) transparent}
+.nest *::-webkit-scrollbar{width:12px;height:12px}
+.nest *::-webkit-scrollbar-track{background:transparent}
+.nest *::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--v) 38%,transparent);border-radius:999px;border:3px solid transparent;background-clip:content-box;min-height:48px;min-width:48px}
+.nest *::-webkit-scrollbar-thumb:hover{background:var(--v);background-clip:content-box;border-width:2px}
+.nest *::-webkit-scrollbar-corner{background:transparent}
+
+/* Scroll shadows: the edge fades in only while there is more to scroll to (background-attachment: local follows the content). */
+.nest .scl,.nest .popm,.nest .lscroll,.nest .tbl>.scroll-x,.nest .app>.sb{
+  --scbg:var(--card);
+  background:
+    linear-gradient(var(--scbg) 30%,transparent) top/100% 28px no-repeat local,
+    linear-gradient(transparent,var(--scbg) 70%) bottom/100% 28px no-repeat local,
+    radial-gradient(farthest-side at 50% 0,color-mix(in srgb,var(--v) 22%,transparent),transparent) top/100% 12px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%,color-mix(in srgb,var(--v) 22%,transparent),transparent) bottom/100% 12px no-repeat scroll,
+    var(--scbg);
+}
+.nest .app>.sb{--scbg:var(--sbg)}
+/* A long list scrolls inside its card so the page keeps its shape. */
+.nest .lscroll,.nest .tbl>.scroll-x{max-height:min(66dvh,680px);overflow-y:auto;overscroll-behavior:contain}
+.nest .lscroll>.grd.rw:first-child{border-top:0}
+
+/* The menu: visible bar, tighter rows on a short window so the last group is never cut off. */
+@media (min-width:901px){
+  .nest .app>.sb{scrollbar-width:thin;scrollbar-gutter:stable}
+  .nest .app>.sb::-webkit-scrollbar{display:block;width:8px}
+}
+@media (min-width:901px) and (max-height:960px){
+  .nest .app>.sb{padding-top:12px;padding-bottom:10px}
+  .nest .app>.sb .nv{height:36px}
+  .nest .app>.sb .sl{padding:10px 12px 3px}
+  .nest .app>.sb .me{padding-top:8px}
+  .nest .app>.sb .sbc{display:none}
+}
+@media (min-width:901px) and (max-height:780px){
+  .nest .app>.sb .nv{height:34px;font-size:14px}
+  .nest .app>.sb .sl{padding:8px 12px 2px}
+  .nest .app>.sb .sbc{display:none}
+}
+/* The collapsed menu cannot show its hover labels inside a scroll area, so the label rides on the browser tooltip instead. */
+.nest .col .nv .tp{display:none}
+
+/* Names and labels that were cut mid-word now wrap or ellipsise with the full text in a tooltip (set in the markup). */
+.nest .ws>div{min-width:0}
+.nest .ws b,.nest .ws small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nest .wsw>div{min-width:0}
+.nest .wsw b,.nest .wsw small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nest .grd .nm{min-width:0}
+.nest .ll{white-space:pre-wrap;overflow-wrap:anywhere}
+.nest .kv b{min-width:0}
+
+/* Tiles size their contents to their own width, not the window's. */
+.nest .tile{container-type:inline-size}
+@container (max-width:250px){
+  .nest .tile .ghostic,.nest .tile.wl .nst{display:none}
+  .nest .tile .big{font-size:38px}
+}
+.nest .need{flex-wrap:wrap}
+.nest .need>div{flex:1 1 130px}
+/* The account block stays at the bottom of the menu even when the list above it scrolls. */
+@media (min-width:901px){
+  .nest .app>.sb .me{position:sticky!important;bottom:-10px;margin-top:auto;padding:10px 6px 12px;background:var(--sbg);z-index:2;box-shadow:0 -14px 14px -10px var(--sbg)}
+  .nest .app>.sb .sbc{margin-top:12px}
+}
+/* On a phone a table keeps the width its columns need and scrolls sideways inside its card, with a visible bar, instead of squeezing names to "Gre…". */
+@media (max-width:700px){
+  .nest .tbl{overflow-x:auto}
+  .nest .tbl .grd{min-width:600px}
+}
+
+/* Lists that would need sideways scrolling on a phone keep only their main columns there. */
+@media (max-width:700px){
+  .nest .hs{display:none!important}
+  .nest .stfw,.nest .inw,.nest .hwlw{min-width:0!important}
+  .nest .tbl .grd.stf,.nest .tbl .grd.inv,.nest .tbl .grd.hwl{min-width:0!important;gap:10px}
+  .nest .stf{grid-template-columns:minmax(0,1fr) auto!important}
+  .nest .inv,.nest .hwl{grid-template-columns:minmax(0,1fr) auto!important;row-gap:8px;align-items:center;padding-top:10px;padding-bottom:10px;height:auto!important}
+  .nest .grd.th.inv{display:none}
+  .nest .inv>:nth-child(even),.nest .hwl>:nth-child(even){justify-self:end}
+  .nest .adm{grid-template-columns:repeat(5,minmax(78%,1fr));scroll-snap-type:x proximity}
+  .nest .admc{scroll-snap-align:start}
+  .nest .card>.ch .srch{flex:1 1 100%;min-width:0!important;order:3}
+}
+.nest .hwl .chip{justify-self:start}

@@ -188,7 +188,7 @@ describe('attendance and fees', () => {
     expect(put.json.marks.filter((m: any) => m.status === 'absent')).toHaveLength(1);
     const future = await h.call('PUT', '/v1/attendance/day', { token, body: { classId: 'cls_6a', date: '2099-01-01', marks } });
     expect(future.status).toBe(400);
-    const msgs = await h.registry.query("select count(*)::int n from sandbox_messages where body like '%marked absent%'");
+    const msgs = await h.registry.query("select count(distinct to_addr)::int n from sandbox_messages where body like '%marked absent%'");
     expect(msgs.rows[0].n).toBe(1);
   });
   it('records a payment once and refuses more than is due', async () => {

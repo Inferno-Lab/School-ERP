@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/network/api_client.dart';
+import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/data/datasources/mock_json_datasource.dart';
 import 'package:edunest/data/datasources/remote_datasource.dart';
 import 'package:edunest/data/repositories/academic_repository.dart';
@@ -58,7 +61,7 @@ class InitialBinding extends Bindings {
       return;
     }
 
-    final remote = Get.put(RemoteDataSource(ApiClient()), permanent: true);
+    final remote = Get.put(RemoteDataSource(ApiClient(onSignedOut: () => unawaited(Get.find<AuthService>().signOut()))), permanent: true);
     Get
       ..lazyPut<AuthRepository>(() => RemoteAuthRepository(remote), fenix: true)
       ..lazyPut<DirectoryRepository>(

@@ -13,6 +13,7 @@ export function DashboardView({ v }: { v: any }) {
       overlays={
         <>
           {v.palette}
+          {v.widgetsDialog}
           {v.toastOn && (
             <>
               <div className="toast" role="status">
@@ -63,7 +64,7 @@ export function DashboardView({ v }: { v: any }) {
             </svg>
             Search anything<span className="kbd">Ctrl K</span>
           </div>
-          <button className="ibtn" aria-label="Notifications" onClick={() => v.goto("/p/notifications")}>
+          <button className="ibtn" aria-label="Notifications" onClick={v.showNeeds}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path className="i" d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"></path>
             </svg>
@@ -141,7 +142,7 @@ export function DashboardView({ v }: { v: any }) {
               {v.me.role} · {v.schoolName}
             </div>
             <div className="quick">
-              <button aria-label="Messages" onClick={() => v.goto("/p/messages")}>
+              <button aria-label="Messages" onClick={() => v.goto("/messages")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path className="i" d="M4 5h16v11H9l-5 4z"></path>
                 </svg>
@@ -149,11 +150,6 @@ export function DashboardView({ v }: { v: any }) {
               <button aria-label="Find" onClick={v.openSearch}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path className="i" d="M4.5 11a6.5 6.5 0 1 0 13 0a6.5 6.5 0 1 0-13 0M20 20l-4.2-4.2"></path>
-                </svg>
-              </button>
-              <button aria-label="Saved" onClick={() => v.goto("/p/saved")}>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path className="i" d="M6 4h12v17l-6-4-6 4z"></path>
                 </svg>
               </button>
             </div>
@@ -249,7 +245,7 @@ export function DashboardView({ v }: { v: any }) {
                 </svg>
                 Approvals
               </span>
-              <button className="arrow" aria-label="Open approvals" onClick={() => v.goto("/p/approvals")}>
+              <button className="arrow" aria-label="Open approvals" onClick={v.showNeeds}>
                 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
                   <path className="i" d="M7 17L17 7M9 7h8v8"></path>
                 </svg>
@@ -375,6 +371,7 @@ export function DashboardView({ v }: { v: any }) {
           </div>
         </section>
         <section className="grid">
+          {!v.hidden.includes("rolls") && (
           <div className="card s6 rise" style={{ "--d": ".35s" } as CSSProperties} aria-labelledby="rolls">
             <div className="ch">
               <h2 id="rolls">Class rolls · today</h2>
@@ -406,6 +403,8 @@ export function DashboardView({ v }: { v: any }) {
               ))}
             </div>
           </div>
+          )}
+          {!v.hidden.includes("fees") && (
           <div className="card s6 rise" style={{ "--d": ".4s" } as CSSProperties} aria-labelledby="jars">
             <div className="ch">
               <h2 id="jars">Fees by type · {v.feeMonth}</h2>
@@ -432,8 +431,10 @@ export function DashboardView({ v }: { v: any }) {
               ))}
             </div>
           </div>
+          )}
         </section>
         <section className="grid">
+          {!v.hidden.includes("day") && (
           <div className="card s9 rise" style={{ "--d": ".45s" } as CSSProperties} aria-labelledby="day">
             <div className="ch">
               <h2 id="day">Today at school</h2>
@@ -452,13 +453,14 @@ export function DashboardView({ v }: { v: any }) {
               ))}
             </div>
           </div>
-          <button className="addw s3 rise" style={{ "--d": ".5s" } as CSSProperties} aria-label="Add a widget" onClick={() => v.goto("/p/widgets")}>
+          )}
+          <button className="addw s3 rise" style={{ "--d": ".5s" } as CSSProperties} aria-label="Choose what the dashboard shows" onClick={v.openWidgets}>
             <span>
               <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
                 <path className="i" d="M12 5v14M5 12h14" style={{ strokeWidth: "2" } as CSSProperties}></path>
               </svg>
             </span>
-            Add a widget
+            {v.hidden.length ? "Add a widget" : "Choose widgets"}
           </button>
         </section>
       </main>

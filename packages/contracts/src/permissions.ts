@@ -24,6 +24,17 @@ export const PERMISSIONS = [
   'staff.write',
   'audit.read',
   'reports.read',
+  'homework.read',
+  'homework.write',
+  'exams.read',
+  'exams.write',
+  'exams.publish',
+  'admissions.read',
+  'admissions.write',
+  'messages.read',
+  'messages.write',
+  'events.read',
+  'events.write',
 ] as const;
 export const Permission = z.enum(PERMISSIONS);
 export type Permission = z.infer<typeof Permission>;
@@ -59,6 +70,17 @@ export const PERMISSION_CATALOG: PermissionInfo[] = [
   { key: 'roles.manage', area: 'Settings', label: 'Change roles and access', sensitive: true },
   { key: 'audit.read', area: 'Settings', label: 'Read the audit log' },
   { key: 'reports.read', area: 'Reports', label: 'See reports' },
+  { key: 'homework.read', area: 'Homework', label: 'See homework' },
+  { key: 'homework.write', area: 'Homework', label: 'Set homework and record hand-ins' },
+  { key: 'exams.read', area: 'Exams', label: 'See exams and results' },
+  { key: 'exams.write', area: 'Exams', label: 'Create exams and enter marks' },
+  { key: 'exams.publish', area: 'Exams', label: 'Publish results to families', sensitive: true },
+  { key: 'admissions.read', area: 'Admissions', label: 'See enquiries and applications' },
+  { key: 'admissions.write', area: 'Admissions', label: 'Move applications and enrol students' },
+  { key: 'messages.read', area: 'Messages', label: 'See family messages' },
+  { key: 'messages.write', area: 'Messages', label: 'Write to families' },
+  { key: 'events.read', area: 'Events', label: 'See the calendar' },
+  { key: 'events.write', area: 'Events', label: 'Add and change events' },
 ];
 
 export interface RoleTemplate {
@@ -78,20 +100,24 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
     description: 'Admissions, people, notices and the timetable.',
     permissions: [
       'students.read', 'students.write', 'staff.read', 'attendance.read', 'notices.read', 'notices.write',
-      'approvals.read', 'timetable.read', 'timetable.edit', 'reports.read',
+      'approvals.read', 'timetable.read', 'timetable.edit', 'reports.read', 'admissions.read', 'admissions.write', 'messages.read', 'messages.write',
+      'events.read', 'events.write', 'homework.read', 'exams.read',
     ],
   },
   {
     key: 'accountant',
     name: 'Accountant',
     description: 'Fees, payments and reports.',
-    permissions: ['students.read', 'fees.read', 'fees.collect', 'reports.read', 'notices.read'],
+    permissions: ['students.read', 'fees.read', 'fees.collect', 'reports.read', 'notices.read', 'events.read'],
   },
   {
     key: 'teacher',
     name: 'Teacher',
     description: 'Marks attendance and sees their classes.',
-    permissions: ['students.read', 'attendance.read', 'attendance.mark', 'notices.read', 'timetable.read'],
+    permissions: [
+      'students.read', 'attendance.read', 'attendance.mark', 'notices.read', 'timetable.read', 'homework.read', 'homework.write', 'exams.read', 'exams.write',
+      'messages.read', 'messages.write', 'events.read',
+    ],
   },
 ];
 

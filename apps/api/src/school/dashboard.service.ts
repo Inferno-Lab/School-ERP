@@ -86,7 +86,7 @@ export class DashboardService {
       needsYou: needs,
       timeline: timeline.map((e, i) => ({ id: e.id, time: e.time, title: e.title, subtitle: e.subtitle, state: !isToday ? 'done' : i < nowIdx ? 'done' : i === nowIdx ? 'now' : 'next' })),
       timelineProgress: progress,
-      badges: { attendance: unmarked.length, admissions: counts.admissions },
+      badges: { attendance: unmarked.length, admissions: counts.admissions, messages: counts.messages },
     };
   }
 
@@ -122,7 +122,7 @@ export class DashboardService {
     return {
       school: { name: String(v['school.name'] ?? t.info.name), shortName: String(v['school.shortName'] ?? t.info.shortName), logoText: String(v['brand.logoText'] ?? '') || String(v['school.shortName'] ?? t.info.shortName).slice(0, 1).toUpperCase(), place: String(v['school.place'] ?? '') },
       term: { name: String(v['term.name'] ?? 'Term 1'), examsLabel: `Exams start ${dayMonth(examsStart)}`, daysToGo, progress: Math.max(0, Math.min(100, Math.round(100 * (1 - daysToGo / REVISION_WINDOW_DAYS)))) },
-      badges: { attendance: unmarked.length, admissions: counts.admissions }, modules,
+      badges: { attendance: unmarked.length, admissions: counts.admissions, messages: counts.messages }, modules,
     };
   }
 

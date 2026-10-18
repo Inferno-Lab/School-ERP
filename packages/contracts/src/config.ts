@@ -32,6 +32,24 @@ export const SchoolSettingsSchema = z.object({
   'demo.mode': z.boolean().default(false),
   'vocab.student': z.string().max(24).default('Student'),
   'vocab.class': z.string().max(24).default('Class'),
+  // The app: what sits in the dock, what the home screen shows, which quick buttons it offers.
+  'app.dock': z.array(z.string()).max(4).default(['home', 'academics', 'fees', 'chat']),
+  'app.home': z.array(z.string()).max(12).default(['dayRibbon', 'dueStack', 'attendance', 'nextExam', 'notices', 'events']),
+  'app.quick': z.array(z.string()).max(6).default(['payFees', 'applyLeave', 'messageTeacher', 'timetable']),
+  // Notifications: which message goes out on which channel, and when families are left in peace.
+  'notify.rules': z.record(z.string(), z.object({ push: z.boolean(), sms: z.boolean(), email: z.boolean() })).default({}),
+  'notify.quietFrom': z.string().regex(/^\d{2}:\d{2}$/, 'Use a time like 21:00').default('21:00'),
+  'notify.quietTo': z.string().regex(/^\d{2}:\d{2}$/, 'Use a time like 07:00').default('07:00'),
+  // Message templates by key, with {placeholders}. Empty means the built-in wording.
+  'templates.messages': z.record(z.string(), z.string().max(320)).default({}),
+  // Privacy and consent.
+  'privacy.notice': z.string().max(4000).default(''),
+  'privacy.officerName': z.string().max(80).default(''),
+  'privacy.officerEmail': z.string().max(120).default(''),
+  'privacy.officerPhone': z.string().max(24).default(''),
+  'privacy.retentionMonths': z.number().int().min(12).max(120).default(36),
+  'privacy.photoConsent': z.boolean().default(true),
+  'privacy.consentRequired': z.boolean().default(true),
 });
 export type SchoolSettings = z.infer<typeof SchoolSettingsSchema>;
 export type SettingKey = keyof SchoolSettings;
@@ -74,4 +92,8 @@ export interface EffectiveConfig {
   settings: Record<string, unknown>;
   vocabulary: Record<string, string>;
   limits: EntitlementDoc['limits'];
+  /** What the mobile app lays out: dock, home sections and quick actions, already limited to modules the school has. */
+  app: { dock: string[]; home: string[]; quick: string[] };
+  /** Kill switches and rollouts the console set for this school. */
+  flags: Record<string, boolean>;
 }

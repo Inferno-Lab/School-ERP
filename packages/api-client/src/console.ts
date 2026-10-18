@@ -1,11 +1,11 @@
 import type {
   ActionRequest, ActionRow, AuditRow, BlueprintInput, BlueprintRow, BuildRow, ConsoleLoginResponse, ConsoleTokens, ConsoleUserRow, FleetSummary, FlagRow, InvoiceRowC, LoginRequest,
-  MigrationRow, PlanRow, PolicyDoc, ProvisionRunRow, ReleaseRow, SandboxMessage, SchoolDetail, SchoolRow, StepKey, SupportSessionRow, SupportToken, VerifyRequest, WizardDraftRow,
+  CellCreate, CellPatch, ComplianceCreate, ComplianceRow, ComplianceUpdate, MigrationRow, PlanRow, PolicyDoc, ProvisionRunRow, ReleaseRow, SandboxMessage, SchoolDetail, SchoolRow, StepKey, SupportSessionRow, SupportToken, VerifyRequest, WizardDraftRow,
   WizardPayload, WizardReview,
 } from '@edunest/contracts';
 import type { Http } from './http';
 
-export interface CellRow { key: string; target: string; region: string; maxSchools: number; schools: number }
+export interface CellRow { key: string; target: string; region: string; maxSchools: number; schools: number; accepting: boolean }
 export interface CatalogDoc { modules: { key: string; name: string; blurb: string; requires: string[]; backend: boolean }[]; roleTemplates: { key: string; name: string; description: string; permissions: string[] }[] }
 
 /** Every call the console makes. */
@@ -17,6 +17,13 @@ export function consoleApi(h: Http) {
     logout: () => h.post<void>(`${base}/auth/logout`),
     fleet: () => h.get<FleetSummary>(`${base}/fleet`),
     cells: () => h.get<CellRow[]>(`${base}/cells`),
+    createCell: (b: CellCreate) => h.post<{ key: string; note: string }>(`${base}/cells`, b),
+    patchCell: (key: string, b: CellPatch) => h.put<{ ok: true }>(`${base}/cells/${key}`, b),
+    compliance: {
+      list: () => h.get<{ items: ComplianceRow[]; subprocessors: readonly { name: string; purpose: string; region: string }[] }>(`${base}/compliance`),
+      create: (b: ComplianceCreate) => h.post<ComplianceRow>(`${base}/compliance`, b),
+      update: (id: string, b: ComplianceUpdate) => h.put<ComplianceRow>(`${base}/compliance/${id}`, b),
+    },
     probe: () => h.post<{ probed: number }>(`${base}/health/probe`),
     schools: (q?: { status?: string; query?: string }) => h.get<SchoolRow[]>(`${base}/schools`, q),
     school: (id: string) => h.get<SchoolDetail>(`${base}/schools/${id}`),

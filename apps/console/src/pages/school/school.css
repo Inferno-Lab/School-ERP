@@ -27,7 +27,7 @@
 .pg-school .stp.fail small{color:var(--r);font-weight:700}
 .pg-school .stp .tm{font:700 12px var(--fb);color:var(--ink3);padding-top:8px}
 .pg-school .log{margin-top:14px;background:#08070C;color:#B4AFCB;border:1px solid var(--line);border-radius:20px;padding:16px 18px;height:176px;overflow:hidden;font:500 12.5px/1.75 ui-monospace,Consolas,monospace;display:flex;flex-direction:column;justify-content:flex-end}
-.pg-school .ll{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:ln .4s var(--e) both}
+.pg-school .ll{white-space:pre-wrap;overflow-wrap:anywhere;padding-left:0;text-indent:0;animation:ln .4s var(--e) both}
 @keyframes ln{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .pg-school .ll .t{color:#5C5775}.pg-school .ll .ok{color:#7DEBC3}.pg-school .ll .bad{color:#FF8A92}
 .pg-school .tkt{position:relative;border-radius:24px;padding:22px 26px;color:#fff;background:radial-gradient(130% 150% at 100% 100%,rgba(255,170,90,.5),transparent 55%),radial-gradient(130% 150% at 0% 0%,rgba(120,96,255,.9),transparent 58%),#1B1530;-webkit-mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;mask:radial-gradient(circle 15px at 64% 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 15px at 64% 100%,transparent 98%,#000) bottom/100% 51% no-repeat;display:grid;grid-template-columns:64% 36%;transition:transform .5s var(--e)}

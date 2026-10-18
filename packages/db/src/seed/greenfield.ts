@@ -2,6 +2,7 @@ import { ROLE_TEMPLATES, addDays, istToday, latestSchoolDay, schoolDaysEnding } 
 import type { Pool, PoolClient } from 'pg';
 import { newId } from '../ids.js';
 import { bulkInsert } from './bulk.js';
+import { seedModulesDemo } from './modules.js';
 import { AREAS, BLOOD, FIRST_FEMALE, FIRST_MALE, HOUSES, LAST, rng, type Rng } from './names.js';
 
 export interface SeedInput {
@@ -170,6 +171,7 @@ async function run(db: PoolClient, input: SeedInput): Promise<Omit<SeedReport, '
   await seedTimetable(ctx, classes, teachers);
   await seedLearning(ctx, classes, students);
   await seedOffice(ctx, classes, students, teachers);
+  await seedModulesDemo(db, today);
   return { students: students.length, classes: classes.length, staff: teachers.length + 1 };
 }
 
@@ -508,7 +510,6 @@ async function seedOffice(ctx: Ctx, classes: ClassRow[], students: StudentRow[],
     ['apr_leave_kavita', 'leave', 'Kavita Iyer asked for leave', '16–17 Oct · Maths, Class 8 A', 'Kavita Iyer', kavita.id, JSON.stringify({ from: leaveFrom, to: addDays(leaveFrom, 1) })],
     ['apr_waiver_kabir', 'fee_waiver', 'Concession for Kabir Singh', '25% sibling · ₹4,625 a term', 'Kabir Singh', kabir.id, JSON.stringify({ percent: 25, amountPerTerm: 4625 })],
     ['apr_notice_ptm', 'notice', 'PTM notice, Class 5', 'Drafted by Meera Nair', 'Meera Nair', 'ntc_ptm', JSON.stringify({ noticeId: 'ntc_ptm' })],
-    ...Array.from({ length: 6 }, (_, i) => [`apr_adm_${i}`, 'admission', `Admission: ${['Ishaan Rao', 'Tara Bhatt', 'Zoya Ansari', 'Veer Kulkarni', 'Navya Reddy', 'Aryan Thakur'][i]}`, `Grade ${[1, 3, 5, 2, 6, 4][i]} · applied this week`, ['Ishaan Rao', 'Tara Bhatt', 'Zoya Ansari', 'Veer Kulkarni', 'Navya Reddy', 'Aryan Thakur'][i], null, JSON.stringify({ grade: [1, 3, 5, 2, 6, 4][i] })]),
   ]);
   await bulkInsert(db, 'events', ['id', 'title', 'starts_at', 'kind', 'note'], [
     ['evt_assembly', 'Assembly', `${last}T02:20:00Z`, 'routine', 'Main ground'],

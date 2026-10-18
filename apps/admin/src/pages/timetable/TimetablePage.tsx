@@ -25,7 +25,7 @@ export function TimetablePage() {
   const qc = useQueryClient();
   const [classId, setClassId] = useState('');
   const [clsOpen, setClsOpen] = useState(false);
-  const [mode, setMode] = useState(0);
+  const [mode, setMode] = useState(() => (window.innerWidth < 640 ? 1 : 0)); // the week grid needs more width than a phone has
   const [sel, setSel] = useState<{ day: number; period: number }>({ day: 3, period: 3 });
   const [week, setWeek] = useState(0);
   const [toast, setToast] = useState('');

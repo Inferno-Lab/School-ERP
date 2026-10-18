@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { inr, lakhs, type ApprovalRow, type DashboardData } from '@edunest/contracts';
-import { EmptyCard, IC, Shell, TONES, rollDigits, tintFor, useIsPhone } from '@edunest/web-ui';
+import { Dialog, EmptyCard, IC, Shell, TONES, rollDigits, tintFor, useIsPhone } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
 import { useChrome } from '../../app/useChrome';
 import { DashboardView } from './dashboard.view';
@@ -12,8 +12,9 @@ const RANGES: [string, number][] = [['Today', 1], ['This week', 6], ['This term'
 const TABS: [string, 'attendance' | 'fees' | 'homework', number][] = [['Attendance', 'attendance', 104], ['Fees', 'fees', 72], ['Homework', 'homework', 104]];
 const NEWS: [string, string, string, string][] = [
   ['Add student', 'stu', 'N S', '/students?add=1'], ['Collect a fee', 'fee', 'N F', '/students?pay=1'], ['Post a notice', 'notice', 'N N', '/notices'],
-  ['Mark attendance', 'att', 'N A', '/attendance'], ['Schedule an exam', 'ex', 'N E', '/p/exams'],
+  ['Mark attendance', 'att', 'N A', '/attendance'], ['Schedule an exam', 'ex', 'N E', '/exams'],
 ];
+const WIDGETS: [string, string, string][] = [['rolls', 'Class rolls', 'Attendance of each class today'], ['fees', 'Fees by type', 'What each kind of fee has collected'], ['day', 'Today at school', 'The timeline of the school day']];
 const HEAD_COLOUR: Record<string, string> = { tuition: 'var(--v)', transport: 'var(--b)', activities: 'var(--c)', lab: 'var(--a)' };
 const H = 236;
 const UP = 'M7 17L17 7M9 7h8v8';
@@ -42,6 +43,9 @@ function DashboardDesktop() {
   const [newOpen, setNewOpen] = useState(false);
   const [tab, setTab] = useState(0);
   const [done, setDone] = useState<Record<string, boolean>>({});
+  const [widgets, setWidgets] = useState(false);
+  const [hidden, setHidden] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(`edunest.dash.hidden.${app.user.id}`) ?? '[]') as string[]; } catch { return []; } });
+  const setHide = (id: string, off: boolean) => setHidden((h) => { const n = off ? [...new Set([...h, id])] : h.filter((x) => x !== id); try { localStorage.setItem(`edunest.dash.hidden.${app.user.id}`, JSON.stringify(n)); } catch { /* private window: the choice lasts until the page closes */ } return n; });
   const [toast, setToast] = useState<{ text: string; id: string } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const days = RANGES[range]![1];
@@ -65,7 +69,7 @@ function DashboardDesktop() {
   });
 
   const d: DashboardData | undefined = q.data;
-  const v = useMemo(() => (d ? build(d) : null), [d, range, tab, rangeOpen, newOpen, done, toast, chrome.shell, chrome.palette, chrome.aside, chrome.dock]);
+  const v = useMemo(() => (d ? build(d) : null), [d, range, tab, rangeOpen, newOpen, done, toast, chrome.shell, chrome.palette, chrome.aside, chrome.dock, hidden, widgets]);
 
   function build(d: DashboardData) {
     const T = TABS[tab]!;
@@ -105,7 +109,22 @@ function DashboardDesktop() {
     const me = tintFor(app.user.name);
     const t = d.timeline;
     return {
-      ...chrome, goto: app.go, me: { name: app.user.name, initials: app.user.initials, role: app.user.roleNames[0] ?? 'Staff', ...me }, schoolName: chrome.shell?.school.shortName ?? d.schoolName,
+      ...chrome, goto: app.go, hidden, openWidgets: () => setWidgets(true),
+      showNeeds: () => document.getElementById('need')?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+      widgetsDialog: widgets && (
+        <Dialog title="Dashboard widgets" onClose={() => setWidgets(false)} width={460}>
+          <p className="help" style={{ margin: '0 0 12px' }}>Choose what this dashboard shows for you. Other people keep their own choice.</p>
+          <div className="stack">
+            {WIDGETS.map(([id, name, blurb]) => (
+              <div className="tgl" key={id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 0', borderTop: '1px solid var(--line)' }}>
+                <div style={{ flex: 1 }}><b style={{ font: '700 14.5px var(--fb)' }}>{name}</b><div className="help">{blurb}</div></div>
+                <button className={`sw ${hidden.includes(id) ? '' : 'on'}`} role="switch" aria-checked={!hidden.includes(id)} aria-label={name} onClick={() => setHide(id, !hidden.includes(id))}></button>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}><button className="btn pri" onClick={() => setWidgets(false)}>Done</button></div>
+        </Dialog>
+      ), me: { name: app.user.name, initials: app.user.initials, role: app.user.roleNames[0] ?? 'Staff', ...me }, schoolName: chrome.shell?.school.shortName ?? d.schoolName,
       greeting: greeting(), subtitle: `${d.term.name} · ${d.subtitle.marked} of ${d.subtitle.classes} classes have marked attendance`,
       hasAlerts: left > 0,
       rangeOpen: rangeOpen ? 'open' : '', rangeExp: rangeOpen ? 'true' : 'false', rangeLabel: RANGES[range]![0],

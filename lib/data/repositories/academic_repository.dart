@@ -80,14 +80,22 @@ class RemoteAttendanceRepository implements AttendanceRepository {
   Future<Map<String, AttendanceStatus>> todayForClass(
     List<String> studentIds,
   ) async {
-    await _remote.get('/attendance/today', query: {'students': studentIds.join(',')});
-    return {};
+    final json = await _remote.get('/attendance/today', query: {'students': studentIds.join(',')});
+    return {
+      for (final e in (json as Map).entries)
+        e.key as String: switch (e.value) {
+          'absent' => AttendanceStatus.absent,
+          'late' => AttendanceStatus.lateArrival,
+          'holiday' => AttendanceStatus.holiday,
+          _ => AttendanceStatus.present,
+        },
+    };
   }
 
   @override
   Future<void> markToday(Map<String, AttendanceStatus> byStudent) async {
     await _remote.post('/attendance', {
-      for (final entry in byStudent.entries) entry.key: entry.value.name,
+      for (final entry in byStudent.entries) entry.key: entry.value == AttendanceStatus.lateArrival ? 'late' : entry.value.name,
     });
   }
 }
@@ -336,8 +344,8 @@ class RemoteExamRepository implements ExamRepository {
 
   @override
   Future<Map<String, int>> marksDraft(String classId, String subject) async {
-    await _remote.get('/classes/$classId/marks', query: {'subject': subject});
-    return {};
+    final json = await _remote.get('/classes/$classId/marks', query: {'subject': subject});
+    return {for (final e in (json as Map).entries) e.key as String: (e.value as num).toInt()};
   }
 
   @override

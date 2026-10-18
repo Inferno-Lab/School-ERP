@@ -127,7 +127,7 @@ export class TimetableService {
     const v = await t.pool.query<{ value: number }>("select value from meta where key = 'timetable.version'");
     if (teachers.length) {
       const phones = await t.pool.query<{ phone: string | null }>('select phone from users where id = any($1)', [teachers]);
-      await this.messenger.sendMany(t, phones.rows.filter((p) => p.phone).map((p) => ({ channel: 'sms' as const, to: p.phone!, body: 'The timetable was updated. Open the EduNest app to see your new periods.' })));
+      await this.messenger.notify(t, 'timetable.published', phones.rows.filter((p) => p.phone).map((p) => ({ to: p.phone!, vars: {} })));
     }
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'timetable.published', entity: 'timetable', detail: { classes: classes.length, teachers: teachers.length } });
     return { families: Number(fam?.rows[0]?.n ?? 0), teachers: teachers.length, version: Number(v.rows[0]!.value) };

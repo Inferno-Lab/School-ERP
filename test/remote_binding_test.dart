@@ -1,5 +1,6 @@
 import 'package:edunest/core/bindings/initial_binding.dart';
 import 'package:edunest/core/config/app_config.dart';
+import 'package:edunest/core/services/storage_service.dart';
 import 'package:edunest/data/repositories/academic_repository.dart';
 import 'package:edunest/data/repositories/auth_repository.dart';
 import 'package:edunest/data/repositories/campus_repository.dart';
@@ -15,6 +16,7 @@ void main() {
 
   test('useMockData false resolves every remote repository', () {
     Get.testMode = true;
+    Get.put(StorageService(memory: <String, dynamic>{}));
     AppConfig.useMockData = false;
     InitialBinding().dependencies();
 

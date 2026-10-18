@@ -41,6 +41,8 @@ const _en = <String, String>{
   'errors.title': 'Something went wrong',
   'errors.generic': 'We could not load this just now.',
   'errors.simulated': 'Simulated error. Turn it off in Settings and try again.',
+  'errors.network': "Can't reach the school's server. Check your connection and try again.",
+  'errors.code_expired': 'That code has expired. Sign in again to get a new one.',
   'errors.remote_unconfigured': 'The live server is not connected yet. This demo is running on local data.',
   'errors.bad_login': 'That email or password does not match a demo account.',
   'errors.bad_otp': 'The code is 123456 for this demo.',
