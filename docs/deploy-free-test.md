@@ -51,6 +51,10 @@ The console's **Build Android app** starts a GitHub Actions workflow (`.github/w
 2. In Render → **Environment** add `GITHUB_TOKEN` (that token) and `GITHUB_REPO` = `Inferno-Lab/School-ERP`, and `GITHUB_BRANCH` = `feat/platform` while that is the branch.
 3. In GitHub → repository → *Settings* → *Secrets and variables* → *Actions*: add the secret `BUILD_CALLBACK_TOKEN` (copy the value of the same variable from Render) and the variable `API_BASE_URL` = your Render address.
 
+### What the app does against the test track
+
+A build made with `SCHOOL` and `API_BASE_URL` (the workflow passes both) reads the school's own name and tagline from its API at start-up, so changing them in the admin's Settings shows up in the app. The rest of the app still runs on the demo content: connecting each screen to the school's data is the next step of the plan (section 19).
+
 ## Updating
 
 Pushing to the branch redeploys automatically. Database changes are applied by the server at start; schools get theirs from the console under **Migrations** and **Releases**.
