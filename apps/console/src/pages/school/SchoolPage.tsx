@@ -5,6 +5,7 @@ import { HttpError } from '@edunest/api-client';
 import { STEP_LABELS, type ActionKey, type ProvisionRunRow, type SchoolDetail } from '@edunest/contracts';
 import { Dialog, EmptyCard, Shell, useShake } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
+import { url } from '../../app/base';
 import { useChrome } from '../../app/useChrome';
 import { ago, count, rupees, statusOf, when } from '../../app/format';
 import { SchoolView } from './school.view';
@@ -115,7 +116,7 @@ export function SchoolPage() {
   const v = {
     ...chrome, tab, extra, toast: toast?.text, toastTone: toast?.tone,
     name: d.name, shortName: d.shortName, color: d.color, logoText: d.logoText, subtitle: `${d.slug} · cell ${d.cell} · ${planName} plan`,
-    toFleet: (e: React.MouseEvent) => { e.preventDefault(); app.go('/'); },
+    fleetHref: url('/'), toFleet: (e: React.MouseEvent) => { e.preventDefault(); app.go('/'); },
     stChip, stText, canSupport: app.can('support.access') && d.status !== 'archived', canErase: app.can('schools.danger') && d.status !== 'archived',
     openSupport: () => setDlg('support'), openErase: () => setDlg('erase'),
     tabs: TABS.map((n, i) => ({ n, on: i === tab ? 'on' : '', sel: i === tab ? 'true' : 'false', pick: () => setTab(i), ref: (el: HTMLButtonElement | null) => { tabEls.current[i] = el; } })), tw: knob.w, tx: knob.x,

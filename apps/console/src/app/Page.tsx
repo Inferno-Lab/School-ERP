@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { EmptyCard, Shell, Toast } from '@edunest/web-ui';
 import { useChrome } from './useChrome';
+import { url } from './base';
 
 interface PageProps {
   /** The menu item to highlight. */
@@ -26,7 +27,7 @@ export function Page({ active, title, sub, actions, children, overlays, toast, e
       <main className="mn" aria-busy={loading || undefined}>
         {back && (
           <div className="crumb rise">
-            <a href={back.to} onClick={(e) => { e.preventDefault(); back.go(back.to); }}>{back.label}</a>
+            <a href={url(back.to)} onClick={(e) => { e.preventDefault(); back.go(back.to); }}>{back.label}</a>
             <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path className="i" d="M9 6l6 6-6 6"></path></svg>
             <b style={{ color: 'var(--ink)' }}>{title}</b>
           </div>

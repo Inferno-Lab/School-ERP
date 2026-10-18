@@ -1,4 +1,5 @@
 import { IC, type NavGroup } from '@edunest/web-ui';
+import { url } from './base';
 
 interface Def { id: string; label: string; icon: keyof typeof IC; keys: string; to: string }
 
@@ -30,7 +31,7 @@ export function consoleNav(counts?: { onboarding?: number; builds?: number; appr
   return DEFS.map((g) => ({
     name: g.name,
     items: g.items.map((i) => ({
-      id: i.id, label: i.label, icon: IC[i.icon], keys: i.keys, href: i.to,
+      id: i.id, label: i.label, icon: IC[i.icon], keys: i.keys, href: url(i.to),
       count: i.id === 'onb' && counts?.onboarding ? String(counts.onboarding) : i.id === 'app' && counts?.builds ? String(counts.builds) : i.id === 'appr' && counts?.approvals ? String(counts.approvals) : undefined,
     })),
   }));

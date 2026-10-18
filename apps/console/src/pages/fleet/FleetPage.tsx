@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dialog, EmptyCard, Shell, tintFor } from '@edunest/web-ui';
 import { useApp } from '../../app/context';
+import { url } from '../../app/base';
 import { useChrome } from '../../app/useChrome';
 import { curve, initials, statusOf } from '../../app/format';
 import { FleetView } from './fleet.view';
@@ -88,7 +89,7 @@ export function FleetPage() {
     return {
       id: s.id, n: s.name, cell: s.cell, ini: initials(s.name), bg: t.bg, fg: t.fg, from: r?.prev ?? s.versions.api, to: rel?.version ?? s.versions.api, vy: newer ? -26 : 0,
       up: newer && i < 3 ? 'up' : '', st: st.text, cc: st.tone, p: s.healthMs != null ? `${s.healthMs} ms` : '–',
-      href: `/schools/${s.id}`, open: (e: React.MouseEvent) => { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); app.go(`/schools/${s.id}`); },
+      href: url(`/schools/${s.id}`), open: (e: React.MouseEvent) => { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); app.go(`/schools/${s.id}`); },
     };
   });
   const month = new Date().toISOString().slice(0, 7);

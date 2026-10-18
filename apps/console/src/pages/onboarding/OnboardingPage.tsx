@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { EmptyCard, tintFor } from '@edunest/web-ui';
 import { Card, Page, useToast } from '../../app/Page';
 import { useApp } from '../../app/context';
+import { url } from '../../app/base';
 import { ago, initials, statusOf } from '../../app/format';
 
 export function OnboardingPage() {
@@ -29,7 +30,7 @@ export function OnboardingPage() {
             {setting.map((s) => {
               const t = tintFor(s.name);
               return (
-                <a key={s.id} className="kv" href={`/schools/${s.id}`} onClick={(e) => { e.preventDefault(); app.go(`/schools/${s.id}`); }} style={{ color: 'inherit', textDecoration: 'none', alignItems: 'center' }}>
+                <a key={s.id} className="kv" href={url(`/schools/${s.id}`)} onClick={(e) => { e.preventDefault(); app.go(`/schools/${s.id}`); }} style={{ color: 'inherit', textDecoration: 'none', alignItems: 'center' }}>
                   <span style={{ display: 'flex', gap: 12, alignItems: 'center', minWidth: 0 }}>
                     <span className="av" style={{ width: 34, height: 34, fontSize: 11, background: t.bg, color: t.fg, boxShadow: 'none' }}>{initials(s.name)}</span>
                     <span style={{ minWidth: 0 }}><b style={{ display: 'block', textAlign: 'left' }}>{s.name}</b><small style={{ color: 'var(--ink3)' }}>{s.slug} · cell {s.cell} · started {ago(s.createdAt)}</small></span>
@@ -52,7 +53,7 @@ export function OnboardingPage() {
         )}
         {recent.length > 0 && (
           <Card title="Went live recently" span="s5">
-            {recent.map((s) => { const st = statusOf(s); return <a key={s.id} className="kv" href={`/schools/${s.id}`} onClick={(e) => { e.preventDefault(); app.go(`/schools/${s.id}`); }} style={{ color: 'inherit', textDecoration: 'none' }}>{s.name}<b><span className={`st ${st.tone}`}><i></i>{st.text}</span></b></a>; })}
+            {recent.map((s) => { const st = statusOf(s); return <a key={s.id} className="kv" href={url(`/schools/${s.id}`)} onClick={(e) => { e.preventDefault(); app.go(`/schools/${s.id}`); }} style={{ color: 'inherit', textDecoration: 'none' }}>{s.name}<b><span className={`st ${st.tone}`}><i></i>{st.text}</span></b></a>; })}
           </Card>
         )}
       </section>

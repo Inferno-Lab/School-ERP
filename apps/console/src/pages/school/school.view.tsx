@@ -33,7 +33,7 @@ export function SchoolView({ v }: { v: any }) {
     >
       <main className="mn">
         <div className="crumb rise">
-          <a href="/" onClick={v.toFleet}>
+          <a href={v.fleetHref} onClick={v.toFleet}>
             Fleet
           </a>
           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">

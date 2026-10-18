@@ -5,6 +5,7 @@ import { AppContext, type AppCtx } from './app/context';
 import { makeClient, session, type Client } from './app/client';
 import { LoginRoute } from './pages/login/LoginRoute';
 import { NotFoundPage } from './pages/status/StatusPages';
+import { BASE } from './app/base';
 
 const root = createRootRoute({ component: Outlet, notFoundComponent: NotFoundPage });
 const login = createRoute({ getParentRoute: () => root, path: '/login', component: LoginRoute });
@@ -57,7 +58,7 @@ const routeTree = root.addChildren([
 ]);
 
 export function makeRouter() {
-  const router = createRouter({ routeTree, defaultPreload: 'intent', defaultPendingMs: 400 });
+  const router = createRouter({ routeTree, basepath: BASE || '/', defaultPreload: 'intent', defaultPendingMs: 400 });
   client = makeClient(() => void router.navigate({ to: '/login' }));
   return router;
 }

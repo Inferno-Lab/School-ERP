@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { EmptyCard } from '@edunest/web-ui';
 import { Card, Page } from '../../app/Page';
 import { useApp } from '../../app/context';
+import { url } from '../../app/base';
 import { statusOf } from '../../app/format';
 
 const TARGET: Record<string, string> = { local: 'This computer', 'free-test': 'Free test track', 'aws-cell': 'AWS cell' };
@@ -34,7 +35,7 @@ export function CellsPage() {
                 {here.map((s) => {
                   const st = statusOf(s);
                   return (
-                    <a key={s.id} className="kv" href={`/schools/${s.id}`} onClick={(e) => { e.preventDefault(); app.go(`/schools/${s.id}`); }} style={{ color: 'inherit', textDecoration: 'none' }}>
+                    <a key={s.id} className="kv" href={url(`/schools/${s.id}`)} onClick={(e) => { e.preventDefault(); app.go(`/schools/${s.id}`); }} style={{ color: 'inherit', textDecoration: 'none' }}>
                       {s.name}<b><span className={`st ${st.tone}`}><i></i>{st.text}</span></b>
                     </a>
                   );

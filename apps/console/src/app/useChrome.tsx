@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Dock, IC, MoreSheet, Palette, Sidebar, WorkspaceHeader, tintFor, useTheme, type DockTab, type PaletteHit } from '@edunest/web-ui';
 import { consoleNav, shortcutTargets } from './nav';
 import { useApp } from './context';
+import { path, url } from './base';
 
 const COLLAPSE_KEY = 'edunest.console.menu.collapsed';
 const ENV = (import.meta.env.VITE_ENV_LABEL as string | undefined) ?? (/^(localhost|127\.)/.test(window.location.hostname) ? 'Local' : 'Test track');
@@ -37,7 +38,7 @@ export function useChrome(active: string) {
       if (Date.now() - armed < 1200) {
         const to = targets.get(e.key.toLowerCase());
         armed = 0;
-        if (to) { e.preventDefault(); goRef.current(to); }
+        if (to) { e.preventDefault(); goRef.current(path(to)); }
       } else if (e.key.toLowerCase() === 'g') armed = Date.now();
     };
     window.addEventListener('keydown', onKey);
@@ -65,7 +66,7 @@ export function useChrome(active: string) {
     <>
     <Sidebar
       label="Console menu" collapsed={collapsed} groups={groups} active={active}
-      onNavigate={(href) => goRef.current(href)}
+      onNavigate={(href) => goRef.current(path(href))}
       header={<WorkspaceHeader env={ENV} envClass={ENV === 'Production' ? '' : 'safe'} collapsed={collapsed} onToggle={() => setCollapsed((c) => { try { localStorage.setItem(COLLAPSE_KEY, c ? '0' : '1'); } catch { /* ignore */ } return !c; })} />}
       promo={(
         <div className="sbc">
@@ -86,7 +87,7 @@ export function useChrome(active: string) {
           <div key={g.name}>
             <div className="sl">{g.name}</div>
             {g.items.map((n) => (
-              <a key={n.id} className={`nvm ${n.id === active ? 'on' : ''}`} href={n.href} onClick={(e) => { e.preventDefault(); setMore(false); goRef.current(n.href); }}>
+              <a key={n.id} className={`nvm ${n.id === active ? 'on' : ''}`} href={n.href} onClick={(e) => { e.preventDefault(); setMore(false); goRef.current(path(n.href)); }}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path className="i" d={n.icon}></path></svg>{n.label}
               </a>
             ))}
@@ -102,7 +103,7 @@ export function useChrome(active: string) {
     <>
       <div className="scrim" onClick={close}></div>
       <div className="mod" style={{ top: '18%', transform: 'translate(-50%, 0)', width: 'min(560px, calc(100% - 32px))' }}>
-        <Palette hits={hits} query={q} onQuery={setQ} onPick={(h) => { close(); goRef.current(h.href); }} onClose={close} placeholder="Find a school or go to a page" empty={`No matches for “${q}”. Try a school name or a page like Releases.`} />
+        <Palette hits={hits} query={q} onQuery={setQ} onPick={(h) => { close(); goRef.current(path(h.href)); }} onClose={close} placeholder="Find a school or go to a page" empty={`No matches for “${q}”. Try a school name or a page like Releases.`} />
       </div>
     </>
   );
