@@ -41,3 +41,12 @@ Add `static const fooEnabled = bool.fromEnvironment('FOO');` to `AppConfig`, che
 ## Copy in another language
 
 Add the key to the `_hi` / `_mr` maps in `app_translations.dart`; anything missing falls back to English.
+
+## An admin or console page (platform)
+
+The steps and the reasons are in `docs/HANDOFF.md` section 9.1; in short:
+
+1. Contracts (`packages/contracts`), then a new SQL migration (`packages/db/migrations/school/`, never edit an applied one) and the schema, then the seed so the demo school has data on every weekday.
+2. Service + controller in `apps/api/src/school/` with `@RequireModule` and `@Require`, audit entries for writes, tests in `apps/api/test/api.test.ts`. Rebuild the package (`pnpm --filter @edunest/api build`) before the dev server sees it.
+3. Method in `packages/api-client`, then the page: copy `apps/admin/src/pages/fees/FeesPage.tsx` (or a console page such as `apps/console/src/pages/flags/FlagsPage.tsx`), use `Page`, the shared blocks and `EmptyCard`; give it loading, empty, error and read-only states. Route in `router.tsx`, menu entry in `app/nav.ts`.
+4. Look at it against `docs/DESIGN.md`, then add it to `tools/audit-ui.mjs` and a flow to `tools/e2e-flows.mjs`, and keep both green. Pages without a canvas board need the owner's design review.

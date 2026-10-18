@@ -40,6 +40,14 @@ GetX named routes (`AppRoutes`). Tab switching from inside a screen: `ShellContr
 - `shaders/liquid_glass.frag` is the backdrop filter behind `Glass`. See `docs/design-system.md` → Glass.
 - Android: adaptive icon, Android 12 splash styles in `values-v31`, `kotlin.incremental=false` in `gradle.properties` (cross-drive builds).
 
-## Where the platform is going
+## The platform around the app
 
-The platform plan (backend, admin panel, console, per-school builds, configurable modules) is in `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`. The app side already follows it: repositories are interfaces, flags are central, copy is keyed, and per-school values are constants in `AppConfig`.
+This file describes the Flutter app. The rest of the repository is a TypeScript platform: school admin (`apps/admin`), console (`apps/console`), school API and console API (`apps/api`, `apps/console-api`) run together by `apps/server`, and shared packages. How it is built and why: `docs/HANDOFF.md`; the look: `docs/DESIGN.md`; the long-term plan: `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`.
+
+```
+ admin (React)  ─┐
+ console (React) ┼─►  apps/server ─►  school API (/v1, tenant by X-School)  ─►  one PostgreSQL database per school
+ Flutter app    ─┘                ─►  console API (/console/v1)             ─►  registry database (schools, plans, runs, releases)
+```
+
+How the app meets it today: repositories are interfaces with Mock and Remote adapters, flags are central, copy is keyed, and `AppConfig.schoolSlug`/`apiBase` (dart-defines `SCHOOL`, `API_BASE_URL`) turn on `SchoolProfileService`, which replaces `AppConfig.schoolName` and `schoolTagline` with the school's own from `GET /v1/brand`. The remote repositories still call the paths in `docs/API_CONTRACT.md`, which the real backend does not serve yet.

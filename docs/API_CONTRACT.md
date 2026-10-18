@@ -1,5 +1,7 @@
 # API contract
 
+> **Status:** this is the contract the Flutter app's `Remote*Repository` classes call. The real backend (`apps/api`, types in `packages/contracts`) does **not** implement these paths yet: it is staff-oriented (`/v1/students`, `/v1/attendance/day`, `/v1/fees/...`). Closing the gap means either adding family endpoints that match this file or rewriting the remote repositories; see `docs/HANDOFF.md` section 9.3. The only live call today is `GET /v1/brand` (`SchoolProfileService`).
+
 Each repository method maps to one REST call. `Remote*Repository` already calls these paths through `RemoteDataSource` and `ApiClient`. With `AppConfig.useMockData` left at `true`, the app never hits the network. Set it to `false` and the same calls throw `errors.remote_unconfigured` until `ApiClient` is implemented.
 
 JSON bodies and responses use the shapes in [MOCK_SCHEMA.md](MOCK_SCHEMA.md). Dates on the wire are ISO-8601. Enum fields use the JSON values listed there (`late`, not the Dart name `lateArrival`; `class`, not `klass`).

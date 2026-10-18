@@ -117,7 +117,7 @@ Commands are in the README. Practical notes learned the hard way:
 
 ### 8.1 What runs
 
-One Render web service `edunest` (free, Singapore, auto-deploy from the branch it was created from) runs `node apps/server/dist/main.js`. Build command (in `render.yaml`): `corepack enable && pnpm install --frozen-lockfile --prod=false && CONSOLE_BASE=/console/ pnpm exec turbo run build --concurrency=2`. Neon (free) holds the registry and each school's database.
+One Render web service `edunest` (free, Singapore, auto-deploys from `main`; work on a branch only reaches the live site once merged to `main`) runs `node apps/server/dist/main.js`. Build command (in `render.yaml`): `corepack enable && pnpm install --frozen-lockfile --prod=false && CONSOLE_BASE=/console/ pnpm exec turbo run build --concurrency=2`. Neon (free) holds the registry and each school's database.
 
 ### 8.2 Environment variables (set in Render → Environment)
 
@@ -142,7 +142,7 @@ Two independent bugs: (1) `CONSOLE_BASE` never reached the console build because
 
 ### 8.5 Redeploying and troubleshooting
 
-Push to the branch Render tracks, or Render → service → Manual Deploy → Deploy latest commit. Logs: Render → Logs. A health check hits `/health`. If the console shows a blank page, check `index.html`'s asset paths start with `/console/`. If sign-in says the school was not found, check the address is `/s/<slug>`. If provisioning a school fails at the database step, check `SHARED_PG_ADMIN_URL` is the direct string and its role can `CREATE ROLE` and `CREATE DATABASE`.
+Push or merge to `main`, or Render → service → Manual Deploy → Deploy latest commit. Logs: Render → Logs. A health check hits `/health`. If the console shows a blank page, check `index.html`'s asset paths start with `/console/`. If sign-in says the school was not found, check the address is `/s/<slug>`. If provisioning a school fails at the database step, check `SHARED_PG_ADMIN_URL` is the direct string and its role can `CREATE ROLE` and `CREATE DATABASE`.
 
 ## 9. What is left, why, and how to do it
 

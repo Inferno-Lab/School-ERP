@@ -17,12 +17,12 @@ Free limits: 0.5 GB storage per project. The demo school with 1,498 students use
 
 ## 2. GitHub: the code
 
-The repository already exists at `Inferno-Lab/School-ERP`. Render builds from the branch you point it at (`feat/platform` until you merge it into `main`).
+The repository already exists at `Inferno-Lab/School-ERP`. Render builds from `main` (the owner's service tracks it), so a change goes live only once it is on `main`.
 
 ## 3. Render: the service
 
 1. Go to **render.com** and sign up with GitHub. Allow it to read `School-ERP`.
-2. **New +** → **Blueprint** → pick `School-ERP` → branch `feat/platform` → **Connect**.
+2. **New +** → **Blueprint** → pick `School-ERP` → branch `main` → **Connect**.
 3. Render reads `render.yaml` and shows one service, `edunest`. It asks for three values:
    - `REGISTRY_DATABASE_URL`: paste the Neon string.
    - `SHARED_PG_ADMIN_URL`: paste the **same** Neon string.
@@ -48,7 +48,7 @@ Texts and emails are caught in the console under **Test inbox**; nothing is sent
 The console's **Build Android app** starts a GitHub Actions workflow (`.github/workflows/mobile-build.yml`) that builds the APK and posts the install link back.
 
 1. GitHub → your profile → *Settings* → *Developer settings* → *Personal access tokens* → fine-grained token for `School-ERP` with **Actions: read and write** and **Contents: read and write**.
-2. In Render → **Environment** add `GITHUB_TOKEN` (that token) and `GITHUB_REPO` = `Inferno-Lab/School-ERP`, and `GITHUB_BRANCH` = `feat/platform` while that is the branch.
+2. In Render → **Environment** add `GITHUB_TOKEN` (that token) and `GITHUB_REPO` = `Inferno-Lab/School-ERP`, and `GITHUB_BRANCH` = `main`.
 3. In GitHub → repository → *Settings* → *Secrets and variables* → *Actions*: add the secret `BUILD_CALLBACK_TOKEN` (copy the value of the same variable from Render) and the variable `API_BASE_URL` = your Render address.
 
 ### What the app does against the test track
@@ -57,7 +57,7 @@ A build made with `SCHOOL` and `API_BASE_URL` (the workflow passes both) reads t
 
 ## Updating
 
-Pushing to the branch redeploys automatically. Database changes are applied by the server at start; schools get theirs from the console under **Migrations** and **Releases**.
+Pushing to `main` redeploys automatically. Database changes are applied by the server at start; schools get theirs from the console under **Migrations** and **Releases**.
 
 ## Using real infrastructure later
 

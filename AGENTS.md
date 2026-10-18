@@ -1,8 +1,8 @@
 # EduNest — guide for coding agents and new developers
 
-EduNest is a school platform. The original part is a Flutter school app (students, parents, teachers) in the **Chalk & Glass** design. It runs today on local JSON mock data; a real backend is a swap of adapters, not a rewrite. Read this file first. It is the single source of truth: `CLAUDE.md` and `AGENT.md` only point here.
+EduNest is a school platform: a TypeScript backend, a school admin, a console and the original Flutter school app (students, parents, teachers) in the **Chalk & Glass** design. The Flutter app still runs on local JSON mock data (it only reads its school's name and tagline from the real backend when built with `SCHOOL` and `API_BASE_URL`); pointing it fully at the backend is a swap of adapters plus new family endpoints (see `docs/HANDOFF.md` section 9.3). Read this file first. It is the single source of truth: `CLAUDE.md` and `AGENT.md` only point here.
 
-Branch work happens on feature branches off `main`. The redesign lives on `redesign/chalk-glass`.
+Branch work happens on feature branches off `main`; the Render test deployment builds from `main`, so a change reaches `https://edunest-0c6x.onrender.com` only after it is merged (or pushed) to `main`. The Chalk & Glass redesign of the app was merged to `main`; `redesign/chalk-glass` and `apple_glass` remain on GitHub as history.
 
 ## The platform (admin, console, backend) lives next to the app
 

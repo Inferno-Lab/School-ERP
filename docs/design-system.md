@@ -1,3 +1,5 @@
+> This file is the **mobile app's** Chalk & Glass system. The school admin and the console use a different language, "Nest": see `docs/DESIGN.md`.
+
 # Chalk & Glass design system
 
 Source of truth in code: `lib/core/theme/` and `lib/core/widgets/`. Live catalogue in the app: Settings → About → long-press the version row.

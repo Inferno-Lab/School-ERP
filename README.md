@@ -92,7 +92,7 @@ render.yaml       the free test deployment (one Render web service)
 
 ## Deploying
 
-The free test track is one Render web service plus a free Neon database: [`docs/deploy-free-test.md`](docs/deploy-free-test.md). `render.yaml` describes it, so connecting the repository is enough. Pushing to the branch redeploys it.
+The free test track is one Render web service plus a free Neon database: [`docs/deploy-free-test.md`](docs/deploy-free-test.md). `render.yaml` describes it, so connecting the repository is enough. Pushing or merging to `main` redeploys it.
 
 ## The Flutter app
 

@@ -1,6 +1,6 @@
 # Platform build status (2026-10-18)
 
-Branch `feat/platform`. The plan is `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`; this file says what of it exists.
+Merged to `main` (work branch `feat/platform`). The plan is `docs/superpowers/specs/2026-10-14-edunest-platform-design.md`; this file says what of it exists.
 Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (decisions, how to continue, what is left) is `docs/HANDOFF.md`; the design concept is `docs/DESIGN.md`. Live test deployment: `https://edunest-0c6x.onrender.com` (admin `/`, console `/console/`).
 
 ## What exists and is checked
@@ -19,7 +19,7 @@ Deploying the free test track: `docs/deploy-free-test.md`. The full hand-off (de
 UI checks, all repeatable:
 
 - `node tools/audit-ui.mjs`: every page of both apps at 360, 390, 768 and 1440 wide, light and dark. Fails on console errors, failed calls, sideways scroll and anything clipped or outside the window.
-- `node tools/e2e-flows.mjs`: sign-in errors, add student, dashboard approval, timetable clash fix and publish, settings save, search and shortcuts, phone dock, console release, flags, team, support and erase guards, billing.
+- `node tools/e2e-flows.mjs` (21 flows): sign-in errors, add student, dashboard approval, timetable clash fix and publish, settings save, search and shortcuts, phone dock, console release, flags, team, support and erase guards, billing.
 - `node tools/e2e-onboard.mjs`: onboards a new empty school through the console wizard, signs in to it with the code from the test inbox, and screenshots every admin page (the brand-new-school states).
 - `node tools/shot.mjs <url> out.png [w] [h] [--dark] [--console] [--audit] [--do '[...]']`: one screenshot, signed in.
 
