@@ -65,7 +65,7 @@ function DashboardDesktop() {
   });
 
   const d: DashboardData | undefined = q.data;
-  const v = useMemo(() => (d ? build(d) : null), [d, range, tab, rangeOpen, newOpen, done, toast, chrome.shell]);
+  const v = useMemo(() => (d ? build(d) : null), [d, range, tab, rangeOpen, newOpen, done, toast, chrome.shell, chrome.palette, chrome.aside, chrome.dock]);
 
   function build(d: DashboardData) {
     const T = TABS[tab]!;

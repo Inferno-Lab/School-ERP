@@ -457,14 +457,15 @@ For each school: slug, legal name, short name, domains, region, cell, plan, stat
 
 ### 12.2 Provisioning (driven by blueprints)
 Provisioning is data, not code. A **blueprint** is a versioned, editable list of steps with parameters, kept in the catalog (12.4) and edited in the console. The console picks the blueprint by target, plan and region (12.11). The workflow is idempotent and resumable; every step is retryable, has a visible log, and can be dry-run first. A step can be skipped only where the blueprint marks it optional, and the reason is recorded. The default blueprint runs these steps in order:
-1. Choose the cell and create the school's database, Postgres role and pool secret.
-2. Create the encryption key, bucket prefix policy, cache namespace, queue registrations and routing-table entry.
-3. Run the latest migrations and seed defaults (role templates, statuses, vocabularies, templates, layouts), or the demo data if the wizard asked for it.
-4. Create the edge entry for the school's address (`<slug>.edunest.app`, or a path in test), plus the custom domain with certificate validation if the school has one.
-5. Push the entitlement document and create the first school admin, who gets an invite with passkey setup.
-6. Write the school's build profile (`schools/<slug>/school.yaml`) through the console's GitHub App as a signed commit to a protected path, which runs validation. Nobody opens a pull request by hand.
-7. Queue the first app build and open the store-onboarding checklist for the school's Apple and Google accounts (section 19.3).
-8. Send the invites and record the school as `live`.
+1. **Database:** choose the cell and create the school's database, Postgres role and pool secret (`database`).
+2. **Keys and storage:** the encryption key, bucket prefix policy, cache namespace, queue registrations and routing-table entry (`keys-storage`).
+3. **Migrations and defaults:** run the latest migrations and seed defaults (role templates, statuses, vocabularies, templates, layouts), or the demo data if the wizard asked for it (`migrate-seed`).
+4. **Domain:** the edge entry for the school's address (`<slug>.edunest.app`, or a path in test), plus the custom domain with certificate validation if the school has one (`domain`).
+5. **First admin:** push the entitlement document and create the first school admin, who gets an invite (`admin`). On the test track the invite lands in the console's test inbox.
+6. **App build profile:** write the school's build profile (`schools/<slug>/school.yaml`) through the console's GitHub App as a signed commit to a protected path, which runs validation (`build-profile`, optional).
+7. **Store checklist:** open the store-onboarding checklist for the school's Apple and Google accounts and queue the first app build (section 19.3) (`store-checklist`, optional).
+
+The invites are sent and the school is recorded as `live` when the last step finishes. The step keys are fixed (`STEP_KEYS` in `packages/contracts`); a blueprint may switch off the optional ones and change their parameters, but not reorder them.
 
 ### 12.3 Plans, entitlements and billing
 - **Plans:** module bundles, limits, add-ons (SMS packs, WhatsApp, dedicated cell, assistant). Per-school overrides and locks. The signed entitlement document is pushed to the cell and also pulled at API start.

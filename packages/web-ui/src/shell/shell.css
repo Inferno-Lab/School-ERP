@@ -62,4 +62,4 @@
   .nest .app>.sb{position:sticky;top:12px;align-self:start;height:calc(100dvh - 24px);overflow-x:hidden;overflow-y:auto;scrollbar-width:none}
   .nest .app>.sb::-webkit-scrollbar{display:none}
 }
-@media (min-width:901px){.nest .app>.sb>*{flex-shrink:0}}
+@media (min-width:901px){.nest .app>.sb .nv,.nest .app>.sb .sl,.nest .app>.sb .sbc,.nest .app>.sb .me,.nest .app>.sb .ws,.nest .app>.sb .wsw{flex-shrink:0}}
