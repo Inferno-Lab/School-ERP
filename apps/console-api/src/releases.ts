@@ -48,6 +48,12 @@ export class Releases implements OnApplicationBootstrap {
     return rows[0] ? this.row(rows[0]) : null;
   }
 
+  /** What the fleet board shows: the release in flight, or else the last one that was started. */
+  async latest(): Promise<ReleaseRow | null> {
+    const { rows } = await this.db.query<ReleaseRecord>("select * from releases where status <> 'draft' order by (status in ('rolling','paused','halted')) desc, created_at desc limit 1");
+    return rows[0] ? this.row(rows[0]) : null;
+  }
+
   async get(id: string): Promise<ReleaseRow> {
     const { rows } = await this.db.query<ReleaseRecord>('select * from releases where id = $1', [id]);
     if (!rows[0]) throw notFound('That release');

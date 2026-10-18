@@ -264,7 +264,7 @@ export class OpsController {
 
   @Get('fleet') @Needs('schools.read')
   async fleet(): Promise<FleetSummary> {
-    return { ...(await this.schools.fleet()), release: await this.releases.current() };
+    return { ...(await this.schools.fleet()), release: await this.releases.latest() };
   }
 
   @Get('cells') @Needs('schools.read')
