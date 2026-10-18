@@ -2,7 +2,7 @@
 
 > **Status:** implemented. The school API serves these calls under the prefix `/v1/f` (for example `GET /v1/f/students/:id/fees`), scoped to the signed-in person, in the shapes below (`apps/api/src/school/family.controller.ts`, tests in `apps/api/test/family.test.ts`). The app's `ApiClient` adds the prefix, the `X-School` header and the token. Sign-in is the platform's own two steps, `POST /v1/auth/login` then `POST /v1/auth/verify`, not the `/auth/*` calls in the next section. Differences from the tables: leave requests, attendance marks and homework hand-ins are stored in the same tables the admin uses; gallery is empty; library lists loans only (reserve answers 409); transport has the route only; notifications are the messages the school sent to the person's phone (read and dismiss state is kept per person).
 
-Each repository method maps to one REST call. `Remote*Repository` already calls these paths through `RemoteDataSource` and `ApiClient`. With `AppConfig.useMockData` left at `true`, the app never hits the network. Set it to `false` and the same calls throw `errors.remote_unconfigured` until `ApiClient` is implemented.
+Each repository method maps to one REST call. `Remote*Repository` calls these paths through `RemoteDataSource` and `ApiClient` (`lib/core/network/api_client.dart`). A build without `SCHOOL` and `API_BASE_URL` keeps `AppConfig.useMockData` on and never touches the network; a build with them uses these calls.
 
 JSON bodies and responses use the shapes in [MOCK_SCHEMA.md](MOCK_SCHEMA.md). Dates on the wire are ISO-8601. Enum fields use the JSON values listed there (`late`, not the Dart name `lateArrival`; `class`, not `klass`).
 
@@ -14,11 +14,11 @@ Failures are a JSON object:
 { "message": "errors.bad_login" }
 ```
 
-`message` is a translation key. The client surfaces it with `.tr`. HTTP status is 400 for validation, 401 for auth, 404 for a missing id, and 500 for anything else. `ApiClient` should turn a non-2xx body into `AppException(message)`.
+The real server sends `{ "code", "message" }`, where `message` is a sentence for people (the client shows it as is) and `code` a machine word. HTTP status is 400 for validation, 401 for auth, 403 for a missing permission, 404 for a missing id, 409 for a conflict and 500 for anything else. `ApiClient` turns a non-2xx body into `AppException(message)` and a failed connection into `errors.network`.
 
 ## Auth
 
-`POST /auth/login`, `/auth/otp`, and `/auth/demo` return the user object. The real client should also return `accessToken` and `refreshToken`. After that, every request sends `Authorization: Bearer <accessToken>`. Refresh with `POST /auth/refresh` and `{ "refreshToken": "..." }`. The demo does not mint tokens; the session is the user JSON kept by `AuthService`.
+As built: `POST /v1/auth/login` `{ "identifier", "password" }` answers `{ "step": "otp", "challenge": { "challengeId", "maskedTo", "expiresInSeconds", "demoCode"? } }` (or the tokens when the school switched the code off); `POST /v1/auth/verify` `{ "challengeId", "code" }` answers `{ "accessToken", "refreshToken", "user" }`. Every later request sends `Authorization: Bearer <accessToken>` and `X-School: <slug>`. Renew with `POST /v1/auth/refresh` `{ "refreshToken" }`; each renewal returns a new refresh token, and reusing an old one ends every session. The app then reads the person from `GET /v1/f/me`. The table below is the demo app's original shape; the mock still uses it.
 
 ## Pagination
 

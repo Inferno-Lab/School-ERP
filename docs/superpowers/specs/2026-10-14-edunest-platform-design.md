@@ -2,7 +2,7 @@
 
 Status: draft for review · 2026-10-14, revised 2026-10-18 (new design language, console-driven onboarding and deployment, free testing of all three products together)
 Replaces: `2026-10-10-edunest-platform-monorepo-design.md` (deleted; it is in git history).
-Scope: this is the plan. Nothing in it is built yet except the Flutter app on mock data.
+Scope: this is the plan. What has been built from it, and how the build differs (Render + Neon instead of Oracle for the test track, plain CSS instead of Tailwind/Radix, permission strings instead of CASL, hand-written clients instead of generated ones), is in `docs/HANDOFF.md` and `docs/platform-status.md`.
 
 **How to read this document.** Every part described here is in scope for the first production launch. Nothing is parked for a later stage. The build order in section 24 only says what gets built first, because each step depends on the one before it. Where something cannot be finished by code alone (a lawyer's sign-off, a store account, a payment-gateway KYC), section 27 lists it as gating work with its own owner.
 

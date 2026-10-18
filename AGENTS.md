@@ -17,10 +17,11 @@ bash tools/dev-reset.sh &           # local PostgreSQL + server + Greenfield dem
 pnpm --filter @edunest/admin dev    # http://localhost:5173/s/greenfield
 pnpm --filter @edunest/console dev  # http://localhost:5174
 node tools/audit-ui.mjs             # every page, 4 widths, light/dark: errors, overflow, clipping
-node tools/e2e-flows.mjs            # 21 browser flows (re-run dev-reset first; it changes data)
+node tools/e2e-flows.mjs            # 38 browser flows (re-run dev-reset first; it changes data)
+node tools/scan-gaps.mjs            # columns ending unevenly; also scan-fit.mjs (tabs, pills) and scan-scroll.mjs (scroll areas)
 ```
 
-Platform rules that have bitten us: never edit an applied SQL migration (add a new file); declare build-time env in `turbo.json`; `apps/server` imports the API packages from `dist/` (rebuild after changing them); a page's `useMemo` values must depend on shared chrome state; check new CSS class names against `nest.css`; do not re-run `tools/dc-to-tsx.mjs` over edited views; keep `tools/audit-ui.mjs` and `tools/e2e-flows.mjs` green before every push and run `node tools/scan-cutoff.mjs` for text that is cut off; a table row (`.rw`) has a fixed height, so a wrapping row needs `height:auto`; shared controls belong in `packages/web-ui/src/blocks.css` (`pages.css` only loads on pages built with `Page`); the owner reviews design, so pages without a canvas board must be built only from `packages/web-ui` pieces.
+Platform rules that have bitten us: never edit an applied SQL migration (add a new file); declare build-time env in `turbo.json`; `apps/server` imports the API packages from `dist/` (rebuild after changing them); a page's `useMemo` values must depend on shared chrome state; check new CSS class names against `nest.css`; do not re-run `tools/dc-to-tsx.mjs` over edited views; keep `tools/audit-ui.mjs` and `tools/e2e-flows.mjs` green before every push and run `node tools/scan-cutoff.mjs` for text that is cut off; a table row (`.rw`) has a fixed height, so a wrapping row needs `height:auto`; shared controls belong in `packages/web-ui/src/blocks.css` (`pages.css` only loads on pages built with `Page`); the owner reviews design, so pages without a canvas board must be built only from `packages/web-ui` pieces; use `Select` (never a bare `<select>`), `Pop` for menus, `data-tip` for chart tooltips, and `data-even`/`data-even-scroll` on side-by-side columns (`EvenRows`); never stretch a card to fill space, and never size a segmented knob by hand (`SegFit` measures it).
 
 ## Commands
 
@@ -85,7 +86,7 @@ Details: `docs/architecture.md`. How to add a screen, a repository, or an AI fea
 - Comments say *why*, one line. Mark a deliberate limit with `// shortcut: <the limit>, <when to upgrade>`.
 - Commits are atomic and use Conventional Commits (`fix(glass): …`, `refactor(fees): …`). Keep refactors separate from behaviour changes.
 - Visual changes: look at them (headless shot at minimum; emulator for glass). Light, dark, AMOLED; small phone (360×640), phone (390×844), tablet (≥ 840 wide).
-- Demo accounts: password `demo123`, OTP `123456`. Student Aarav, parent Priya, teacher Kavita (see `README.md`).
+- Demo accounts: password `demo123`, OTP `123456` on demo content; `nest2026` and code `424242` on a school build against the demo school. Student Aarav, parent Priya, teacher Kavita (see `README.md`).
 
 ## Where things are
 

@@ -7,7 +7,7 @@ EduNest is a school platform with four parts that work together:
 | **School admin** | The website a school's office and principal use: dashboard, students, attendance, fees, notices, timetable, settings. | `apps/admin` |
 | **Console** | EduNest's own control room: onboard a school, set up its database and address, roll out releases, watch health, give support, bill, manage the team. | `apps/console` |
 | **Backend** | Two NestJS APIs (one for schools, one for the console) in one process, with a PostgreSQL database per school. | `apps/api`, `apps/console-api`, `apps/server`, `packages/*` |
-| **Mobile app** | A Flutter app for students, parents and teachers ("Chalk & Glass" look). Still runs on demo content; it already reads its school's name and tagline from the backend. | `lib/`, `android/`, `ios/` |
+| **Mobile app** | A Flutter app for students, parents and teachers ("Chalk & Glass" look). Built for a school (`SCHOOL` and `API_BASE_URL`), it signs in for real and reads that school's data through the family API (`/v1/f/*`); built without them, it runs on demo content. | `lib/`, `android/`, `ios/` |
 
 Start here depending on who you are:
 
@@ -49,16 +49,22 @@ Sign in:
 | --- | --- | --- |
 | School admin (demo school) | `http://localhost:5173/s/greenfield` | `neha.menon@greenfield.edu.in` / `nest2026`, then press "Type the demo code" (`424242`) |
 | Console | `http://localhost:5174` | `kaushal@edunest.app` / `nest2026`, code `424242` |
+| Phone app on the demo school | a build with `SCHOOL=greenfield` | parent `priya.sharma@example.com`, student `aarav.sharma@edunest.app`, teacher `kavita.iyer@greenfield.edu.in`; password `nest2026`, code `424242` |
+
+On the hosted test track (`https://edunest-0c6x.onrender.com`) the school logins are the same. The console there uses `BOOTSTRAP_PASSWORD` and `DEMO_CODE` from Render's Environment page.
 
 Texts and emails are never sent for real: they land in the console's **Test inbox**. That is where a new school's invite and sign-in codes appear.
 
 ## Check that nothing is broken
 
 ```bash
-pnpm typecheck && pnpm test         # types and 150+ unit and API tests (the API tests start a real PostgreSQL)
+pnpm typecheck && pnpm test         # types and 132 unit and API tests (the API tests start a real PostgreSQL)
 node tools/audit-ui.mjs             # every page, 4 widths, light and dark: errors, overflow, clipped text
-node tools/e2e-flows.mjs            # 36 click-through flows in a real browser (run after dev-reset; it changes demo data)
+node tools/e2e-flows.mjs            # 38 click-through flows in a real browser (run after dev-reset; it changes demo data)
 node tools/scan-cutoff.mjs          # text cut by an ellipsis, hidden scrollbars, clipped boxes (the audit does not see these)
+node tools/scan-gaps.mjs            # side-by-side columns that end unevenly, blank inside cards, content short of the edge
+node tools/scan-fit.mjs             # tab knobs off their tab, text wrapping in pills or spilling out, 'undefined' on screen
+node tools/scan-scroll.mjs          # slow scroll areas and table headings that scroll away
 node tools/e2e-onboard.mjs          # onboards a new empty school through the wizard and screenshots every page
 tool/verify.sh                      # Flutter analyzer and tests
 ```
@@ -101,7 +107,7 @@ The original demo app (students, parents, teachers; Chalk & Glass; mock JSON in 
 
 ```bash
 flutter pub get && flutter run          # demo content, no backend needed
-flutter run --dart-define=SCHOOL=greenfield --dart-define=API_BASE_URL=https://edunest-0c6x.onrender.com   # name and tagline come from the school's backend
+flutter run --dart-define=SCHOOL=greenfield --dart-define=API_BASE_URL=https://edunest-0c6x.onrender.com   # the demo school's real data (password nest2026, code 424242)
 ```
 
-Demo accounts (password `demo123`, OTP `123456`): student Aarav Sharma, parent Priya Sharma, teacher Kavita Iyer.
+Demo accounts on demo content (password `demo123`, OTP `123456`): student Aarav Sharma, parent Priya Sharma, teacher Kavita Iyer. On a school build the same people sign in with `nest2026` and code `424242`.

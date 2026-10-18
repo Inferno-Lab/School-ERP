@@ -59,7 +59,7 @@ Colour rules:
 ### Shape, depth, spacing
 
 - Radii: frame 28, big tiles/cards 24–28, inputs 16, row cards 18–20, pills/buttons 999, avatars 50%. Bars: 7–14 px radius equal to half the height.
-- Shadows: `--sh1` hairline (cards), `--sh2` hover lift (violet-tinted), `--sh3` floating (frame, dialogs, toast). In dark, shadows become pure black or none.
+- Shadows: `--sh1` hairline (cards), `--sh2` hover lift, `--sh3` floating (frame, dialogs, toast), all neutral (no coloured or glowing shadows). In dark, shadows become pure black or none.
 - Spacing scale (px): 4, 6, 8, 10, 12, 14, 16, 18, 22, 26, 34. Page gutter 34 (desktop) / 16 (phone); grid gap 18; card padding 22; list rows min-height 58–64; touch targets ≥ 40.
 - Layout: 12-column grid (`grid`, spans `s3 s4 s5 s6 s7 s8 s12`), collapsing to one column under 1100 px. Page width fills the frame.
 - Focus: 2.5 px violet ring, 3 px offset, on every interactive element. Never remove it.
@@ -92,7 +92,7 @@ page background (flat)
 | **Status pill** `.st` | 28 px pill with a dot: `g` Healthy/Paid/Live, `a` Degraded/Waiting, `b` Updating/Setting up, `r` Down/Overdue, `n` neutral. Always includes a word. |
 | **Card** `.card` | White, 1 px line, radius 24, padding 22, `sh1`. Header row `.ch`: title 17–22 px display + chip + optional small button; wraps on phones. |
 | **Tile** `.tile t-*` | Coloured feature card, radius 28, a label chip, a big display number, a one-line explanation, optional corner arrow button. 3–4 per row at the top of a page. |
-| **Inputs** `.inp`/`Field` | 48 px, radius 16, 1.5 px border; focus = violet border plus a crisp 1 px line, no glow; label above (13.5 px/700); hint below in `--ink3`; error: red border, tint, message with a warning icon, and the field **vibrates** (see motion). `SelectField` is a styled native select. |
+| **Inputs** `.inp`/`Field` | 48 px, radius 16, 1.5 px border; focus = violet border plus a crisp 1 px line, no glow; label above (13.5 px/700); hint below in `--ink3`; error: red border, tint, message with a warning icon, and the field **vibrates** (see motion). `SelectField` wraps the `Select` dropdown below. |
 | **Switch** `.sw` | 38×22 flat pill, 16 px knob; grey off, violet on, no spring and no shadow. Always paired with a label. |
 | **Dropdown** `Select` / `SelectField` | Replaces the browser's `<select>`. A 50 px field (or `compact` 40 px pill for page headers) with a round chevron chip; the list is drawn in a portal on the page root with fixed coordinates, so no card, table or dialog can clip it; it flips upward near the bottom, scrolls inside, gets a search box above 10 options, and works with the keyboard (arrows, Home/End, Enter, Esc, type-ahead). Never use a bare `<select>`. |
 | **Tooltip** `data-tip` | One shared tooltip (`Tooltips`, mounted by `Shell`). Put `data-tip="Title (newline) more"` on any chart column, bar or segment; every `.us` usage row gets one for free; the collapsed menu uses it for names. |
@@ -101,7 +101,7 @@ page background (flat)
 | **Table** `.grd` | CSS-grid rows (`--cols`), 58–64 px, hairline separators, hover tint, header row 11.5 px uppercase. Rows are links where they open something. Wrap in `.scroll-x` with a min-width on phones. |
 | **Usage bar** `.bar` | **14 px tall**, full radius, `--sunk` track, violet→coral fill; `warn` variant amber→red; label left, value right. **Bars are never thin** (owner rule). Segmented tick bars (`tk3`, 20 ticks, 24 px tall) for SMS credits; release progress is 60 ticks. |
 | **Charts** | Columns: wide, rounded tops, today highlighted in amber, previous period as a ghost behind, hover bubble. Lines: 3 px violet, drawn once, area gradient below, dashed previous line, follow-pointer tooltip. Roll bars: segmented present/late/absent, filled. Fee bars: filled, labelled with percent. No pencils, jars or dot rows. Goal line dashed with a chip. Empty chart: columns hidden, one sentence ("Attendance appears here after the first roll call is marked."). |
-| **Ticket** `.tkt` | The plan card: dark gradient, notched sides (CSS mask), dashed perforation, plan name display 23 px, two icon lines, a white pill button, status chip and counts on the right. |
+| **Ticket** `.tkt` | The plan card: flat dark fill, notched sides (CSS mask), dashed perforation, plan name display 23 px, two icon lines, a white pill button, status chip and counts on the right. |
 | **Dialog** | Centered card over a blurred scrim, tag chip above the title, focus trapped, Esc and scrim close. Dark variant for dangerous actions (erase). Typed-confirmation input for irreversible actions. |
 | **Drawer** | Right panel that slides in (student detail). |
 | **Toast** | Dark pill, bottom centre, green check or red cross circle + one sentence; auto-hides after ~4 s; never the only place an error appears. |
@@ -114,26 +114,25 @@ page background (flat)
 
 ## 5. Motion
 
-Easing: `--e` = `cubic-bezier(.22,1,.36,1)` (smooth out) for movement; `--sp` = `cubic-bezier(.34,1.56,.64,1)` (spring) for pops, switches and knobs. Durations: hover/colour 200–300 ms, movement 400–700 ms, page entrance 700 ms with a stagger of ~50 ms between blocks (`rise` + `--d` delay, capped), chart draws 2 s once.
+Easing: `--e` = `cubic-bezier(.22,1,.36,1)` (smooth out) for movement; `--sp` = `cubic-bezier(.34,1.56,.64,1)` (spring) for pops, switches and knobs. Durations: hover/colour 150–300 ms, movement 200–500 ms, page entrance 450 ms with a short stagger (`rise` + `--d` delay at 0.4×), chart draws once.
 
 | Pattern | Behaviour |
 | --- | --- |
-| **Rise** | Blocks enter 18 px lower with a fade, staggered top to bottom. |
+| **Rise** | Blocks enter 10 px lower with a fade, staggered top to bottom. |
 | **Roll digits** | Each digit scrolls on a vertical strip to its new value (`Roll`, 1.1 em per digit); separators stay still. |
 | **Morph** | Menus grow from their button (width, height) and items fade in with a delay per item. |
 | **Vibrate (errors)** | `nShkA`/`nShkB`: ±9 px horizontal shake over .6 s. Two keyframe names alternate (`shk1`/`shk2` on a wrapper, `useShake().hit()`), so the same error can vibrate again and again. Used for wrong passwords, wrong codes, invalid fields, a failed save, a wrong typed confirmation. The error message also fades down (`nEm`). |
 | **Pop** | Success marks scale from .6 with the spring. |
 | **Draw** | Chart lines and illustration strokes draw once (dash offset). |
-| **Hover lift** | Cards/tiles rise 2–4 px (ticket also tilts −.3°); arrow buttons rotate 45°. |
-| **Live pulse** | The environment dot and the "now" tick pulse softly. |
+| **Hover lift** | Cards rise 2–4 px; arrow buttons rotate 45°. |
 | **Sign-in** | A panel with floating sample cards, rolling digits, a toast that appears, and a padlock illustration that rocks when a credential is wrong; the form shakes. |
-| **Reduced motion** | `prefers-reduced-motion` (and the `rm` class) removes movement, keeps state changes instant. Never rely on motion to convey meaning. |
+| **Reduced motion** | `prefers-reduced-motion` (and the `rm` class) makes animations instant and turns transitions off (`transition: none`). Never rely on motion to convey meaning. |
 
 Animate transform and opacity only; never animate layout properties in lists.
 
 ### Scrolling and fitting (rules added 2026-10-18)
 
-- Every scroll area has a visible, themed bar (thin, violet, a pill) and a soft shadow at the edge that still has more behind it (`polish.css`; add `.lscroll` to a list that can grow long, `.scl` to any other box).
+- Every scroll area has a visible, themed bar (thin, violet, a pill) and a plain background (`polish.css`; add `.lscroll` to a list that can grow long, `.scl` to any other box).
 - A list longer than about 12 rows scrolls inside its card (`max-height: min(66dvh, 680px)`); the page never grows with the data.
 - The menu fits a short window: tighter rows under 900 px high, no context card under 780 px, and the account block stays pinned at the bottom.
 - Text that names a person or thing wraps to two lines before it is cut; a one-line ellipsis is for previews only, and the full text is in the `title`.
