@@ -5,6 +5,7 @@ abstract final class StorageKeys {
   static const themeMode = 'themeMode';
   static const textScale = 'textScale';
   static const onboardingSeen = 'onboardingSeen';
+  static const welcomeSeen = 'welcomeSeen';
   static const sessionUser = 'sessionUser';
   static const activeStudent = 'activeStudent';
   static const accessToken = 'accessToken';

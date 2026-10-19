@@ -742,6 +742,9 @@ const enRedesign = <String, String>{
   'home.welcome_body':
       'Your timetable, homework and fees will appear here as soon as the school publishes them. Until then, three good first steps:',
   'home.first_steps': 'First steps',
+  'welcome.hello': 'Welcome, @name',
+  'welcome.body': 'Your day, homework, fees and messages live here. Three good places to start:',
+  'welcome.continue': "Let's go",
   'home.step_chat': 'Say hello to the class teacher',
   'home.step_chat_sub': 'Questions about the new term? Ask here.',
   'home.step_profile': 'Check the ID card',

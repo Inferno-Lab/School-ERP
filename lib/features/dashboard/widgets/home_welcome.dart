@@ -9,6 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+List<(IconData, String, String, VoidCallback)> _firstSteps() => [
+  (PhosphorIconsRegular.chatCircle, 'home.step_chat', 'home.step_chat_sub', () => Get.find<ShellController>().go(3)),
+  (PhosphorIconsRegular.identificationCard, 'home.step_profile', 'home.step_profile_sub', () => Get.find<ShellController>().go(4)),
+  (PhosphorIconsRegular.bellRinging, 'home.step_alerts', 'home.step_alerts_sub', () => Get.toNamed<void>(AppRoutes.settings)),
+];
+
 /// What Home shows before the school has put anything in: a welcome and three
 /// first steps, so a new family lands on something useful, not an empty page.
 class HomeWelcome extends StatelessWidget {
@@ -17,11 +23,7 @@ class HomeWelcome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.app;
-    final steps = [
-      (PhosphorIconsRegular.chatCircle, 'home.step_chat', 'home.step_chat_sub', () => Get.find<ShellController>().go(3)),
-      (PhosphorIconsRegular.identificationCard, 'home.step_profile', 'home.step_profile_sub', () => Get.find<ShellController>().go(4)),
-      (PhosphorIconsRegular.bellRinging, 'home.step_alerts', 'home.step_alerts_sub', () => Get.toNamed<void>(AppRoutes.settings)),
-    ];
+    final steps = _firstSteps();
     return EduCard(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
       child: Column(
@@ -35,39 +37,58 @@ class HomeWelcome extends StatelessWidget {
           const SizedBox(height: 14),
           Overline('home.first_steps'.tr),
           const SizedBox(height: 4),
-          for (final (i, s) in steps.indexed) ...[
-            if (i > 0) const Hr(indent: 52),
-            Pressable(
-              onTap: s.$4,
-              scale: .985,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(color: i == 0 ? AppColors.mari : c.paper2, borderRadius: BorderRadius.circular(12)),
-                      child: Icon(s.$1, size: 20, color: i == 0 ? AppColors.mariInk : c.ink),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(s.$2.tr, style: context.type.t.copyWith(fontSize: 15)),
-                          Text(s.$3.tr, style: context.type.cap),
-                        ],
-                      ),
-                    ),
-                    Icon(PhosphorIconsRegular.caretRight, size: 16, color: c.ink3),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          _StepList(steps: steps),
         ],
       ),
+    );
+  }
+}
+
+class _StepList extends StatelessWidget {
+  const _StepList({required this.steps});
+
+  final List<(IconData, String, String, VoidCallback)> steps;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.app;
+    return Column(
+      children: [
+        for (final (i, s) in steps.indexed) ...[
+          if (i > 0) const Hr(indent: 52),
+          Pressable(
+            onTap: s.$4,
+            scale: .985,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: i == 0 ? AppColors.mari : c.paper2,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(s.$1, size: 20, color: i == 0 ? AppColors.mariInk : c.ink),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.$2.tr, style: context.type.t.copyWith(fontSize: 15)),
+                        Text(s.$3.tr, style: context.type.cap),
+                      ],
+                    ),
+                  ),
+                  Icon(PhosphorIconsRegular.caretRight, size: 16, color: c.ink3),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
