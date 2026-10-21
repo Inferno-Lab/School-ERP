@@ -6,10 +6,14 @@ class AppConfig {
 
   static const appName = 'EduNest';
 
-  /// Which school this build is for, and where its API lives. A school's build profile passes both with
+  /// Which school this build is for, and where its API lives. Override with
   /// `--dart-define=SCHOOL=<slug> --dart-define=API_BASE_URL=<address>`; the console's build workflow does.
-  static const schoolSlug = String.fromEnvironment('SCHOOL');
-  static const apiBase = String.fromEnvironment('API_BASE_URL');
+  /// Defaults point at the hosted Greenfield test track. Pass empty values to run on mock JSON.
+  static const schoolSlug = String.fromEnvironment('SCHOOL', defaultValue: 'greenfield');
+  static const apiBase = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://edunest-0c6x.onrender.com',
+  );
   static const live = schoolSlug != '' && apiBase != '';
 
   /// The school's name and tagline. The demo values stand until `SchoolProfileService` has the school's own from the API.

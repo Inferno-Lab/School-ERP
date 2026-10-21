@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/services/storage_service.dart';
 import 'package:edunest/core/utils/app_exception.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 /// Talks to the school's API. Every call names the school, carries the signed-in person's token and, when the token
@@ -62,9 +63,13 @@ class ApiClient {
   Future<dynamic> _send(String method, String path, {Map<String, dynamic>? query, Map<String, dynamic>? body, bool retried = false}) async {
     if (_base.isEmpty || _school.isEmpty) throw const AppException('errors.remote_unconfigured');
     final open = path.startsWith('/v1/auth/');
+    final uri = _uri(path, query);
     final client = HttpClient()..connectionTimeout = _timeout;
+    final started = DateTime.now();
+    final hasToken = _storage.read<String>(StorageKeys.accessToken) != null;
+    _logRequest(method: method, uri: uri, body: body, retried: retried, authed: hasToken && !open);
     try {
-      final req = await client.openUrl(method, _uri(path, query)).timeout(_timeout);
+      final req = await client.openUrl(method, uri).timeout(_timeout);
       req.headers
         ..set('x-school', _school)
         ..set('accept', 'application/json');
@@ -76,7 +81,9 @@ class ApiClient {
       }
       final res = await req.close().timeout(_timeout);
       final text = await res.transform(utf8.decoder).join().timeout(_timeout);
+      final ms = DateTime.now().difference(started).inMilliseconds;
       final json = text.trim().isEmpty ? null : jsonDecode(text);
+      _logResponse(method: method, uri: uri, status: res.statusCode, ms: ms, body: text);
       if (res.statusCode >= 200 && res.statusCode < 300) return json;
       if (res.statusCode == 401 && !open && !retried && await _renew()) {
         return await _send(method, path, query: query, body: body, retried: true);
@@ -89,10 +96,100 @@ class ApiClient {
       throw AppException(message);
     } on AppException {
       rethrow;
-    } on Object {
+    } on Object catch (error) {
+      final ms = DateTime.now().difference(started).inMilliseconds;
+      _logBlock([
+        'API ERROR',
+        '  method:   $method',
+        '  url:      $uri',
+        '  duration: ${ms}ms',
+        '  error:    $error',
+      ]);
       throw const AppException('errors.network');
     } finally {
       client.close(force: true);
+    }
+  }
+
+  void _logRequest({
+    required String method,
+    required Uri uri,
+    required Map<String, dynamic>? body,
+    required bool retried,
+    required bool authed,
+  }) {
+    _logBlock([
+      'API REQUEST${retried ? ' (retry)' : ''}',
+      '  method:  $method',
+      '  url:     $uri',
+      '  school:  $_school',
+      '  auth:    ${authed ? 'Bearer …' : 'none'}',
+      if (body != null) ..._bodyLines(_safeJson(body)),
+    ]);
+  }
+
+  void _logResponse({
+    required String method,
+    required Uri uri,
+    required int status,
+    required int ms,
+    required String body,
+  }) {
+    _logBlock([
+      'API RESPONSE',
+      '  method:   $method',
+      '  url:      $uri',
+      '  status:   $status',
+      '  duration: ${ms}ms',
+      ..._bodyLines(_safeJson(_tryDecode(body))),
+    ]);
+  }
+
+  static List<String> _bodyLines(dynamic value) => [
+    '  body:',
+    for (final line in _pretty(value).split('\n')) '    $line',
+  ];
+
+  static void _logBlock(List<String> lines) {
+    debugPrint('┌── ${lines.first}');
+    for (final line in lines.skip(1)) {
+      debugPrint('│$line');
+    }
+    debugPrint('└────────────────────────────────');
+  }
+
+  /// Keeps passwords and tokens out of the console.
+  static dynamic _safeJson(dynamic value) {
+    const hide = {'password', 'refreshToken', 'accessToken', 'code', 'otp', 'token'};
+    if (value is Map) {
+      return {
+        for (final e in value.entries)
+          '${e.key}': hide.contains('${e.key}') ? '…' : _safeJson(e.value),
+      };
+    }
+    if (value is List) return [for (final item in value) _safeJson(item)];
+    return value;
+  }
+
+  static dynamic _tryDecode(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return '(empty)';
+    try {
+      return jsonDecode(trimmed);
+    } on Object {
+      return trimmed;
+    }
+  }
+
+  static String _pretty(dynamic value) {
+    if (value is String) {
+      return value.length <= 2000 ? value : '${value.substring(0, 2000)}…';
+    }
+    try {
+      final encoded = const JsonEncoder.withIndent('  ').convert(value);
+      return encoded.length <= 4000 ? encoded : '${encoded.substring(0, 4000)}…';
+    } on Object {
+      return '$value';
     }
   }
 

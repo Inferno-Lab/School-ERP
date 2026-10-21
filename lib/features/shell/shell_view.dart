@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:edunest/core/utils/extensions.dart';
 import 'package:edunest/core/widgets/dock.dart';
 import 'package:edunest/core/widgets/lazy_stack.dart';
+import 'package:edunest/features/auth/views/welcome_overlay.dart';
 import 'package:edunest/features/chat/controllers/chat_controller.dart';
 import 'package:edunest/features/chat/views/chat_list_view.dart';
 import 'package:edunest/features/dashboard/views/academics_view.dart';
@@ -16,11 +17,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-class ShellView extends GetView<ShellController> {
+class ShellView extends StatefulWidget {
   const ShellView({super.key});
 
   @override
+  State<ShellView> createState() => _ShellViewState();
+}
+
+class _ShellViewState extends State<ShellView> {
+  late var _welcome = welcomePending();
+
+  @override
   Widget build(BuildContext context) {
+    final controller = Get.find<ShellController>();
     final chat = Get.find<ChatListController>();
     return Obx(() {
       final teacher = controller.isTeacher;
@@ -46,25 +55,35 @@ class ShellView extends GetView<ShellController> {
               Positioned.fill(
                 child: LazyIndexedStack(index: index, children: pages),
               ),
-              if (wide)
-                Positioned(
-                  left: 20,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: GlassRail(items: items, index: index, onChanged: controller.go),
-                  ),
-                )
-              else
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 20 + MediaQuery.paddingOf(context).bottom,
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 460),
-                      child: GlassDock(items: items, index: index, onChanged: controller.go),
+              if (!_welcome) ...[
+                if (wide)
+                  Positioned(
+                    left: 20,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: GlassRail(items: items, index: index, onChanged: controller.go),
                     ),
+                  )
+                else
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 20 + MediaQuery.paddingOf(context).bottom,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 460),
+                        child: GlassDock(items: items, index: index, onChanged: controller.go),
+                      ),
+                    ),
+                  ),
+              ],
+              if (_welcome)
+                Positioned.fill(
+                  child: WelcomeOverlay(
+                    onFinished: () {
+                      if (mounted) setState(() => _welcome = false);
+                    },
                   ),
                 ),
             ],

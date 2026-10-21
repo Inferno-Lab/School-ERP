@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:edunest/core/services/connectivity_service.dart';
 import 'package:edunest/core/theme/app_colors.dart';
 import 'package:edunest/core/theme/app_typography.dart';
@@ -232,7 +234,7 @@ class SkeletonList extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              FractionallySizedBox(widthFactor: i.isEven ? .8 : .6, child: const SkeletonBox(height: 14)),
+                              FractionallySizedBox(widthFactor: i.isEven ? .8 : .6, child: const SkeletonBox()),
                               const SizedBox(height: 8),
                               FractionallySizedBox(widthFactor: i.isEven ? .5 : .4, child: const SkeletonBox(height: 12)),
                             ],
@@ -276,7 +278,25 @@ class Sweep extends StatefulWidget {
 }
 
 class _SweepState extends State<Sweep> with SingleTickerProviderStateMixin {
-  late final _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600))..repeat();
+  // Created in initState so dispose never looks up ancestors on a dead element
+  // (a late field first touched in dispose used to throw when Reduce motion skipped build).
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1600));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.reduceMotion) {
+      _c.stop();
+    } else if (!_c.isAnimating) {
+      unawaited(_c.repeat());
+    }
+  }
 
   @override
   void dispose() {
@@ -322,7 +342,6 @@ class OfflineCapsule extends StatelessWidget {
         child: Center(
           child: Glass(
             height: 44,
-            radius: 22,
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Row(
               mainAxisSize: MainAxisSize.min,
