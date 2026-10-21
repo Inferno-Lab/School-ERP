@@ -30,6 +30,7 @@ export function schoolApi(h: Http) {
     login: (b: LoginRequest) => h.post<LoginResponse>('/v1/auth/login', b),
     verify: (b: VerifyRequest) => h.post<TokenPair>('/v1/auth/verify', b),
     logout: () => h.post<void>('/v1/auth/logout'),
+    logoutAll: () => h.post<void>('/v1/auth/logout-all'),
     me: () => h.get<SessionUser>('/v1/me'),
     config: () => h.get<EffectiveConfig>('/v1/config'),
     shell: () => h.get<ShellData>('/v1/shell'),

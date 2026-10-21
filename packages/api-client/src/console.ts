@@ -15,6 +15,7 @@ export function consoleApi(h: Http) {
     login: (b: LoginRequest) => h.post<ConsoleLoginResponse>(`${base}/auth/login`, b),
     verify: (b: VerifyRequest) => h.post<ConsoleTokens>(`${base}/auth/verify`, b),
     logout: () => h.post<void>(`${base}/auth/logout`),
+    logoutAll: () => h.post<void>(`${base}/auth/logout-all`),
     fleet: () => h.get<FleetSummary>(`${base}/fleet`),
     cells: () => h.get<CellRow[]>(`${base}/cells`),
     createCell: (b: CellCreate) => h.post<{ key: string; note: string }>(`${base}/cells`, b),

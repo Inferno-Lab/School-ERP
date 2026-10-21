@@ -56,6 +56,21 @@ describe('Greenfield demo seed', () => {
     const dupes = await q('select phone from users where phone is not null group by phone having count(*) > 1');
     expect(dupes).toHaveLength(0);
   });
+  it('has the indexes the API lookups need, and uses them', async () => {
+    const names = (await q<{ indexname: string }>('select indexname from pg_indexes where schemaname = \'public\'')).map((r) => r.indexname);
+    expect(names).toEqual(expect.arrayContaining([
+      'otp_challenges_user_idx', 'sessions_user_live_idx', 'student_guardians_guardian_idx', 'guardians_user_idx',
+      'students_user_idx', 'user_roles_role_idx', 'homework_class_due_idx', 'notices_status_pub_idx',
+      'audit_entity_idx', 'fee_invoices_student_due_idx', 'substitutions_date_idx', 'users_phone_digits_idx',
+    ]));
+    const plan = async (sql: string) => (await pool.query(`explain ${sql}`)).rows.map((r: Record<string, unknown>) => String(Object.values(r)[0])).join('\n');
+    const usesIndex = async (sql: string) => expect(await plan(sql), sql).toMatch(/Index Scan|Bitmap Index Scan|Index Only Scan/);
+    await usesIndex("select id from users where right(regexp_replace(coalesce(phone,''), '\\D', '', 'g'), 10) = '9822011002' and length('9822011002') >= 8");
+    await usesIndex("select * from fee_invoices where student_id = 'stu_aarav'");
+    await usesIndex("select * from student_guardians where guardian_id = (select id from guardians limit 1)");
+    await usesIndex("select * from notices where status = 'published' order by published_at desc");
+    await usesIndex("select * from homework where class_id = 'cls_8a'");
+  });
   it('seeds an empty school with settings but no people', async () => {
     const url = await ensureDatabase(server.url, 'school_empty');
     const p2 = new pg.Pool({ connectionString: url, max: 2 });

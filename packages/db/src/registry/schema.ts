@@ -180,7 +180,7 @@ export const flags = pgTable(
     updatedBy: text('updated_by').notNull(),
     updatedAt: at('updated_at'),
   },
-  (t) => [primaryKey({ columns: [t.key, t.schoolId] })],
+  (t) => [primaryKey({ columns: [t.key, t.schoolId] }), index('flags_school_key_idx').on(t.schoolId, t.key)],
 );
 
 export const consoleSettings = pgTable('console_settings', {
@@ -211,28 +211,38 @@ export const consoleUsers = pgTable(
     roles: jsonb('roles').$type<string[]>().notNull(),
     status: text('status').notNull().default('active'),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
+    tokenVersion: integer('token_version').notNull().default(0),
     createdAt: at('created_at'),
   },
   (t) => [uniqueIndex('console_users_email_uq').on(t.email)],
 );
 
-export const consoleSessions = pgTable('console_sessions', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => consoleUsers.id, { onDelete: 'cascade' }),
-  refreshHash: text('refresh_hash').notNull(),
-  createdAt: at('created_at'),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-  revokedAt: timestamp('revoked_at', { withTimezone: true }),
-});
+export const consoleSessions = pgTable(
+  'console_sessions',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => consoleUsers.id, { onDelete: 'cascade' }),
+    refreshHash: text('refresh_hash').notNull(),
+    client: text('client').notNull().default('web'),
+    createdAt: at('created_at'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  },
+  (t) => [index('console_sessions_user_idx').on(t.userId)],
+);
 
-export const consoleOtp = pgTable('console_otp', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => consoleUsers.id, { onDelete: 'cascade' }),
-  codeHash: text('code_hash').notNull(),
-  attempts: integer('attempts').notNull().default(0),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-  usedAt: timestamp('used_at', { withTimezone: true }),
-});
+export const consoleOtp = pgTable(
+  'console_otp',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => consoleUsers.id, { onDelete: 'cascade' }),
+    codeHash: text('code_hash').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+  },
+  (t) => [index('console_otp_user_idx').on(t.userId)],
+);
 
 export const supportSessions = pgTable('support_sessions', {
   id: text('id').primaryKey(),

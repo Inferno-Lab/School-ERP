@@ -16,7 +16,15 @@ let client: Client;
 const authed = createRoute({
   getParentRoute: () => root,
   id: 'authed',
-  beforeLoad: () => { if (!session.read()) throw redirect({ to: '/login' }); },
+  beforeLoad: async () => {
+    if (!session.read()) throw redirect({ to: '/login' });
+    if (session.access()) return;
+    const ok = await client.http.restore();
+    if (!ok) {
+      session.write(null);
+      throw redirect({ to: '/login' });
+    }
+  },
   component: function Authed() {
     const router = useRouter();
     const qc = useQueryClient();

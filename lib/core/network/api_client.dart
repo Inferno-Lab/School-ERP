@@ -203,7 +203,7 @@ class ApiClient {
     final refresh = _storage.read<String>(StorageKeys.refreshToken);
     if (refresh == null) return null;
     try {
-      final tokens = await _send('POST', '/v1/auth/refresh', body: {'refreshToken': refresh}, retried: true);
+      final tokens = await _send('POST', '/v1/auth/refresh', body: {'refreshToken': refresh, 'client': 'mobile'}, retried: true);
       if (tokens is! Map<String, dynamic>) return null;
       await saveTokens(tokens);
       return tokens['accessToken'] as String?;

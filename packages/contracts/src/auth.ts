@@ -1,9 +1,13 @@
 import { z } from 'zod';
 import { Permission } from './permissions.js';
 
+export const ClientKind = z.enum(['web', 'mobile']);
+export type ClientKind = z.infer<typeof ClientKind>;
+
 export const LoginRequest = z.object({
   identifier: z.string().trim().min(3, 'Enter your email or phone').max(120),
   password: z.string().min(1, 'Enter your password').max(200),
+  client: ClientKind.optional(),
 });
 export type LoginRequest = z.infer<typeof LoginRequest>;
 
@@ -25,10 +29,14 @@ export type LoginResponse =
 export const VerifyRequest = z.object({
   challengeId: z.string().min(1),
   code: z.string().regex(/^\d{6}$/, 'The code is 6 digits'),
+  client: ClientKind.optional(),
 });
 export type VerifyRequest = z.infer<typeof VerifyRequest>;
 
-export const RefreshRequest = z.object({ refreshToken: z.string().min(20) });
+export const RefreshRequest = z.object({
+  refreshToken: z.string().min(20).optional(),
+  client: ClientKind.optional(),
+});
 export type RefreshRequest = z.infer<typeof RefreshRequest>;
 
 export interface SessionUser {
@@ -44,7 +52,8 @@ export interface SessionUser {
 
 export interface TokenPair {
   accessToken: string;
-  refreshToken: string;
+  /** Present for the phone app. The websites keep the refresh token in an httpOnly cookie instead. */
+  refreshToken?: string;
   expiresInSeconds: number;
   user: SessionUser;
 }
@@ -56,4 +65,7 @@ export interface AccessClaims {
   sid: string;
   name: string;
   perms: string[];
+  /** users.token_version at issue time. A bump (role, password, logout-all) ends the token. */
+  ver?: number;
+  support?: boolean;
 }

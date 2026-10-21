@@ -1,55 +1,69 @@
-import { Body, Controller, Get, HttpCode, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
 import { LoginRequest, RefreshRequest, VerifyRequest, type EffectiveConfig, type LoginResponse, type SessionUser, type TokenPair } from '@edunest/contracts';
-import type { FastifyRequest } from 'fastify';
-import { ApiError, ZodPipe } from '@edunest/nest-kit';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { Limiter, ZodPipe } from '@edunest/nest-kit';
 import { SettingsService } from '../school/support.js';
 import { Tenant, type AuthedUser, type TenantCtx } from '../tenancy/tenant.js';
 import { AuthService } from './auth.service.js';
 import { CurrentUser, Public } from './guards.js';
 
-/** At most `limit` calls per `windowMs` for a key. Enough to blunt guessing; a shared store would replace it with many servers. */
-class Limiter {
-  private readonly hits = new Map<string, number[]>();
-  constructor(private readonly limit: number, private readonly windowMs: number) {}
-  check(key: string): void {
-    const now = Date.now();
-    const recent = (this.hits.get(key) ?? []).filter((t) => now - t < this.windowMs);
-    if (recent.length >= this.limit) {
-      const retryAfter = Math.ceil((this.windowMs - (now - recent[0]!)) / 1000);
-      throw new ApiError('rate_limited', 'Too many tries from this device. Wait a moment and try again.', { retryAfter });
-    }
-    recent.push(now);
-    this.hits.set(key, recent);
-    if (this.hits.size > 5000) for (const [k, v] of this.hits) if (!v.some((t) => now - t < this.windowMs)) this.hits.delete(k);
-  }
-}
-
-const loginLimit = new Limiter(30, 60_000);
+const loginLimit = new Limiter(process.env.NODE_ENV === 'test' ? 10_000 : 30, 60_000);
 
 @Controller('v1/auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Public() @Post('login') @HttpCode(200)
-  login(@Tenant() t: TenantCtx, @Body(new ZodPipe(LoginRequest)) body: LoginRequest, @Req() req: FastifyRequest): Promise<LoginResponse> {
+  login(
+    @Tenant() t: TenantCtx,
+    @Body(new ZodPipe(LoginRequest)) body: LoginRequest,
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<LoginResponse> {
     loginLimit.check(`${t.info.slug}|${req.ip}`);
-    return this.auth.login(t, body, req.headers['user-agent']);
+    return this.auth.login(t, body, req.headers['user-agent'], reply);
   }
 
   @Public() @Post('verify') @HttpCode(200)
-  verify(@Tenant() t: TenantCtx, @Body(new ZodPipe(VerifyRequest)) body: VerifyRequest, @Req() req: FastifyRequest): Promise<TokenPair> {
+  verify(
+    @Tenant() t: TenantCtx,
+    @Body(new ZodPipe(VerifyRequest)) body: VerifyRequest,
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<TokenPair> {
     loginLimit.check(`${t.info.slug}|${req.ip}|v`);
-    return this.auth.verify(t, body.challengeId, body.code, req.headers['user-agent']);
+    return this.auth.verify(t, body.challengeId, body.code, req.headers['user-agent'], body.client, reply);
   }
 
   @Public() @Post('refresh') @HttpCode(200)
-  refresh(@Tenant() t: TenantCtx, @Body(new ZodPipe(RefreshRequest)) body: RefreshRequest): Promise<TokenPair> {
-    return this.auth.refresh(t, body.refreshToken);
+  refresh(
+    @Tenant() t: TenantCtx,
+    @Body(new ZodPipe(RefreshRequest)) body: RefreshRequest,
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<TokenPair> {
+    loginLimit.check(`${t.info.slug}|${req.ip}|r`);
+    return this.auth.refresh(t, body.refreshToken, req, reply, body.client);
   }
 
   @Post('logout') @HttpCode(204)
-  async logout(@Tenant() t: TenantCtx, @CurrentUser() u: AuthedUser): Promise<void> {
-    await this.auth.logout(t, u.sid);
+  async logout(
+    @Tenant() t: TenantCtx,
+    @CurrentUser() u: AuthedUser,
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<void> {
+    await this.auth.logout(t, u.sid, req, reply);
+  }
+
+  @Post('logout-all') @HttpCode(204)
+  async logoutAll(
+    @Tenant() t: TenantCtx,
+    @CurrentUser() u: AuthedUser,
+    @Req() req: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<void> {
+    await this.auth.logoutAll(t, u.id, req, reply);
   }
 }
 

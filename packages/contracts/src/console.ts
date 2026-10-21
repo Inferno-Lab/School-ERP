@@ -390,7 +390,8 @@ export function consolePermissions(roles: readonly ConsoleRole[]): ConsolePermis
 
 export interface ConsoleTokens {
   accessToken: string;
-  refreshToken: string;
+  /** Present for non-browser clients. The console website keeps the refresh token in an httpOnly cookie. */
+  refreshToken?: string;
   expiresInSeconds: number;
   user: ConsoleSession & { permissions: ConsolePermission[] };
 }

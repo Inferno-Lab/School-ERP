@@ -33,13 +33,22 @@ const POSITIVE_TTL_MS = 15_000;
 const NEGATIVE_TTL_MS = 5_000;
 
 /** Read access to the school registry for the school API. The console API uses the same database with full rights. */
+const PG_OPTIONS = '-c statement_timeout=15000 -c idle_in_transaction_session_timeout=10000';
+
 export class Registry {
   readonly pool: pg.Pool;
   readonly db;
   private readonly cache = new Map<string, { at: number; value: TenantInfo | null }>();
 
   constructor(private readonly opts: RegistryOptions) {
-    this.pool = new pg.Pool({ connectionString: opts.url, max: opts.max ?? 8, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 10_000 });
+    this.pool = new pg.Pool({
+      connectionString: opts.url,
+      max: opts.max ?? 8,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000,
+      application_name: 'edunest-registry',
+      options: PG_OPTIONS,
+    });
     this.db = drizzle(this.pool);
   }
 
@@ -91,6 +100,13 @@ interface Entry {
  * Keeps a bounded set of pools, one per school database, closing the least recently used.
  * Hundreds of schools share a few connections: each pool is small and idle pools are dropped.
  */
+/** 40 schools × 5 connections = 200, plus the registry pool. Stay under the server's max_connections. */
+export function poolManagerFromEnv(source: NodeJS.ProcessEnv = process.env): PoolManager {
+  const maxPools = Number(source.TENANT_MAX_POOLS) || 40;
+  const perPool = Number(source.TENANT_PER_POOL) || 5;
+  return new PoolManager({ maxPools, perPool });
+}
+
 export class PoolManager {
   private readonly pools = new Map<string, Entry>();
   private sweeper: NodeJS.Timeout | undefined;
@@ -107,7 +123,14 @@ export class PoolManager {
       return hit.pool;
     }
     if (hit) void hit.pool.end().catch(() => undefined);
-    const pool = new pg.Pool({ connectionString: url, max: this.opts.perPool ?? 5, idleTimeoutMillis: 20_000, connectionTimeoutMillis: 15_000 });
+    const pool = new pg.Pool({
+      connectionString: url,
+      max: this.opts.perPool ?? 5,
+      idleTimeoutMillis: 20_000,
+      connectionTimeoutMillis: 15_000,
+      application_name: `edunest-${slug}`.slice(0, 63),
+      options: PG_OPTIONS,
+    });
     pool.on('error', () => undefined); // a dropped idle connection must not crash the process
     this.pools.set(slug, { pool, lastUsed: Date.now(), url });
     this.evictOverflow();

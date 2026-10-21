@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
-import cors from '@fastify/cors';
+import { registerHttp } from '@edunest/nest-kit';
 import { migrate, pg } from '@edunest/db';
 import type { PoolManager, Registry } from '@edunest/tenancy';
 import { ConsoleModule } from './console.module.js';
@@ -19,14 +19,10 @@ export async function prepareRegistry(env: Env): Promise<number> {
 
 export async function createConsoleApp(env: Env = loadEnv(), shared?: { registry: Registry; pools: PoolManager }): Promise<NestFastifyApplication> {
   await prepareRegistry(env);
-  const app = await NestFactory.create<NestFastifyApplication>(ConsoleModule.register(env, shared), new FastifyAdapter({ trustProxy: true, bodyLimit: 1_000_000 }), {
+  const app = await NestFactory.create<NestFastifyApplication>(ConsoleModule.register(env, shared), new FastifyAdapter({ trustProxy: true, bodyLimit: 256_000 }), {
     logger: env.NODE_ENV === 'test' ? ['error'] : ['error', 'warn', 'log'],
   });
-  await app.register(cors as never, {
-    origin: env.CORS_ORIGINS === '*' ? true : env.CORS_ORIGINS.split(',').map((s) => s.trim()),
-    allowedHeaders: ['content-type', 'authorization'],
-    maxAge: 86400,
-  });
+  await registerHttp(app, env);
   app.enableShutdownHooks();
   return app;
 }

@@ -7,6 +7,7 @@ const Env = z.object({
   REGISTRY_DATABASE_URL: z.string().min(10),
   SECRETS_KEY: z.string().min(16),
   JWT_SECRET: z.string().min(16),
+  JWT_SECRET_PREVIOUS: z.string().min(16).optional(),
   CORS_ORIGINS: z.string().default('*'),
   APP_VERSION: z.string().default('0.1.0'),
   /** Postgres server where `local` and shared test schools get their own database. Defaults to the registry's server. */
@@ -32,8 +33,11 @@ const Env = z.object({
   DEMO_CODE: z.string().regex(/^\d{6}$/).optional(),
   /** Creates the Greenfield demo school on first start when there is none. */
   SEED_DEMO: z.enum(['true', 'false']).default('false'),
+  ALLOW_DEMO: z.enum(['true', 'false']).default('false'),
   PROBE_SECONDS: z.coerce.number().int().default(60),
   STEP_PAUSE_MS: z.coerce.number().int().default(350),
+  TENANT_MAX_POOLS: z.coerce.number().int().min(1).max(500).default(40),
+  TENANT_PER_POOL: z.coerce.number().int().min(1).max(20).default(5),
 });
 export type Env = z.infer<typeof Env>;
 
@@ -43,7 +47,18 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     const lines = parsed.error.issues.map((i) => `  ${i.path.join('.')}: ${i.message}`).join('\n');
     throw new Error(`The console is not configured correctly:\n${lines}`);
   }
-  return parsed.data;
+  const env = parsed.data;
+  if (env.NODE_ENV === 'production') {
+    const problems: string[] = [];
+    if (env.JWT_SECRET.length < 32) problems.push('JWT_SECRET must be at least 32 characters.');
+    if (env.SECRETS_KEY.length < 32) problems.push('SECRETS_KEY must be at least 32 characters.');
+    if (env.JWT_SECRET === env.SECRETS_KEY) problems.push('JWT_SECRET and SECRETS_KEY must be different.');
+    if (env.CORS_ORIGINS === '*') problems.push('CORS_ORIGINS must list the admin and console origins, not *.');
+    if (env.SEED_DEMO === 'true' && env.ALLOW_DEMO !== 'true') problems.push('SEED_DEMO is not allowed in production unless ALLOW_DEMO=true.');
+    if (env.DEMO_CODE && env.ALLOW_DEMO !== 'true') problems.push('DEMO_CODE is not allowed in production unless ALLOW_DEMO=true.');
+    if (problems.length) throw new Error(`The console is not configured correctly:\n${problems.map((p) => `  ${p}`).join('\n')}`);
+  }
+  return env;
 }
 
 export const ENV = Symbol('ENV');

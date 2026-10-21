@@ -20,8 +20,16 @@ const login = createRoute({ getParentRoute: () => root, path: '/login', componen
 const authed = createRoute({
   getParentRoute: () => root,
   id: 'authed',
-  beforeLoad: ({ context }) => {
+  beforeLoad: async ({ context }) => {
+    if (session.read(context.slug)?.support) return;
     if (!session.read(context.slug)) throw redirect({ to: '/login' });
+    if (!session.access(context.slug)) {
+      const ok = await context.client.http.restore();
+      if (!ok) {
+        session.write(context.slug, null);
+        throw redirect({ to: '/login' });
+      }
+    }
   },
   component: function Authed() {
     const { slug, client } = authed.useRouteContext();

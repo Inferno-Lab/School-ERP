@@ -180,9 +180,11 @@ Everything here needs paid or owner-owned services: AWS accounts and OpenTofu fo
 
 ### 9.5 Security hardening before real schools
 
-- Admin/console tokens live in `localStorage`. The plan (section 17) specifies httpOnly SameSite cookies with CSRF tokens, a strict CSP with nonces, Trusted Types, SRI and Permissions-Policy. Implement in `apps/server` (cookie issue and CSRF check) and the two `client.ts` files; add CSP headers in `static.ts`.
-- Passkeys and TOTP; SSO (the sign-in buttons are disabled placeholders); password reset flow ("Forgot it?" currently tells the person to ask the principal/EduNest); rate limiting per IP (lockout exists per account); DPDP consent and data-export/erasure flows; penetration test.
-- Remove the public demo credentials from any environment with real data; keep `DEMO_CODE`/`SEED_DEMO` off.
+Done: access JWT (15 min, HS256, `iss`/`aud`/`alg`/`typ` checked, key derived per audience, `JWT_SECRET_PREVIOUS` for rotation). Web refresh tokens are httpOnly `SameSite=Strict` cookies with CSRF double-submit (`en_csrf` + `x-csrf`) and Origin check; the phone keeps the refresh token in the body and in `flutter_secure_storage`. Admin and console keep the access token in memory (a leftover `accessToken` in `localStorage` is still read so older tabs and e2e keep working). `AuthGuard` checks `sid` and `users.token_version` on every request (about 30 s cache). `POST /v1/auth/logout-all`. Helmet (HSTS, CSP, Referrer-Policy, Permissions-Policy), production refuses `CORS_ORIGINS=*`, `@fastify/rate-limit` (300/min) plus stricter login/verify/refresh limits, 256 KB body limit (2 MB on CSV import), scrypt N=32768 with rehash, school indexes and daily OTP/session sweep, pool `statement_timeout` / `idle_in_transaction_session_timeout`, `TENANT_MAX_POOLS` × `TENANT_PER_POOL`. Deploying this signs everyone out once (new keys and cookies).
+
+Still open: passkeys and TOTP; SSO (the sign-in buttons are disabled placeholders); password reset flow ("Forgot it?" currently tells the person to ask the principal/EduNest); CSP nonces, Trusted Types and SRI; DPDP consent and data-export/erasure flows; penetration test.
+
+Remove the public demo credentials from any environment with real data; keep `DEMO_CODE`/`SEED_DEMO` off (production refuses them unless `ALLOW_DEMO=true`).
 
 ### 9.6 Console gaps
 

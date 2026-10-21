@@ -17,7 +17,7 @@ export interface Harness {
   server: DevPostgres;
   registry: pg.Pool;
   slug: string;
-  call: (method: string, url: string, opts?: { token?: string; body?: unknown; school?: string }) => Promise<{ status: number; json: any; text: string }>;
+  call: (method: string, url: string, opts?: { token?: string; body?: unknown; school?: string; headers?: Record<string, string>; cookies?: Record<string, string> }) => Promise<{ status: number; json: any; text: string; cookies: Record<string, string>; headers: Record<string, string | string[] | undefined> }>;
   login: (identifier?: string, password?: string) => Promise<string>;
   close: () => Promise<void>;
   addSchool: (slug: string, o: { plan: string; data: 'demo' | 'empty'; demoMode?: boolean; status?: string }) => Promise<void>;
@@ -60,12 +60,26 @@ export async function startHarness(port?: number): Promise<Harness> {
   const call: Harness['call'] = async (method, url, opts = {}) => {
     const res = await app.inject({
       method: method as 'GET', url,
-      headers: { 'x-school': opts.school ?? slug, ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}), ...(opts.body ? { 'content-type': 'application/json' } : {}) },
+      headers: {
+        'x-school': opts.school ?? slug,
+        ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}),
+        ...(opts.body ? { 'content-type': 'application/json' } : {}),
+        ...opts.headers,
+      },
+      cookies: opts.cookies,
       payload: opts.body ? JSON.stringify(opts.body) : undefined,
     });
     let json: any = null;
     try { json = JSON.parse(res.body); } catch { /* not json */ }
-    return { status: res.statusCode, json, text: res.body };
+    const cookies: Record<string, string> = {};
+    for (const c of res.cookies ?? []) cookies[c.name] = c.value;
+    const setCookie = res.headers['set-cookie'];
+    for (const line of Array.isArray(setCookie) ? setCookie : setCookie ? [setCookie] : []) {
+      const [pair] = line.split(';');
+      const eq = pair.indexOf('=');
+      if (eq > 0 && !cookies[pair.slice(0, eq)]) cookies[pair.slice(0, eq)] = decodeURIComponent(pair.slice(eq + 1));
+    }
+    return { status: res.statusCode, json, text: res.body, cookies, headers: res.headers as Record<string, string | string[] | undefined> };
   };
   const login = async (identifier = 'neha.menon@greenfield.edu.in', password = 'nest2026') => {
     const step1 = await call('POST', '/v1/auth/login', { body: { identifier, password } });
