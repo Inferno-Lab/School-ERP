@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 /// Single place for the product name and the mock/remote switch.
@@ -15,6 +16,15 @@ class AppConfig {
     defaultValue: 'https://edunest-0c6x.onrender.com',
   );
   static const live = schoolSlug != '' && apiBase != '';
+
+  /// Release builds only talk to https. A clear error is better than leaking tokens over http.
+  static void assertReleaseUrl() {
+    if (!kReleaseMode || !live) return;
+    final uri = Uri.tryParse(apiBase);
+    if (uri == null || uri.scheme != 'https') {
+      throw StateError('API_BASE_URL must use https in a release build.');
+    }
+  }
 
   /// The school's name and tagline. The demo values stand until `SchoolProfileService` has the school's own from the API.
   static String schoolName = 'Greenfield International School';

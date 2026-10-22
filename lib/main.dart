@@ -1,4 +1,5 @@
 import 'package:edunest/app.dart';
+import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/services/auth_service.dart';
 import 'package:edunest/core/services/connectivity_service.dart';
 import 'package:edunest/core/services/school_profile_service.dart';
@@ -11,6 +12,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppConfig.assertReleaseUrl();
   await initializeDateFormatting();
   await SchoolProfileService.load();
   final storage = await StorageService().init();

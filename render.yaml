@@ -8,7 +8,8 @@ services:
     region: singapore
     autoDeploy: true
     healthCheckPath: /health
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && CONSOLE_BASE=/console/ pnpm exec turbo run build --concurrency=2
+    # corepack enable writes shims to /usr/bin (EROFS on Render). Use `corepack pnpm` instead.
+    buildCommand: corepack pnpm install --frozen-lockfile --prod=false && CONSOLE_BASE=/console/ corepack pnpm exec turbo run build --concurrency=2
     startCommand: node apps/server/dist/main.js
     envVars:
       - key: NODE_VERSION

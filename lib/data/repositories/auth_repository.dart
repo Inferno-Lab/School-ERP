@@ -82,7 +82,7 @@ class RemoteAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> login({required String email, required String password}) async {
-    final json = Map<String, dynamic>.from(await _remote.post('/v1/auth/login', {'identifier': email.trim(), 'password': password}) as Map);
+    final json = Map<String, dynamic>.from(await _remote.post('/v1/auth/login', {'identifier': email.trim(), 'password': password, 'client': 'mobile'}) as Map);
     if (json['step'] == 'done') return _enter(Map<String, dynamic>.from(json['tokens'] as Map));
     final challenge = Map<String, dynamic>.from(json['challenge'] as Map);
     _challenge = challenge['challengeId'] as String;
@@ -101,7 +101,7 @@ class RemoteAuthRepository implements AuthRepository {
   }) async {
     final challenge = _challenge;
     if (challenge == null) throw const AppException('errors.code_expired');
-    final json = await _remote.post('/v1/auth/verify', {'challengeId': challenge, 'code': otp});
+    final json = await _remote.post('/v1/auth/verify', {'challengeId': challenge, 'code': otp, 'client': 'mobile'});
     _challenge = null;
     return _enter(Map<String, dynamic>.from(json as Map));
   }

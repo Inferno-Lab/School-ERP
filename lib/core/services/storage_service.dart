@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' show AndroidOptions, FlutterSecureStorage;
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -24,32 +25,89 @@ class StorageService extends GetxService {
   StorageService({Map<String, dynamic>? memory}) : _memory = memory;
 
   GetStorage? _box;
+  FlutterSecureStorage? _secure;
   final Map<String, dynamic>? _memory;
+  String? _accessToken;
+  String? _refreshToken;
+
+  static bool _isSecret(String key) => key == StorageKeys.accessToken || key == StorageKeys.refreshToken;
 
   Future<StorageService> init() async {
-    if (_memory == null) {
+    final memory = _memory;
+    if (memory == null) {
       await GetStorage.init();
       _box = GetStorage();
+      _secure = const FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true),
+      );
+      await _migrateAndLoadTokens();
+    } else {
+      _accessToken = memory[StorageKeys.accessToken] as String?;
+      _refreshToken = memory[StorageKeys.refreshToken] as String?;
     }
     return this;
   }
 
+  Future<void> _migrateAndLoadTokens() async {
+    final secure = _secure;
+    final box = _box;
+    if (secure == null || box == null) return;
+    final oldAccess = box.read<String>(StorageKeys.accessToken);
+    final oldRefresh = box.read<String>(StorageKeys.refreshToken);
+    if (oldAccess != null || oldRefresh != null) {
+      if (oldAccess != null) await secure.write(key: StorageKeys.accessToken, value: oldAccess);
+      if (oldRefresh != null) await secure.write(key: StorageKeys.refreshToken, value: oldRefresh);
+      await box.remove(StorageKeys.accessToken);
+      await box.remove(StorageKeys.refreshToken);
+    }
+    _accessToken = await secure.read(key: StorageKeys.accessToken);
+    _refreshToken = await secure.read(key: StorageKeys.refreshToken);
+  }
+
   T? read<T>(String key) {
-    if (_memory != null) return _memory[key] as T?;
+    if (key == StorageKeys.accessToken) return _accessToken as T?;
+    if (key == StorageKeys.refreshToken) return _refreshToken as T?;
+    final memory = _memory;
+    if (memory != null) return memory[key] as T?;
     return _box?.read<T>(key);
   }
 
   Future<void> write(String key, dynamic value) async {
-    if (_memory != null) {
-      _memory[key] = value;
+    if (key == StorageKeys.accessToken || key == StorageKeys.refreshToken) {
+      if (key == StorageKeys.accessToken) _accessToken = value as String?;
+      if (key == StorageKeys.refreshToken) _refreshToken = value as String?;
+      final secure = _secure;
+      final memory = _memory;
+      if (secure != null) {
+        if (value == null) {
+          await secure.delete(key: key);
+        } else {
+          await secure.write(key: key, value: value as String);
+        }
+      } else if (memory != null) {
+        memory[key] = value;
+      }
+      return;
+    }
+    final memory = _memory;
+    if (memory != null) {
+      memory[key] = value;
       return;
     }
     await _box?.write(key, value);
   }
 
   Future<void> remove(String key) async {
-    if (_memory != null) {
-      _memory.remove(key);
+    if (_isSecret(key)) {
+      if (key == StorageKeys.accessToken) _accessToken = null;
+      if (key == StorageKeys.refreshToken) _refreshToken = null;
+      await _secure?.delete(key: key);
+      _memory?.remove(key);
+      return;
+    }
+    final memory = _memory;
+    if (memory != null) {
+      memory.remove(key);
       return;
     }
     await _box?.remove(key);
