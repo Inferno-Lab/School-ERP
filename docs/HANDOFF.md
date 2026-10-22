@@ -120,7 +120,7 @@ Commands are in the README. Practical notes learned the hard way:
 
 ### 8.1 What runs
 
-One Render web service `edunest` (free, Singapore, auto-deploys from `main`; work on a branch only reaches the live site once merged to `main`) runs `node apps/server/dist/main.js`. Build command (in `render.yaml`): `corepack enable && pnpm install --frozen-lockfile --prod=false && CONSOLE_BASE=/console/ pnpm exec turbo run build --concurrency=2`. Neon (free) holds the registry and each school's database.
+One Render web service `edunest` (free, Singapore, auto-deploys from `main`; work on a branch only reaches the live site once merged to `main`) runs `node apps/server/dist/main.js`. Build command (in `render.yaml`): `corepack pnpm install --frozen-lockfile --prod=false && CONSOLE_BASE=/console/ corepack pnpm exec turbo run build --concurrency=2` (avoid `corepack enable` — it tries to write shims under `/usr/bin` and fails with EROFS on Render). Neon (free) holds the registry and each school's database.
 
 ### 8.2 Environment variables (set in Render → Environment)
 
