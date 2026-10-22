@@ -654,3 +654,4 @@ class _ClassCard extends StatelessWidget {
     );
   }
 }
+
