@@ -22,6 +22,7 @@ import { OfficeService } from './school/office.service.js';
 import { PeopleService } from './school/people.service.js';
 import { StudentsService } from './school/students.service.js';
 import { AuditService, Messenger, SettingsService } from './school/support.js';
+import { SweepService } from './school/sweep.service.js';
 import { TimetableService } from './school/timetable.service.js';
 import { POOLS, REGISTRY, TenantGuard, TenantService } from './tenancy/tenant.js';
 
@@ -47,7 +48,7 @@ class Shutdown implements OnApplicationShutdown {
 export class AppModule {
   static register(env: Env, shared?: { registry: Registry; pools: PoolManager }): DynamicModule {
     const registry = shared?.registry ?? new Registry({ url: env.REGISTRY_DATABASE_URL, secret: env.SECRETS_KEY });
-    const pools = shared?.pools ?? new PoolManager();
+    const pools = shared?.pools ?? new PoolManager({ maxPools: env.TENANT_MAX_POOLS, perPool: env.TENANT_PER_POOL });
     return {
       module: AppModule,
       controllers: [
@@ -60,7 +61,7 @@ export class AppModule {
         { provide: POOLS, useValue: pools },
         { provide: OWNS, useValue: !shared },
         Shutdown,
-        TenantService, AuthService, AuditService, Messenger, SettingsService, StudentsService, AttendanceService, FeesService, ApprovalsService, TimetableService, DashboardService, MetricsService, LearningService, PeopleService, OfficeService, FamilyService,
+        TenantService, AuthService, AuditService, Messenger, SettingsService, StudentsService, AttendanceService, FeesService, ApprovalsService, TimetableService, DashboardService, MetricsService, LearningService, PeopleService, OfficeService, FamilyService, SweepService,
         // Order matters: find the school, then the person, then what they may do.
         { provide: APP_GUARD, useClass: TenantGuard },
         { provide: APP_GUARD, useClass: AuthGuard },

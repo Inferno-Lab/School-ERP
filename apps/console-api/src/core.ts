@@ -34,7 +34,14 @@ export class Db implements OnApplicationShutdown {
   readonly db: RegistryDb;
 
   constructor(@Inject(ENV) env: Env) {
-    this.pool = new pg.Pool({ connectionString: env.REGISTRY_DATABASE_URL, max: 8, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 10_000 });
+    this.pool = new pg.Pool({
+      connectionString: env.REGISTRY_DATABASE_URL,
+      max: 8,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000,
+      application_name: 'edunest-console',
+      options: '-c statement_timeout=15000 -c idle_in_transaction_session_timeout=10000',
+    });
     this.pool.on('error', () => undefined);
     this.db = drizzle(this.pool, { schema: reg });
   }
@@ -65,17 +72,28 @@ export class ConsoleAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     @Inject(ENV) private readonly env: Env,
+    private readonly db: Db,
   ) {}
 
-  canActivate(ctx: ExecutionContext): boolean {
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const targets = [ctx.getHandler(), ctx.getClass()];
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
     if (!req.url.startsWith('/console/') || this.reflector.getAllAndOverride<boolean>('public', targets)) return true;
     const header = req.headers.authorization;
     const token = header?.startsWith('Bearer ') ? header.slice(7) : (req.query as { access_token?: string } | undefined)?.access_token;
     if (!token) throw new ApiError('unauthenticated', 'Sign in to continue.');
-    const claims = verifyJwt<{ sub: string; aud: string; sid: string; name: string; email: string; roles: ConsoleRole[] }>(token, this.env.JWT_SECRET);
+    const claims = verifyJwt<{ sub: string; aud: string; sid: string; name: string; email: string; roles: ConsoleRole[]; ver?: number }>(token, this.env.JWT_SECRET, this.env.JWT_SECRET_PREVIOUS);
     if (!claims || claims.aud !== 'console') throw new ApiError('unauthenticated', 'Your session has ended. Sign in again.');
+    if (claims.sid !== 'system') {
+      const { rows } = await this.db.pool.query<{ revoked_at: Date | null; token_version: number; status: string }>(
+        'select s.revoked_at, u.token_version, u.status from console_sessions s join console_users u on u.id = s.user_id where s.id = $1 and u.id = $2',
+        [claims.sid, claims.sub],
+      );
+      const row = rows[0];
+      if (!row || row.revoked_at || row.status !== 'active' || row.token_version !== (claims.ver ?? 0)) {
+        throw new ApiError('unauthenticated', 'Your session has ended. Sign in again.');
+      }
+    }
     req.cuser = { id: claims.sub, name: claims.name, email: claims.email, roles: claims.roles, permissions: consolePermissions(claims.roles), sid: claims.sid };
     const needed = this.reflector.getAllAndOverride<ConsolePermission[] | undefined>('cperms', targets);
     if (needed?.length && !needed.every((p) => req.cuser!.permissions.includes(p))) {

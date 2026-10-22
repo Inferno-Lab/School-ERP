@@ -107,9 +107,10 @@ void main() {
 
     test('reaches the sign-in routes by their full path and sends no token to them', () async {
       await client.saveTokens({'accessToken': 'access-1', 'refreshToken': 'refresh-1'});
-      await client.post('/v1/auth/login', {'identifier': 'a', 'password': 'right'});
+      await client.post('/v1/auth/login', {'identifier': 'a', 'password': 'right', 'client': 'mobile'});
       expect(fake.seen.single.path, '/v1/auth/login');
       expect(fake.seen.single.headers['authorization'], '');
+      expect(fake.seen.single.body, containsPair('client', 'mobile'));
     });
 
     test('turns the server’s sentence into the exception, and a dead server into a network error', () async {
@@ -128,6 +129,7 @@ void main() {
       expect(fake.seen.map((c) => c.path), ['/v1/f/me', '/v1/auth/refresh', '/v1/f/me']);
       expect(fake.seen.last.headers['authorization'], 'Bearer access-2');
       expect(storage.read<String>(StorageKeys.refreshToken), 'refresh-2');
+      expect((fake.seen[1].body as Map)['client'], 'mobile');
       expect(signedOut, 0);
     });
 
@@ -158,6 +160,8 @@ void main() {
       expect(user.role, UserRole.parent);
       expect(user.childIds, ['stu_aarav', 'stu_ananya']);
       expect(client.hasSession, isTrue);
+      expect((fake.seen.firstWhere((c) => c.path == '/v1/auth/login').body as Map)['client'], 'mobile');
+      expect((fake.seen.firstWhere((c) => c.path == '/v1/auth/verify').body as Map)['client'], 'mobile');
     });
 
     test('a wrong password and a wrong code say so, and a code with no password step says to start again', () async {

@@ -12,7 +12,13 @@
   },
   "dependencies": {
     "@edunest/contracts": "workspace:*",
+    "@edunest/security": "workspace:*",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.0.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/rate-limit": "^10.3.0",
     "@nestjs/common": "^11.1.0",
+    "@nestjs/platform-fastify": "^11.1.0",
     "fastify": "^5.4.0",
     "reflect-metadata": "^0.2.2",
     "zod": "^4.1.0"

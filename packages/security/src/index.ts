@@ -1,13 +1,17 @@
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, scrypt as scryptCb, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 
-const scrypt = promisify(scryptCb) as (pw: string, salt: Buffer, len: number, opts: { N: number; r: number; p: number }) => Promise<Buffer>;
-const SCRYPT = { N: 16384, r: 8, p: 1 } as const;
+const scrypt = promisify(scryptCb) as (pw: string, salt: Buffer, len: number, opts: { N: number; r: number; p: number; maxmem: number }) => Promise<Buffer>;
+/** ~32 MiB, about 80 ms. Older hashes (N=16384) are accepted and rewritten on the next sign-in. Node's default maxmem is 32 MiB, which is exactly this cost, so we allow a little more. */
+export const SCRYPT = { N: 32768, r: 8, p: 1 } as const;
+const SCRYPT_MEM = 64 * 1024 * 1024;
 
-/** scrypt hash in the form `scrypt$N$r$p$salt$hash` (all base64url). Costs about 40 ms. */
+export const JWT_ISSUER = 'edunest';
+
+/** scrypt hash in the form `scrypt$N$r$p$salt$hash` (all base64url). */
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
-  const hash = await scrypt(password, salt, 32, SCRYPT);
+  const hash = await scrypt(password, salt, 32, { ...SCRYPT, maxmem: SCRYPT_MEM });
   return `scrypt$${SCRYPT.N}$${SCRYPT.r}$${SCRYPT.p}$${salt.toString('base64url')}$${hash.toString('base64url')}`;
 }
 
@@ -16,8 +20,15 @@ export async function verifyPassword(password: string, stored: string | null | u
   const [kind, n, r, p, salt, hash] = stored.split('$');
   if (kind !== 'scrypt' || !n || !r || !p || !salt || !hash) return false;
   const expected = Buffer.from(hash, 'base64url');
-  const actual = await scrypt(password, Buffer.from(salt, 'base64url'), expected.length, { N: Number(n), r: Number(r), p: Number(p) });
+  const actual = await scrypt(password, Buffer.from(salt, 'base64url'), expected.length, { N: Number(n), r: Number(r), p: Number(p), maxmem: SCRYPT_MEM });
   return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
+
+/** True when the stored hash uses older scrypt parameters than we write today. */
+export function passwordNeedsRehash(stored: string | null | undefined): boolean {
+  if (!stored) return false;
+  const [kind, n, r, p] = stored.split('$');
+  return kind !== 'scrypt' || Number(n) !== SCRYPT.N || Number(r) !== SCRYPT.r || Number(p) !== SCRYPT.p;
 }
 
 export function sha256(value: string): string {
@@ -49,6 +60,11 @@ function keyFrom(secret: string): Buffer {
   return createHash('sha256').update(secret).digest();
 }
 
+/** Signing key bound to one audience, so a school token cannot be checked as a console token. */
+export function jwtKey(secret: string, aud: string): Buffer {
+  return createHmac('sha256', secret).update(`aud:${aud}`).digest();
+}
+
 /** AES-256-GCM seal: used for database connection strings and other secrets at rest. Format `v1.iv.tag.data`. */
 export function seal(plain: string, secret: string): string {
   const iv = randomBytes(12);
@@ -65,28 +81,46 @@ export function unseal(sealed: string, secret: string): string {
   return Buffer.concat([d.update(Buffer.from(data, 'base64url')), d.final()]).toString('utf8');
 }
 
-// Minimal HS256 JWT. Small enough to own, and avoids a dependency for 30 lines.
 const b64 = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64url');
 
 export function signJwt(claims: Record<string, unknown>, secret: string, ttlSeconds: number): string {
+  const aud = claims.aud;
+  if (typeof aud !== 'string' || !aud) throw new Error('JWT claims must include aud');
   const now = Math.floor(Date.now() / 1000);
   const head = b64({ alg: 'HS256', typ: 'JWT' });
-  const body = b64({ ...claims, iat: now, exp: now + ttlSeconds });
-  const sig = createHmac('sha256', secret).update(`${head}.${body}`).digest('base64url');
+  const body = b64({ iss: JWT_ISSUER, ...claims, iat: now, exp: now + ttlSeconds });
+  const sig = createHmac('sha256', jwtKey(secret, aud)).update(`${head}.${body}`).digest('base64url');
   return `${head}.${body}.${sig}`;
 }
 
-export function verifyJwt<T extends Record<string, unknown>>(token: string, secret: string): (T & { exp: number; iat: number }) | null {
+export function verifyJwt<T extends Record<string, unknown>>(
+  token: string,
+  secret: string,
+  previous?: string | null,
+): (T & { exp: number; iat: number; iss: string; aud: string }) | null {
   const [head, body, sig] = token.split('.');
   if (!head || !body || !sig) return null;
-  const expected = createHmac('sha256', secret).update(`${head}.${body}`).digest('base64url');
-  if (!constantTimeEqual(sig, expected)) return null;
+  let header: { alg?: unknown; typ?: unknown };
   try {
-    const claims = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as T & { exp: number; iat: number };
-    return claims.exp > Math.floor(Date.now() / 1000) ? claims : null;
+    header = JSON.parse(Buffer.from(head, 'base64url').toString('utf8')) as { alg?: unknown; typ?: unknown };
   } catch {
     return null;
   }
+  if (header.alg !== 'HS256' || header.typ !== 'JWT') return null;
+  let claims: T & { exp: number; iat: number; iss?: unknown; aud?: unknown };
+  try {
+    claims = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as T & { exp: number; iat: number; iss?: unknown; aud?: unknown };
+  } catch {
+    return null;
+  }
+  if (claims.iss !== JWT_ISSUER || typeof claims.aud !== 'string' || !claims.aud) return null;
+  if (typeof claims.exp !== 'number' || claims.exp <= Math.floor(Date.now() / 1000)) return null;
+  const secrets = [secret, previous].filter((s): s is string => !!s);
+  for (const s of secrets) {
+    const expected = createHmac('sha256', jwtKey(s, claims.aud)).update(`${head}.${body}`).digest('base64url');
+    if (constantTimeEqual(sig, expected)) return claims as T & { exp: number; iat: number; iss: string; aud: string };
+  }
+  return null;
 }
 
 export function maskPhone(phone: string): string {

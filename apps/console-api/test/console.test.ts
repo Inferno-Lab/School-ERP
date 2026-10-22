@@ -120,6 +120,12 @@ describe('the new-school wizard', () => {
     const cfg = await h.s('GET', '/v1/config', { school: 'freshschool', token: verified.json.accessToken });
     expect(cfg.json.school.color).toBe('#0EA5E9');
     expect(cfg.json.modules).toEqual(['people', 'attendance', 'fees', 'notices', 'timetable']);
+    const role = 'school_freshschool_app';
+    const dbname = 'school_freshschool';
+    const own = await h.registry.query('select has_database_privilege($1, $2, \'CONNECT\') ok', [role, dbname]);
+    expect(own.rows[0].ok).toBe(true);
+    const pub = await h.registry.query('select has_database_privilege(\'public\', $1, \'CONNECT\') ok', [dbname]);
+    expect(pub.rows[0].ok).toBe(false);
   });
   it('refuses a taken address and a second setup of the same school', async () => {
     const r = await h.c('POST', '/console/v1/wizard/launch', { token: t, body: { payload: wizardPayload('freshschool') } });

@@ -38,7 +38,7 @@ export class ConsoleModule {
   /** Pass the school API's registry and pools to share one set of connections in a single server. */
   static register(env: Env, shared?: { registry: Registry; pools: PoolManager }): DynamicModule {
     const registry = shared?.registry ?? new Registry({ url: env.REGISTRY_DATABASE_URL, secret: env.SECRETS_KEY });
-    const pools = shared?.pools ?? new PoolManager();
+    const pools = shared?.pools ?? new PoolManager({ maxPools: env.TENANT_MAX_POOLS, perPool: env.TENANT_PER_POOL });
     return {
       module: ConsoleModule,
       controllers: [AuthController, SandboxController, SchoolsController, WizardController, ActionsController, ReleasesController, PolicyController, OpsController, ComplianceController],

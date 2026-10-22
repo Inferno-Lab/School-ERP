@@ -41,11 +41,13 @@ export const users = pgTable(
     failedLogins: integer('failed_logins').notNull().default(0),
     lockedUntil: timestamp('locked_until', { withTimezone: true }),
     lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+    tokenVersion: integer('token_version').notNull().default(0),
     createdAt: at('created_at'),
   },
   (t) => [
     uniqueIndex('users_email_uq').on(sql`lower(${t.email})`),
     uniqueIndex('users_phone_uq').on(t.phone),
+    index('users_phone_digits_idx').on(sql`right(regexp_replace(coalesce(${t.phone}, ''), '\\D', '', 'g'), 10)`),
   ],
 );
 
@@ -64,7 +66,7 @@ export const userRoles = pgTable(
     userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     roleId: text('role_id').notNull().references(() => roles.id, { onDelete: 'cascade' }),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.roleId] })],
+  (t) => [primaryKey({ columns: [t.userId, t.roleId] }), index('user_roles_role_idx').on(t.roleId)],
 );
 
 export const sessions = pgTable(
@@ -74,23 +76,31 @@ export const sessions = pgTable(
     userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
     refreshHash: text('refresh_hash').notNull(),
     userAgent: text('user_agent'),
+    client: text('client').notNull().default('web'),
     createdAt: at('created_at'),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
   },
-  (t) => [index('sessions_user_idx').on(t.userId)],
+  (t) => [
+    index('sessions_user_idx').on(t.userId),
+    index('sessions_user_live_idx').on(t.userId).where(sql`${t.revokedAt} is null`),
+  ],
 );
 
-export const otpChallenges = pgTable('otp_challenges', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  codeHash: text('code_hash').notNull(),
-  channel: text('channel').notNull(),
-  attempts: integer('attempts').notNull().default(0),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-  usedAt: timestamp('used_at', { withTimezone: true }),
-  createdAt: at('created_at'),
-});
+export const otpChallenges = pgTable(
+  'otp_challenges',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    codeHash: text('code_hash').notNull(),
+    channel: text('channel').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: at('created_at'),
+  },
+  (t) => [index('otp_challenges_user_idx').on(t.userId)],
+);
 
 export const staff = pgTable('staff', {
   userId: text('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
@@ -143,17 +153,21 @@ export const students = pgTable(
     admittedOn: date('admitted_on'),
     createdAt: at('created_at'),
   },
-  (t) => [index('students_class_idx').on(t.classId), index('students_name_idx').on(sql`lower(${t.name})`)],
+  (t) => [index('students_class_idx').on(t.classId), index('students_name_idx').on(sql`lower(${t.name})`), index('students_user_idx').on(t.userId)],
 );
 
-export const guardians = pgTable('guardians', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
-  name: text('name').notNull(),
-  phone: text('phone'),
-  email: text('email'),
-  relation: text('relation').notNull().default('Parent'),
-});
+export const guardians = pgTable(
+  'guardians',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    phone: text('phone'),
+    email: text('email'),
+    relation: text('relation').notNull().default('Parent'),
+  },
+  (t) => [index('guardians_user_idx').on(t.userId)],
+);
 
 export const studentGuardians = pgTable(
   'student_guardians',
@@ -162,7 +176,7 @@ export const studentGuardians = pgTable(
     guardianId: text('guardian_id').notNull().references(() => guardians.id, { onDelete: 'cascade' }),
     isPrimary: boolean('is_primary').notNull().default(true),
   },
-  (t) => [primaryKey({ columns: [t.studentId, t.guardianId] })],
+  (t) => [primaryKey({ columns: [t.studentId, t.guardianId] }), index('student_guardians_guardian_idx').on(t.guardianId)],
 );
 
 export const attendanceSessions = pgTable(
@@ -199,7 +213,7 @@ export const feeInvoices = pgTable(
     waivedAmount: integer('waived_amount').notNull().default(0),
     createdAt: at('created_at'),
   },
-  (t) => [index('fee_invoices_student_idx').on(t.studentId)],
+  (t) => [index('fee_invoices_student_idx').on(t.studentId), index('fee_invoices_student_due_idx').on(t.studentId, t.dueOn)],
 );
 
 export const payments = pgTable(
@@ -218,17 +232,21 @@ export const payments = pgTable(
   (t) => [index('payments_invoice_idx').on(t.invoiceId)],
 );
 
-export const notices = pgTable('notices', {
-  id: text('id').primaryKey(),
-  title: text('title').notNull(),
-  body: text('body').notNull(),
-  audience: text('audience').notNull().default('everyone'),
-  classId: text('class_id').references(() => classes.id, { onDelete: 'set null' }),
-  status: text('status').notNull().default('draft'), // draft | pending | published
-  authorId: text('author_id').references(() => users.id, { onDelete: 'set null' }),
-  publishedAt: timestamp('published_at', { withTimezone: true }),
-  createdAt: at('created_at'),
-});
+export const notices = pgTable(
+  'notices',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    audience: text('audience').notNull().default('everyone'),
+    classId: text('class_id').references(() => classes.id, { onDelete: 'set null' }),
+    status: text('status').notNull().default('draft'), // draft | pending | published
+    authorId: text('author_id').references(() => users.id, { onDelete: 'set null' }),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    createdAt: at('created_at'),
+  },
+  (t) => [index('notices_status_pub_idx').on(t.status, t.publishedAt)],
+);
 
 export const approvals = pgTable(
   'approvals',
@@ -286,7 +304,7 @@ export const substitutions = pgTable(
     createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
     createdAt: at('created_at'),
   },
-  (t) => [uniqueIndex('substitutions_uq').on(t.slotId, t.date)],
+  (t) => [uniqueIndex('substitutions_uq').on(t.slotId, t.date), index('substitutions_date_idx').on(t.date)],
 );
 
 export const settings = pgTable('settings', {
@@ -320,20 +338,24 @@ export const auditLog = pgTable(
     entityId: text('entity_id'),
     detail: jsonb('detail').$type<Record<string, unknown>>().notNull().default({}),
   },
-  (t) => [index('audit_at_idx').on(t.at)],
+  (t) => [index('audit_at_idx').on(t.at), index('audit_entity_idx').on(t.entity, t.entityId)],
 );
 
-export const homework = pgTable('homework', {
-  id: text('id').primaryKey(),
-  classId: text('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
-  subjectId: text('subject_id').notNull().references(() => subjects.id),
-  title: text('title').notNull(),
-  assignedOn: date('assigned_on').notNull(),
-  dueOn: date('due_on').notNull(),
-  description: text('description').notNull().default(''),
-  maxMarks: integer('max_marks').notNull().default(20),
-  createdBy: text('created_by'),
-});
+export const homework = pgTable(
+  'homework',
+  {
+    id: text('id').primaryKey(),
+    classId: text('class_id').notNull().references(() => classes.id, { onDelete: 'cascade' }),
+    subjectId: text('subject_id').notNull().references(() => subjects.id),
+    title: text('title').notNull(),
+    assignedOn: date('assigned_on').notNull(),
+    dueOn: date('due_on').notNull(),
+    description: text('description').notNull().default(''),
+    maxMarks: integer('max_marks').notNull().default(20),
+    createdBy: text('created_by'),
+  },
+  (t) => [index('homework_class_due_idx').on(t.classId, t.dueOn)],
+);
 
 export const homeworkSubmissions = pgTable(
   'homework_submissions',

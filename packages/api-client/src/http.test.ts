@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { HttpError, createHttp } from './http';
+import { HttpError, createHttp, type Tokens } from './http';
 
 const json = (status: number, body: unknown) => new Response(status === 204 ? null : JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
 function setup(handler: (url: string, init: RequestInit) => Response) {
-  let tokens: { accessToken: string; refreshToken: string } | null = { accessToken: 'old', refreshToken: 'r1' };
+  let tokens: Tokens | null = { accessToken: 'old', refreshToken: 'r1' };
   const calls: string[] = [];
   const onSignedOut = vi.fn();
   const http = createHttp({
@@ -60,5 +60,20 @@ describe('createHttp', () => {
   it('returns nothing for 204', async () => {
     const s = setup(() => json(204, null));
     expect(await s.http.del('/v1/x')).toBeUndefined();
+  });
+
+  it('sends cookies, CSRF, and client=web when cookieRefresh is on', async () => {
+    vi.stubGlobal('document', { cookie: 'en_csrf=tok' });
+    let init: RequestInit | undefined;
+    const http = createHttp({
+      baseUrl: 'http://api.test', refreshPath: '/v1/auth/refresh', cookieRefresh: true,
+      tokens: { get: () => ({ accessToken: 'a' }), set: () => undefined },
+      fetch: (async (_url: string, i?: RequestInit) => { init = i; return json(200, { ok: true }); }) as typeof fetch,
+    });
+    await http.post('/v1/auth/refresh', {});
+    expect(init?.credentials).toBe('include');
+    expect((init?.headers as Record<string, string>)['x-csrf']).toBe('tok');
+    expect(JSON.parse(String(init?.body)).client).toBe('web');
+    vi.unstubAllGlobals();
   });
 });

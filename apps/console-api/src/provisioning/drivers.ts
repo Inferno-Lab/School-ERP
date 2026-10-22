@@ -93,6 +93,11 @@ async function createOnServer(ctx: StepCtx, adminUrl: string): Promise<{ url: st
     }
     const found = await c.query('select 1 from pg_database where datname = $1', [name]);
     if (!found.rowCount) await c.query(`create database ${name}${owner ? ` owner ${owner}` : ''}`);
+    await c.query(`revoke connect on database ${name} from public`).catch(() => undefined);
+    if (owner) {
+      await c.query(`grant connect on database ${name} to ${owner}`).catch(() => undefined);
+      await c.query(`grant connect on database ${name} to current_user`).catch(() => undefined);
+    }
     const base = new URL(adminUrl);
     const user = owner ?? decodeURIComponent(base.username);
     const pw = owner ? password : decodeURIComponent(base.password);

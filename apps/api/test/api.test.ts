@@ -43,7 +43,7 @@ describe('sign-in', () => {
     expect(ok.json.user.roles).toContain('principal');
   });
   it('rotates refresh tokens and ends every session when an old one is replayed', async () => {
-    const step1 = await h.call('POST', '/v1/auth/login', { body: { identifier: 'neha.menon@greenfield.edu.in', password: 'nest2026' } });
+    const step1 = await h.call('POST', '/v1/auth/login', { body: { identifier: 'sunita.desai@greenfield.edu.in', password: 'nest2026' } });
     const t1 = (await h.call('POST', '/v1/auth/verify', { body: { challengeId: step1.json.challenge.challengeId, code: '424242' } })).json;
     const t2 = (await h.call('POST', '/v1/auth/refresh', { body: { refreshToken: t1.refreshToken } })).json;
     expect(t2.refreshToken).not.toBe(t1.refreshToken);
@@ -51,6 +51,64 @@ describe('sign-in', () => {
     expect(replay.status).toBe(401);
     const afterReplay = await h.call('POST', '/v1/auth/refresh', { body: { refreshToken: t2.refreshToken } });
     expect(afterReplay.status).toBe(401);
+    const audit = (await h.call('GET', '/v1/settings/audit', { token })).json as { action: string }[];
+    expect(audit.some((a) => a.action === 'auth.refresh_replayed')).toBe(true);
+  });
+  it('keeps the web refresh token in an httpOnly cookie and checks CSRF', async () => {
+    const step1 = await h.call('POST', '/v1/auth/login', { body: { identifier: 'neha.menon@greenfield.edu.in', password: 'nest2026', client: 'web' } });
+    const verified = await h.call('POST', '/v1/auth/verify', { body: { challengeId: step1.json.challenge.challengeId, code: '424242', client: 'web' } });
+    expect(verified.status).toBe(200);
+    expect(verified.json.refreshToken).toBeUndefined();
+    expect(verified.cookies.en_rt_greenfield).toBeTruthy();
+    expect(verified.cookies.en_csrf).toBeTruthy();
+    const noCsrf = await h.call('POST', '/v1/auth/refresh', {
+      body: { client: 'web' },
+      cookies: { en_rt_greenfield: verified.cookies.en_rt_greenfield, en_csrf: verified.cookies.en_csrf },
+    });
+    expect(noCsrf.status).toBe(401);
+    const ok = await h.call('POST', '/v1/auth/refresh', {
+      body: { client: 'web' },
+      cookies: { en_rt_greenfield: verified.cookies.en_rt_greenfield, en_csrf: verified.cookies.en_csrf },
+      headers: { 'x-csrf': verified.cookies.en_csrf, origin: 'http://localhost:5173' },
+    });
+    expect(ok.status).toBe(200);
+    expect(ok.json.accessToken).toBeTruthy();
+    expect(ok.json.refreshToken).toBeUndefined();
+  });
+  it('stops using an access token once the session is revoked', async () => {
+    const step1 = await h.call('POST', '/v1/auth/login', { body: { identifier: 'meera.nair@greenfield.edu.in', password: 'nest2026' } });
+    const pair = (await h.call('POST', '/v1/auth/verify', { body: { challengeId: step1.json.challenge.challengeId, code: '424242' } })).json;
+    expect((await h.call('GET', '/v1/me', { token: pair.accessToken })).status).toBe(200);
+    expect((await h.call('POST', '/v1/auth/logout', { token: pair.accessToken })).status).toBe(204);
+    expect((await h.call('GET', '/v1/me', { token: pair.accessToken })).status).toBe(401);
+  });
+  it('logout-all ends every session for that person', async () => {
+    const a1 = await h.call('POST', '/v1/auth/login', { body: { identifier: 'meera.nair@greenfield.edu.in', password: 'nest2026' } });
+    const t1 = (await h.call('POST', '/v1/auth/verify', { body: { challengeId: a1.json.challenge.challengeId, code: '424242' } })).json.accessToken as string;
+    const a2 = await h.call('POST', '/v1/auth/login', { body: { identifier: 'meera.nair@greenfield.edu.in', password: 'nest2026' } });
+    const t2 = (await h.call('POST', '/v1/auth/verify', { body: { challengeId: a2.json.challenge.challengeId, code: '424242' } })).json.accessToken as string;
+    expect((await h.call('POST', '/v1/auth/logout-all', { token: t1 })).status).toBe(204);
+    expect((await h.call('GET', '/v1/me', { token: t1 })).status).toBe(401);
+    expect((await h.call('GET', '/v1/me', { token: t2 })).status).toBe(401);
+  });
+  it('a role change ends that person’s access token', async () => {
+    const step1 = await h.call('POST', '/v1/auth/login', { body: { identifier: 'sunita.desai@greenfield.edu.in', password: 'nest2026' } });
+    const teacherTok = (await h.call('POST', '/v1/auth/verify', { body: { challengeId: step1.json.challenge.challengeId, code: '424242' } })).json.accessToken as string;
+    expect((await h.call('GET', '/v1/me', { token: teacherTok })).status).toBe(200);
+    const staff = (await h.call('GET', '/v1/staff?query=Sunita', { token })).json as { id: string; name: string; roles: { id: string }[] }[];
+    const person = staff.find((s) => s.name === 'Sunita Desai' && s.roles.length);
+    expect(person).toBeTruthy();
+    const patched = await h.call('PATCH', `/v1/staff/${person!.id}`, { token, body: { roleId: person!.roles[0]!.id } });
+    expect(patched.status).toBe(200);
+    expect((await h.call('GET', '/v1/me', { token: teacherTok })).status).toBe(401);
+  });
+  it('sends security headers', async () => {
+    const r = await h.call('GET', '/v1/brand');
+    expect(r.status).toBe(200);
+    expect(r.headers['x-content-type-options']).toBe('nosniff');
+    expect(r.headers['referrer-policy']).toBe('no-referrer');
+    expect(String(r.headers['content-security-policy'] ?? '')).toMatch(/frame-ancestors 'none'/);
+    expect(String(r.headers['permissions-policy'] ?? '')).toMatch(/camera=\(\)/);
   });
   it('needs a known school and a token', async () => {
     expect((await h.call('GET', '/v1/me', { school: 'no-such-school' })).status).toBe(404);

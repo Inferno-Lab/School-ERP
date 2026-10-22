@@ -16,12 +16,14 @@ export function LoginRoute() {
           const res = await client.api.login({ identifier: email, password });
           try { localStorage.setItem('edunest.console.email', email); } catch { /* ignore */ }
           if (res.step === 'otp') return res.challenge;
-          session.write({ accessToken: res.tokens.accessToken, refreshToken: res.tokens.refreshToken, user: res.tokens.user });
+          session.write({ user: res.tokens.user });
+          session.setAccess(res.tokens.accessToken);
           return null;
         },
         submitCode: async (challengeId, code) => {
-          const t = await client.api.verify({ challengeId, code });
-          session.write({ accessToken: t.accessToken, refreshToken: t.refreshToken, user: t.user });
+          const t = await client.api.verify({ challengeId, code, client: 'web' });
+          session.write({ user: t.user });
+          session.setAccess(t.accessToken);
           return t.user.name;
         },
         enter: () => void navigate({ to: '/' }),

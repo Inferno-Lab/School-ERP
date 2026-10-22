@@ -7,6 +7,7 @@ import {
 import { hashPassword, randomToken } from '@edunest/security';
 import { ApiError, forbidden, notFound } from '@edunest/nest-kit';
 import type { TenantCtx } from '../tenancy/tenant.js';
+import { AuthService } from '../auth/auth.service.js';
 import { StudentsService } from './students.service.js';
 import { AuditService, Messenger } from './support.js';
 
@@ -23,6 +24,7 @@ export class PeopleService {
     private readonly audit: AuditService,
     private readonly messenger: Messenger,
     private readonly students: StudentsService,
+    private readonly auth: AuthService,
   ) {}
 
   // Staff
@@ -109,6 +111,7 @@ export class PeopleService {
     } finally {
       client.release();
     }
+    if (body.roleId || body.status === 'inactive') await this.auth.bumpVersion(t, id);
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'staff.changed', entity: 'staff', entityId: id, detail: Object.fromEntries(Object.entries(body).map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : String(v)])) });
     return (await this.staff(t, { id }))[0]!;
   }
@@ -194,6 +197,7 @@ export class PeopleService {
       if ((await t.pool.query('select 1 from roles where id = $1 or lower(name) = lower($2)', [id, body.name])).rowCount) throw new ApiError('validation', 'There is already a role with that name.', { fields: { name: 'There is already a role with that name.' } });
       await t.pool.query('insert into roles (id, key, name, description, permissions, locked) values ($1,$2,$3,$4,$5,false)', [id, key, body.name, body.description, JSON.stringify(body.permissions)]);
     }
+    await this.auth.bumpVersionForRole(t, id);
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'role.saved', entity: 'role', entityId: id, detail: { name: body.name, permissions: body.permissions.length } });
     return (await this.roles(t)).find((r) => r.id === id)!;
   }

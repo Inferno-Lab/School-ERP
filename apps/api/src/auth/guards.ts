@@ -7,6 +7,7 @@ import type { FastifyRequest } from 'fastify';
 import { ENV, type Env } from '../env.js';
 import { ApiError } from '@edunest/nest-kit';
 import type { AuthedUser } from '../tenancy/tenant.js';
+import { AuthService } from './auth.service.js';
 
 /** The route needs no sign-in. */
 export const Public = () => SetMetadata('public', true);
@@ -23,20 +24,24 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     @Inject(ENV) private readonly env: Env,
+    private readonly auth: AuthService,
   ) {}
 
-  canActivate(ctx: ExecutionContext): boolean {
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const targets = [ctx.getHandler(), ctx.getClass()];
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
     if (req.url.startsWith('/console/') || this.reflector.getAllAndOverride<boolean>('public', targets) || this.reflector.getAllAndOverride<boolean>('noTenant', targets)) return true;
     const header = req.headers.authorization;
     const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) throw new ApiError('unauthenticated', 'Sign in to continue.');
-    const claims = verifyJwt<AccessClaims & Record<string, unknown>>(token, this.env.JWT_SECRET);
+    const claims = verifyJwt<AccessClaims & Record<string, unknown>>(token, this.env.JWT_SECRET, this.env.JWT_SECRET_PREVIOUS);
     if (!claims || claims.aud !== req.tenant?.info.slug) throw new ApiError('unauthenticated', 'Your session has ended. Sign in again.');
     // A support session opened from the console can look but never change anything.
-    if ((claims as { support?: boolean }).support && req.method !== 'GET' && req.method !== 'HEAD') {
+    if (claims.support && req.method !== 'GET' && req.method !== 'HEAD') {
       throw new ApiError('forbidden', 'This is a read-only support session. Nothing can be changed from here.');
+    }
+    if (!claims.support && req.tenant) {
+      await this.auth.assertSession(req.tenant, claims.sid, claims.ver, claims.sub);
     }
     req.user = { id: claims.sub, sid: claims.sid, name: claims.name, permissions: claims.perms };
     return true;

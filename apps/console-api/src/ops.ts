@@ -182,7 +182,10 @@ export class Admin {
       const others = await this.db.pool.query("select count(*) n from console_users where id <> $1 and status = 'active' and roles ? 'super_admin'", [id]);
       if (Number(others.rows[0]!.n) === 0) throw new ApiError('conflict', 'There must always be one active super admin.');
     }
-    await this.db.pool.query('update console_users set roles = $2, status = $3 where id = $1', [id, JSON.stringify(roles), status]);
+    await this.db.pool.query('update console_users set roles = $2, status = $3, token_version = token_version + 1 where id = $1', [id, JSON.stringify(roles), status]);
+    if (status !== 'active') {
+      await this.db.pool.query('update console_sessions set revoked_at = now() where user_id = $1 and revoked_at is null', [id]);
+    }
     await this.db.audit(user, 'team.changed', 'user', id, { roles, status });
   }
 
