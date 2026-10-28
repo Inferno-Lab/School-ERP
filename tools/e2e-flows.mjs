@@ -182,7 +182,11 @@ await flow('admin: search opens on every page and the menu collapses', { storage
   await expectVisible(p.getByRole('button', { name: 'Expand the menu' }), 'the collapsed menu');
 });
 
-await flow('admin: sign out returns to the sign-in page', { storage: adminStore }, async (p) => {
+// Sign-out revokes its session on the server, so this flow gets a session of its own and the flows after it keep theirs.
+const so = await post('/v1/auth/login', { identifier: 'neha.menon@greenfield.edu.in', password: 'nest2026' }, h);
+const st = await post('/v1/auth/verify', { challengeId: so.challenge.challengeId, code: '424242' }, h);
+const signOutStore = [adminStore[0], JSON.stringify({ accessToken: st.accessToken, refreshToken: st.refreshToken, user: st.user })];
+await flow('admin: sign out returns to the sign-in page', { storage: signOutStore }, async (p) => {
   await p.goto(`${ADMIN}/s/${slug}/`, { waitUntil: 'networkidle' });
   await p.locator('.mebtn').click();
   await p.getByRole('menuitem', { name: 'Sign out' }).click();

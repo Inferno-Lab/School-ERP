@@ -56,7 +56,7 @@ void main() {
     final auth = Get.find<AuthRepository>();
     final student = await auth.login(
       email: 'aarav.sharma@edunest.app',
-      password: AppConfig.demoPassword,
+      password: 'demo123', // the mock content's own; AppConfig.demoPassword follows the build's school
     );
     expect(student.role, UserRole.student);
     expect(
