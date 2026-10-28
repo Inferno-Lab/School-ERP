@@ -112,115 +112,125 @@ class _WelcomeOverlayState extends State<WelcomeOverlay> with TickerProviderStat
             child: Material(
               color: c.chalk,
               child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
-                  child: Column(
-                    children: [
-                      const Spacer(flex: 2),
-                      SizedBox(
-                        width: 270,
-                        height: 210,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Opacity(
-                              opacity: ((.5 + .12 * breath) * glow * leave).clamp(0.0, 1.0),
-                              child: Transform.scale(
-                                scale: glowScale,
-                                child: Container(
-                                  width: 240,
-                                  height: 240,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: RadialGradient(
-                                      colors: [
-                                        AppColors.mari.withValues(alpha: .5),
-                                        AppColors.mari.withValues(alpha: 0),
-                                      ],
+                child: LayoutBuilder(
+                  // A short phone (320x640) scrolls; taller ones keep the spaced layout.
+                  builder: (context, box) => SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: box.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
+                          child: Column(
+                            children: [
+                              const Spacer(flex: 2),
+                              SizedBox(
+                                width: 270,
+                                height: 210,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Opacity(
+                                      opacity: ((.5 + .12 * breath) * glow * leave).clamp(0.0, 1.0),
+                                      child: Transform.scale(
+                                        scale: glowScale,
+                                        child: Container(
+                                          width: 240,
+                                          height: 240,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                AppColors.mari.withValues(alpha: .5),
+                                                AppColors.mari.withValues(alpha: 0),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ),
+                                    _Book(
+                                      subject: 'maths',
+                                      left: 32 + 48 * (1 - fan),
+                                      top: 20 + 36 * (1 - stack),
+                                      angle: -.26 * fan,
+                                      rise: stack,
+                                    ),
+                                    _Book(
+                                      subject: 'science',
+                                      left: 152 - 48 * (1 - fan),
+                                      top: 20 + 36 * (1 - stack),
+                                      angle: .26 * fan,
+                                      rise: stack,
+                                    ),
+                                    _Book(
+                                      subject: 'hindi',
+                                      left: 92,
+                                      top: 6 + 28 * (1 - stack),
+                                      angle: 0,
+                                      rise: stack,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 28),
+                              Opacity(
+                                opacity: hello,
+                                child: Transform.translate(
+                                  offset: Offset(0, 18 * (1 - hello)),
+                                  child: Text(
+                                    'welcome.hello'.trp({'name': name.isEmpty ? AppConfig.appName : name}),
+                                    textAlign: TextAlign.center,
+                                    style: context.type.h1,
                                   ),
                                 ),
                               ),
-                            ),
-                            _Book(
-                              subject: 'maths',
-                              left: 32 + 48 * (1 - fan),
-                              top: 20 + 36 * (1 - stack),
-                              angle: -.26 * fan,
-                              rise: stack,
-                            ),
-                            _Book(
-                              subject: 'science',
-                              left: 152 - 48 * (1 - fan),
-                              top: 20 + 36 * (1 - stack),
-                              angle: .26 * fan,
-                              rise: stack,
-                            ),
-                            _Book(
-                              subject: 'hindi',
-                              left: 92,
-                              top: 6 + 28 * (1 - stack),
-                              angle: 0,
-                              rise: stack,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      Opacity(
-                        opacity: hello,
-                        child: Transform.translate(
-                          offset: Offset(0, 18 * (1 - hello)),
-                          child: Text(
-                            'welcome.hello'.trp({'name': name.isEmpty ? AppConfig.appName : name}),
-                            textAlign: TextAlign.center,
-                            style: context.type.h1,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Opacity(
-                        opacity: body,
-                        child: Transform.translate(
-                          offset: Offset(0, 14 * (1 - body)),
-                          child: Text(
-                            'welcome.body'.tr,
-                            textAlign: TextAlign.center,
-                            style: context.type.b.copyWith(color: c.ink2),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      Opacity(
-                        opacity: chips,
-                        child: Transform.translate(
-                          offset: Offset(0, 16 * (1 - chips)),
-                          child: Column(
-                            children: [
-                              for (final (i, tip) in tips.indexed)
-                                Opacity(
-                                  opacity: _beat(t, .6 + i * .05, .78 + i * .05),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(bottom: i == tips.length - 1 ? 0 : 10),
-                                    child: _TipChip(icon: tip.$1, label: tip.$2, highlight: i == 0),
+                              const SizedBox(height: 12),
+                              Opacity(
+                                opacity: body,
+                                child: Transform.translate(
+                                  offset: Offset(0, 14 * (1 - body)),
+                                  child: Text(
+                                    'welcome.body'.tr,
+                                    textAlign: TextAlign.center,
+                                    style: context.type.b.copyWith(color: c.ink2),
                                   ),
                                 ),
+                              ),
+                              const SizedBox(height: 28),
+                              Opacity(
+                                opacity: chips,
+                                child: Transform.translate(
+                                  offset: Offset(0, 16 * (1 - chips)),
+                                  child: Column(
+                                    children: [
+                                      for (final (i, tip) in tips.indexed)
+                                        Opacity(
+                                          opacity: _beat(t, .6 + i * .05, .78 + i * .05),
+                                          child: Padding(
+                                            padding: EdgeInsets.only(bottom: i == tips.length - 1 ? 0 : 10),
+                                            child: _TipChip(icon: tip.$1, label: tip.$2, highlight: i == 0),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const Spacer(flex: 3),
+                              Opacity(
+                                opacity: cta,
+                                child: Transform.scale(
+                                  scale: .9 + .1 * cta,
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: Btn('welcome.continue', expand: true, onPressed: _continue),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ),
-                      const Spacer(flex: 3),
-                      Opacity(
-                        opacity: cta,
-                        child: Transform.scale(
-                          scale: .9 + .1 * cta,
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Btn('welcome.continue', expand: true, onPressed: _continue),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
