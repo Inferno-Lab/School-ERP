@@ -38,5 +38,9 @@ services:
         sync: false
       - key: SEED_DEMO
         value: "true"
+      # Production refuses SEED_DEMO and DEMO_CODE unless this says the service is a demo/test track.
+      - key: ALLOW_DEMO
+        value: "true"
+      # Production refuses "*". Admin and console are served from this same address; browsers still send it as Origin.
       - key: CORS_ORIGINS
-        value: "*"
+        value: "https://edunest-0c6x.onrender.com"
