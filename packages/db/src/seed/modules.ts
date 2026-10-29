@@ -85,7 +85,8 @@ export async function seedModulesDemo(db: Db, todayIn?: string): Promise<string[
     const msgs: unknown[][] = [];
     g.forEach((x, i) => {
       const id = `thr_${i + 1}`;
-      const at = new Date(`${addDays(last, -(i % 4))}T${String(4 + i).padStart(2, '0')}:20:00Z`);
+      // Hours ago from now, so a reply at now() always sorts after the seed (fixed clock-of-day times failed morning CI).
+      const at = new Date(Date.now() - (i + 2) * 3_600_000);
       const replied = i % 3 === 0;
       const assigned = replied ? staff[i % staff.length]?.id ?? admin : null;
       th.push([id, x.guardian_id, x.student_id, subjects[i], i === 5 ? 'closed' : 'open', assigned, new Date(at.getTime() + (replied ? 3_600_000 : 0)).toISOString()]);

@@ -433,7 +433,11 @@ export class FamilyService {
       if (!user.permissions.includes('messages.write')) throw forbidden('You are not allowed to write to families.');
       await this.office.reply(t, user, threadId, { body: text });
     } else {
-      await t.pool.query("insert into thread_messages (id, thread_id, from_kind, sender_name, body) values ($1,$2,'guardian',$3,$4)", [newId('tmsg'), threadId, w.name, text]);
+      await t.pool.query(
+        `insert into thread_messages (id, thread_id, from_kind, sender_name, body, created_at)
+         values ($1,$2,'guardian',$3,$4, greatest(now(), coalesce((select max(created_at) + interval '1 millisecond' from thread_messages where thread_id = $2), now())))`,
+        [newId('tmsg'), threadId, w.name, text],
+      );
       await t.pool.query("update threads set last_at = now(), status = 'open' where id = $1", [threadId]);
     }
     return { ok: true };
