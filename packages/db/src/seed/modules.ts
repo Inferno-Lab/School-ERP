@@ -125,12 +125,9 @@ export async function seedModulesDemo(db: Db, todayIn?: string): Promise<string[
     did.push('admissions');
   }
 
-  // The demo family: Aarav can sign in as himself, and Priya has a second child, so the app's child switcher has something to switch.
-  const priya = (await db.query<{ gid: string; hash: string | null }>("select g.id gid, u.password_hash hash from guardians g join users u on u.id = g.user_id where u.email = 'priya.sharma@example.com' limit 1")).rows[0];
-  if (priya && !(await db.query("select 1 from users where email = 'aarav.sharma@edunest.app'")).rowCount) {
-    const uid = newId('usr');
-    await db.query("insert into users (id, kind, name, email, phone, password_hash) values ($1,'student','Aarav Sharma','aarav.sharma@edunest.app','+91 98220 11001',$2)", [uid, priya.hash]);
-    await db.query("update students set user_id = $1 where id = 'stu_aarav'", [uid]);
+  // Priya's second child, so the app's child switcher has something to switch. Students do not get a login.
+  const priya = (await db.query<{ gid: string }>("select g.id gid from guardians g join users u on u.id = g.user_id where u.email = 'priya.sharma@example.com' limit 1")).rows[0];
+  if (priya && !(await db.query('select 1 from student_guardians where guardian_id = $1 and student_id <> $2', [priya.gid, 'stu_aarav'])).rowCount) {
     const sib = (await db.query<{ id: string }>("select id from students where class_id = 'cls_5b' order by roll_no limit 1")).rows[0];
     if (sib) {
       await db.query("update students set name = 'Ananya Sharma' where id = $1", [sib.id]);

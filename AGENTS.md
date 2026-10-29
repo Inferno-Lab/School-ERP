@@ -86,7 +86,7 @@ Details: `docs/architecture.md`. How to add a screen, a repository, or an AI fea
 - Comments say *why*, one line. Mark a deliberate limit with `// shortcut: <the limit>, <when to upgrade>`.
 - Commits are atomic and use Conventional Commits (`fix(glass): …`, `refactor(fees): …`). Keep refactors separate from behaviour changes.
 - Visual changes: look at them (headless shot at minimum; emulator for glass). Light, dark, AMOLED; small phone (360×640), phone (390×844), tablet (≥ 840 wide).
-- Demo accounts: password `demo123`, OTP `123456` on demo content; `nest2026` and code `424242` on a school build against the demo school. Student Aarav, parent Priya, teacher Kavita (see `README.md`).
+- Demo accounts: password `demo123`, OTP `123456` on demo content; `nest2026` and code `424242` on a school build against the demo school. Parent Priya, teacher Kavita (see `README.md`). Students do not sign in.
 
 ## Where things are
 

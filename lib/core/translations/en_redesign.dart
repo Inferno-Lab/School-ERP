@@ -68,8 +68,8 @@ const enRedesign = <String, String>{
   'auth.code_note': 'The code fills in automatically when the SMS arrives. Codes expire after 10 minutes.',
   'auth.verify': 'Verify',
   'auth.demo_line_pick': 'Pick a role to look around with sample data. Nothing is saved.',
-  'auth.demo_line_student': 'Signs in as Aarav, Class 8 A, with sample data. Nothing is saved.',
   'auth.demo_line_parent': 'Signs in as Priya, parent of Aarav and Ananya, with sample data. Nothing is saved.',
+  'errors.student_login': 'Students sign in through a parent account.',
   'auth.demo_line_teacher': 'Signs in as Kavita Iyer, class teacher of 8 A, with sample data. Nothing is saved.',
 
   // home

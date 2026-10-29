@@ -35,8 +35,8 @@ class MockAuthRepository implements AuthRepository {
   @override
   Future<AppUser> loginAs(UserRole role) {
     return _ds.guard(() {
+      if (role == UserRole.student) throw const AppException('errors.student_login');
       const ids = {
-        UserRole.student: 'usr_aarav',
         UserRole.parent: 'usr_priya',
         UserRole.teacher: 'usr_kavita',
       };
@@ -108,8 +108,8 @@ class RemoteAuthRepository implements AuthRepository {
 
   @override
   Future<AppUser> loginAs(UserRole role) async {
+    if (role == UserRole.student) throw const AppException('errors.student_login');
     const accounts = {
-      UserRole.student: 'aarav.sharma@edunest.app',
       UserRole.parent: 'priya.sharma@example.com',
       UserRole.teacher: 'kavita.iyer@greenfield.edu.in',
     };

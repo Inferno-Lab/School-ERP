@@ -42,6 +42,7 @@ export class FamilyService {
   async who(t: TenantCtx, user: AuthedUser): Promise<Who> {
     const u = (await t.pool.query<{ id: string; kind: Who['kind']; name: string; phone: string | null; email: string | null }>('select id, kind, name, phone, email from users where id = $1', [user.id])).rows[0];
     if (!u) throw new ApiError('unauthenticated', 'Your session has ended. Sign in again.');
+    if (u.kind === 'student') throw forbidden('Students sign in through a parent account.');
     let children: string[] = [];
     let guardianIds: string[] = [];
     if (u.kind === 'guardian') {

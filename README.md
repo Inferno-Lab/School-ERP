@@ -49,7 +49,7 @@ Sign in:
 | --- | --- | --- |
 | School admin (demo school) | `http://localhost:5173/s/greenfield` | `neha.menon@greenfield.edu.in` / `nest2026`, then press "Type the demo code" (`424242`) |
 | Console | `http://localhost:5174` | `kaushal@edunest.app` / `nest2026`, code `424242` |
-| Phone app on the demo school | a build with `SCHOOL=greenfield` | parent `priya.sharma@example.com`, student `aarav.sharma@edunest.app`, teacher `kavita.iyer@greenfield.edu.in`; password `nest2026`, code `424242` |
+| Phone app on the demo school | a build with `SCHOOL=greenfield` | parent `priya.sharma@example.com`, teacher `kavita.iyer@greenfield.edu.in`; password `nest2026`, code `424242` |
 
 On the hosted test track (`https://edunest-0c6x.onrender.com`) the school logins are the same. The console there uses `BOOTSTRAP_PASSWORD` and `DEMO_CODE` from Render's Environment page.
 
@@ -110,4 +110,4 @@ flutter pub get && flutter run          # demo content, no backend needed
 flutter run --dart-define=SCHOOL=greenfield --dart-define=API_BASE_URL=https://edunest-0c6x.onrender.com   # the demo school's real data (password nest2026, code 424242)
 ```
 
-Demo accounts on demo content (password `demo123`, OTP `123456`): student Aarav Sharma, parent Priya Sharma, teacher Kavita Iyer. On a school build the same people sign in with `nest2026` and code `424242`.
+Demo accounts on demo content (password `demo123`, OTP `123456`): parent Priya Sharma, teacher Kavita Iyer. On a school build the same people sign in with `nest2026` and code `424242`. Students do not sign in.

@@ -5,6 +5,7 @@ import 'package:edunest/core/config/app_config.dart';
 import 'package:edunest/core/routes/app_routes.dart';
 import 'package:edunest/core/services/storage_service.dart';
 import 'package:edunest/core/theme/tokens.dart';
+import 'package:edunest/core/utils/app_exception.dart';
 import 'package:edunest/data/models/user.dart';
 import 'package:get/get.dart';
 
@@ -26,12 +27,22 @@ class AuthService extends GetxService {
     if (AppConfig.live && _storage.read<String>(StorageKeys.accessToken) == null) return;
     final decoded = jsonDecode(raw);
     if (decoded is! Map<String, dynamic>) return;
-    user.value = AppUser.fromJson(decoded);
+    final next = AppUser.fromJson(decoded);
+    // Student logins are retired. Drop a saved student session instead of opening the shell.
+    if (next.role == UserRole.student) {
+      unawaited(_storage.remove(StorageKeys.sessionUser));
+      unawaited(_storage.remove(StorageKeys.activeStudent));
+      unawaited(_storage.remove(StorageKeys.accessToken));
+      unawaited(_storage.remove(StorageKeys.refreshToken));
+      return;
+    }
+    user.value = next;
     activeStudentId.value =
         _storage.read<String>(StorageKeys.activeStudent) ?? user.value?.studentId ?? user.value?.childIds.firstOrNull;
   }
 
   Future<void> setSession(AppUser next, {String? studentId}) async {
+    if (next.role == UserRole.student) throw const AppException('errors.student_login');
     user.value = next;
     final resolved = studentId ?? next.studentId ?? next.childIds.firstOrNull;
     activeStudentId.value = resolved;

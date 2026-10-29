@@ -18,7 +18,7 @@ void main() {
   tearDown(Get.reset);
 
   Future<void> openSheet(WidgetTester tester) async {
-    await real(tester, () => signIn(UserRole.student));
+    await real(tester, () => signIn(UserRole.parent));
     final fees = Get.put(FeesController());
     await real(tester, fees.load);
     await tester.pumpWidget(testApp(home: Scaffold(body: SingleChildScrollView(child: PaySheet(item: fees.next!)))));

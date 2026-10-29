@@ -3,7 +3,6 @@ import { startHarness, type Harness } from './harness.js';
 
 let h: Harness;
 let parent: string;
-let student: string;
 let teacher: string;
 let admin: string;
 let ananya: string;
@@ -14,7 +13,6 @@ const post = (token: string, url: string, body?: unknown) => h.call('POST', `/v1
 beforeAll(async () => {
   h = await startHarness();
   parent = await h.login('priya.sharma@example.com');
-  student = await h.login('aarav.sharma@edunest.app');
   teacher = await h.login('kavita.iyer@greenfield.edu.in');
   admin = await h.login();
   ananya = (await f(parent, '/me')).json.childIds.find((c: string) => c !== 'stu_aarav');
@@ -27,14 +25,15 @@ describe('who is signed in', () => {
   it('tells the app who the person is, in the app’s own shape', async () => {
     expect((await f(parent, '/me')).json).toMatchObject({ role: 'parent', name: 'Priya Sharma', childIds: expect.arrayContaining(['stu_aarav']) });
     expect((await f(parent, '/me')).json.childIds).toHaveLength(2);
-    expect((await f(student, '/me')).json).toMatchObject({ role: 'student', studentId: 'stu_aarav', childIds: [] });
     expect((await f(teacher, '/me')).json).toMatchObject({ role: 'teacher', name: 'Kavita Iyer' });
+    const blocked = await h.call('POST', '/v1/auth/login', { body: { identifier: 'aarav.sharma@edunest.app', password: 'nest2026' } });
+    expect(blocked.status === 401 || blocked.status === 403).toBe(true);
+    expect(blocked.json?.step).toBeUndefined();
     expect((await h.call('GET', '/v1/f/me')).status).toBe(401);
   });
   it('keeps each family to its own children', async () => {
     expect((await f(parent, '/students/stu_aarav')).status).toBe(200);
     expect((await f(parent, '/students/stu_diya')).status).toBe(403);
-    expect((await f(student, '/students/stu_diya')).status).toBe(403);
     expect((await f(parent, '/students/stu_diya/fees')).status).toBe(403);
     expect((await f(parent, '/classes/cls_9a/timetable')).status).toBe(403);
     expect((await f(teacher, '/students/stu_diya')).status).toBe(200);
@@ -68,16 +67,16 @@ describe('learning', () => {
     const mid = exams.find((e: any) => e.name === 'Mid-term exams');
     expect((await f(parent, `/results/${mid.id}/stu_aarav`)).status).toBe(404);
   });
-  it('lets a student hand homework in and a teacher grade it', async () => {
+  it('lets a parent hand homework in and a teacher grade it', async () => {
     const assigned = await post(teacher, '/homework', { classId: 'cls_8a', subject: 'maths', title: 'From the app', dueOn: new Date(Date.now() + 3 * 86_400_000).toISOString() });
     expect(assigned.status).toBe(200);
-    const hw = (await f(student, '/classes/cls_8a/homework')).json.find((x: any) => x.id === assigned.json.id);
+    const hw = (await f(parent, '/classes/cls_8a/homework')).json.find((x: any) => x.id === assigned.json.id);
     expect(hw.submissions.find((s: any) => s.studentId === 'stu_aarav').status).toBe('pending');
-    expect((await post(student, `/homework/${hw.id}/submissions`, { studentId: 'stu_aarav', fileName: 'work.pdf' })).status).toBe(200);
-    expect((await f(student, `/homework/${hw.id}`)).json.submissions.find((s: any) => s.studentId === 'stu_aarav').status).toBe('submitted');
+    expect((await post(parent, `/homework/${hw.id}/submissions`, { studentId: 'stu_aarav', fileName: 'work.pdf' })).status).toBe(200);
+    expect((await f(parent, `/homework/${hw.id}`)).json.submissions.find((s: any) => s.studentId === 'stu_aarav').status).toBe('submitted');
     expect((await post(parent, `/homework/${hw.id}/grades`, { studentId: 'stu_aarav', marks: 15 })).status).toBe(403);
     expect((await post(teacher, `/homework/${hw.id}/grades`, { studentId: 'stu_aarav', marks: 15, feedback: 'Well done' })).status).toBe(200);
-    expect((await f(student, `/homework/${hw.id}`)).json.submissions.find((s: any) => s.studentId === 'stu_aarav')).toMatchObject({ status: 'graded', marks: 15, feedback: 'Well done' });
+    expect((await f(parent, `/homework/${hw.id}`)).json.submissions.find((s: any) => s.studentId === 'stu_aarav')).toMatchObject({ status: 'graded', marks: 15, feedback: 'Well done' });
     expect((await post(parent, '/homework', { classId: 'cls_8a', subject: 'maths', title: 'Not a teacher', dueOn: '2099-01-01' })).status).toBe(403);
   });
   it('lets a teacher mark attendance, and the family sees it and is told', async () => {
@@ -148,7 +147,7 @@ describe('chat, leave and the rest', () => {
     expect((await post(parent, `/threads/${threads[0].id}/messages`, { senderId: me.id, text: 'Thank you.' })).status).toBe(200);
     expect((await f(parent, `/threads/${threads[0].id}/messages`)).json.at(-1)).toMatchObject({ text: 'Thank you.', senderId: me.id });
     expect((await f(parent, `/users/${me.id}/messages`)).json.length).toBeGreaterThan(0);
-    expect((await f(student, `/threads/${threads[0].id}/messages`)).status).toBe(404);
+    expect((await f(parent, '/threads/th_missing/messages')).status).toBe(404);
     const kav = (await f(teacher, '/me')).json.id;
     const started = await post(parent, '/threads', { userId: me.id, teacherId: kav });
     expect(started.status).toBe(200);

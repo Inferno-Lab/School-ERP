@@ -248,7 +248,7 @@ class _DemoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roles = [UserRole.student, UserRole.parent, UserRole.teacher];
+    final roles = [UserRole.parent, UserRole.teacher];
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: SizedBox(
@@ -270,7 +270,7 @@ class _DemoCard extends StatelessWidget {
               top: 14,
               child: Obx(
                 () => GlassSegmented(
-                  labels: const ['nav.student', 'nav.parent', 'nav.teacher'],
+                  labels: const ['nav.parent', 'nav.teacher'],
                   index: controller.demoRole.value == null ? -1 : roles.indexOf(controller.demoRole.value!),
                   height: 48,
                   onPigment: true,
