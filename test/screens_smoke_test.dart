@@ -81,7 +81,7 @@ void main() {
     await loadAppFonts();
   });
 
-  for (final role in [UserRole.student, UserRole.parent, UserRole.teacher]) {
+  for (final role in [UserRole.parent, UserRole.teacher]) {
     for (final size in _sizes.entries) {
       testWidgets('${role.name} screens render on ${size.key}', (tester) async {
         await bootMock();

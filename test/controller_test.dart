@@ -26,7 +26,7 @@ void main() {
 
   tearDown(Get.reset);
 
-  testWidgets('login controller opens a student session', (tester) async {
+  testWidgets('login controller opens a parent session', (tester) async {
     await tester.pumpWidget(
       testApp(
         pages: [
@@ -39,13 +39,13 @@ void main() {
       ),
     );
     final login = Get.put(LoginController());
-    await real(tester, () => login.demo(UserRole.student));
-    expect(Get.find<AuthService>().user.value?.id, 'usr_aarav');
+    await real(tester, () => login.demo(UserRole.parent));
+    expect(Get.find<AuthService>().user.value?.id, 'usr_priya');
   });
 
   testWidgets('dashboard loads a fee that is due for Aarav', (tester) async {
     await tester.pumpWidget(testApp(home: const SizedBox.shrink()));
-    await real(tester, () => signIn(UserRole.student));
+    await real(tester, () => signIn(UserRole.parent));
     final home = Get.put(DashboardController());
     await real(tester, home.load);
     expect(home.state.value, ViewState.success);
@@ -55,7 +55,7 @@ void main() {
 
   testWidgets('homework submit and fee payment update the session', (tester) async {
     await tester.pumpWidget(testApp(home: const SizedBox.shrink()));
-    await real(tester, () => signIn(UserRole.student));
+    await real(tester, () => signIn(UserRole.parent));
     final homework = Get.put(HomeworkController());
     await real(tester, homework.load);
     final pending = homework.visible;
@@ -121,7 +121,7 @@ void main() {
     expect(draft?[studentId], 91);
   });
 
-  test('demo login roles map to the three showcase accounts', () async {
+  test('demo login roles map to the showcase accounts', () async {
     final auth = Get.find<AuthRepository>();
     expect((await auth.loginAs(UserRole.parent)).id, 'usr_priya');
     expect((await auth.loginAs(UserRole.teacher)).id, 'usr_kavita');

@@ -23,7 +23,7 @@ import '../support/harness.dart';
 
 const _enabled = String.fromEnvironment('SHOOT_DIR') != '';
 const _dir = String.fromEnvironment('SHOOT_DIR', defaultValue: 'build/shots');
-const _roleName = String.fromEnvironment('SHOOT_ROLE', defaultValue: 'student');
+const _roleName = String.fromEnvironment('SHOOT_ROLE', defaultValue: 'parent');
 const _empty = bool.fromEnvironment('EMPTY_DATA');
 const _dark = bool.fromEnvironment('SHOOT_DARK');
 const _width = int.fromEnvironment('SHOOT_W', defaultValue: 390);
@@ -90,7 +90,7 @@ void main() {
 
   testWidgets('shoot $_roleName', skip: !_enabled, (tester) async {
     final guest = _roleName == 'guest';
-    final role = guest ? UserRole.student : UserRole.values.byName(_roleName);
+    final role = guest ? UserRole.parent : UserRole.values.byName(_roleName);
     await bootMock();
     AppConfig.emptyData.value = _empty;
     Get.testMode = false;

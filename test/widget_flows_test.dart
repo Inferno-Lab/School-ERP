@@ -59,17 +59,17 @@ void main() {
     );
     await tester.pump();
     await tester.runAsync(() => Get.find<MockJsonDataSource>().ensureLoaded());
-    final student = find.text('Student');
-    await tester.ensureVisible(student);
-    await tester.tap(student);
+    final parent = find.text('Parent');
+    await tester.ensureVisible(parent);
+    await tester.tap(parent);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(Get.find<AuthService>().user.value?.id, 'usr_aarav');
+    expect(Get.find<AuthService>().user.value?.id, 'usr_priya');
     expect(find.text('Home shell'), findsOneWidget);
   });
 
   testWidgets('home shows the signed-in student', (tester) async {
-    final user = (await real(tester, () => signIn(UserRole.student)))!;
+    final user = (await real(tester, () => signIn(UserRole.parent)))!;
     await real(
       tester,
       () => Get.find<AuthService>().setSession(user.copyWith(avatarUrl: '')),
@@ -83,7 +83,7 @@ void main() {
   });
 
   testWidgets('fees screen lists an installment', (tester) async {
-    await real(tester, () => signIn(UserRole.student));
+    await real(tester, () => signIn(UserRole.parent));
     final fees = Get.put(FeesController());
     await real(tester, fees.load);
     await tester.pumpWidget(testApp(home: const FeesView()));

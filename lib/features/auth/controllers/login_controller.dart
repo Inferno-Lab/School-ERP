@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginController extends GetxController {
-  final email = TextEditingController(text: 'aarav.sharma@edunest.app');
+  final email = TextEditingController(
+    text: AppConfig.live ? 'priya.sharma@example.com' : 'priya.sharma@edunest.app',
+  );
   final password = TextEditingController(text: AppConfig.demoPassword);
   final otp = TextEditingController();
   final formKey = GlobalKey<FormState>();

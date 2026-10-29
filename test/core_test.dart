@@ -54,19 +54,20 @@ void main() {
 
   test('auth, fees, homework, notices, and chat repositories', () async {
     final auth = Get.find<AuthRepository>();
-    final student = await auth.login(
-      email: 'aarav.sharma@edunest.app',
+    final parent = await auth.login(
+      email: 'priya.sharma@edunest.app',
       password: 'demo123', // the mock content's own; AppConfig.demoPassword follows the build's school
     );
-    expect(student.role, UserRole.student);
+    expect(parent.role, UserRole.parent);
     expect(
-      () => auth.login(email: student.email, password: 'nope'),
+      () => auth.login(email: parent.email, password: 'nope'),
       throwsA(isA<AppException>()),
     );
     expect(
-      () => auth.loginWithOtp(email: student.email, otp: '000000'),
+      () => auth.loginWithOtp(email: parent.email, otp: '000000'),
       throwsA(isA<AppException>()),
     );
+    expect(() => auth.loginAs(UserRole.student), throwsA(isA<AppException>()));
 
     final fees = Get.find<FeeRepository>();
     final before = await fees.forStudent('stu_aarav');

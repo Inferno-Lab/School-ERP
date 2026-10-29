@@ -38,7 +38,7 @@ If `edunest` is already taken as a name, Render proposes another one. That is fi
 | --- | --- | --- |
 | Console | `https://<service>.onrender.com/console/` | `kaushal@edunest.app`, the password from Render → your service → **Environment** → `BOOTSTRAP_PASSWORD`, then your `DEMO_CODE` |
 | Demo school admin | `https://<service>.onrender.com/s/greenfield` | `neha.menon@greenfield.edu.in`, password `nest2026`, then press *Type the demo code* |
-| Phone app (a build for `greenfield`) | the app | parent `priya.sharma@example.com`, student `aarav.sharma@edunest.app`, teacher `kavita.iyer@greenfield.edu.in`; password `nest2026`, code `424242` |
+| Phone app (a build for `greenfield`) | the app | parent `priya.sharma@example.com`, teacher `kavita.iyer@greenfield.edu.in`; password `nest2026`, code `424242` |
 
 The demo school Greenfield is created by the first start (a minute or two; watch it appear on the console's Fleet page). Anyone with the address can open the demo school, so keep real data out of this environment.
 
