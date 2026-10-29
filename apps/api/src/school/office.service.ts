@@ -190,7 +190,11 @@ export class OfficeService {
     if (!g) throw new ApiError('validation', 'That student has no guardian on record to write to.', { fields: { studentId: 'No guardian on record.' } });
     const id = newId('thr');
     await t.pool.query('insert into threads (id, guardian_id, student_id, subject, assigned_to) values ($1,$2,$3,$4,$5)', [id, g.guardian_id, body.studentId, body.subject, user.id]);
-    await t.pool.query("insert into thread_messages (id, thread_id, from_kind, sender_name, body, read_at) values ($1,$2,'staff',$3,$4,now())", [newId('tmsg'), id, user.name, body.body]);
+    await t.pool.query(
+      `insert into thread_messages (id, thread_id, from_kind, sender_name, body, read_at, created_at)
+       values ($1,$2,'staff',$3,$4,now(), greatest(now(), coalesce((select max(created_at) + interval '1 millisecond' from thread_messages where thread_id = $2), now())))`,
+      [newId('tmsg'), id, user.name, body.body],
+    );
     await this.pushToGuardian(t, id, `${user.name}: ${body.subject}`);
     await this.audit.record(t, { actorId: user.id, actorName: user.name, action: 'message.started', entity: 'thread', entityId: id, detail: { subject: body.subject } });
     return this.thread(t, id);
@@ -199,7 +203,12 @@ export class OfficeService {
   async reply(t: TenantCtx, user: User, id: string, body: ThreadReply): Promise<ThreadDetail> {
     const th = (await t.pool.query<{ assigned_to: string | null }>('select assigned_to from threads where id = $1', [id])).rows[0];
     if (!th) throw notFound('That conversation');
-    await t.pool.query("insert into thread_messages (id, thread_id, from_kind, sender_name, body, read_at) values ($1,$2,'staff',$3,$4,now())", [newId('tmsg'), id, user.name, body.body]);
+    // Seeded demo threads can sit later today than CI's clock; keep the new message last.
+    await t.pool.query(
+      `insert into thread_messages (id, thread_id, from_kind, sender_name, body, read_at, created_at)
+       values ($1,$2,'staff',$3,$4,now(), greatest(now(), coalesce((select max(created_at) + interval '1 millisecond' from thread_messages where thread_id = $2), now())))`,
+      [newId('tmsg'), id, user.name, body.body],
+    );
     await t.pool.query("update threads set last_at = now(), status = 'open', assigned_to = coalesce(assigned_to, $2) where id = $1", [id, user.id]);
     await this.pushToGuardian(t, id, `${user.name}: ${body.body.slice(0, 80)}`);
     return this.thread(t, id);

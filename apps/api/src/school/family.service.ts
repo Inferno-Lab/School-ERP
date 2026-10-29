@@ -17,10 +17,10 @@ const key = (subjectId: string) => subjectId.replace(/^sub_/, '');
 interface Who {
   id: string;
   name: string;
-  kind: 'staff' | 'guardian' | 'student';
+  kind: 'staff' | 'guardian';
   phone: string | null;
   email: string | null;
-  /** The students this person looks after, or is. */
+  /** The students this person looks after. */
   children: string[];
   guardianIds: string[];
   perms: string[];
@@ -40,7 +40,7 @@ export class FamilyService {
   ) {}
 
   async who(t: TenantCtx, user: AuthedUser): Promise<Who> {
-    const u = (await t.pool.query<{ id: string; kind: Who['kind']; name: string; phone: string | null; email: string | null }>('select id, kind, name, phone, email from users where id = $1', [user.id])).rows[0];
+    const u = (await t.pool.query<{ id: string; kind: Who['kind'] | 'student'; name: string; phone: string | null; email: string | null }>('select id, kind, name, phone, email from users where id = $1', [user.id])).rows[0];
     if (!u) throw new ApiError('unauthenticated', 'Your session has ended. Sign in again.');
     if (u.kind === 'student') throw forbidden('Students sign in through a parent account.');
     let children: string[] = [];
@@ -48,10 +48,8 @@ export class FamilyService {
     if (u.kind === 'guardian') {
       guardianIds = (await t.pool.query<{ id: string }>('select id from guardians where user_id = $1', [u.id])).rows.map((g) => g.id);
       children = (await t.pool.query<{ student_id: string }>('select distinct student_id from student_guardians where guardian_id = any($1)', [guardianIds])).rows.map((r) => r.student_id);
-    } else if (u.kind === 'student') {
-      children = (await t.pool.query<{ id: string }>('select id from students where user_id = $1', [u.id])).rows.map((r) => r.id);
     }
-    return { ...u, children, guardianIds, perms: user.permissions };
+    return { id: u.id, kind: u.kind, name: u.name, phone: u.phone, email: u.email, children, guardianIds, perms: user.permissions };
   }
 
   private async mayStudent(t: TenantCtx, w: Who, studentId: string): Promise<void> {
@@ -70,8 +68,8 @@ export class FamilyService {
   async me(t: TenantCtx, user: AuthedUser): Promise<Record<string, unknown>> {
     const w = await this.who(t, user);
     return {
-      id: w.id, role: w.kind === 'guardian' ? 'parent' : w.kind === 'student' ? 'student' : 'teacher', name: w.name, email: w.email ?? '', phone: w.phone ?? '', avatarUrl: '', password: '',
-      childIds: w.kind === 'guardian' ? w.children : [], ...(w.kind === 'student' ? { studentId: w.children[0] } : {}), ...(w.kind === 'staff' ? { teacherId: w.id } : {}),
+      id: w.id, role: w.kind === 'guardian' ? 'parent' : 'teacher', name: w.name, email: w.email ?? '', phone: w.phone ?? '', avatarUrl: '', password: '',
+      childIds: w.kind === 'guardian' ? w.children : [], ...(w.kind === 'staff' ? { teacherId: w.id } : {}),
     };
   }
 
@@ -435,7 +433,11 @@ export class FamilyService {
       if (!user.permissions.includes('messages.write')) throw forbidden('You are not allowed to write to families.');
       await this.office.reply(t, user, threadId, { body: text });
     } else {
-      await t.pool.query("insert into thread_messages (id, thread_id, from_kind, sender_name, body) values ($1,$2,'guardian',$3,$4)", [newId('tmsg'), threadId, w.name, text]);
+      await t.pool.query(
+        `insert into thread_messages (id, thread_id, from_kind, sender_name, body, created_at)
+         values ($1,$2,'guardian',$3,$4, greatest(now(), coalesce((select max(created_at) + interval '1 millisecond' from thread_messages where thread_id = $2), now())))`,
+        [newId('tmsg'), threadId, w.name, text],
+      );
       await t.pool.query("update threads set last_at = now(), status = 'open' where id = $1", [threadId]);
     }
     return { ok: true };
